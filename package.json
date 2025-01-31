@@ -16,8 +16,13 @@
     "output": "./dist",
     "replace": {}
   },
+  "projectScripts": {
+    "preinstall": "bundle install && bundle update",
+    "start": "bundle exec gulp --cwd ./ --gulpfile ./node_modules/ultimate-jekyll-manager/dist/gulp/main.js",
+    "build": "bundle exec gulp build"
+  },
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "repository": {
     "type": "git",
@@ -44,11 +49,23 @@
     "sharp": "0.23.1 (sometime before 2021ish): Hard lock because later versions had issues. Possibly solved in higher node versions"
   },
   "dependencies": {
+    "@babel/core": "^7.26.7",
+    "@babel/preset-env": "^7.26.7",
+    "babel-loader": "^9.2.1",
+    "browser-sync": "^3.0.3",
+    "fs-jetpack": "^5.1.0",
+    "glob": "^11.0.1",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-sass": "^6.0.0",
     "itwcw-package-analytics": "^1.0.6",
+    "lodash": "^4.17.21",
     "node-powertools": "^2.1.2",
     "npm-api": "^1.0.1",
-    "semver": "^7.6.3",
+    "sass": "^1.83.4",
+    "sharp": "^0.33.5",
+    "webpack": "^5.97.1",
     "wonderful-fetch": "^1.3.0",
+    "wonderful-version": "^1.2.0",
     "yargs": "^17.7.2"
   },
   "peerDependencies": {

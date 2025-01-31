@@ -1,35 +1,49 @@
 // Libraries
 const path = require('path');
-const { gte } = require('semver');
+const jetpack = require('fs-jetpack');
+const wonderfulVersion = require('wonderful-version');
 const { execute } = require('node-powertools');
 const NPM = require('npm-api');
+const glob = require('glob').globSync;
 
 // Load package
-const package = require('../../package.json');
-const project = require(path.join(process.cwd(), 'package.json'));
+const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
+const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
 
 // Dependency MAP
 const DEPENDENCY_MAP = {
   'gulp': 'dev',
 }
 
+// File MAP
+const FILE_MAP = {
+  'hooks/postbuild.js': {overwrite: false},
+  'hooks/prebuild.js': {overwrite: false},
+}
+
 module.exports = async function (options) {
+  // Log
   console.log(`Welcome to Ultimate Jekyll v${package.version}!`);
 
   // Prefix project
   project.dependencies = project.dependencies || {};
   project.devDependencies = project.devDependencies || {};
 
-  // Log
-  // console.log('package:', package);
-  // console.log('project:', project);
-
   try {
     // Ensure this package is up-to-date
     await updateManager();
 
+    // Ensure proper node version
+    await ensureNodeVersion();
+
     // Run the setup
     await ensurePeerDependencies();
+
+    // Setup scripts
+    setupScripts();
+
+    // Build files
+    await buildSiteFiles();
 
     // Check which locality we are using
     checkLocality();
@@ -43,6 +57,7 @@ async function updateManager() {
   const npm = new NPM();
 
   // Get the latest version
+  const installedVersion = project.devDependencies['ultimate-jekyll-manager'];
   const latestVersion = await npm.repo('ultimate-jekyll-manager')
   .package()
     .then((pkg) => {
@@ -50,26 +65,37 @@ async function updateManager() {
     }, (e) => {
       return '0.0.0';
     });
-  const installedVersion = project.devDependencies['ultimate-jekyll-manager'];
 
   // Quit if local
   if (installedVersion.startsWith('file:')) {
     return console.log('Local version detected. Skipping update check.');
   }
 
-  // Clean the versions
-  const cleanInstalledVersion = clean(installedVersion) || '0.0.0';
-  const cleanLatestVersion = clean(latestVersion);
-
   // Log
-  console.log('Installed Version:', cleanInstalledVersion);
-  console.log('Latest Version:', cleanLatestVersion);
+  console.log('Installed Version:', installedVersion);
+  console.log('Latest Version:', latestVersion);
 
   // Check if we need to update
-  if (gte(cleanInstalledVersion, cleanLatestVersion)) {
+  if (wonderfulVersion.is(installedVersion, '>=', latestVersion)) {
     return console.log('Ultimate Jekyll Manager is up-to-date.');
   } else {
     await install('ultimate-jekyll-manager', latestVersion);
+  }
+}
+
+async function ensureNodeVersion() {
+  const installedVersion = process.version;
+  const requiredVersion = package.engines.node;
+
+  // Log
+  console.log('Installed Node Version:', installedVersion);
+  console.log('Required Node Version:', requiredVersion);
+
+  // Check if we need to update
+  if (wonderfulVersion.is(installedVersion, '>=', requiredVersion)) {
+    return console.log('Node version is up-to-date.');
+  } else {
+    console.error(`Node version is out-of-date. Required version is ${requiredVersion}.`);
   }
 }
 
@@ -81,20 +107,32 @@ async function ensurePeerDependencies() {
     const projectDependencyVersion = project.dependencies[dependency] || project.devDependencies[dependency];
     const location = DEPENDENCY_MAP[dependency] === 'dev' ? '--save-dev' : '';
 
+    // Log
+    console.log('Checking peer dep:', dependency, '-->', projectDependencyVersion, '>=', version);
 
     // Install if not found
-    if (!projectDependencyVersion) {
+    if (
+      // Not found
+      !projectDependencyVersion
+      // Not the right version
+      || wonderfulVersion.is(projectDependencyVersion, '<', version)
+    ) {
       await install(dependency, version, location);
-    } else {
-      // Clean the version and compare
-      const cleanProjectVersion = clean(projectDependencyVersion);
-      const cleanRequiredVersion = clean(version);
-
-      if (!gte(cleanProjectVersion, cleanRequiredVersion)) {
-        await install(dependency, version, location);
-      }
     }
   }
+}
+
+function setupScripts() {
+  // Setup the scripts
+  project.scripts = project.scripts || {};
+
+  // Setup the scripts
+  Object.keys(package.projectScripts).forEach((key) => {
+    project.scripts[key] = package.projectScripts[key];
+  });
+
+  // Save the project
+  jetpack.write(path.join(process.cwd(), 'package.json'), project);
 }
 
 function checkLocality() {
@@ -105,11 +143,12 @@ function checkLocality() {
   }
 }
 
-const clean = (version) => version.replace(/^[^\d]+/, '');
-
 function install(package, version, location) {
   // Default to latest
   version || 'latest';
+
+  // Clean version if needed
+  version = version === 'latest' ? version : wonderfulVersion.clean(version);
 
   // Build the command
   let command = `npm install ${package}@${version} ${location || '--save'}`;
@@ -119,4 +158,61 @@ function install(package, version, location) {
 
   // Execute
   return execute(command, { log: true })
+  .then(async () => {
+    // Read new project
+    const projectUpdated = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+
+    // Log
+    console.log('Installed:', package, version);
+
+    // Update package object
+    project.dependencies = projectUpdated.dependencies;
+    project.devDependencies = projectUpdated.devDependencies;
+  });
+}
+
+function buildSiteFiles() {
+  // Loop through all files in /templates directory
+  const dir = path.join(__dirname, '..', 'templates');
+  const files = glob('**/*', {
+    cwd: dir,
+    dot: true,
+    nodir: true,
+  });
+
+  // Loop
+  for (const file of files) {
+    // Get the destination
+    const source = path.join(dir, file);
+    const destination = path.join(process.cwd(), file.replace('templates/', ''));
+    const filename = path.basename(destination);
+    const options = FILE_MAP[file] || {overwrite: true};
+
+    // Quit if file is '_'
+    if (filename === '_') {
+      continue;
+    }
+
+    // Check if the file exists
+    const exists = jetpack.exists(destination);
+
+    // console.log('File:', file);
+    // console.log('filename:', filename);
+    // console.log('options:', options);
+    // console.log('source:', source);
+    // console.log('Destination:', destination);
+
+    // Skip if it exists
+    // console.log('---1');
+
+    if (exists && !options.overwrite) {
+    // console.log('---2');
+      continue;
+    }
+    // console.log('---3', jetpack.read(source));
+
+    // Copy the file
+    // console.log('Copying:', file, 'to', destination);
+    jetpack.copy(source, destination, { overwrite: true });
+  }
 }

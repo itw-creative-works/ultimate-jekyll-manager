@@ -65,5 +65,10 @@ node_modules/
 # dotenv environment variables file
 .env
 
+# Jekyll
+_site/
+site/.jekyll-cache/
+site/.jekyll-metadata
+
 # Custom
-dist/
+.temp/
