@@ -1,6 +1,8 @@
 // Libraries
 const path = require('path');
 const wp = require('webpack');
+const Manager = new (require('../../index.js'));
+const logger = Manager.logger('webpack');
 
 // console.log('======', path.resolve(__dirname, 'node_modules', 'babel-loader', 'lib', 'index.js'));
 
@@ -49,31 +51,27 @@ const settings = {
   optimization: {
     minimize: MINIFY,
   },
-  watch: true, // Enables watch mode
+  watch: process.env.UJ_BUILD_MODE !== 'true',
 }
 
 // Task
 module.exports = function webpack(complete) {
-  console.log('*** webpack ***');
-  // console.log('---- 1', path.resolve(process.cwd(), 'node_modules'));
-  // console.log('---- 2', path.resolve(process.cwd(), 'node_modules', 'ultimate-jekyll-manager', 'node_modules'));
+  // Log
+  logger.log('Starting webpack compilation...');
 
   // Compiler
   const compiler = wp(settings, (e, stats) => {
     // Log
-    console.log('Compiling webpack starting...');
+    logger.log('Finished webpack compilation!');
 
     // Error
     if (e) {
-      console.error(e);
+      logger.error(e);
     } else {
-      console.log(stats.toString({ colors: true }));
+      logger.log('Stats:\n', stats.toString({ colors: true }));
     }
 
-    // Log
-    console.log('Compiled webpack complete!');
+    // Complete
+    return complete(e);
   });
-
-  // Complete
-  return complete();
 }

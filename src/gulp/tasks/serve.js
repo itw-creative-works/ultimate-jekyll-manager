@@ -3,6 +3,8 @@ const path = require('path');
 const { watch, series } = require('gulp');
 const browserSync = require('browser-sync').create();
 const jetpack = require('fs-jetpack');
+const Manager = new (require('../../index.js'));
+const logger = Manager.logger('serve');
 
 // Local URL
 let localUrl;
@@ -27,7 +29,7 @@ const settings = {
 
       // If the file has no ext, log it
       if (!path.extname(pathname)) {
-        console.log(`[Browsersync] Serving ${pathname}`);
+        logger.log(`Serving ${pathname}`);
       }
 
       // Process the post request
@@ -54,7 +56,7 @@ const settings = {
           lib = require(`../${qsUrl}`);
         } catch (e) {
           // Log the error
-          console.error(`[Browsersync] Error processing ${qsUrl}`);
+          logger.error(`Error processing ${qsUrl}`);
 
           // Set the status code
           res.statusCode = 500;
@@ -64,7 +66,7 @@ const settings = {
         }
 
         // Log
-        console.log(`[Browsersync] Processing ${qsUrl}`);
+        logger.log(`Processing ${qsUrl}`);
 
         // Process the library
         return await lib({
@@ -102,7 +104,7 @@ const settings = {
         const newURL = `${pathname}.html`;
 
         // Log
-        // console.log(`[Browsersync] Rewriting ${pathname} to ${newURL}`);
+        // logger.log(`Rewriting ${pathname} to ${newURL}`);
 
         // Rewrite it to serve the .html extension
         req.url = newURL;
@@ -122,12 +124,12 @@ const settings = {
 // Task
 module.exports = function serve(complete) {
   // Log
-  console.log('--- 2');
+  logger.log('Starting server setup...');
 
   // Initialize browserSync
-  browserSync.init(settings, async (error, instance) => {
-    if (error) {
-      return console.error(`[Browsersync] Error:`, error);
+  browserSync.init(settings, async (e, instance) => {
+    if (e) {
+      return logger.error(e);
     }
 
     // Get URLs
@@ -139,6 +141,9 @@ module.exports = function serve(complete) {
 
     // Set global variable to access browserSync in other files
     global.browserSync = browserSync;
+
+    // Log
+    logger.log('Finished server setup!');
 
     // Complete
     return complete();

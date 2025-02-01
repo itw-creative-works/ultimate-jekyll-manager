@@ -72,3 +72,4 @@ site/.jekyll-metadata
 
 # Custom
 .temp/
+site/compiled/

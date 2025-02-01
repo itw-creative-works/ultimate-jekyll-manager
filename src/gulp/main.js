@@ -2,13 +2,15 @@
 const path = require('path');
 const jetpack = require('fs-jetpack');
 const { series, parallel, watch } = require('gulp');
+const Manager = new (require('../index.js'));
+const logger = Manager.logger('main');
 
 // Load tasks
 const tasks = jetpack.list(path.join(__dirname, 'tasks'));
 
 // Log
-// console.log('---tasks 1', path.join(__dirname, 'tasks'));
-// console.log('---tasks 2', tasks);
+// logger.log('---tasks 1', path.join(__dirname, 'tasks'));
+// logger.log('---tasks 2', tasks);
 
 // Init global
 global.tasks = {};
@@ -19,14 +21,14 @@ tasks.forEach((file) => {
   const name = file.replace('.js', '');
 
   // Log
-  // console.log('Loading task:', name);
+  // logger.log('Loading task:', name);
 
   // Export task
   exports[name] = require(path.join(__dirname, 'tasks', file));
 });
 
 // Log tasks
-// console.log('exports:', exports);
+// logger.log('exports:', exports);
 
 // Set global variable to access tasks in other files
 global.tasks = exports;
@@ -59,7 +61,7 @@ exports.watcher = function watcher() {
     { delay: 500 },
     series(exports.jekyll, (complete) => {
       // Log
-      console.log('Running browserSync reload...');
+      logger.log('Reloading browser...');
 
       // Reload
       global.browserSync.notify('Rebuilt Jekyll');

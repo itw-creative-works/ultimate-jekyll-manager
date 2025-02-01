@@ -196,9 +196,11 @@ function buildSiteFiles() {
     // Check if the file exists
     const exists = jetpack.exists(destination);
 
+    // Log
     // console.log('File:', file);
     // console.log('filename:', filename);
     // console.log('options:', options);
+    // console.log('contents:', jetpack.read(source));
     // console.log('source:', source);
     // console.log('Destination:', destination);
 

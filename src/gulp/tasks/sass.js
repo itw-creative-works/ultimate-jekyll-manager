@@ -3,6 +3,8 @@ const path = require('path');
 const { src, dest, watch, series } = require('gulp');
 const compiler = require('gulp-sass')(require('sass'));
 const cleanCSS = require('gulp-clean-css');
+const Manager = new (require('../../index.js'));
+const logger = Manager.logger('sass');
 
 // Glob
 const input = [
@@ -15,30 +17,41 @@ const input = [
 const output = 'site/compiled/css';
 
 // SASS Compilation Task
-function sassTask(done) {
+function sass(complete) {
   // Log
-  console.log('*** Compiling SASS ***');
+  logger.log('Starting SASS compilation...');
 
   // Compile
   return src(input)
     .pipe(compiler({ outputStyle: 'compressed' }).on('error', compiler.logError))
     .pipe(cleanCSS())
     .pipe(dest(output))
-    .on('end', done);
+    .on('end', () => {
+      // Log
+      logger.log('Finished SASS compilation');
+
+      // Complete
+      return complete();
+    });
 }
 
 // Watcher Task
-function watcher(complete) {
+function sassWatcher(complete) {
+  // Quit if in build mode
+  if (process.env.UJ_BUILD_MODE === 'true') {
+    logger.log('Skipping SASS watcher in build mode');
+    return complete();
+  }
+
+  // Log
+  logger.log('Watching for SASS changes...');
+
   // Watch for changes
-  watch(
-    input,
-    { delay: 250 },
-    sassTask
-  );
+  watch(input, { delay: 250 }, sass);
 
   // Complete
   return complete();
 }
 
 // Default Task
-module.exports = series(sassTask, watcher);
+module.exports = series(sass, sassWatcher);
