@@ -19,6 +19,7 @@ const DEPENDENCY_MAP = {
 const FILE_MAP = {
   'hooks/postbuild.js': {overwrite: false},
   'hooks/prebuild.js': {overwrite: false},
+  'src/_config.yml': {overwrite: false},
 }
 
 module.exports = async function (options) {

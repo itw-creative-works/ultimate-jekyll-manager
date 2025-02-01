@@ -1,16 +1,13 @@
 // Libraries
-const path = require('path');
-const jetpack = require('fs-jetpack');
-const { series, parallel, watch } = require('gulp');
 const Manager = new (require('../index.js'));
 const logger = Manager.logger('main');
+const { series, parallel, watch } = require('gulp');
+const path = require('path');
+const jetpack = require('fs-jetpack');
+const { execute } = require('node-powertools');
 
 // Load tasks
 const tasks = jetpack.list(path.join(__dirname, 'tasks'));
-
-// Log
-// logger.log('---tasks 1', path.join(__dirname, 'tasks'));
-// logger.log('---tasks 2', tasks);
 
 // Init global
 global.tasks = {};
@@ -21,41 +18,38 @@ tasks.forEach((file) => {
   const name = file.replace('.js', '');
 
   // Log
-  // logger.log('Loading task:', name);
+  logger.log('Loading task:', name);
 
   // Export task
   exports[name] = require(path.join(__dirname, 'tasks', file));
 });
-
-// Log tasks
-// logger.log('exports:', exports);
 
 // Set global variable to access tasks in other files
 global.tasks = exports;
 
 // Define build process
 exports.build = series(
+  exports.clean,
+  exports.distribute,
   parallel(exports.sass, exports.webpack, exports.imagemin),
   exports.jekyll,
 );
 
 // Watch for changes
-exports.watcher = function watcher() {
+exports.watcher = function watcher(complete) {
+  // Log
+  logger.log('Watching for main changes...');
+
+  // Watcher: jekyll
   watch(
     [
       // Files to include
-      'site/**/*',
-      // '**/*.html',
-      // '**/*.md',
-      // '**/*.yml',
-      // '**/*.scss',
-      // '**/*.js',
+      'dist/**/*',
 
       // Files to exclude
       '!_site/**',
-      '!site/.jekyll-cache/**',
-      '!site/.jekyll-metadata',
-      // '!site/compiled/**',
+      '!dist/.jekyll-cache/**',
+      '!dist/.jekyll-metadata',
       // '!./node_modules/**/*',
     ],
     { delay: 500 },
@@ -63,7 +57,7 @@ exports.watcher = function watcher() {
       // Log
       logger.log('Reloading browser...');
 
-      // Reload
+      // Open the browser with the external URL
       global.browserSync.notify('Rebuilt Jekyll');
       global.browserSync.reload();
 
@@ -71,12 +65,17 @@ exports.watcher = function watcher() {
       return complete();
     })
   );
+
+  // Complete
+  return complete();
 }
 
 // Compose task scheduler
 exports.default = series(
-  exports.build,
+  exports.clean,
   exports.serve,
   exports.watcher,
+  exports.build,
 );
+
 

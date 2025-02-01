@@ -67,9 +67,7 @@ node_modules/
 
 # Jekyll
 _site/
-site/.jekyll-cache/
-site/.jekyll-metadata
 
 # Custom
+dist/
 .temp/
-site/compiled/

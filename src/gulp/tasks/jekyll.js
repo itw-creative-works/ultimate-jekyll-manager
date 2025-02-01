@@ -1,9 +1,9 @@
 // Libraries
+const Manager = new (require('../../index.js'));
+const logger = Manager.logger('jekyll');
 const path = require('path');
 const { execute } = require('node-powertools');
 const jetpack = require('fs-jetpack');
-const Manager = new (require('../../index.js'));
-const logger = Manager.logger('jekyll');
 
 // Set index
 let index = -1;
@@ -14,6 +14,9 @@ const hooks = {
   postbuild: loadHook('postbuild'),
 }
 
+// Flags
+let browserSyncLaunched = false;
+
 // Task
 module.exports = async function jekyll(complete) {
   // Log
@@ -22,22 +25,19 @@ module.exports = async function jekyll(complete) {
   // Increment index
   index++;
 
-  // Clean if on index 0
-  if (index === 0) {
-    await execute('npx uj clean', {log: true});
-  }
-
-  // Wait 5 seconds
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
-
   // Run prebuild hook
   await hooks.prebuild(index);
 
   // Build Jekyll
   const command = [
     'bundle exec jekyll build',
-    '--source site',
-    '--config ./node_modules/ultimate-jekyll-manager/dist/config/_config_main.yml,site/_config.yml,.temp/_config_browsersync.yml',
+    '--source dist',
+    '--config ' + [
+      './node_modules/ultimate-jekyll-manager/dist/templates/src/_config.yml',
+      'dist/_config.yml',
+      // Add browsesrsync IF BUILD_MODE is not true
+      process.env.UJ_BUILD_MODE === 'true' ? '' : '.temp/_config_browsersync.yml',
+    ].join(','),
     '--incremental',
   ]
 
@@ -52,6 +52,11 @@ module.exports = async function jekyll(complete) {
 
   // Log
   logger.log('Finished Jekyll build!');
+
+  // Launch browser sync
+  if (!browserSyncLaunched) {
+    launchBrowserSync();
+  }
 
   // Complete
   return complete();
@@ -79,4 +84,27 @@ function loadHook(file) {
     // Return a noop function
     return () => {};
   }
+}
+
+function launchBrowserSync() {
+  // Quit if in build mode
+  if (process.env.UJ_BUILD_MODE === 'true') {
+    // Log
+    logger.log('Skipping browser sync since in build mode');
+
+    // Return
+    return;
+  }
+
+  // Get external URL
+  const externalUrl = global.browserSync.instance.options.get('urls').get('external');
+
+  // Log
+  logger.log(`Opening browser to: ${externalUrl}`);
+
+  // Set flag
+  browserSyncLaunched = true
+
+  // Open the browser with the external URL
+  return execute(`open ${externalUrl}`);
 }

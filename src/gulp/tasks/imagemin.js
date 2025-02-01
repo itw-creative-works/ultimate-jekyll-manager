@@ -1,22 +1,21 @@
 // Libraries
-const path = require('path');
+const Manager = new (require('../../index.js'));
+const logger = Manager.logger('imagemin');
 const { src, dest, watch, series } = require('gulp');
 const glob = require('glob').globSync;
 const responsive = require('gulp-responsive-modern');
-const Manager = new (require('../../index.js'));
-const logger = Manager.logger('imagemin');
 
 // Glob
 const input = [
   // Files to include
-  'site/assets/images/**/*.{jpg,jpeg,png}',
+  'src/assets/images/**/*.{jpg,jpeg,png}',
 
   // Files to exclude
-  // '!site/compiled/**',
+  // '!dist/**',
 ];
-const output = 'site/compiled/images';
+const output = 'dist/assets/images';
 
-// IMAGES Processing Task
+// Main task
 function imagemin(complete) {
   // Log
   logger.log('Starting image processing...');
@@ -88,7 +87,7 @@ function imagemin(complete) {
     });
 }
 
-// Watcher Task
+// Watcher task
 function imageminWatcher(complete) {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {

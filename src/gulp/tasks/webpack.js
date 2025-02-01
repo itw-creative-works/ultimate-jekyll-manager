@@ -1,10 +1,8 @@
 // Libraries
-const path = require('path');
-const wp = require('webpack');
 const Manager = new (require('../../index.js'));
 const logger = Manager.logger('webpack');
-
-// console.log('======', path.resolve(__dirname, 'node_modules', 'babel-loader', 'lib', 'index.js'));
+const path = require('path');
+const wp = require('webpack');
 
 // Settings
 const MINIFY = false;
@@ -12,14 +10,13 @@ const settings = {
   mode: 'production',
   entry: {
     // default: './src/js/default.js', // Common scripts
-    default: './site/assets/js/test.js', // Common scripts
+    default: './src/assets/js/test.js', // Common scripts
     // pricing: './src/js/pricing.js', // Page-specific script
     // about: './src/js/about.js'
   },
   output: {
     filename: '[name].bundle.js',
-    // path: path.resolve(process.cwd(), 'site/assets/js'),
-    path: path.resolve(process.cwd(), 'site/compiled/js'),
+    path: path.resolve(process.cwd(), 'dist/assets/js'),
   },
   resolveLoader: {
     modules: [

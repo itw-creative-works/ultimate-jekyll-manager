@@ -1,20 +1,19 @@
 // Libraries
-const path = require('path');
+const Manager = new (require('../../index.js'));
+const logger = Manager.logger('sass');
 const { src, dest, watch, series } = require('gulp');
 const compiler = require('gulp-sass')(require('sass'));
 const cleanCSS = require('gulp-clean-css');
-const Manager = new (require('../../index.js'));
-const logger = Manager.logger('sass');
 
 // Glob
 const input = [
   // Files to include
-  'site/assets/css/**/*.{css,scss,sass}',
+  'src/assets/css/**/*.{css,scss,sass}',
 
   // Files to exclude
-  // '!site/compiled/**',
+  // '!dist/**',
 ];
-const output = 'site/compiled/css';
+const output = 'dist/assets/css';
 
 // SASS Compilation Task
 function sass(complete) {

@@ -1,10 +1,9 @@
 // Libraries
-const path = require('path');
-const { watch, series } = require('gulp');
-const browserSync = require('browser-sync').create();
-const jetpack = require('fs-jetpack');
 const Manager = new (require('../../index.js'));
 const logger = Manager.logger('serve');
+const path = require('path');
+const browserSync = require('browser-sync').create();
+const jetpack = require('fs-jetpack');
 
 // Local URL
 let localUrl;
@@ -15,7 +14,7 @@ const settings = {
   port: 4000,
   browser: 'default',
   cors: true,
-  open: 'external',
+  open: false,
   ghostMode: false,
   server: {
     baseDir: '_site',
