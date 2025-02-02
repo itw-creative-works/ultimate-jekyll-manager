@@ -20,6 +20,7 @@ const FILE_MAP = {
   'hooks/postbuild.js': {overwrite: false},
   'hooks/prebuild.js': {overwrite: false},
   'src/_config.yml': {overwrite: false},
+  '_.gitignore': {rename: '.gitignore'},
 }
 
 module.exports = async function (options) {
@@ -173,8 +174,8 @@ function install(package, version, location) {
 }
 
 function buildSiteFiles() {
-  // Loop through all files in /templates directory
-  const dir = path.join(__dirname, '..', 'templates');
+  // Loop through all files in /defaults directory
+  const dir = path.join(__dirname, '..', 'defaults');
   const files = glob('**/*', {
     cwd: dir,
     dot: true,
@@ -185,13 +186,18 @@ function buildSiteFiles() {
   for (const file of files) {
     // Get the destination
     const source = path.join(dir, file);
-    const destination = path.join(process.cwd(), file.replace('templates/', ''));
+    let destination = path.join(process.cwd(), file.replace('defaults/', ''));
     const filename = path.basename(destination);
     const options = FILE_MAP[file] || {overwrite: true};
 
     // Quit if file is '_'
     if (filename === '_') {
       continue;
+    }
+
+    // Rename if needed
+    if (options.rename) {
+      destination = destination.replace(filename, options.rename);
     }
 
     // Check if the file exists
@@ -205,17 +211,11 @@ function buildSiteFiles() {
     // console.log('source:', source);
     // console.log('Destination:', destination);
 
-    // Skip if it exists
-    // console.log('---1');
-
     if (exists && !options.overwrite) {
-    // console.log('---2');
       continue;
     }
-    // console.log('---3', jetpack.read(source));
 
     // Copy the file
-    // console.log('Copying:', file, 'to', destination);
     jetpack.copy(source, destination, { overwrite: true });
   }
 }

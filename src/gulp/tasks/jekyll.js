@@ -33,7 +33,7 @@ module.exports = async function jekyll(complete) {
     'bundle exec jekyll build',
     '--source dist',
     '--config ' + [
-      './node_modules/ultimate-jekyll-manager/dist/templates/src/_config.yml',
+      './node_modules/ultimate-jekyll-manager/dist/defaults/src/_config.yml',
       'dist/_config.yml',
       // Add browsesrsync IF BUILD_MODE is not true
       process.env.UJ_BUILD_MODE === 'true' ? '' : '.temp/_config_browsersync.yml',

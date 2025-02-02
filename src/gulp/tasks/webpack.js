@@ -49,12 +49,16 @@ const settings = {
     minimize: MINIFY,
   },
   watch: process.env.UJ_BUILD_MODE !== 'true',
+  plugins: [],
 }
 
 // Task
 module.exports = function webpack(complete) {
   // Log
   logger.log('Starting webpack compilation...');
+
+  // Add WatchRunPlugin
+  settings.plugins.push(new WatchRunPlugin());
 
   // Compiler
   const compiler = wp(settings, (e, stats) => {
@@ -71,4 +75,28 @@ module.exports = function webpack(complete) {
     // Complete
     return complete(e);
   });
+}
+
+// WatchRun Plugin for Webpack 5 to log changed files
+class WatchRunPlugin {
+  apply(compiler) {
+    compiler.hooks.watchRun.tap('WatchRun', (comp) => {
+      // Quit if no modified files
+      if (!comp.modifiedFiles) {
+        return;
+      }
+
+      // Get changed files
+      const changedFiles = Array.from(comp.modifiedFiles)
+        // .map(file => `\n  ${file}`)
+
+      // Quit if no changed files
+      if (!changedFiles.length) {
+        return;
+      }
+
+      // Log
+      logger.log(`[watcher] File ${changedFiles.join(',')} was changed`);
+    });
+  }
 }

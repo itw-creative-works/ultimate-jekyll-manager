@@ -38,15 +38,18 @@ function sass(complete) {
 function sassWatcher(complete) {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
-    logger.log('Skipping SASS watcher in build mode');
+    logger.log('[watcher] Skipping SASS watcher in build mode');
     return complete();
   }
 
   // Log
-  logger.log('Watching for SASS changes...');
+  logger.log('[watcher] Watching for SASS changes...');
 
   // Watch for changes
-  watch(input, { delay: 250 }, sass);
+  watch(input, { delay: 250 }, sass)
+  .on('change', function(path) {
+    logger.log(`[watcher] File ${path} was changed`);
+  });
 
   // Complete
   return complete();

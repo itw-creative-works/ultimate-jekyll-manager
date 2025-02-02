@@ -91,15 +91,18 @@ function imagemin(complete) {
 function imageminWatcher(complete) {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
-    logger.log('Skipping image watcher in build mode');
+    logger.log('[watcher] Skipping image watcher in build mode');
     return complete();
   }
 
   // Log
-  logger.log('Watching for image changes...');
+  logger.log('[watcher] Watching for image changes...');
 
   // Watch for changes
-  watch(input, { delay: 250 }, imagemin);
+  watch(input, { delay: 250 }, imagemin)
+  .on('change', function(path) {
+    logger.log(`[watcher] File ${path} was changed`);
+  });
 
   // Complete
   return complete();

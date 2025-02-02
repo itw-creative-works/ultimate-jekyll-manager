@@ -64,7 +64,10 @@ exports.watcher = function watcher(complete) {
       // Complete
       return complete();
     })
-  );
+  )
+  .on('change', function(path) {
+    logger.log(`[watcher] File ${path} was changed`);
+  });
 
   // Complete
   return complete();
@@ -74,8 +77,8 @@ exports.watcher = function watcher(complete) {
 exports.default = series(
   exports.clean,
   exports.serve,
-  exports.watcher,
   exports.build,
+  exports.watcher,
 );
 
 
