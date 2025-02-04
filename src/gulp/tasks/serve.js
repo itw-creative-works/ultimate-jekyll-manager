@@ -123,7 +123,7 @@ const settings = {
 // Task
 module.exports = function serve(complete) {
   // Log
-  logger.log('Starting server setup...');
+  logger.log('Starting...');
 
   // Initialize browserSync
   browserSync.init(settings, async (e, instance) => {
@@ -142,7 +142,7 @@ module.exports = function serve(complete) {
     global.browserSync = browserSync;
 
     // Log
-    logger.log('Finished server setup!');
+    logger.log('Finished!');
 
     // Complete
     return complete();

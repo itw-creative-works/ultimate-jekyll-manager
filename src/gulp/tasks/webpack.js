@@ -1,22 +1,41 @@
 // Libraries
 const Manager = new (require('../../index.js'));
 const logger = Manager.logger('webpack');
+const { watch, series } = require('gulp');
+const glob = require('glob').globSync;
 const path = require('path');
+const jetpack = require('fs-jetpack');
 const wp = require('webpack');
+const yaml = require('js-yaml');
+const config = yaml.load(jetpack.read('dist/_config.yml'));
 
 // Settings
 const MINIFY = false;
+const input = [
+  // Files to include
+  'src/assets/js/**/*.js',
+
+  // Files to exclude
+  // '!dist/**',
+];
 const settings = {
   mode: 'production',
-  entry: {
-    // default: './src/js/default.js', // Common scripts
-    default: './src/assets/js/test.js', // Common scripts
-    // pricing: './src/js/pricing.js', // Page-specific script
-    // about: './src/js/about.js'
-  },
+  target: ['web', 'es5'],
+  entry: {},
   output: {
-    filename: '[name].bundle.js',
+    // Set the path to the dist folder
     path: path.resolve(process.cwd(), 'dist/assets/js'),
+
+    // Set the public path
+    publicPath: `${Manager.isServer() ? config.url : ''}/assets/js/`,
+
+    // https://github.com/webpack/webpack/issues/959
+    chunkFilename: (data) => {
+      return data.chunk.name === 'main' ? '[name].chunk.js' : '[name].chunk.[chunkhash].js';
+    },
+    filename: (data) => {
+      return '[name].bundle.js';
+    },
   },
   resolveLoader: {
     modules: [
@@ -48,22 +67,20 @@ const settings = {
   optimization: {
     minimize: MINIFY,
   },
-  watch: process.env.UJ_BUILD_MODE !== 'true',
-  plugins: [],
 }
 
 // Task
-module.exports = function webpack(complete) {
+function webpack(complete) {
   // Log
-  logger.log('Starting webpack compilation...');
+  logger.log('Starting...');
 
-  // Add WatchRunPlugin
-  settings.plugins.push(new WatchRunPlugin());
+  // Update entry points
+  updateEntryPoints();
 
   // Compiler
   const compiler = wp(settings, (e, stats) => {
     // Log
-    logger.log('Finished webpack compilation!');
+    logger.log('Finished!');
 
     // Error
     if (e) {
@@ -76,27 +93,47 @@ module.exports = function webpack(complete) {
     return complete(e);
   });
 }
-
-// WatchRun Plugin for Webpack 5 to log changed files
-class WatchRunPlugin {
-  apply(compiler) {
-    compiler.hooks.watchRun.tap('WatchRun', (comp) => {
-      // Quit if no modified files
-      if (!comp.modifiedFiles) {
-        return;
-      }
-
-      // Get changed files
-      const changedFiles = Array.from(comp.modifiedFiles)
-        // .map(file => `\n  ${file}`)
-
-      // Quit if no changed files
-      if (!changedFiles.length) {
-        return;
-      }
-
-      // Log
-      logger.log(`[watcher] File ${changedFiles.join(',')} was changed`);
-    });
+// Watcher task
+function webpackWatcher(complete) {
+  // Quit if in build mode
+  if (process.env.UJ_BUILD_MODE === 'true') {
+    logger.log('[watcher] Skipping watcher in build mode');
+    return complete();
   }
+
+  // Log
+  logger.log('[watcher] Watching for changes...');
+
+  // Watch for changes
+  watch(input, { delay: 250 }, webpack)
+  .on('change', function(path) {
+    // Log
+    logger.log(`[watcher] File ${path} was changed`);
+  });
+
+  // Complete
+  return complete();
 }
+
+function updateEntryPoints() {
+  // Get all JS files
+  const files = glob(input);
+
+  // Update entry points
+  settings.entry = files.reduce((acc, file) => {
+    // Get the file name
+    const name = path.basename(file, path.extname(file));
+
+    // Add to entry points starting with "./"
+    acc[name] = `./${file}`;
+
+    // Return
+    return acc;
+  }, {});
+
+  // Log
+  logger.log('Updated entry points:', settings.entry);
+}
+
+// Default Task
+module.exports = series(webpack, webpackWatcher);

@@ -18,7 +18,7 @@ const output = 'dist/assets/images';
 // Main task
 function imagemin(complete) {
   // Log
-  logger.log('Starting image processing...');
+  logger.log('Starting...');
 
   // Use glob to get file count for msdtching files
   const files = glob(input);
@@ -80,7 +80,7 @@ function imagemin(complete) {
     .pipe(dest(output))
     .on('end', () => {
       // Log
-      logger.log('Finished image processing!');
+      logger.log('Finished!');
 
       // Complete
       return complete();
@@ -91,12 +91,12 @@ function imagemin(complete) {
 function imageminWatcher(complete) {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
-    logger.log('[watcher] Skipping image watcher in build mode');
+    logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
 
   // Log
-  logger.log('[watcher] Watching for image changes...');
+  logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
   watch(input, { delay: 250 }, imagemin)

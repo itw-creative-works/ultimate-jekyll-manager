@@ -24,7 +24,7 @@ function distribute(complete) {
   index++;
 
   // Log
-  logger.log('Starting distribute...');
+  logger.log('Starting...');
 
   // Copy all files from src/defaults/dist on first run
   if (index === 0) {
@@ -43,7 +43,7 @@ function distribute(complete) {
     .pipe(dest(output))
     .on('end', () => {
       // Log
-      logger.log('Finished distribute');
+      logger.log('Finished!');
 
       // Complete
       return complete();
@@ -54,12 +54,12 @@ function distribute(complete) {
 function distributeWatcher(complete) {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
-    logger.log('[watcher] Skipping distribute watcher in build mode');
+    logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
 
   // Log
-  logger.log('[watcher] Watching for distribute changes...');
+  logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
   watch(input, { delay: 250 }, distribute)

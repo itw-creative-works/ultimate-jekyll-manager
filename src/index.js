@@ -14,7 +14,7 @@ Manager.prototype.initialize = function () {
   console.log('initialize:');
 };
 
-// Initialize
+// Logger
 Manager.prototype.logger = function (name) {
   // Create logger
   if (!this._logger) {
@@ -24,10 +24,17 @@ Manager.prototype.logger = function (name) {
   return this._logger;
 };
 
+// isServer
+Manager.isServer = function () {
+  return process.env.UJ_IS_SERVER === 'true';
+}
+Manager.prototype.isServer = Manager.isServer;
+
 // Require
 Manager.require = function (path) {
   return require(path);
 };
+Manager.prototype.require = Manager.require;
 
 // Export
 module.exports = Manager;

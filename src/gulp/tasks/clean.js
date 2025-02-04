@@ -23,13 +23,13 @@ module.exports = async function clean(complete) {
   }
 
   // Log
-  logger.log('Starting clean...');
+  logger.log('Starting...');
 
   // Clean
   await execute('npx uj clean', {log: true});
 
   // Log
-  logger.log('Finished clean!');
+  logger.log('Finished!');
 
   // Complete
   return complete();

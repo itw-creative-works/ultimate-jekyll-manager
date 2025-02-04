@@ -10,6 +10,9 @@ const input = [
   // Files to include
   'src/assets/css/**/*.{css,scss,sass}',
 
+  // Main files
+  `${__dirname}/../../assets/css/main.scss`,
+
   // Files to exclude
   // '!dist/**',
 ];
@@ -18,7 +21,7 @@ const output = 'dist/assets/css';
 // SASS Compilation Task
 function sass(complete) {
   // Log
-  logger.log('Starting SASS compilation...');
+  logger.log('Starting...');
 
   // Compile
   return src(input)
@@ -27,7 +30,7 @@ function sass(complete) {
     .pipe(dest(output))
     .on('end', () => {
       // Log
-      logger.log('Finished SASS compilation');
+      logger.log('Finished!');
 
       // Complete
       return complete();
@@ -38,12 +41,12 @@ function sass(complete) {
 function sassWatcher(complete) {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
-    logger.log('[watcher] Skipping SASS watcher in build mode');
+    logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
 
   // Log
-  logger.log('[watcher] Watching for SASS changes...');
+  logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
   watch(input, { delay: 250 }, sass)

@@ -20,7 +20,7 @@ let browserSyncLaunched = false;
 // Task
 module.exports = async function jekyll(complete) {
   // Log
-  logger.log('Starting Jekyll build...');
+  logger.log('Starting...');
 
   // Increment index
   index++;
@@ -51,7 +51,7 @@ module.exports = async function jekyll(complete) {
   await hooks.postbuild(index);
 
   // Log
-  logger.log('Finished Jekyll build!');
+  logger.log('Finished!');
 
   // Launch browser sync
   if (!browserSyncLaunched) {
@@ -86,7 +86,7 @@ function loadHook(file) {
   }
 }
 
-function launchBrowserSync() {
+async function launchBrowserSync() {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
     // Log
@@ -99,12 +99,58 @@ function launchBrowserSync() {
   // Get external URL
   const externalUrl = global.browserSync.instance.options.get('urls').get('external');
 
-  // Log
-  logger.log(`Opening browser to: ${externalUrl}`);
+  // Check if the tab is already open
+  const isOpen = await isBrowserTabOpen(externalUrl);
 
   // Set flag
   browserSyncLaunched = true
 
+  // Log
+  if (isOpen) {
+    logger.log('Switched to existing browser tab');
+    return;
+  }
+
+  // Log
+  logger.log(`Opening browser to: ${externalUrl}`);
+
   // Open the browser with the external URL
   return execute(`open ${externalUrl}`);
+}
+
+async function isBrowserTabOpen(url) {
+  try {
+    const script = `
+      set logOutput to ""
+      set foundMatch to false
+      tell application "Google Chrome"
+        set windowList to every window
+        repeat with w in windowList
+          set tabList to every tab of w
+          set tabIndex to 1
+          repeat with t in tabList
+            set tabURL to URL of t
+            set logOutput to logOutput & "Checking: " & tabURL & "\\n"
+            if tabURL contains "${url}" then
+              tell w to set active tab index to tabIndex
+              tell application "System Events" to tell process "Google Chrome" to perform action "AXRaise" of window 1
+              activate
+              set foundMatch to true
+              tell t to reload
+            end if
+            set tabIndex to tabIndex + 1
+          end repeat
+        end repeat
+      end tell
+      return foundMatch
+    `;
+
+    // Execute
+    const result = await execute(`osascript -e '${script}'`);
+
+    // Convert to boolean
+    return result.trim() === 'true'; // Convert to boolean
+  } catch (error) {
+    return false;
+  }
 }
