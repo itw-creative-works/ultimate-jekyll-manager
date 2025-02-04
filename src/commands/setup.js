@@ -17,8 +17,8 @@ const DEPENDENCY_MAP = {
 
 // File MAP
 const FILE_MAP = {
-  'hooks/postbuild.js': {overwrite: false},
-  'hooks/prebuild.js': {overwrite: false},
+  'hooks/build:pre.js': {overwrite: false},
+  'hooks/build:post.js': {overwrite: false},
   'src/_config.yml': {overwrite: false},
   '_.gitignore': {rename: '.gitignore'},
 }

@@ -10,8 +10,8 @@ let index = -1;
 
 // Hooks
 const hooks = {
-  prebuild: loadHook('prebuild'),
-  postbuild: loadHook('postbuild'),
+  buildpre: loadHook('build:pre'),
+  buildpost: loadHook('build:post'),
 }
 
 // Flags
@@ -25,8 +25,8 @@ module.exports = async function jekyll(complete) {
   // Increment index
   index++;
 
-  // Run prebuild hook
-  await hooks.prebuild(index);
+  // Run buildpre hook
+  await hooks.buildpre(index);
 
   // Build Jekyll
   const command = [
@@ -47,8 +47,8 @@ module.exports = async function jekyll(complete) {
   // Build Jekyll
   await execute(command.join(' '), {log: true});
 
-  // Run postbuild hook
-  await hooks.postbuild(index);
+  // Run buildpost hook
+  await hooks.buildpost(index);
 
   // Log
   logger.log('Finished!');

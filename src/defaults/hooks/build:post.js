@@ -1,6 +1,6 @@
 // Libraries
 const Manager = new (require('ultimate-jekyll-manager'));
-const logger = Manager.logger('hook:postbuild');
+const logger = Manager.logger('build:post');
 
 // Hook
 module.exports = async (index) => {
