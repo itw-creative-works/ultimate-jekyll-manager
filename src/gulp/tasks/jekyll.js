@@ -1,18 +1,13 @@
 // Libraries
-const Manager = new (require('../../index.js'));
+const Manager = new (require('../../build.js'));
 const logger = Manager.logger('jekyll');
 const path = require('path');
 const { execute } = require('node-powertools');
 const jetpack = require('fs-jetpack');
+const JSON5 = require('json5');
 
 // Set index
 let index = -1;
-
-// Hooks
-const hooks = {
-  buildpre: loadHook('build:pre'),
-  buildpost: loadHook('build:post'),
-}
 
 // Flags
 let browserSyncLaunched = false;
@@ -26,14 +21,18 @@ module.exports = async function jekyll(complete) {
   index++;
 
   // Run buildpre hook
-  await hooks.buildpre(index);
+  await hook('build:pre', index)
 
   // Build Jekyll
   const command = [
     'bundle exec jekyll build',
     '--source dist',
     '--config ' + [
+      // This is the base config file with all the user-editable settings
       './node_modules/ultimate-jekyll-manager/dist/defaults/src/_config.yml',
+      // This is the default config with NON user-editable settings
+      './node_modules/ultimate-jekyll-manager/dist/config/_config_default.yml',
+      // This is the user's project config file
       'dist/_config.yml',
       // Add browsesrsync IF BUILD_MODE is not true
       process.env.UJ_BUILD_MODE === 'true' ? '' : '.temp/_config_browsersync.yml',
@@ -48,7 +47,7 @@ module.exports = async function jekyll(complete) {
   await execute(command.join(' '), {log: true});
 
   // Run buildpost hook
-  await hooks.buildpost(index);
+  await hook('build:post', index)
 
   // Log
   logger.log('Finished!');
@@ -63,26 +62,35 @@ module.exports = async function jekyll(complete) {
 };
 
 
-function loadHook(file) {
+async function hook(file, index) {
   // Full path
   const fullPath = path.join(process.cwd(), 'hooks', `${file}.js`);
 
   // Log
   // logger.log(`Loading hook: ${fullPath}`);
 
+  // Check if it exists
+  if (!jetpack.exists(fullPath)) {
+    throw new Error('Hook not found');
+  }
+
+  // Log
+  logger.log(`Running hook: ${fullPath}`);
+
+  // Load hook
+  let hook;
   try {
-    // Check if it exists
-    if (!jetpack.exists(fullPath)) {
-      throw new Error('Hook not found');
-    }
-
-    return require(fullPath);
+    // Load the hook
+    hook = require(fullPath);
   } catch (e) {
-    // Log
-    logger.error(`Error executing hook: ${fullPath}`, e);
+    throw new Error(`Error loading hook: ${fullPath} ${e.stack}`);
+  }
 
-    // Return a noop function
-    return () => {};
+  // Execute hook
+  try {
+    return await hook(index);
+  } catch (e) {
+    throw new Error(`Error running hook: ${fullPath} ${e.stack}`);
   }
 }
 
@@ -154,3 +162,4 @@ async function isBrowserTabOpen(url) {
     return false;
   }
 }
+

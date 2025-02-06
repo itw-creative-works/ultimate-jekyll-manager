@@ -1,40 +1,27 @@
+// Libraries
+const WebManager = require('web-manager');
+
 // Class
 function Manager() {
   const self = this;
-
-  // Properties
-  self._logger = null;
 
   // Return
   return self;
 }
 
 // Initialize
-Manager.prototype.initialize = function () {
-  console.log('initialize:');
+Manager.prototype.initialize = function (callback) {
+  const self = this;
+
+  // Initiate the web manager
+  self._manager = new WebManager();
+
+  // Initialize
+  self._manager.init(window.Configuration, callback);
+
+  // Return
+  return self._manager;
 };
-
-// Logger
-Manager.prototype.logger = function (name) {
-  // Create logger
-  if (!this._logger) {
-    this._logger = new (require('./lib/logger'))(name);
-  }
-
-  return this._logger;
-};
-
-// isServer
-Manager.isServer = function () {
-  return process.env.UJ_IS_SERVER === 'true';
-}
-Manager.prototype.isServer = Manager.isServer;
-
-// Require
-Manager.require = function (path) {
-  return require(path);
-};
-Manager.prototype.require = Manager.require;
 
 // Export
 module.exports = Manager;

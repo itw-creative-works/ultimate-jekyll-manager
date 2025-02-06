@@ -1,5 +1,5 @@
 // Libraries
-const Manager = new (require('../../index.js'));
+const Manager = new (require('../../build.js'));
 const logger = Manager.logger('sass');
 const { src, dest, watch, series } = require('gulp');
 const compiler = require('gulp-sass')(require('sass'));

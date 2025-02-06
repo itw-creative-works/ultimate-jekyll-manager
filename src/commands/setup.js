@@ -1,14 +1,22 @@
 // Libraries
+const Manager = new (require('../build.js'));
+const logger = Manager.logger('setup');
 const path = require('path');
 const jetpack = require('fs-jetpack');
-const wonderfulVersion = require('wonderful-version');
-const { execute } = require('node-powertools');
+const version = require('wonderful-version');
+const { execute, template } = require('node-powertools');
 const NPM = require('npm-api');
 const glob = require('glob').globSync;
+const { minimatch } = require('minimatch');
 
 // Load package
 const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
 const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+const templating = {
+  nodeVersion: version.clean(package.engines.node),
+  bundlerVersion: version.clean(package.engines.bundler),
+  rubyVersion: version.clean(package.engines.ruby),
+};
 
 // Dependency MAP
 const DEPENDENCY_MAP = {
@@ -17,15 +25,21 @@ const DEPENDENCY_MAP = {
 
 // File MAP
 const FILE_MAP = {
-  'hooks/build:pre.js': {overwrite: false},
-  'hooks/build:post.js': {overwrite: false},
-  'src/_config.yml': {overwrite: false},
+  // Files to skip overwrite
+  'hooks/**/*': {overwrite: false},
+  'src/**/*': {overwrite: false},
+
+  // Files to rename
   '_.gitignore': {rename: '.gitignore'},
+
+  // Files to run templating on
+  '.github/workflows/build.yml': {template: templating},
 }
 
 module.exports = async function (options) {
   // Log
-  console.log(`Welcome to Ultimate Jekyll v${package.version}!`);
+  logger.log(`Welcome to Ultimate Jekyll v${package.version}!`);
+  logger.log(`Environment variables`, process.env);
 
   // Prefix project
   project.dependencies = project.dependencies || {};
@@ -38,20 +52,29 @@ module.exports = async function (options) {
     // Ensure proper node version
     await ensureNodeVersion();
 
+    // Ensure proper bundler version
+    await ensureBundlerVersion();
+
+    // Ensure proper ruby version
+    await ensureRubyVersion();
+
     // Run the setup
     await ensurePeerDependencies();
 
     // Setup scripts
-    setupScripts();
+    await setupScripts();
+
+    // Save local/prod checker script
+    await createLocalProdChecker();
 
     // Build files
     await buildSiteFiles();
 
     // Check which locality we are using
-    checkLocality();
+    await checkLocality();
 
   } catch (e) {
-    console.error(`Error during setup:`, e);
+    logger.error(`Error during setup:`, e);
   }
 };
 
@@ -70,34 +93,70 @@ async function updateManager() {
 
   // Quit if local
   if (installedVersion.startsWith('file:')) {
-    return console.log('Local version detected. Skipping update check.');
+    return logger.log('Local version detected. Skipping update check.');
   }
 
   // Log
-  console.log('Installed Version:', installedVersion);
-  console.log('Latest Version:', latestVersion);
+  logger.log('Installed Version:', installedVersion);
+  logger.log('Latest Version:', latestVersion);
 
   // Check if we need to update
-  if (wonderfulVersion.is(installedVersion, '>=', latestVersion)) {
-    return console.log('Ultimate Jekyll Manager is up-to-date.');
+  if (version.is(installedVersion, '>=', latestVersion)) {
+    return logger.log('Ultimate Jekyll Manager is up-to-date.');
   } else {
     await install('ultimate-jekyll-manager', latestVersion);
   }
 }
 
 async function ensureNodeVersion() {
-  const installedVersion = process.version;
-  const requiredVersion = package.engines.node;
+  const installedVersion = version.clean(process.version);
+  const requiredVersion = version.clean(package.engines.node);
 
   // Log
-  console.log('Installed Node Version:', installedVersion);
-  console.log('Required Node Version:', requiredVersion);
+  logger.log('Installed Node Version:', installedVersion);
+  logger.log('Required Node Version:', requiredVersion);
 
   // Check if we need to update
-  if (wonderfulVersion.is(installedVersion, '>=', requiredVersion)) {
-    return console.log('Node version is up-to-date.');
+  if (version.is(installedVersion, '>=', requiredVersion)) {
+    return logger.log('Node version is up-to-date.');
   } else {
-    console.error(`Node version is out-of-date. Required version is ${requiredVersion}.`);
+    throw new Error(`Node version is out-of-date. Required version is ${requiredVersion}.`);
+  }
+}
+
+async function ensureBundlerVersion() {
+  const installedVersion = version.clean(
+    (await execute('bundler -v', { log: false })).match(/(\d+\.\d+\.\d+)/)[0]
+  );
+  const requiredVersion = version.clean(package.engines.bundler);
+
+  // Log
+  logger.log('Installed Bundler Version:', installedVersion);
+  logger.log('Required Bundler Version:', requiredVersion);
+
+  // Check if we need to update
+  if (version.is(installedVersion, '>=', requiredVersion)) {
+    return logger.log('Bundler version is up-to-date.');
+  } else {
+    throw new Error(`Bundler version is out-of-date. Required version is ${requiredVersion}.`);
+  }
+}
+
+async function ensureRubyVersion() {
+  const installedVersion = version.clean(
+    (await execute('ruby -v', { log: false })).match(/(\d+\.\d+\.\d+)/)[0]
+  );
+  const requiredVersion = version.clean(package.engines.ruby);
+
+  // Log
+  logger.log('Installed Ruby Version:', installedVersion);
+  logger.log('Required Ruby Version:', requiredVersion);
+
+  // Check if we need to update
+  if (version.is(installedVersion, '>=', requiredVersion)) {
+    return logger.log('Ruby version is up-to-date.');
+  } else {
+    throw new Error(`Ruby version is out-of-date. Required version is ${requiredVersion}.`);
   }
 }
 
@@ -105,21 +164,21 @@ async function ensurePeerDependencies() {
   const requiredPeerDependencies = package.peerDependencies || {};
 
   // Loop through and make sure project has AT LEAST the required version
-  for (const [dependency, version] of Object.entries(requiredPeerDependencies)) {
+  for (const [dependency, ver] of Object.entries(requiredPeerDependencies)) {
     const projectDependencyVersion = project.dependencies[dependency] || project.devDependencies[dependency];
     const location = DEPENDENCY_MAP[dependency] === 'dev' ? '--save-dev' : '';
 
     // Log
-    console.log('Checking peer dep:', dependency, '-->', projectDependencyVersion, '>=', version);
+    logger.log('Checking peer dep:', dependency, '-->', projectDependencyVersion, '>=', ver);
 
     // Install if not found
     if (
       // Not found
       !projectDependencyVersion
       // Not the right version
-      || wonderfulVersion.is(projectDependencyVersion, '<', version)
+      || version.is(projectDependencyVersion, '<', ver)
     ) {
-      await install(dependency, version, location);
+      await install(dependency, ver, location);
     }
   }
 }
@@ -145,18 +204,18 @@ function checkLocality() {
   }
 }
 
-function install(package, version, location) {
+function install(package, ver, location) {
   // Default to latest
-  version || 'latest';
+  ver || 'latest';
 
   // Clean version if needed
-  version = version === 'latest' ? version : wonderfulVersion.clean(version);
+  ver = ver === 'latest' ? ver : version.clean(ver);
 
   // Build the command
-  let command = `npm install ${package}@${version} ${location || '--save'}`;
+  let command = `npm install ${package}@${ver} ${location || '--save'}`;
 
   // Log
-  console.log('Installing:', command);
+  logger.log('Installing:', command);
 
   // Execute
   return execute(command, { log: true })
@@ -165,7 +224,7 @@ function install(package, version, location) {
     const projectUpdated = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
 
     // Log
-    console.log('Installed:', package, version);
+    logger.log('Installed:', package, ver);
 
     // Update package object
     project.dependencies = projectUpdated.dependencies;
@@ -176,11 +235,23 @@ function install(package, version, location) {
 function buildSiteFiles() {
   // Loop through all files in /defaults directory
   const dir = path.join(__dirname, '..', 'defaults');
-  const files = glob('**/*', {
+  const input = [
+    // Files to include
+    '**/*',
+
+    // Files to exclude
+    '!**/.DS_Store', // TODO: NOT WORKING
+  ]
+
+  // Get all files
+  const files = glob(input, {
     cwd: dir,
     dot: true,
     nodir: true,
   });
+
+  // Log
+  // logger.log('Files:', files)
 
   // Loop
   for (const file of files) {
@@ -188,10 +259,14 @@ function buildSiteFiles() {
     const source = path.join(dir, file);
     let destination = path.join(process.cwd(), file.replace('defaults/', ''));
     const filename = path.basename(destination);
-    const options = FILE_MAP[file] || {overwrite: true};
+    const options = getFileOptions(file);
 
     // Quit if file is '_'
     if (filename === '_') {
+      // First, create the directory around the file
+      jetpack.dir(destination.split(path.sep).slice(0, -1).join(path.sep));
+
+      // Skip
       continue;
     }
 
@@ -204,18 +279,49 @@ function buildSiteFiles() {
     const exists = jetpack.exists(destination);
 
     // Log
-    // console.log('File:', file);
-    // console.log('filename:', filename);
-    // console.log('options:', options);
-    // console.log('contents:', jetpack.read(source));
-    // console.log('source:', source);
-    // console.log('Destination:', destination);
+    // logger.log('File:', file);
+    // logger.log('filename:', filename);
+    // logger.log('options:', options);
+    // logger.log('contents:', jetpack.read(source));
+    // logger.log('source:', source);
+    // logger.log('Destination:', destination);
 
+    // Skip if exists and we don't want to overwrite
     if (exists && !options.overwrite) {
       continue;
     }
 
-    // Copy the file
-    jetpack.copy(source, destination, { overwrite: true });
+    // Run templating if needed
+    if (options.template) {
+      // Log
+      // logger.log('Running templating on:', destination);
+
+      // Run the templating
+      const contents = jetpack.read(source);
+      const templated = template(contents, options.template);
+
+      // Write the file
+      jetpack.write(destination, templated);
+    } else {
+      // Copy the file
+      jetpack.copy(source, destination, { overwrite: true });
+    }
   }
+}
+function getFileOptions(filePath) {
+  const defaults = {
+    overwrite: true,
+    rename: null,
+    template: null,
+  };
+
+  // Loop through all patterns
+  for (const pattern in FILE_MAP) {
+    if (minimatch(filePath, pattern)) {
+      return { ...defaults, ...FILE_MAP[pattern] };
+    }
+  }
+
+  // Default
+  return defaults;
 }

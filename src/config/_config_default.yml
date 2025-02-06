@@ -1,0 +1,56 @@
+# Comments
+comments:
+  gisqus-repo: "Distalk/giscus" # string, example: somiibo/giscus
+  gisqus-repo-id: "R_kgDOJ-chGA" # string, example: R_kgDOJ-chGA
+  gisqus-category: "Giscus" # string, example: Giscus
+  gisqus-category-id: "DIC_kwDOJ-chGM4CYD4O" # string, example: DIC_kwDOJ-chGM4CYD4O
+
+# Advertising
+advertising:
+  google-adsense: "pub-7372939085773564" # false to disable, example: ca-pub-7372939085773564
+  google-adsense-display-slot: "9023354299" # example: 9023354299
+  google-adsense-in-article-slot: "7329067043" # example: 7329067043
+  google-adsense-in-feed-slot: "5986127415" # example: 5986127415
+  google-adsense-multiplex-slot: "8772072856" # example: 8772072856
+  cse-site-id: "5ad46a4c7412db0ae" # example: 5ad46a4c7412db0ae
+
+# Escape shortcuts
+escapes:
+  underscore: "_"
+  asterisk: "*"
+  brace-left: "{"
+  brace-right: "}"
+  bracket-left: "["
+  bracket-right: "]"
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-paginate-v2
+  - jekyll-liquify
+  - jekyll-uj-powertools
+  - jekyll-truthyfalsy
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - gulp_tasks
+  - gulpfile.js
+  - LICENSE
+  - node_modules
+  - npm-debug.log
+  - package.json
+  - package-lock.json
+  - README.md
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - yarn.lock
+  - .placeholder
+
+# Include in processing
+include:
+  - .well-known
+  - __

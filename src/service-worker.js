@@ -1,0 +1,256 @@
+// Libraries
+
+// Class
+function Manager() {
+  const self = this;
+
+  // Properties
+  self.controller = null;
+
+  // Defaults
+  self.config = {};
+  self.version = '';
+  self.brand = {
+    name: 'Default',
+  };
+  self.app = 'default';
+  self.environment = 'production';
+  self.libraries = {
+    firebase: false,
+    messaging: false,
+    promoServer: false,
+    cachePolyfill: false,
+  };
+  self.cache = {
+    breaker: '',
+    name: ''
+  };
+
+  // Return
+  return self;
+}
+
+// Initialize
+Manager.prototype.initialize = function (controller) {
+  const self = this;
+
+  // Properties
+  self.controller = controller;
+
+  // Parse config file
+  parseConfiguration(self, controller);
+
+  // Setup listeners
+  setupListeners(self, controller);
+
+  // Import firebase
+  importFirebase(self, controller);
+
+  // Log
+  self.log('Initialized!', self.location.pathname, self.version, self.cache.name, self);
+
+  // Return
+  return self;
+};
+
+['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
+  Manager.prototype[method] = function() {
+    // Get arguments
+    const time = new Date().toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    // Add prefix
+    const args = [`[${time}] service-worker:`, ...Array.from(arguments)];
+
+    // Call the original console method
+    console[method].apply(console, args);
+  };
+});
+
+// Parse configuration
+function parseConfiguration(self, controller) {
+  try {
+    self.config = JSON.parse(new URL(self.location).searchParams.get('config'));
+
+    // Set up self
+    self.version = self.config.v || self.config.version;
+    self.environment = self.config.env || self.config.environment;
+    self.brand.name = self.config.name;
+    self.app = self.config.id || (self.brand.name.toLowerCase().replace(' ', '-') || 'default');
+    self.cache.breaker = self.config.cb;
+    self.cache.name = self.app + '-' + self.cache.breaker;
+
+    // Log
+    self.log('Parsed configuration', self.config);
+  } catch (e) {
+    self.error('Error parsing configuration', e);
+  }
+}
+
+// Setup listeners
+function setupListeners(self, controller) {
+  // Force service worker to use the latest version
+  controller.addEventListener('install', (event) => {
+    event.waitUntil(controller.skipWaiting());
+  });
+
+  controller.addEventListener('activate', (event) => {
+    event.waitUntil(controller.clients.claim());
+  });
+
+  // Handle clicks on notifications
+  // Open the URL of the notification
+  // ⚠️⚠️⚠️ THIS MUST BE PLACED BEFORE THE FIREBASE IMPORTS HANDLER ⚠️⚠️⚠️
+  // https://stackoverflow.com/questions/78270541/cant-catch-fcm-notificationclick-event-in-service-worker-using-firebase-messa
+  controller.addEventListener('notificationclick', (event) => {
+    // Get the properties of the notification
+    const notification = event.notification;
+    const data = (notification.data && notification.data.FCM_MSG ? notification.data.FCM_MSG.data : null) || {};
+    const payload = (notification.data && notification.data.FCM_MSG ? notification.data.FCM_MSG.notification : null) || {};
+
+    // Get the click action
+    const clickAction = payload.click_action || data.click_action || '/';
+
+    // Log
+    self.log('Event: notificationclick event', event);
+    self.log('Event: notificationclick data', data);
+    self.log('Event: notificationclick payload', payload);
+    self.log('Event: notificationclick clickAction', clickAction);
+
+    // Handle the click
+    event.waitUntil(
+      clients.openWindow(clickAction)
+    );
+
+    // Close the notification
+    notification.close();
+  });
+
+  // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
+  // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
+  controller.addEventListener('message', (event) => {
+    try {
+      // Get the data
+      const data = event.data || {};
+      const response = {
+        status: 'success',
+        command: '',
+        data: {}
+      };
+
+      // Parse the data
+      data.command = data.command || '';
+      data.args = data.args || {};
+      response.command = data.command;
+
+      // Quit if no command
+      if (data.command === '') { return };
+
+      // Log
+      self.log('Event: postMessage', data);
+
+      // Handle the command
+      if (data.command === 'function') {
+        data.args.function = data.args.function || function() {};
+        data.args.function();
+      } else if (data.command === 'debug') {
+        self.log('Debug data =', data);
+        event.ports[0].postMessage(response);
+      } else if (data.command === 'skipWaiting') {
+        self.skipWaiting();
+        event.ports[0].postMessage(response);
+      } else if (data.command === 'unregister') {
+        self.registration.unregister()
+        .then(() => {
+          event.ports[0].postMessage(response);
+        })
+        .catch(() => {
+          response.status = 'fail';
+          event.ports[0].postMessage(response);
+        });
+      } else if (data.command === 'cache') {
+        data.args.pages = data.args.pages || [];
+        var defaultPages =
+        [
+          '/',
+          '/index.html',
+          /* '/?homescreen=1', */
+          '/assets/css/main.css',
+          '/assets/js/main.js',
+        ];
+        var pagesToCache = arrayUnique(data.args.pages.concat(defaultPages));
+        caches.open(SWManager.cache.name).then(cache => {
+          return cache.addAll(
+            pagesToCache
+          )
+          .then(() => {
+            self.log('Cached resources.');
+            event.ports[0].postMessage(response);
+          })
+          .catch(() => {
+            response.status = 'fail';
+            event.ports[0].postMessage(response);
+            self.log('Failed to cache resources.')
+          });
+        })
+      }
+
+      event.ports[0].postMessage(response);
+    } catch (e) {
+      // Set up a response
+      response.success = 'fail';
+
+      // Try to send a response
+      try { event.ports[0].postMessage(response) } catch (e) {}
+
+      // Log
+      self.log('Failed to receive message:', data, e);
+    }
+  });
+
+  // Log
+  self.log('Set up listeners');
+}
+
+// Import Firebase
+function importFirebase(self, controller) {
+  // Import Firebase libraries
+  importScripts(
+    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-messaging-compat.js',
+    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-database-compat.js',
+    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-firestore-compat.js',
+  );
+
+  // Initialize app
+  const app = firebase.initializeApp(self.config.firebase);
+
+  // Initialize messaging
+  self.libraries.messaging = firebase.messaging();
+
+  // Attach firebase to SWManager
+  self.libraries.firebase = firebase;
+}
+
+function arrayUnique(array) {
+  var a = array.concat();
+
+  // Loop through array
+  for(var i=0; i<a.length; ++i) {
+    for(var j=i+1; j<a.length; ++j) {
+      if(a[i] === a[j]) {
+        a.splice(j--, 1);
+      }
+    }
+  }
+
+  // Return
+  return a;
+}
+
+// Export
+module.exports = Manager;

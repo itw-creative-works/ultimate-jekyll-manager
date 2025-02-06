@@ -1,5 +1,5 @@
 // Libraries
-const Manager = new (require('ultimate-jekyll-manager'));
+const Manager = new (require('ultimate-jekyll-manager/build'));
 const logger = Manager.logger('build:pre');
 
 // Hook

@@ -1,8 +1,10 @@
 // Libraries
-const Manager = new (require('../../index.js'));
+const Manager = new (require('../../build.js'));
 const logger = Manager.logger('imagemin');
 const { src, dest, watch, series } = require('gulp');
 const glob = require('glob').globSync;
+const path = require('path');
+const jetpack = require('fs-jetpack');
 const responsive = require('gulp-responsive-modern');
 
 // Glob
@@ -26,14 +28,36 @@ function imagemin(complete) {
   // If there's no files, complete
   if (files.length === 0) {
     // Log
-    logger.log('No images to process');
+    logger.log('Found 0 images to process');
 
     // Complete
     return complete();
   }
 
+  // Log
+  logger.log(`Found ${files.length} images to process`, files);
+
+  // Filter out files that already exist in the destination
+  // const filesToProcess = files.filter(file => {
+  //   const fileName = path.basename(file);
+  //   const destFile = path.join(output, fileName);
+  //   return !jetpack.exists(destFile);
+  // });
+
+  // If there's no files to process, complete
+  // if (filesToProcess.length === 0) {
+  //   // Log
+  //   logger.log('No new images to process');
+
+  //   // Complete
+  //   return complete();
+  // }
+
+  // Log
+  // logger.log(`Processing ${filesToProcess.length} images`, filesToProcess);
+
   // Process images: resize and convert to webp
-  return src(input)
+  return src(files)
     .pipe(
       responsive({
         '**/*.{jpg,jpeg,png}': [

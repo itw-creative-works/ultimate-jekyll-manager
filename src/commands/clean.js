@@ -1,4 +1,6 @@
 // Libraries
+const Manager = new (require('../build.js'));
+const logger = Manager.logger('clean');
 const path = require('path');
 const jetpack = require('fs-jetpack');
 
@@ -15,7 +17,7 @@ const dirs = [
 
 module.exports = async function (options) {
   // Log
-  console.log(`Cleaning up _site, .jekyll-cache, and .jekyll-metadata...`);
+  logger.log(`Cleaning up _site, .jekyll-cache, and .jekyll-metadata...`);
 
   try {
     // Loop through dirs
@@ -27,6 +29,6 @@ module.exports = async function (options) {
       jetpack.dir(dir);
     });
   } catch (e) {
-    console.error(`Error clearing directories: ${e}`);
+    logger.error(`Error clearing directories: ${e}`);
   }
 };

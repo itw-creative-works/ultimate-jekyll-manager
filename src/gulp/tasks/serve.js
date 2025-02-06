@@ -1,5 +1,5 @@
 // Libraries
-const Manager = new (require('../../index.js'));
+const Manager = new (require('../../build.js'));
 const logger = Manager.logger('serve');
 const path = require('path');
 const browserSync = require('browser-sync').create();

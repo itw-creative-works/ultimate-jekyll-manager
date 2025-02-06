@@ -1,9 +1,15 @@
 // Libraries
-const Manager = new (require('../../index.js'));
+const Manager = new (require('../../build.js'));
 const logger = Manager.logger('distribute');
 const { src, dest, watch, series } = require('gulp');
 const jetpack = require('fs-jetpack');
 const path = require('path');
+const JSON5 = require('json5');
+const { execute } = require('node-powertools');
+const fetch = require('wonderful-fetch');
+
+// Variables
+const config = Manager.getConfig();
 
 // Glob
 const input = [
@@ -19,7 +25,7 @@ const output = 'dist';
 let index = -1;
 
 // Main task
-function distribute(complete) {
+async function distribute(complete) {
   // Increment index
   index++;
 
@@ -37,6 +43,12 @@ function distribute(complete) {
     // Copy the files
     jetpack.copy(dir, 'dist', { overwrite: true });
   }
+
+  // Create build JSON
+  await createBuildJSON();
+
+  // Fetch firebase-auth files
+  await fetchFirebaseAuth();
 
   // Complete
   return src(input)
@@ -73,3 +85,124 @@ function distributeWatcher(complete) {
 
 // Default Task
 module.exports = series(distribute, distributeWatcher);
+
+
+async function getGitInfo() {
+  return await execute('git remote -v')
+  .then((r) => {
+    // Split on whitespace
+    const split = r.split(/\s+/);
+    const url = split[1];
+
+    // Get user and repo
+    const user = url.split('/')[3];
+    const name = url.split('/')[4].replace('.git', '');
+
+    // Return
+    return {user, name};
+  })
+}
+
+async function createBuildJSON() {
+  // Create build log JSON
+  try {
+    // Get info first
+    const git = await getGitInfo();
+    const config = Manager.getConfig();
+
+    // Create JSON
+    const json = {
+      timestamp: new Date().toISOString(),
+      repo: {
+        user: git.user,
+        name: git.name,
+      },
+      environment: Manager.getEnvironment(),
+      packages: {
+        'web-manager': require('web-manager/package.json').version,
+        'ultimate-jekyll-manager': require('../../../package.json').version,
+      },
+      config: config,
+
+      // Legacy
+      // TODO: REMOVE
+      'npm-build': new Date().toISOString(),
+      brand: config.brand,
+      'admin-dashboard': JSON5.parse(config['admin-dashboard']),
+    }
+
+    // Write to file
+    jetpack.write('dist/build.json', JSON.stringify(json, null, 2));
+
+    // Log
+    logger.log('Created build.json');
+  } catch (e) {
+    console.error('Error updating build.json', e);
+  }
+}
+
+async function fetchFirebaseAuth() {
+  const firebase = eval(`(${config.settings['manager-configuration']})`)?.libraries?.firebase_app?.config;
+  const projectId = firebase.projectId || 'ultimate-jekyll';
+  const base = `https://${projectId}.firebaseapp.com`;
+  const files = [
+    {
+      remote: '__/auth/handler',
+      // local: 'handler.html',
+      filename: 'handler',
+    },
+    {
+      remote: '__/auth/handler.js',
+    },
+    {
+      remote: '__/auth/experiments.js',
+    },
+    {
+      remote: '__/auth/iframe',
+      // local: 'iframe.html',
+      filename: 'iframe',
+    },
+    {
+      remote: '__/auth/iframe.js',
+    },
+    {
+      remote: '__/firebase/init.json',
+      // custom: 'init',
+    }
+  ]
+  const promises = [];
+  const output = './dist';
+
+  // Loop through files
+  files.forEach((file) => {
+    // Get the remote URL
+    const url = `${base}/${file.remote}`;
+
+    // Get the local path
+    const fileName = file.filename ? path.basename(file.filename) : path.basename(file.remote);
+    // console.log('---fileName', fileName);
+
+    const filePath = path.join(path.dirname(file.remote), fileName);
+    // console.log('---filePath', filePath);
+
+    const finalPath = path.join(output, filePath);
+    // console.log('---finalPath', finalPath);
+
+    // Push to promises
+    promises.push(
+      fetch(url, {
+        response: 'text',
+      })
+      .then((r) => {
+        // Write to file
+        jetpack.write(finalPath, r);
+      })
+    );
+  });
+
+  // Await all promises
+  await Promise.all(promises);
+
+  // Log
+  logger.log('Fetched firebase-auth files');
+}
