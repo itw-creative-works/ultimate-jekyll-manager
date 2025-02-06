@@ -64,9 +64,6 @@ module.exports = async function (options) {
     // Setup scripts
     await setupScripts();
 
-    // Save local/prod checker script
-    await createLocalProdChecker();
-
     // Build files
     await buildSiteFiles();
 
