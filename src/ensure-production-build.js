@@ -8,5 +8,10 @@ const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
 
 // Export
 module.exports = () => {
+  // Log
+  console.log('Ensure production build');
 
+  // Log
+  console.log('package', package);
+  console.log('project', project);
 };
