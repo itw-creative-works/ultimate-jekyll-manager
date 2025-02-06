@@ -70,7 +70,10 @@ jobs:
 
           echo "NPM Dependeny Versions: "
           npm list --depth=0 || echo ""
-      - name: Fetch
+      - name: Fetch ensure-production-build.js
+        run: |
+          mkdir -p node_modules/ultimate-jekyll-manager
+          curl -L https://raw.githubusercontent.com/itw-creative-works/ultimate-jekyll-manager/refs/heads/master/src/ensure-production-build.js > node_modules/ultimate-jekyll-manager/ensure-production-build.js
       - name: Log all files in repo
         run: |
           echo "All files in the repo: "
@@ -78,7 +81,7 @@ jobs:
       - name: Run node build
         # run: npm run build -- --buildLocation='server'
         run: |
-          UJ_BUILD_MODE=true UJ_IS_SERVER=true npx uj setup && npm run build
+          UJ_BUILD_MODE=true UJ_IS_SERVER=true node node_modules/ultimate-jekyll-manager/ensure-production-build.js && npx uj setup && npm run build
       # - name: Create build.json
       #   run: |
       #     export TZ=UTC date

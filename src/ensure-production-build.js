@@ -1,10 +1,13 @@
 // Libraries
-const jetpack = require('fs-jetpack');
+const fs = require('fs');
 const path = require('path');
 
 // Load package
-const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
-const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+const packagePath = path.join(__dirname, '../../', 'package.json');
+const projectPath = path.join(process.cwd(), 'package.json');
+
+const package = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+const project = JSON.parse(fs.readFileSync(projectPath, 'utf8'));
 
 // Export
 module.exports = () => {
