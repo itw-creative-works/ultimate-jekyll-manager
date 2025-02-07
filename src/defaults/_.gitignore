@@ -66,8 +66,8 @@ node_modules/
 .env
 
 # Jekyll
-_site/
+/_site
 
 # Custom
-dist/
-.temp/
+/dist
+/.temp

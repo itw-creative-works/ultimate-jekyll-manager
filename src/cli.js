@@ -27,6 +27,9 @@ Main.prototype.process = async function (options) {
     await Command(options);
   } catch (e) {
     console.error(`Error executing command "${command}": ${e.message}`);
+
+    // Exit with error
+    throw e;
   }
 };
 

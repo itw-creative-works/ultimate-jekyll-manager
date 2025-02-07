@@ -13,9 +13,9 @@ const { minimatch } = require('minimatch');
 const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
 const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
 const templating = {
-  nodeVersion: version.clean(package.engines.node),
-  bundlerVersion: version.clean(package.engines.bundler),
   rubyVersion: version.clean(package.engines.ruby),
+  bundlerVersion: version.clean(package.engines.bundler),
+  nodeVersion: version.major(package.engines.node),
 };
 
 // Dependency MAP
@@ -34,12 +34,13 @@ const FILE_MAP = {
 
   // Files to run templating on
   '.github/workflows/build.yml': {template: templating},
+  '.nvmrc': {template: templating},
 }
 
 module.exports = async function (options) {
   // Log
   logger.log(`Welcome to Ultimate Jekyll v${package.version}!`);
-  logger.log(`Environment variables`, process.env);
+  // logger.log(`Environment variables`, process.env);
 
   // Prefix project
   project.dependencies = project.dependencies || {};
@@ -71,7 +72,8 @@ module.exports = async function (options) {
     await checkLocality();
 
   } catch (e) {
-    logger.error(`Error during setup:`, e);
+    // Throw error
+    throw e;
   }
 };
 
@@ -248,7 +250,7 @@ function buildSiteFiles() {
   });
 
   // Log
-  // logger.log('Files:', files)
+  // logger.log('Files:', files);
 
   // Loop
   for (const file of files) {

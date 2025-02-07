@@ -2,6 +2,7 @@
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('distribute');
 const { src, dest, watch, series } = require('gulp');
+const through2 = require('through2');
 const jetpack = require('fs-jetpack');
 const path = require('path');
 const JSON5 = require('json5');
@@ -32,26 +33,24 @@ async function distribute(complete) {
   // Log
   logger.log('Starting...');
 
-  // Copy all files from src/defaults/dist on first run
+  // First-run tasks
   if (index === 0) {
-    // Get the directory
-    const dir = path.join(__dirname, '..', '..', 'defaults', 'dist');
+    // Copy all files from src/defaults/dist on first run
+    await copyDefaultDistFiles();
 
-    // Log
-    logger.log(`Copying default dist files from ${dir}`);
+    // Create CNAME
+    await createCNAME();
 
-    // Copy the files
-    jetpack.copy(dir, 'dist', { overwrite: true });
+    // Fetch firebase-auth files
+    await fetchFirebaseAuth();
   }
 
   // Create build JSON
   await createBuildJSON();
 
-  // Fetch firebase-auth files
-  await fetchFirebaseAuth();
-
   // Complete
-  return src(input)
+  return src(input, { base: 'src' })
+    .pipe(customPathTransform())
     .pipe(dest(output))
     .on('end', () => {
       // Log
@@ -60,6 +59,24 @@ async function distribute(complete) {
       // Complete
       return complete();
     });
+}
+
+function customPathTransform() {
+  return through2.obj(function(file, _, cb) {
+    if (file.isDirectory()) {
+      return cb(null, file);
+    }
+
+    const relativePath = path.relative(file.base, file.path);
+
+    if (relativePath.startsWith('pages/')) {
+      const newRelativePath = relativePath.replace(/^pages\//, '');
+      file.path = path.join(file.base, newRelativePath);
+    }
+
+    this.push(file);
+    cb();
+  });
 }
 
 // Watcher task
@@ -87,6 +104,7 @@ function distributeWatcher(complete) {
 module.exports = series(distribute, distributeWatcher);
 
 
+// Get git info
 async function getGitInfo() {
   return await execute('git remote -v')
   .then((r) => {
@@ -103,6 +121,7 @@ async function getGitInfo() {
   })
 }
 
+// Create build.json
 async function createBuildJSON() {
   // Create build log JSON
   try {
@@ -141,6 +160,32 @@ async function createBuildJSON() {
   }
 }
 
+// Copy default dist files
+async function copyDefaultDistFiles() {
+  // Get the directory
+  const dir = path.join(__dirname, '..', '..', 'defaults', 'dist');
+
+  // Log
+  logger.log(`Copying default dist files from ${dir}`);
+
+  // Copy the files
+  jetpack.copy(dir, 'dist', { overwrite: true });
+}
+
+// Create CNAME
+async function createCNAME() {
+  // Get the CNAME
+  const url = Manager.getConfig().url;
+  const host = new URL(url).host
+
+  // Write to file
+  jetpack.write('dist/CNAME', host);
+
+  // Log
+  logger.log('Created CNAME');
+}
+
+// Fetch firebase-auth files
 async function fetchFirebaseAuth() {
   const firebase = eval(`(${config.settings['manager-configuration']})`)?.libraries?.firebase_app?.config;
   const projectId = firebase.projectId || 'ultimate-jekyll';
@@ -206,3 +251,4 @@ async function fetchFirebaseAuth() {
   // Log
   logger.log('Fetched firebase-auth files');
 }
+

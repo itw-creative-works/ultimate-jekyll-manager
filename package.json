@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.8",
+  "version": "0.0.13",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -23,12 +23,12 @@
   },
   "projectScripts": {
     "preinstall": "bundle install && bundle update",
+    "start": "npx uj setup && bundle exec npm run gulp",
     "gulp": "gulp --cwd ./ --gulpfile ./node_modules/ultimate-jekyll-manager/dist/gulp/main.js",
-    "start": "bundle exec npm run gulp",
     "build": "UJ_BUILD_MODE=true bundle exec npm run gulp -- build"
   },
   "engines": {
-    "node": "20",
+    "node": "22",
     "bundler": "2.4.21",
     "ruby": "3.0.0"
   },
@@ -75,6 +75,7 @@
     "node-powertools": "^2.1.4",
     "npm-api": "^1.0.1",
     "sass": "^1.84.0",
+    "through2": "^4.0.2",
     "web-manager": "^3.2.73",
     "webpack": "^5.97.1",
     "wonderful-fetch": "^1.3.2",
