@@ -2,16 +2,47 @@
 const path = require('path');
 const jetpack = require('fs-jetpack');
 
-// Main Function
-function Main() {
-  const self = this;
+// Command Aliases
+const DEFAULT = 'setup';
+const ALIASES = {
+  clean: ['-c', '--clean'],
+  'cloudflare-purge': ['-cf', 'purge', '--cloudflare-purge'],
+  install: ['-i', 'i', '--install'],
+  setup: ['-s', '--setup'],
+  version: ['-v', '--version'],
+};
+
+// Function to resolve command name from aliases
+function resolveCommand(options) {
+  // Check if a command was explicitly passed via positional argument
+  if (options._.length > 0) {
+    const command = options._[0];
+    for (const [key, aliases] of Object.entries(ALIASES)) {
+      if (command === key || aliases.includes(command)) {
+        return key;
+      }
+    }
+    return command; // If not found in aliases, return as-is
+  }
+
+  // Check if any alias was passed as a flag (e.g., -g)
+  for (const [key, aliases] of Object.entries(ALIASES)) {
+    for (const alias of aliases) {
+      if (options[alias.replace(/^-+/, '')]) { // Remove leading `-`
+        return key;
+      }
+    }
+  }
+
+  return DEFAULT; // Fallback to default if no match is found
 }
 
-Main.prototype.process = async function (options) {
-  const self = this;
+// Main Function
+function Main() {}
 
-  // Determine the command (default to "setup" if none provided)
-  const command = options._[0] || 'setup';
+Main.prototype.process = async function (options) {
+  // Determine the command (use default if not provided)
+  const command = resolveCommand(options);
 
   try {
     // Get the command file path
