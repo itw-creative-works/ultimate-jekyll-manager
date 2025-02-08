@@ -1,0 +1,47 @@
+---
+### ALL PAGES ###
+layout: master/global/default
+
+### REGULAR PAGES ###
+head:
+  pre-bundle-css: '
+    {%- include /themes/geeks/head-pre-bundle.html -%}
+  '
+
+foot:
+  pre-bundle-script: '
+    {%- include /themes/geeks/foot-pre-bundle.html -%}
+  '
+
+settings:
+  include-app-foot: false
+  include-app-head: false
+  include-app-footer: false
+  include-app-header: false
+  include-script-bundle: true
+  include-script-core: true
+  include-css-bundle: false
+  manager-configuration: "
+    {
+      libraries: {
+        cookieconsent: {
+          enabled: true
+        },
+        chatsy: {
+          enabled: true
+        },
+        sentry: {
+          enabled: true
+        }
+      },
+    }
+  "
+---
+{%- include /themes/geeks/header.html -%}
+
+<!-- ========== MAIN CONTENT ========== -->
+<main class="bg-white">
+  {{ content | liquify | markdownify }}
+</main>
+
+{%- include /themes/geeks/footer.html -%}

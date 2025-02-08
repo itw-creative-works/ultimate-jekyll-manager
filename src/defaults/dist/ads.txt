@@ -1,0 +1,5 @@
+---
+layount: null
+permalink: /ads.txt
+---
+google.com, {{ site.advertising.google-adsense }}, DIRECT, f08c47fec0942fa0

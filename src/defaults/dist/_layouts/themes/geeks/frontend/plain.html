@@ -1,0 +1,42 @@
+---
+### ALL PAGES ###
+layout: themes/geeks/frontend/default
+
+### REGULAR PAGES ###
+---
+<!-- <section class="py-lg-14 py-8 bg-gray-200" style="background: url(https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/geeks/v3.2.0/images/background/course-graphics.svg) no-repeat; background-size: cover; background-position: top center"> -->
+<section class="py-lg-14 py-8 bg-gray-200" style="background-image: url(https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/components/wave-pattern-light.svg);">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-lg-6 col-md-12 col-12">
+				<!-- heading -->
+				<div class="text-center mb-4">
+					<span class="text-warning ls-md text-uppercase fw-semibold">
+            {{ page.meta.breadcrumb | default: layout.meta.breadcrumb | default: site.meta.breadcrumb | liquify }}
+					</span>
+					<h2 class="display-3 mt-4 mb-3 fw-bold">
+            {{ page.meta.title | default: layout.meta.title | default: site.meta.title | liquify }}
+          </h2>
+					<p class="lead">
+            {{ page.meta.description | default: layout.meta.description | default: site.meta.description | liquify }}
+          </p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="pb-8">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-lg-12 col-md-12 col-12">
+        <div class="mt-4">
+
+        </div>
+        {{ content | liquify | markdownify }}
+			</div>
+		</div>
+	</div>
+</section>
+
+

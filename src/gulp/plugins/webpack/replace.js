@@ -5,29 +5,35 @@ class ReplacePlugin {
   }
 
   apply(compiler) {
-    compiler.hooks.emit.tapAsync('ReplacePlugin', (compilation, callback) => {
-      // Iterate through all compiled assets,
-      // replace each placeholder with the corresponding value
-      for (const filename in compilation.assets) {
-        if (filename.endsWith('.js')) {
-          let asset = compilation.assets[filename];
-          let content = asset.source();
+    compiler.hooks.compilation.tap('ReplacePlugin', (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'ReplacePlugin',
+          stage: compilation.PROCESS_ASSETS_STAGE_OPTIMIZE, // Use an appropriate stage
+        },
+        (assets) => {
+          // Iterate through all compiled assets,
+          // replace each placeholder with the corresponding value
+          for (const filename in assets) {
+            if (filename.endsWith('.js')) {
+              let asset = assets[filename];
+              let content = asset.source();
 
-          // Perform replacements
-          for (const [placeholder, replacement] of Object.entries(this.replacements)) {
-            const regex = new RegExp(placeholder, 'g');
-            content = content.replace(regex, replacement);
+              // Perform replacements
+              for (const [placeholder, replacement] of Object.entries(this.replacements)) {
+                const regex = new RegExp(placeholder, 'g');
+                content = content.replace(regex, replacement);
+              }
+
+              // Update the asset with the new content
+              compilation.updateAsset(
+                filename,
+                new compiler.webpack.sources.RawSource(content)
+              );
+            }
           }
-
-          // Update the asset with the new content
-          compilation.assets[filename] = {
-            source: () => content,
-            size: () => content.length,
-          };
         }
-      }
-
-      callback();
+      );
     });
   }
 }

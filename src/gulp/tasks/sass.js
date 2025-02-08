@@ -17,6 +17,7 @@ const input = [
   // '!dist/**',
 ];
 const output = 'dist/assets/css';
+const delay = 250;
 
 // SASS Compilation Task
 function sass(complete) {
@@ -49,7 +50,7 @@ function sassWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: 250 }, sass)
+  watch(input, { delay: delay }, sass)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });

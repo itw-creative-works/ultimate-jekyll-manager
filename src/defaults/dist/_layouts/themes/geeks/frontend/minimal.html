@@ -1,0 +1,85 @@
+---
+### ALL PAGES ###
+layout: master/global/default
+
+### REGULAR PAGES ###
+head:
+  pre-bundle-css: '
+    {%- include /themes/geeks/head-pre-bundle.html -%}
+  '
+
+foot:
+  pre-bundle-script: '
+    {%- include /themes/geeks/foot-pre-bundle.html -%}
+  '
+
+settings:
+  include-app-foot: false
+  include-app-head: false
+  include-app-footer: false
+  include-app-header: false
+  include-script-bundle: true
+  include-script-core: true
+  include-css-bundle: false
+  manager-configuration: "
+    {
+      libraries: {
+        cookieconsent: {
+          enabled: false
+        },
+        chatsy: {
+          enabled: false
+        },
+        sentry: {
+          enabled: true
+        }
+      },
+    }
+  "
+---
+<main class="bg-white">
+  <section class="container d-flex flex-column vh-100">
+    <div class="row">
+      <div class="offset-xl-1 col-xl-10 col-md-12 col-12">
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+          <a href="{{ site.url }}">
+            <div class="d-flex align-items-center">
+              <img src="{{ site.brand.logo-image-svg }}" alt="{{ site.brand.name }}" class="filter-white" height="32px"/>
+              <span class="h3 text-dark fw-bold ms-2 mb-0">
+                {{ site.brand.name }}
+              </span>
+            </div>
+          </a>
+          <div class="ms-auto d-flex align-items-center order-lg-3">
+            <a class="fw-bold py-1 px-0" aria-current="page" href="{{ site.url }}">Return home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row align-items-center justify-content-center g-0 h-lg-100 py-8">
+      {{ content }}
+    </div>
+    <div class="row">
+      <div class="offset-xl-1 col-xl-10 col-lg-12 col-md-12 col-12">
+        <div class="row align-items-center my-6">
+          <div class="col-md-6 col-8">
+            <span>
+              © {{ site.time | date: '%Y' }} <strong>{{ site.brand.name }}</strong>, <a href="https://itwcreativeworks.com">ITW Creative Works</a>. All Rights Reserved.
+            </span>
+          </div>
+          <div class="col-md-6 col-4 d-flex justify-content-end">
+            <a href="{{ site.url }}/linkedin" class="text-primary-hover me-3">
+              <i class="bi bi-linkedin display-6_"></i>
+            </a>
+            <a href="{{ site.url }}/facebook" class="text-primary-hover me-3">
+              <i class="bi bi-facebook display-6_"></i>
+            </a>
+            <a href="{{ site.url }}/instagram" class="text-primary-hover">
+              <i class="bi bi-instagram display-6_"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

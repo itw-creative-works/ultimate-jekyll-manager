@@ -2,6 +2,7 @@
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('distribute');
 const { src, dest, watch, series } = require('gulp');
+const glob = require('glob').globSync;
 const through2 = require('through2');
 const jetpack = require('fs-jetpack');
 const path = require('path');
@@ -21,6 +22,7 @@ const input = [
   // '!dist/**',
 ];
 const output = 'dist';
+const delay = 250;
 
 // Index
 let index = -1;
@@ -32,18 +34,6 @@ async function distribute(complete) {
 
   // Log
   logger.log('Starting...');
-
-  // First-run tasks
-  if (index === 0) {
-    // Copy all files from src/defaults/dist on first run
-    await copyDefaultDistFiles();
-
-    // Create CNAME
-    await createCNAME();
-
-    // Fetch firebase-auth files
-    await fetchFirebaseAuth();
-  }
 
   // Create build JSON
   await createBuildJSON();
@@ -62,20 +52,35 @@ async function distribute(complete) {
 }
 
 function customPathTransform() {
-  return through2.obj(function(file, _, cb) {
+  return through2.obj(function (file, _, callback) {
+    // Skip if it's a directory
     if (file.isDirectory()) {
-      return cb(null, file);
+      return callback(null, file);
     }
 
+    // Get relative path
     const relativePath = path.relative(file.base, file.path);
 
+    // Log
+    // logger.log(`Processing file 111: ${relativePath}`);
+
+    // Change path if it starts with 'pages/'
     if (relativePath.startsWith('pages/')) {
       const newRelativePath = relativePath.replace(/^pages\//, '');
       file.path = path.join(file.base, newRelativePath);
+
+      // Log
+      // logger.log(`Changed path to 222: ${file.path}`);
     }
 
+    // Log
+    // logger.log(`Processing file 333: ${file.path}`);
+
+    // Push the file
     this.push(file);
-    cb();
+
+    // Continue
+    callback(null, file);
   });
 }
 
@@ -91,7 +96,7 @@ function distributeWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: 250 }, distribute)
+  watch(input, { delay: delay }, distribute)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });
@@ -127,7 +132,6 @@ async function createBuildJSON() {
   try {
     // Get info first
     const git = await getGitInfo();
-    const config = Manager.getConfig();
 
     // Create JSON
     const json = {
@@ -160,95 +164,4 @@ async function createBuildJSON() {
   }
 }
 
-// Copy default dist files
-async function copyDefaultDistFiles() {
-  // Get the directory
-  const dir = path.join(__dirname, '..', '..', 'defaults', 'dist');
-
-  // Log
-  logger.log(`Copying default dist files from ${dir}`);
-
-  // Copy the files
-  jetpack.copy(dir, 'dist', { overwrite: true });
-}
-
-// Create CNAME
-async function createCNAME() {
-  // Get the CNAME
-  const url = Manager.getConfig().url;
-  const host = new URL(url).host
-
-  // Write to file
-  jetpack.write('dist/CNAME', host);
-
-  // Log
-  logger.log('Created CNAME');
-}
-
-// Fetch firebase-auth files
-async function fetchFirebaseAuth() {
-  const firebase = eval(`(${config.settings['manager-configuration']})`)?.libraries?.firebase_app?.config;
-  const projectId = firebase.projectId || 'ultimate-jekyll';
-  const base = `https://${projectId}.firebaseapp.com`;
-  const files = [
-    {
-      remote: '__/auth/handler',
-      // local: 'handler.html',
-      filename: 'handler',
-    },
-    {
-      remote: '__/auth/handler.js',
-    },
-    {
-      remote: '__/auth/experiments.js',
-    },
-    {
-      remote: '__/auth/iframe',
-      // local: 'iframe.html',
-      filename: 'iframe',
-    },
-    {
-      remote: '__/auth/iframe.js',
-    },
-    {
-      remote: '__/firebase/init.json',
-      // custom: 'init',
-    }
-  ]
-  const promises = [];
-  const output = './dist';
-
-  // Loop through files
-  files.forEach((file) => {
-    // Get the remote URL
-    const url = `${base}/${file.remote}`;
-
-    // Get the local path
-    const fileName = file.filename ? path.basename(file.filename) : path.basename(file.remote);
-    // console.log('---fileName', fileName);
-
-    const filePath = path.join(path.dirname(file.remote), fileName);
-    // console.log('---filePath', filePath);
-
-    const finalPath = path.join(output, filePath);
-    // console.log('---finalPath', finalPath);
-
-    // Push to promises
-    promises.push(
-      fetch(url, {
-        response: 'text',
-      })
-      .then((r) => {
-        // Write to file
-        jetpack.write(finalPath, r);
-      })
-    );
-  });
-
-  // Await all promises
-  await Promise.all(promises);
-
-  // Log
-  logger.log('Fetched firebase-auth files');
-}
 

@@ -1,0 +1,33 @@
+---
+layount: null
+permalink: /robots.txt
+sitemap:
+  include: false
+---
+User-agent: *
+#
+# @reference
+#
+Disallow: /@reference/
+Noindex: /@reference/
+Disallow: /pages/@reference/
+Noindex: /pages/@reference/
+#
+# Admin Pages
+#
+Disallow: /admin/
+Noindex: /admin/
+#
+# Protection
+#
+Disallow: /search
+Disallow: /index.html?
+Disallow: /?
+Disallow: /startup?page=
+Disallow: *page=
+Disallow: *?page=
+#
+# App/Custom pages
+#
+
+Sitemap: {{ site.url }}/sitemap.xml

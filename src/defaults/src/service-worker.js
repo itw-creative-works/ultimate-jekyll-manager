@@ -1,2 +1,5 @@
-// Log
-logger.log('app service-worker.js loaded: ', self.location.pathname);
+// Load Manager
+const Manager = new (require('ultimate-jekyll-manager/service-worker'))();
+
+// Initialze
+Manager.initialize();

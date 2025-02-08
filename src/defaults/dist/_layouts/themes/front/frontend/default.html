@@ -1,0 +1,19 @@
+---
+### ALL PAGES ###
+layout: master/global/default
+
+### REGULAR PAGES ###
+head:
+  pre-bundle-css: '
+    {%- include /themes/front/head-pre-bundle.html -%}
+  '
+
+foot:
+  pre-bundle-script: '
+    {%- include /themes/front/foot-pre-bundle.html -%}
+  '
+---
+<!-- ========== MAIN CONTENT ========== -->
+<main id="content" role="main">
+  {{ content | liquify | markdownify }}
+</main>

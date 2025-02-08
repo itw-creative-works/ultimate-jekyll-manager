@@ -1,10 +1,11 @@
 // Libraries
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('jekyll');
+const argv = Manager.getArguments();
+const { series, watch } = require('gulp');
 const path = require('path');
 const { execute } = require('node-powertools');
 const jetpack = require('fs-jetpack');
-const JSON5 = require('json5');
 
 // Set index
 let index = -1;
@@ -12,8 +13,20 @@ let index = -1;
 // Flags
 let browserSyncLaunched = false;
 
+// Glob
+const input = [
+  // Files to include
+  'dist/**/*',
+
+  // Files to exclude
+  '!dist/.jekyll-cache/**',
+  '!dist/.jekyll-metadata',
+];
+const output = '';
+const delay = 500;
+
 // Task
-module.exports = async function jekyll(complete) {
+async function jekyll(complete) {
   // Log
   logger.log('Starting...');
 
@@ -61,7 +74,31 @@ module.exports = async function jekyll(complete) {
   return complete();
 };
 
+// Watch for changes
+function jekyllWatcher(complete) {
+  // Quit if in build mode
+  if (process.env.UJ_BUILD_MODE === 'true') {
+    logger.log('[watcher] Skipping watcher in build mode');
+    return complete();
+  }
 
+  // Log
+  logger.log('[watcher] Watching for changes...');
+
+  // Watch for changes
+  watch(input, { delay: delay }, jekyll)
+  .on('change', function(path) {
+    logger.log(`[watcher] File ${path} was changed`);
+  });
+
+  // Complete
+  return complete();
+}
+
+// Default Task
+module.exports = series(jekyll, jekyllWatcher);
+
+// Run hooks
 async function hook(file, index) {
   // Full path
   const fullPath = path.join(process.cwd(), 'hooks', `${file}.js`);
@@ -94,14 +131,18 @@ async function hook(file, index) {
   }
 }
 
+// Launch browser sync
 async function launchBrowserSync() {
   // Quit if in build mode
   if (process.env.UJ_BUILD_MODE === 'true') {
     // Log
-    logger.log('Skipping browser sync since in build mode');
+    return logger.log('Skipping browser sync since in build mode');
+  }
 
-    // Return
-    return;
+  // Quit if browser argument is false
+  if (argv.browser === false) {
+    // Log
+    return logger.log('Skipping browser sync since browser argument is false');
   }
 
   // Get external URL
@@ -126,6 +167,7 @@ async function launchBrowserSync() {
   return execute(`open ${externalUrl}`);
 }
 
+// Check if browser tab is open
 async function isBrowserTabOpen(url) {
   try {
     const script = `

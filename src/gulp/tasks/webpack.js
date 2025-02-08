@@ -30,6 +30,8 @@ const input = [
   // Files to exclude
   // '!dist/**',
 ];
+const delay = 250;
+
 const settings = {
   mode: 'production',
   target: ['web', 'es5'],
@@ -124,7 +126,7 @@ function webpackWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: 250 }, webpack)
+  watch(input, { delay: delay }, webpack)
   .on('change', function(path) {
     // Log
     logger.log(`[watcher] File ${path} was changed`);

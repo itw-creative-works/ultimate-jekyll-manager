@@ -1,8 +1,8 @@
 // Libraries
 const jetpack = require('fs-jetpack');
-const path = require('path');
 const yaml = require('js-yaml');
-const { execute } = require('node-powertools');
+const argv = require('yargs').argv;
+const { force } = require('node-powertools');
 
 // Class
 function Manager() {
@@ -29,6 +29,20 @@ Manager.prototype.logger = function (name) {
 
   return this._logger;
 };
+
+// argv
+Manager.getArguments = function () {
+  const options = argv || {};
+
+  // Fix
+  options._ = options._ || [];
+  options.browser = force(options.browser === undefined ? true : options.browser, 'boolean');
+  options.debug = force(options.debug === undefined ? false : options.debug, 'boolean');
+
+  // Return
+  return options;
+};
+Manager.prototype.getArguments = Manager.getArguments;
 
 // isServer
 Manager.isServer = function () {

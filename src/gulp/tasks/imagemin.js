@@ -16,6 +16,7 @@ const input = [
   // '!dist/**',
 ];
 const output = 'dist/assets/images';
+const delay = 250;
 
 // Main task
 function imagemin(complete) {
@@ -123,7 +124,7 @@ function imageminWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: 250 }, imagemin)
+  watch(input, { delay: delay }, imagemin)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });
