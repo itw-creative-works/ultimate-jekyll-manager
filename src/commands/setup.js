@@ -28,16 +28,48 @@ const DEPENDENCY_MAP = {
 // File MAP
 const FILE_MAP = {
   // Files to skip overwrite
-  'hooks/**/*': {overwrite: false, rule_1: true},
-  'src/**/*': {overwrite: false, rule_2: true},
+  'hooks/**/*': {
+    overwrite: false,
+  },
+  'src/**/*': {
+    overwrite: false,
+  },
+  'src/**/*.{html,md}': {
+    skip: (file) => {
+      // Get the name
+      const name = path.basename(file.name, path.extname(file.name));
+      const htmlFilePath = path.join(file.destination, `${name}.html`);
+      const mdFilePath = path.join(file.destination, `${name}.md`);
+      const htmlFileExists = jetpack.exists(htmlFilePath);
+      const mdFileExists = jetpack.exists(mdFilePath);
+      const eitherExists = htmlFileExists || mdFileExists;
+
+      console.log('--htmlFilePath', htmlFilePath);
+      console.log('--mdFilePath', mdFilePath);
+      console.log('--htmlFileExists', htmlFileExists);
+      console.log('--mdFileExists', mdFileExists);
+      console.log('--eitherExists', eitherExists);
+
+      // Skip if both files exist
+      return eitherExists;
+    },
+  },
 
   // Files to rewrite path
-  'dist/pages/**/*': {path: (p) => p.replace('dist/pages', 'dist'), rule_3: true},
-  '_.gitignore': {path: (p) => p.replace('_.gitignore', '.gitignore'), rule_4: true},
+  'dist/pages/**/*': {
+    path: (file) => file.source.replace('dist/pages', 'dist'),
+  },
+  '_.gitignore': {
+    name: (file) => file.name.replace('_.gitignore', '.gitignore'),
+  },
 
   // Files to run templating on
-  '.github/workflows/build.yml': {template: templating, rule_5: true},
-  '.nvmrc': {template: templating, rule_6: true},
+  '.github/workflows/build.yml': {
+    template: templating,
+  },
+  '.nvmrc': {
+    template: templating,
+  },
 }
 
 module.exports = async function (options) {
@@ -93,9 +125,9 @@ module.exports = async function (options) {
 };
 
 async function logCWD() {
-  logger.log('Current working directory 1:', process.cwd());
-  logger.log('Current working directory 2:', await execute('pwd'));
-  logger.log('Current working directory 3:', await execute('ls -al'));
+  logger.log('Current working directory:', process.cwd());
+  // logger.log('Current working directory 2:', await execute('pwd'));
+  // logger.log('Current working directory 3:', await execute('ls -al'));
 }
 
 async function updateManager() {
@@ -276,45 +308,73 @@ function buildSiteFiles() {
     nodir: true,
   });
 
+  const debug = argv.debug
+    || true;
+
   // Log
   logger.log(`Preparing to copy ${files.length} default files...`);
 
   // Loop
   for (const file of files) {
+    // Build item
+    const item = {
+      source: null,
+      destination: null,
+      name: null,
+    }
     // Get the destination
-    const source = path.join(dir, file);
-    let destination = path.join(process.cwd(), file.replace('defaults/', ''));
-    const filename = path.basename(destination);
+    // const source = path.join(dir, file);
+    // let destination = path.join(process.cwd(), file.replace('defaults/', ''));
+    // const filename = path.basename(destination);
+
+    // Set the item properties
+    item.source = path.dirname(path.join(dir, file));
+    item.name = path.basename(file);
+    item.destination = path.dirname(path.join(process.cwd(), file.replace('defaults/', '')));
+
+    // Get options
     const options = getFileOptions(file);
+    const ogName = item.name;
 
     // Quit if file is '_'
-    if (filename === '_') {
+    // We have files like this to trigger the creation of directories without them being ignored by git
+    if (item.name === '_') {
       // First, create the directory around the file
-      jetpack.dir(destination.split(path.sep).slice(0, -1).join(path.sep));
+      jetpack.dir(item.destination);
 
       // Skip
       continue;
     }
 
-    // Rename if needed
-    // if (options.rename) {
-    //   destination = destination.replace(filename, options.rename);
-    // }
-
-    // Rewrite path
-    if (options.path) {
-      destination = options.path(destination);
+    // Resolve name
+    if (typeof options.name === 'function') {
+      item.name = options.name(item);
     }
 
-    // Check if the file exists
-    const exists = jetpack.exists(destination);
+    // Resolve path
+    if (typeof options.path === 'function') {
+      item.destination = options.path(item);
+    }
+
+    // Resolve overwrite
+    if (typeof options.overwrite === 'function') {
+      options.overwrite = options.overwrite(item);
+    }
+
+    // Resolve skip
+    if (typeof options.skip === 'function') {
+      options.skip = options.skip(item);
+    }
 
     // Log
-    // if (argv.debug) {
+    if (debug) {
       logger.log(`Copying defaults...`);
-      logger.log(`  file: ${file}`);
-      logger.log(`  from: ${source}`);
-      logger.log(`  to: ${destination}`);
+      logger.log(`  name: ${item.name}`);
+      logger.log(`  from: ${item.source}`);
+      logger.log(`  to: ${item.destination}`);
+      logger.log(`  overwrite: ${options.overwrite}`);
+      logger.log(`  skip: ${options.skip}`);
+
       // logger.log('File:', file);
       // logger.log('filename:', filename);
       // logger.log('options:', options);
@@ -322,10 +382,26 @@ function buildSiteFiles() {
       // logger.log('source:', source);
       // logger.log('Destination:', destination);
       console.log('\n');
-    // }
+    }
+
+    // Skip if needed
+    if (options.skip) {
+      continue;
+    }
+
+
+    // Get final paths
+    const finalSource = path.join(item.source, ogName);
+    const finalDestination = path.join(item.destination, item.name);
+
+    // console.log('---finalSource', finalSource);
+    // console.log('---finalDestination', finalDestination);
+
+    // Check if the file exists
+    const exists = jetpack.exists(finalDestination);
 
     // Skip if exists and we don't want to overwrite
-    if (exists && !options.overwrite) {
+    if (!options.overwrite && exists) {
       continue;
     }
 
@@ -335,14 +411,14 @@ function buildSiteFiles() {
       // logger.log('Running templating on:', destination);
 
       // Run the templating
-      const contents = jetpack.read(source);
+      const contents = jetpack.read(finalSource);
       const templated = template(contents, options.template);
 
       // Write the file
-      jetpack.write(destination, templated);
+      jetpack.write(finalDestination, templated);
     } else {
       // Copy the file
-      jetpack.copy(source, destination, { overwrite: true });
+      jetpack.copy(finalSource, finalDestination, { overwrite: true });
     }
   }
 }
@@ -491,8 +567,10 @@ async function fetchFirebaseAuth() {
 function getFileOptions(filePath) {
   const defaults = {
     overwrite: true,
-    rename: null,
+    name: null,
+    path: null,
     template: null,
+    skip: false,
   };
 
   let options = { ...defaults };

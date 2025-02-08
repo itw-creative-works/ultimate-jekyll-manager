@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: themes/placeholder/theme/plain
+layout: themes/geeks/frontend/plain
 sitemap:
   include: true
 
