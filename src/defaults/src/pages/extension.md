@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/extension
+layout: placeholder/extension
 permalink: /extension
 
 ### REGULAR PAGES ###

@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/about
+layout: placeholder/about
 permalink: /about
 
 ### REGULAR PAGES ###

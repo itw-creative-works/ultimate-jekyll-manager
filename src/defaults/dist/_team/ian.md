@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/team/profile
+layout: placeholder/team/profile
 sitemap:
   include: true
 

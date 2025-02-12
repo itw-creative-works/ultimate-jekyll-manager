@@ -10,6 +10,7 @@ meta:
   description: "Discover {{ site.brand.name }} and learn what we're all about"
   breadcrumb: "About"
 ---
+
 # About {{ site.brand.name }}
 
 Welcome to the world of {{ site.brand.name }} – a place where innovation, efficiency, and user satisfaction are at the heart of everything we do.

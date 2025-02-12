@@ -19,6 +19,7 @@ settings:
     }
   "
 ---
+
 {% capture brand %}**{{ site.brand.name | liquify }}**{% endcapture %}
 {% capture breadcrumb %}{{ page.meta.breadcrumb | default: layout.meta.breadcrumb | liquify }}{% endcapture %}
 

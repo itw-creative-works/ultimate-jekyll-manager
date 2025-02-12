@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/contact
+layout: placeholder/contact
 permalink: /contact
 
 ### REGULAR PAGES ###

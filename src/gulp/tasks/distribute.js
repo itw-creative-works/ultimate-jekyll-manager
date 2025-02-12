@@ -2,13 +2,11 @@
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('distribute');
 const { src, dest, watch, series } = require('gulp');
-const glob = require('glob').globSync;
 const through2 = require('through2');
 const jetpack = require('fs-jetpack');
 const path = require('path');
 const JSON5 = require('json5');
 const { execute } = require('node-powertools');
-const fetch = require('wonderful-fetch');
 
 // Variables
 const config = Manager.getConfig();
@@ -40,7 +38,7 @@ async function distribute(complete) {
 
   // Complete
   return src(input, { base: 'src' })
-    .pipe(customPathTransform())
+    // .pipe(customPathTransform())
     .pipe(dest(output))
     .on('end', () => {
       // Log

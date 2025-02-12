@@ -6,8 +6,8 @@ url: ""
 baseurl: ""
 
 # Project
-version: '1.0.0'
-app: ''
+version: 1.0.0
+app: ""
 
 # Meta
 meta:
@@ -38,38 +38,37 @@ favicon:
 
 # Socials
 socials:
-  facebook: ""
-  twitter: ""
-  linkedin: ""
-  youtube: ""
-  instagram: ""
-  tumblr: ""
-  slack: ""
-  discord: ""
-  github: ""
-  dev: ""
-  tiktok: ""
-  twitch: ""
-  soundcloud: ""
-  spotify: ""
-  mixcloud: ""
+  facebook: null
+  twitter: null
+  linkedin: null
+  youtube: null
+  instagram: null
+  tumblr: null
+  slack: null
+  discord: null
+  github: null
+  dev: null
+  tiktok: null
+  twitch: null
+  soundcloud: null
+  spotify: null
+  mixcloud: null
 
 # Cloudflare
 cloudflare:
-  zone: ""
+  zone: null
 
 # Tracking
 tracking:
-  google-analytics: false
-  facebook-pixel: false
-  tiktok-pixel: false
+  google-analytics: null
+  facebook-pixel: null
+  tiktok-pixel: null
 
 # Contact
 contact:
-  email-support: ""
-  email-business: ""
-  slapform-form-id: ""
+  email: ""
   phone: ""
+  slapform-form-id: ""
 
 # Manifest
 manifest:
@@ -223,7 +222,7 @@ pagination:
   limit: 0
   permalink: /page/:num.html
   title: :title - page :num
-  sort_field: 'date'
+  sort_field: date
   sort_reverse: true
 
 # Jekyll collections
@@ -235,7 +234,7 @@ collections:
 # Jekyll defaults
 defaults:
 - scope:
-    path: ''
+    path: ""
     type: team
   values:
     permalink: /team/:title

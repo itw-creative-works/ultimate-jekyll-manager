@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/legal/terms
+layout: placeholder/legal/terms
 permalink: /terms
 
 ### REGULAR PAGES ###

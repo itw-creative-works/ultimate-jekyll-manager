@@ -5,7 +5,7 @@ const argv = Manager.getArguments();
 const path = require('path');
 const jetpack = require('fs-jetpack');
 const version = require('wonderful-version');
-const { execute, template } = require('node-powertools');
+const { execute, template, force } = require('node-powertools');
 const NPM = require('npm-api');
 const glob = require('glob').globSync;
 const { minimatch } = require('minimatch');
@@ -44,21 +44,16 @@ const FILE_MAP = {
       const mdFileExists = jetpack.exists(mdFilePath);
       const eitherExists = htmlFileExists || mdFileExists;
 
-      console.log('--htmlFilePath', htmlFilePath);
-      console.log('--mdFilePath', mdFilePath);
-      console.log('--htmlFileExists', htmlFileExists);
-      console.log('--mdFileExists', mdFileExists);
-      console.log('--eitherExists', eitherExists);
-
       // Skip if both files exist
       return eitherExists;
     },
   },
 
   // Files to rewrite path
-  'dist/pages/**/*': {
-    path: (file) => file.source.replace('dist/pages', 'dist'),
-  },
+  // Removed because getting too confusing
+  // 'dist/pages/**/*': {
+  //   path: (file) => file.source.replace('dist/pages', 'dist'),
+  // },
   '_.gitignore': {
     name: (file) => file.name.replace('_.gitignore', '.gitignore'),
   },
@@ -73,9 +68,23 @@ const FILE_MAP = {
 }
 
 module.exports = async function (options) {
+  // Fix options
+  options = options || {};
+  options.checkManager = force(options.checkManager || true, 'boolean');
+  options.checkNode = force(options.checkNode || true, 'boolean');
+  options.checkBundler = force(options.checkBundler || true, 'boolean');
+  options.checkRuby = force(options.checkRuby || true, 'boolean');
+  options.checkPeerDependencies = force(options.checkPeerDependencies || true, 'boolean');
+  options.setupScripts = force(options.setupScripts || true, 'boolean');
+  options.buildSiteFiles = force(options.buildSiteFiles || true, 'boolean');
+  options.buildSiteFilesInput = force(options.buildSiteFilesInput || ['**/*'], 'array');
+  options.createCname = force(options.createCname || true, 'boolean');
+  options.fetchFirebaseAuth = force(options.fetchFirebaseAuth || true, 'boolean');
+  options.checkLocality = force(options.checkLocality || true, 'boolean');
+
   // Log
   logger.log(`Welcome to Ultimate Jekyll v${package.version}!`);
-  // logger.log(`Environment variables`, process.env);
+  logger.log(`options`, options);
 
   // Prefix project
   project.dependencies = project.dependencies || {};
@@ -86,38 +95,57 @@ module.exports = async function (options) {
     await logCWD();
 
     // Ensure this package is up-to-date
-    await updateManager();
+    if (options.checkManager) {
+      await updateManager();
+    }
 
     // Ensure proper node version
-    await ensureNodeVersion();
+    if (options.checkNode) {
+      await ensureNodeVersion();
+    }
 
     // Ensure proper bundler version
-    await ensureBundlerVersion();
+    if (options.checkBundler) {
+      await ensureBundlerVersion();
+    }
 
     // Ensure proper ruby version
-    await ensureRubyVersion();
+    if (options.checkRuby) {
+      await ensureRubyVersion();
+    }
 
     // Run the setup
-    await ensurePeerDependencies();
+    if (options.checkPeerDependencies) {
+      await ensurePeerDependencies();
+    }
 
     // Setup scripts
-    await setupScripts();
+    if (options.setupScripts) {
+      await setupScripts();
+    }
 
     // Build files
-    await buildSiteFiles();
+    if (options.buildSiteFiles) {
+      await buildSiteFiles({ input: options.buildSiteFilesInput });
+    }
 
     // Copy all files from src/defaults/dist on first run
     // await copyDefaultDistFiles();
 
     // Create CNAME
-    await createCNAME();
+    if (options.createCname) {
+      await createCname();
+    }
 
     // Fetch firebase-auth files
-    await fetchFirebaseAuth();
+    if (options.fetchFirebaseAuth) {
+      await fetchFirebaseAuth();
+    }
 
     // Check which locality we are using
-    await checkLocality();
-
+    if (options.checkLocality) {
+      await checkLocality();
+    }
   } catch (e) {
     // Throw error
     throw e;
@@ -288,12 +316,16 @@ function install(package, ver, location) {
   });
 }
 
-function buildSiteFiles() {
+function buildSiteFiles(options) {
+  options = options || {};
+  options.input = options.input || ['**/*'];
+
   // Loop through all files in /defaults directory
   const dir = path.join(__dirname, '..', 'defaults');
   const input = [
     // Files to include
-    '**/*',
+    // '**/*',
+    ...options.input,
 
     // Files to exclude
     // Dist files
@@ -389,7 +421,6 @@ function buildSiteFiles() {
       continue;
     }
 
-
     // Get final paths
     const finalSource = path.join(item.source, ogName);
     const finalDestination = path.join(item.destination, item.name);
@@ -479,7 +510,7 @@ function buildSiteFiles() {
 // }
 
 // Create CNAME
-async function createCNAME() {
+async function createCname() {
   // Get the CNAME
   const url = config.url;
   const host = new URL(url).host

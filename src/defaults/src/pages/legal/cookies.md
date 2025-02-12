@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/legal/cookies
+layout: placeholder/legal/cookies
 permalink: /cookies
 
 ### REGULAR PAGES ###

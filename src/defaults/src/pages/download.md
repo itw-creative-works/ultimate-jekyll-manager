@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/download
+layout: placeholder/download
 permalink: /download
 
 ### REGULAR PAGES ###

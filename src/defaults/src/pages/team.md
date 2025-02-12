@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/team/index
+layout: placeholder/team/index
 permalink: /team
 
 ### REGULAR PAGES ###

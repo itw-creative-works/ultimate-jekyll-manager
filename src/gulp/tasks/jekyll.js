@@ -33,6 +33,11 @@ async function jekyll(complete) {
   // Increment index
   index++;
 
+  // Notify
+  if (global.browserSync) {
+    global.browserSync.notify('Rebuilding...');
+  }
+
   // Run buildpre hook
   await hook('build:pre', index)
 
@@ -68,6 +73,11 @@ async function jekyll(complete) {
   // Launch browser sync
   if (!browserSyncLaunched) {
     launchBrowserSync();
+  }
+
+  // Reload browser
+  if (global.browserSync) {
+    global.browserSync.reload();
   }
 
   // Complete

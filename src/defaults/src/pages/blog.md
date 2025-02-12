@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/blog/index
+layout: placeholder/blog/index
 permalink: /blog
 
 ### REGULAR PAGES ###

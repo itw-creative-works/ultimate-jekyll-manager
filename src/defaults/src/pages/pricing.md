@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/pricing
+layout: placeholder/pricing
 permalink: /pricing
 
 ### REGULAR PAGES ###

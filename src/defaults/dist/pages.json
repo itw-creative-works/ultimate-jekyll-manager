@@ -7,6 +7,7 @@ sitemap:
 meta:
   index: false
 ---
+
 {% assign pages = site.pages %}
 {% assign posts = site.posts %}
 {% assign data = pages | concat: posts %}

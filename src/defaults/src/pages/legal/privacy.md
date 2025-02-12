@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/legal/privacy
+layout: placeholder/legal/privacy
 permalink: /privacy
 
 ### REGULAR PAGES ###

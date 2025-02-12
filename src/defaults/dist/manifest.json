@@ -4,6 +4,7 @@ permalink: /manifest.json
 sitemap:
   include: false
 ---
+
 {%- if site.manifest.name != null and site.manifest.name != '' -%}
   {% assign name = site.manifest.name %}
 {% else %}

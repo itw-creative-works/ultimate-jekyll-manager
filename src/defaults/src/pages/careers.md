@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/careers
+layout: placeholder/careers
 permalink: /careers
 
 ### REGULAR PAGES ###

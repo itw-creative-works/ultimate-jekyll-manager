@@ -10,6 +10,7 @@ meta:
   description: "The {{ site.brand.name }} browser extension is free to use on Chrome, Firefox & Opera. Get started for free today!"
   breadcrumb: "Extension"
 ---
+
 # {{ site.brand.name }} Browser Extension
 {{ layout.meta.description }}
 

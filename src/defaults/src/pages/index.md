@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/index
+layout: placeholder/index
 permalink: /
 
 ### REGULAR PAGES ###

@@ -2,6 +2,7 @@
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('sass');
 const { src, dest, watch, series } = require('gulp');
+const path = require('path');
 const compiler = require('gulp-sass')(require('sass'));
 const cleanCSS = require('gulp-clean-css');
 
@@ -11,7 +12,9 @@ const input = [
   'src/assets/css/**/*.{css,scss,sass}',
 
   // Main files
-  `${__dirname}/../../assets/css/main.scss`,
+  // `${__dirname}/../../assets/css/main.scss`,
+  // path.join(__dirname, '..', '..', 'assets/css/main.scss'),
+  `${path.join(__dirname, '..', '..', 'assets/css')}/**/*`
 
   // Files to exclude
   // '!dist/**',

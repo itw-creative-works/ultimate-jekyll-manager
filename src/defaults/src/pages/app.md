@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/placeholder/app
+layout: placeholder/app
 permalink: /app
 
 ### REGULAR PAGES ###
