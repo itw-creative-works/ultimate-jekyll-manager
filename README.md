@@ -32,7 +32,7 @@
 ## 🚀 Getting started
 1. [Create a repo](https://github.com/itw-creative-works/ultimate-jekyll/generate) from the **Ultimate Jekyll** template.
 2. Clone the repo to your local machine.
-3. Run these command to get everything setup and sync'd!
+3. Run these commands to get everything setup and sync'd!
 ```bash
 npm install
 npx uj setup
@@ -54,4 +54,13 @@ npm start -- --browser=false
 * `--debug=true` - Enables logging of extra information when running `npm start`.
 ```bash
 npm start -- --debug=true
+```
+
+<!-- Developing -->
+## 🛠 Developing
+1. Clone the repo to your local machine.
+2. Run these commands
+```bash
+npm install
+npm run prepare:watch
 ```

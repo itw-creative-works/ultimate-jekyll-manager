@@ -16,7 +16,7 @@ sitemap:
     </div>
 
     <div class="my-4 my-sm-8">
-      {%- include /master/helpers/blog-image.html id=page.post.id name=page.url class="img-fluid rounded-lg" alt=page.post.title -%}
+      {%- include /main/helpers/blog-image.html id=page.post.id name=page.url class="img-fluid rounded-lg" alt=page.post.title -%}
     </div>
 
     <div class="row align-items-sm-center mb-5">
@@ -24,13 +24,13 @@ sitemap:
         <!-- Media -->
         <div class="d-flex align-items-center">
           <div class="flex-shrink-0">
-            {%- include /master/helpers/blog-author.html author=post.post.author class="avatar avatar-circle" mode="image" -%}
+            {%- include /main/helpers/blog-author.html author=post.post.author class="avatar avatar-circle" mode="image" -%}
           </div>
 
           <div class="flex-grow-1 ms-3">
             <h5 class="mb-0">
-              <a class="text-dark" href="{%- include /master/helpers/blog-author.html author=post.post.author class="avatar-img" mode="url" -%}">
-                {%- include /master/helpers/blog-author.html author=post.post.author class="avatar-img" mode="name" -%}
+              <a class="text-dark" href="{%- include /main/helpers/blog-author.html author=post.post.author class="avatar-img" mode="url" -%}">
+                {%- include /main/helpers/blog-author.html author=post.post.author class="avatar-img" mode="name" -%}
               </a>
             </h5>
             <span class="d-block small">
@@ -47,7 +47,7 @@ sitemap:
           <span class="text-cap mb-0 me-2">Share:</span>
 
           <div class="d-flex gap-2">
-            {%- include /master/modules/engagement/social-share-kit.html -%}
+            {%- include /main/modules/engagement/social-share-kit.html -%}
           </div>
         </div>
       </div>

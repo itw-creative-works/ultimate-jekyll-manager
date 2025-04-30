@@ -1,0 +1,196 @@
+<!-- Page Variables -->
+{% assign page-url-stripped = page.url | replace: 'index.html', '' %}
+{%- if page-url-stripped == '/' -%}
+  {% assign page-url-stripped = '' %}
+{% endif %}
+
+{%- if page.layout contains 'post' and page.post.id != null and page.post.id != '' -%}
+  {% assign page-is-post = true %}
+{% else %}
+  {% assign page-is-post = false %}
+{% endif %}
+
+<!-- Prefetch -->
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+<!-- Meta -->
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+{% if site.meta.viewport != '' and site.meta.viewport != false and site.meta.viewport != null %}
+  <meta name="viewport" content="{{ site.meta.viewport }}">
+{% else %}
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, minimum-scale=1, maximum-scale=5"> --> <!-- DISABLED 4/8/23 to prevent auto-zooming on text fields -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no">
+{% endif %}
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="generator" content="Ultimate Jekyll">
+
+<!-- Referrer -->
+<meta name="referrer" content="{{ page.meta.referrer | default: layout.meta.referrer | default: site.meta.referrer | default: 'strict-origin-when-cross-origin' }}">
+
+<!-- Canonical -->
+<link rel="canonical" href="{{ site.url }}{{ page-url-stripped }}">
+
+<!-- Robots -->
+{%- if page.meta.index == false or layout.meta.index == false or site.meta.index == false -%}
+  <meta name="robots" content="noindex">
+{% endif %}
+
+<!-- Keywords -->
+{%- if page.meta.keywords != null and page.meta.keywords != '' -%}
+  {% assign page-keywords = page.meta.keywords | liquify %}
+{%- elsif site.meta.keywords != null and site.meta.keywords != '' -%}
+  {% assign page-keywords = site.meta.keywords | liquify %}
+{%- else -%}
+  {% assign page-keywords = '' %}
+{%- endif -%}
+<meta name="keywods" content="{{ page-keywords }}">
+
+<!-- Manifest.json -->
+<link rel="manifest" href="{{ site.url }}/manifest.json">
+
+<!-- Title -->
+{%- if page-is-post and page.post.title != null and page.post.title != '' -%}
+  {% assign page-title = page.post.title | liquify %}
+{%- elsif page.meta.title != null and page.meta.title != '' -%}
+  {% assign page-title = page.meta.title | liquify %}
+{%- elsif layout.meta.title != null and layout.meta.title != '' -%}
+  {% assign page-title = layout.meta.title | liquify %}
+{%- else -%}
+  {% assign page-title = site.meta.title | liquify %}
+{%- endif -%}
+<title>{{ page-title }}</title>
+<meta name="twitter:title" content="{{ page-title }}">
+<meta property="og:title" content="{{ page-title }}">
+
+<!-- Description -->
+{%- if page-is-post and page.post.excerpt != null and page.post.excerpt != '' -%}
+  {% assign page-description = page.post.excerpt | liquify %}
+{%- elsif page.meta.description != null and page.meta.description != '' -%}
+  {% assign page-description = page.meta.description | liquify %}
+{%- elsif layout.meta.description != null and layout.meta.description != '' -%}
+  {% assign page-description = layout.meta.description | liquify %}
+{%- else -%}
+  {% assign page-description = site.meta.description | liquify %}
+{%- endif -%}
+<meta name="description" content="{{ page-description }}">
+<meta name="twitter:description" content="{{ page-description }}">
+<meta property="og:description" content="{{ page-description }}">
+
+<!-- Image -->
+{%- if page-is-post and page.post.id != null and page.post.id != '' -%}
+  {% capture page-image %}{{ site.url }}/assets/images/blog/posts/post-{{ page.post.id }}/{{ page-url-stripped | split: '/' | last }}.jpg{% endcapture %}
+{%- elsif page.meta.og-image != null and page.meta.og-image != '' -%}
+  {% capture page-image %}{%- if page.meta.og-image contains '://' -%}{%- else -%}{{ site.url }}/assets/images/og{%- endif -%}{{ page.meta.og-image }}{% endcapture %}
+{%- else -%}
+  {% capture page-image %}{%- if site.meta.og-image contains '://' -%}{%- else -%}{{ site.url }}/assets/images/og{%- endif -%}{{ site.meta.og-image }}{% endcapture %}
+{%- endif -%}
+<meta name="twitter:image" content="{{ page-image }}">
+<meta property="og:image" content="{{ page-image }}">
+
+<!-- OG: Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@{{ site.socials.twitter }}">
+<meta name="twitter:widgets:theme" content="light">
+
+<!-- OG: Facebook / Open Graph -->
+<meta property="og:url" content="{{ site.url }}{{ page-url-stripped }}">
+{%- if page-is-post -%}
+  {% assign og-type = 'article' %}
+{%- else -%}
+  {% assign og-type = 'website' %}
+{%- endif -%}
+<meta property="og:type" content="{{ og-type }}">
+
+<!-- Main Feed -->
+<link href="{{ site.url }}/feeds/posts.xml" type="application/atom+xml" rel="alternate" title="{{ site.brand.name }} Feed">
+
+<!-- Language Tags -->
+<link rel="alternate" href="{{ site.url }}{{ page-url-stripped }}" hreflang="x-default">
+<link rel="alternate" href="{{ site.url }}{{ page-url-stripped }}" hreflang="en">
+<!-- <link rel="alternate" href="{{ site.url }}/es/{{ page-url-stripped }}" hreflang="es"> -->
+
+<!-- Favicon -->
+{%- if site.favicon.path != null and site.favicon.path != '' -%}
+  {% assign favicon-path = site.favicon.path %}
+{%- else -%}
+  {% assign favicon-path = site.url | append: '/assets/images/favicon' %}
+{%- endif -%}
+<link rel="apple-touch-icon" sizes="180x180" href="{{ favicon-path }}/apple-touch-icon.png?cb={{ uj_cache }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ favicon-path }}/favicon-32x32.png?cb={{ uj_cache }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ favicon-path }}/favicon-16x16.png?cb={{ uj_cache }}">
+<link rel="mask-icon" href="{{ favicon-path }}/safari-pinned-tab.svg" color="{{ site.favicon.safari-pinned-tab }}">
+<link rel="shortcut icon" type="image/x-icon" href="{{ favicon-path }}/favicon.ico?cb={{ uj_cache }}">
+<meta name="msapplication-TileColor" content="{{ site.favicon.msapp-tile-color }}">
+<meta name="msapplication-config" content="{{ favicon-path }}/browserconfig.xml?cb={{ uj_cache }}">
+<meta name="theme-color" content="{{ site.favicon.theme-color }}">
+
+<!-- Browser Support -->
+<!--[if lte IE 9]>
+  <link rel="stylesheet" type="text/css" href="/assets/css/main/lte-ie9.css?cb={{ uj_cache }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!-- CSS Bundle -->
+<link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ uj_cache }}">
+
+<!-- Style - Scripts are Disabled -->
+<noscript>
+  <style media="screen">
+    .main-alert-outdated {
+      display: block !important;
+    }
+  </style>
+</noscript>
+
+<!-- Alerts -->
+<!-- Master - Outdated Alert Box -->
+<div
+  class="main-alert main-alert-top main-alert-fixed main-alert-outdated bg-danger animation-fade-in"
+  role="alert" aria-live="polite" aria-label="Outdated browser"
+  hidden>
+  <span class="main-alert-close">&times;</span>
+  <div>
+    <i class="fa-solid fa-warning fa-bounce me-2"></i>
+    You are using an outdated browser that our site <strong>DOES NOT</strong> support. Please <a href="https://www.google.com/chrome" rel="nofollow" target="_blank">click here</a> to update your browser.
+  </div>
+</div>
+<div
+  class="main-alert main-alert-top main-alert-fixed main-alert-suspended bg-danger animation-fade-in"
+  role="alert" aria-live="polite" aria-label="Payment method issue"
+  hidden>
+  <span class="main-alert-close">&times;</span>
+  <div>
+    <i class="fa-solid fa-warning fa-bounce me-2"></i>
+    There is a <strong>problem with your payment method</strong>. To continue using <strong>{{ site.brand.name }}</strong>, please <a href="{{ site.url }}/account#billing" target="_blank">update your payment method</a>.
+  </div>
+</div>
+<div
+  class="main-alert main-alert-top main-alert-fixed main-alert-sale bg-primary animation-fade-in"
+  role="alert" aria-live="polite" aria-label="Flash sale"
+  hidden>
+  <span class="main-alert-close">&times;</span>
+  <div>
+    <i class="fa-solid fa-stopwatch fa-beat me-2"></i>
+    <strong>FLASH SALE!</strong>
+    Save <strong>15%</strong> at checkout—today only! <a href="{{ site.url }}/pricing" target="_blank">Claim discount</a>.
+  </div>
+</div>
+
+<!-- App - Head Content -->
+{%- if page.settings.include-app-head == false -%}
+{% elsif layout.settings.include-app-head == false %}
+{% elsif site.settings.include-app-head == false %}
+{% else %}
+  {% include /app/global/head.html %}
+{% endif %}
+
+<!-- Page - Injected head -->
+{{ layout.head.content | liquify }}
+{{ page.head.content | liquify }}

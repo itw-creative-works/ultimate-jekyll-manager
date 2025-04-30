@@ -7,6 +7,12 @@ const path = require('path');
 const { execute } = require('node-powertools');
 const jetpack = require('fs-jetpack');
 
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
+
 // Set index
 let index = -1;
 
@@ -47,13 +53,13 @@ async function jekyll(complete) {
     '--source dist',
     '--config ' + [
       // This is the base config file with all the user-editable settings
-      './node_modules/ultimate-jekyll-manager/dist/defaults/src/_config.yml',
+      `./node_modules/${package.name}/dist/defaults/src/_config.yml`,
       // This is the default config with NON user-editable settings
-      './node_modules/ultimate-jekyll-manager/dist/config/_config_default.yml',
+      `./node_modules/${package.name}/dist/config/_config_default.yml`,
       // This is the user's project config file
       'dist/_config.yml',
       // Add browsesrsync IF BUILD_MODE is not true
-      process.env.UJ_BUILD_MODE === 'true' ? '' : '.temp/_config_browsersync.yml',
+      Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
     ].join(','),
     '--incremental',
   ]
@@ -87,7 +93,7 @@ async function jekyll(complete) {
 // Watch for changes
 function jekyllWatcher(complete) {
   // Quit if in build mode
-  if (process.env.UJ_BUILD_MODE === 'true') {
+  if (Manager.isBuildMode()) {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
@@ -96,7 +102,7 @@ function jekyllWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay }, jekyll)
+  watch(input, { delay: delay, dot: true }, jekyll)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });
@@ -118,7 +124,7 @@ async function hook(file, index) {
 
   // Check if it exists
   if (!jetpack.exists(fullPath)) {
-    throw new Error('Hook not found');
+    return console.warn(`Hook not found: ${fullPath}`);
   }
 
   // Log
@@ -144,7 +150,7 @@ async function hook(file, index) {
 // Launch browser sync
 async function launchBrowserSync() {
   // Quit if in build mode
-  if (process.env.UJ_BUILD_MODE === 'true') {
+  if (Manager.isBuildMode()) {
     // Log
     return logger.log('Skipping browser sync since in build mode');
   }

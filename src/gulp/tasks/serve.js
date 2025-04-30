@@ -5,6 +5,12 @@ const path = require('path');
 const browserSync = require('browser-sync').create();
 const jetpack = require('fs-jetpack');
 
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
+
 // Local URL
 let localUrl;
 let externalUrl;
@@ -127,6 +133,7 @@ module.exports = function serve(complete) {
 
   // Initialize browserSync
   browserSync.init(settings, async (e, instance) => {
+    // Quit if there's an error
     if (e) {
       return logger.error(e);
     }

@@ -3,9 +3,13 @@ const Manager = new (require('../../build.js'));
 const logger = Manager.logger('imagemin');
 const { src, dest, watch, series } = require('gulp');
 const glob = require('glob').globSync;
-const path = require('path');
-const jetpack = require('fs-jetpack');
 const responsive = require('gulp-responsive-modern');
+
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
 
 // Glob
 const input = [
@@ -23,7 +27,7 @@ function imagemin(complete) {
   // Log
   logger.log('Starting...');
 
-  // Use glob to get file count for msdtching files
+  // Use glob to get file count for matching files
   const files = glob(input);
 
   // If there's no files, complete
@@ -115,7 +119,7 @@ function imagemin(complete) {
 // Watcher task
 function imageminWatcher(complete) {
   // Quit if in build mode
-  if (process.env.UJ_BUILD_MODE === 'true') {
+  if (Manager.isBuildMode()) {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
@@ -124,7 +128,7 @@ function imageminWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay }, imagemin)
+  watch(input, { delay: delay, dot: true }, imagemin)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });

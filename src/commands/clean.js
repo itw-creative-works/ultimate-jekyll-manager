@@ -5,14 +5,14 @@ const path = require('path');
 const jetpack = require('fs-jetpack');
 
 // Load package
-const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
-const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
 
 // Const dirs
 const dirs = [
-  '_site',
-  'dist',
   '.temp',
+  'dist',
+  '_site',
 ]
 
 module.exports = async function (options) {

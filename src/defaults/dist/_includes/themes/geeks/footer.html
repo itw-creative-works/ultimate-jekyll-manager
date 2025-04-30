@@ -13,14 +13,14 @@
             {{ site.brand.description }}
           </p>
           <div class="fs-4 d-flex flex-row gap-3">
-            {% if site.socials.instagram %}
-              <a href="{{ site.socials.instagram }}" class="text-reset">
-                {{ site.icons.instagram }}
-              </a>
-            {% endif %}
             {% if site.socials.linkedin %}
               <a href="{{ site.socials.linkedin }}" class="text-reset">
                 {{ site.icons.linkedin }}
+              </a>
+            {% endif %}
+            {% if site.socials.instagram %}
+              <a href="{{ site.socials.instagram }}" class="text-reset">
+                {{ site.icons.instagram }}
               </a>
             {% endif %}
             {% if site.socials.tiktok %}
@@ -38,14 +38,19 @@
                 {{ site.icons.youtube }}
               </a>
             {% endif %}
-            {% if site.socials.facebook %}
-              <a href="{{ site.socials.facebook }}" class="text-reset">
-                {{ site.icons.facebook }}
-              </a>
-            {% endif %}
             {% if site.socials.discord %}
               <a href="{{ site.socials.discord }}" class="text-reset">
                 {{ site.icons.discord }}
+              </a>
+            {% endif %}
+            {% if site.socials.github %}
+              <a href="{{ site.socials.github }}" class="text-reset">
+                {{ site.icons.github }}
+              </a>
+            {% endif %}
+            {% if site.socials.facebook %}
+              <a href="{{ site.socials.facebook }}" class="text-reset">
+                {{ site.icons.facebook }}
               </a>
             {% endif %}
           </div>
@@ -56,10 +61,24 @@
           <span class="text-white-stable h5">Company</span>
           <ul class="list-unstyled mb-0 d-flex flex-column nav nav-footer nav-x-0">
             <li>
-              <a href="{{ site.url }}/about" class="nav-link">About us</a>
+              <a href="{{ site.url }}/about" class="nav-link">
+                About us
+              </a>
             </li>
             <li>
-              <a href="{{ site.url }}/pricing" class="nav-link">Pricing</a>
+              <a href="{{ site.url }}/pricing" class="nav-link">
+                Pricing
+              </a>
+            </li>
+            <li>
+              <a href="{{ site.url }}/reviews" class="nav-link">
+                Reviews
+              </a>
+            </li>
+            <li>
+              <a href="{{ site.url }}/careers" class="nav-link">
+                Careers
+              </a>
             </li>
           </ul>
         </div>
@@ -69,10 +88,19 @@
           <span class="text-white-stable h5">Community</span>
           <ul class="list-unstyled mb-0 d-flex flex-column nav nav-footer nav-x-0">
             <li>
-              <a href="{{ site.url }}/blog" class="nav-link">Blog</a>
+              <a href="{{ site.url }}/blog" class="nav-link">
+                Blog
+              </a>
             </li>
             <li>
-              <a href="{{ site.url }}/discord" class="nav-link">Discord server</a>
+              <a href="{{ site.url }}/discord" class="nav-link">
+                Discord server
+              </a>
+            </li>
+            <li>
+              <a href="{{ site.url }}/account#affiliate" class="nav-link">
+                Affiliate program
+              </a>
             </li>
           </ul>
         </div>
@@ -82,13 +110,34 @@
           <span class="text-white-stable h5">Account</span>
           <ul class="list-unstyled mb-0 d-flex flex-column nav nav-footer nav-x-0">
             <li>
-              <a href="{{ site.url }}/account" class="nav-link">Account</a>
+              <a href="{{ site.url }}/account" class="nav-link">
+                <span class="d-flex align-items-center">
+                  {{ site.icons.user-circle }}
+                  <span class="ms-2">
+                    My account
+                  </span>
+                </span>
+              </a>
             </li>
             <li>
-              <a href="{{ site.url }}/signin" class="nav-link">Sign in</a>
+              <a href="{{ site.url }}/signin" class="nav-link">
+                <span class="d-flex align-items-center">
+                  {{ site.icons.right-to-bracket }}
+                  <span class="ms-2">
+                    Sign in
+                  </span>
+                </span>
+              </a>
             </li>
             <li>
-              <a href="{{ site.url }}/signup" class="nav-link">Sign up</a>
+              <a href="{{ site.url }}/signup" class="nav-link">
+                <span class="d-flex align-items-center">
+                  {{ site.icons.user-plus }}
+                  <span class="ms-2">
+                    Sign up
+                  </span>
+                </span>
+              </a>
             </li>
           </ul>
         </div>
@@ -99,11 +148,19 @@
             <span class="text-white-stable h5">Support</span>
             <ul class="list-unstyled mb-0 d-flex flex-column nav nav-footer nav-x-0">
               <li>
-                <a href="{{ site.url }}/contact" class="nav-link">Contact</a>
+                <a href="{{ site.url }}/contact" class="nav-link">
+                  Contact us
+                </a>
               </li>
               <li>
-                Email:
-                <a class="fw-semibold" href="mailto:{{ site.contact.email }}">{{ site.contact.email }}</a>
+                <a href="mailto:{{ site.contact.email }}" class="nav-link">
+                  Email
+                </a>
+              </li>
+              <li>
+                <a href="#" class="nav-link">
+                  Live chat
+                </a>
               </li>
             </ul>
           </div>
@@ -118,14 +175,14 @@
       <!-- Desc -->
       <div class="col-lg-6 col-12 text-center text-md-start">
         <span>
-					© {{ site.time | date: '%Y' }} <strong>{{ site.brand.name }}</strong>, <a href="https://itwcreativeworks.com">ITW Creative Works</a>. All Rights Reserved.
+					© {{ site.time | date: '%Y' }} <strong>{{ site.brand.name }}</strong>, <a href="https://itwcreativeworks.com" target="_blank">ITW Creative Works</a>. All Rights Reserved.
         </span>
       </div>
       <!-- Links -->
       <div class="col-12 col-lg-6">
         <nav class="nav nav-footer justify-content-center justify-content-md-start justify-content-lg-end">
-          <a class="nav-link active" href="{{ site.url }}/terms">Terms of use</a>
-          <a class="nav-link" href="{{ site.url }}/cookies">Cookie Settings</a>
+          <a class="nav-link active" href="{{ site.url }}/terms">Terms of service</a>
+          <a class="nav-link" href="{{ site.url }}/cookies">Cookie settings</a>
           <a class="nav-link" href="{{ site.url }}/privacy">Privacy policy</a>
         </nav>
       </div>

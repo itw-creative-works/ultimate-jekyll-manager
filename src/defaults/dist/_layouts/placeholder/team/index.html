@@ -22,12 +22,12 @@ meta:
         {% assign member-id = member.id | replace: "/team/", ""  %}
 
         <div class="card h-100">
-          {%- include /master/helpers/blog-author.html author=member-id mode="image" class="card-img-top" -%}
+          {%- include /main/helpers/blog-author.html author=member-id mode="image" class="card-img-top" -%}
 
           <div class="card-body">
             <h5 class="card-title">{{ member.member.name }}</h5>
             <p class="card-text">{{ member.member.excerpt }}</p>
-            <a href="{%- include /master/helpers/blog-author.html author=member-id mode="url" class="card-img-top" -%}">View profile</a>
+            <a href="{%- include /main/helpers/blog-author.html author=member-id mode="url" class="card-img-top" -%}">View profile</a>
           </div>
           <div class="card-footer">
             <small class="text-body-secondary">Joined: {{ member.member.joined }}</small>

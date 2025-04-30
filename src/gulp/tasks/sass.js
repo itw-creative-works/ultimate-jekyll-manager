@@ -5,6 +5,13 @@ const { src, dest, watch, series } = require('gulp');
 const path = require('path');
 const compiler = require('gulp-sass')(require('sass'));
 const cleanCSS = require('gulp-clean-css');
+const rename = require('gulp-rename');
+
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
 
 // Glob
 const input = [
@@ -12,9 +19,7 @@ const input = [
   'src/assets/css/**/*.{css,scss,sass}',
 
   // Main files
-  // `${__dirname}/../../assets/css/main.scss`,
-  // path.join(__dirname, '..', '..', 'assets/css/main.scss'),
-  `${path.join(__dirname, '..', '..', 'assets/css')}/**/*`
+  `${rootPathPackage}/dist/assets/css/**/*`,
 
   // Files to exclude
   // '!dist/**',
@@ -31,6 +36,9 @@ function sass(complete) {
   return src(input)
     .pipe(compiler({ outputStyle: 'compressed' }).on('error', compiler.logError))
     .pipe(cleanCSS())
+    .pipe(rename((path) => {
+      path.basename += '.bundle';
+    }))
     .pipe(dest(output))
     .on('end', () => {
       // Log
@@ -44,7 +52,7 @@ function sass(complete) {
 // Watcher Task
 function sassWatcher(complete) {
   // Quit if in build mode
-  if (process.env.UJ_BUILD_MODE === 'true') {
+  if (Manager.isBuildMode()) {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
@@ -53,7 +61,7 @@ function sassWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay }, sass)
+  watch(input, { delay: delay, dot: true }, sass)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });

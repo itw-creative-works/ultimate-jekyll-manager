@@ -5,11 +5,16 @@ const { src, dest, watch, series } = require('gulp');
 const path = require('path');
 const { execute } = require('node-powertools');
 
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
+
 // Glob
 const input = [
   // Files to include
-  // `${__dirname}/../../defaults/dist/**/*`,
-  `${path.join(__dirname, '..', '..', 'defaults/dist')}/**/*`,
+  `${rootPathPackage}/dist/defaults/dist/**/*`,
 
   // Files to exclude
 ];
@@ -75,7 +80,7 @@ async function developmentRebuild(complete) {
 // Watcher Task
 function developmentRebuildWatcher(complete) {
   // Quit if in build mode
-  if (process.env.UJ_BUILD_MODE === 'true') {
+  if (Manager.isBuildMode()) {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
@@ -84,7 +89,7 @@ function developmentRebuildWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay }, developmentRebuild)
+  watch(input, { delay: delay, dot: true }, developmentRebuild)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });

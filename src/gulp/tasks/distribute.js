@@ -8,8 +8,12 @@ const path = require('path');
 const JSON5 = require('json5');
 const { execute } = require('node-powertools');
 
-// Variables
-const config = Manager.getConfig();
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const config = Manager.getConfig('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
 
 // Glob
 const input = [
@@ -26,30 +30,32 @@ const delay = 250;
 let index = -1;
 
 // Main task
-async function distribute(complete) {
-  // Increment index
-  index++;
+function distribute() {
+  return new Promise(async function(resolve, reject) {
+    // Increment index
+    index++;
 
-  // Log
-  logger.log('Starting...');
+    // Log
+    logger.log('Starting...');
 
-  // Create build JSON
-  await createBuildJSON();
+    // Create build JSON
+    await createBuildJSON();
 
-  // Complete
-  return src(input, { base: 'src' })
-    // .pipe(customPathTransform())
-    .pipe(dest(output))
-    .on('end', () => {
-      // Log
-      logger.log('Finished!');
+    // Complete
+    return src(input, { base: 'src' })
+      // .pipe(customTransform())
+      .pipe(dest(output))
+      .on('end', () => {
+        // Log
+        logger.log('Finished!');
 
-      // Complete
-      return complete();
-    });
+        // Complete
+        return resolve();
+      });
+  });
 }
 
-function customPathTransform() {
+function customTransform() {
   return through2.obj(function (file, _, callback) {
     // Skip if it's a directory
     if (file.isDirectory()) {
@@ -85,7 +91,7 @@ function customPathTransform() {
 // Watcher task
 function distributeWatcher(complete) {
   // Quit if in build mode
-  if (process.env.UJ_BUILD_MODE === 'true') {
+  if (Manager.isBuildMode()) {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }
@@ -94,7 +100,7 @@ function distributeWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay }, distribute)
+  watch(input, { delay: delay, dot: true }, distribute)
   .on('change', function(path) {
     logger.log(`[watcher] File ${path} was changed`);
   });
@@ -141,7 +147,7 @@ async function createBuildJSON() {
       environment: Manager.getEnvironment(),
       packages: {
         'web-manager': require('web-manager/package.json').version,
-        'ultimate-jekyll-manager': require('../../../package.json').version,
+        [package.name]: package.version,
       },
       config: config,
 

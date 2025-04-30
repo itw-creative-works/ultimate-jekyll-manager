@@ -4,7 +4,7 @@
 # For example, when they "Link" their Google account to their first-party account from their /account/ page.
 
 ### ALL PAGES ###
-layout: master/global/default
+layout: main/global/default
 permalink: /oauth2
 sitemap:
   include: false
@@ -83,7 +83,7 @@ head:
       <footer class="mt-md-3 mb-md-2 pt-md-3 border-top">
         <div class="row">
           <div class="col-4 offset-4 text-center">
-            {%- include /master/helpers/svg.html src=site.brand.logo-image-svg class="mb-2" alt="Company logo" style="height: 45px; width: 45px;" -%}
+            {%- include /main/helpers/svg.html src=site.brand.logo-image-svg class="mb-2" alt="Company logo" style="height: 45px; width: 45px;" -%}
             <small class="d-block mb-3 text-muted">© {{ "now" | date: "%Y" }} {{ site.brand.name }}</small>
             <ul class="list-unstyled list-inline text-small">
               <li class="list-inline-item"><a class="text-muted" href="{{ site.url }}">Home</a></li>

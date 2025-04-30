@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/admin/main
+layout: main/admin/main
 permalink: /admin/posts/create
 sitemap:
   include: false
@@ -13,7 +13,7 @@ meta:
   index: false
 
 post-vars:
-  ad: '{% include /master/modules/adunits/adsense-in-article.html index="1" %}'
+  ad: '{% include /main/modules/adunits/adsense-in-article.html index="1" %}'
 
 admin:
   header: '
@@ -345,7 +345,7 @@ admin:
               </label>
 
               <small class="d-block _form-text text-muted">
-                Replace <code class="highlighter-rouge">[alt](url)</code> with <code class="highlighter-rouge">&#123;%- include /master/helpers/blog-image.html src="&#123;&#123;url&#125;&#125;" -%&#125;</code>
+                Replace <code class="highlighter-rouge">[alt](url)</code> with <code class="highlighter-rouge">&#123;%- include /main/helpers/blog-image.html src="&#123;&#123;url&#125;&#125;" -%&#125;</code>
               </small>
 
             </div>
@@ -716,7 +716,7 @@ admin:
     affiliateSearchTerm: '{{ post.post.affiliate-search-term }}',
     tags: [{% for tag in latest-post.post.tags %}'{{ tag }}',{% endfor %}],
     categories: [{% for category in latest-post.post.categories %}'{{ category }}',{% endfor %}],
-    replaceImagesIncludeTag: '{% raw %}{%- include /master/helpers/blog-image.html name="{name}" alt="{alt}" -%}{% endraw %}',
+    replaceImagesIncludeTag: '{% raw %}{%- include /main/helpers/blog-image.html name="{name}" alt="{alt}" -%}{% endraw %}',
   }
 
 
@@ -1362,7 +1362,7 @@ admin:
     dom.select('#path').setValue('./_posts/' + date.getFullYear() + '/guest');
 
     // special
-    var serverDev = siteUrl + '/_process?url=master/create-post.js';
+    var serverDev = siteUrl + '/_process?url=main/create-post.js';
     var serverProd = 'https://us-central1-' + Manager.properties.options.libraries.firebase_app.config.projectId + '.cloudfunctions.net/bm_api';
     var serverProdDev = 'http://localhost:5001/' + Manager.properties.options.libraries.firebase_app.config.projectId + '/us-central1/bm_api';
     var env = buildFile.environment;
@@ -1493,6 +1493,6 @@ admin:
 <!-- https://benweet.github.io/stackedit.js/ -->
 <script src="https://unpkg.com/stackedit-js@1.0.7/docs/lib/stackedit.min.js" async></script>
 <!-- <script src="https://unpkg.com/turndown/dist/turndown.js" async></script> -->
-<script src="/special/master/pages/admin/posts/vendor/turndown.js" type="text/javascript"></script>
+<script src="/special/main/pages/admin/posts/vendor/turndown.js" type="text/javascript"></script>
 <!-- <script src="https://cdn.jsdelivr.net/npm/stackedit-js@1.0.7/docs/lib/stackedit.min.js" async></script> -->
 <!-- <script src="https://cdn.jsdelivr.net/npm/turndown@5.0.3/lib/turndown.cjs.min.js" async></script> -->

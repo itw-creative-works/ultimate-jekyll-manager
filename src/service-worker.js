@@ -1,11 +1,12 @@
 // Libraries
+const serviceWorker = self;
 
 // Class
 function Manager() {
   const self = this;
 
   // Properties
-  self.controller = null;
+  self.serviceWorker = null;
 
   // Defaults
   self.config = {};
@@ -31,26 +32,28 @@ function Manager() {
 }
 
 // Initialize
-Manager.prototype.initialize = function (controller) {
+Manager.prototype.initialize = function () {
   const self = this;
 
-  // Properties
-  self.controller = controller;
+  return new Promise(function(resolve, reject) {
+    // Properties
+    self.serviceWorker = serviceWorker;
 
-  // Parse config file
-  parseConfiguration(self, controller);
+    // Parse config file
+    parseConfiguration(self);
 
-  // Setup listeners
-  setupListeners(self, controller);
+    // Setup listeners
+    setupListeners(self);
 
-  // Import firebase
-  importFirebase(self, controller);
+    // Import firebase
+    importFirebase(self);
 
-  // Log
-  self.log('Initialized!', self.location.pathname, self.version, self.cache.name, self);
+    // Log
+    self.log('Initialized!', self.location.pathname, self.version, self.cache.name, self);
 
-  // Return
-  return self;
+    // Return
+    return resolve(self);
+  });
 };
 
 ['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
@@ -72,7 +75,7 @@ Manager.prototype.initialize = function (controller) {
 });
 
 // Parse configuration
-function parseConfiguration(self, controller) {
+function parseConfiguration(self) {
   try {
     self.config = JSON.parse(new URL(self.location).searchParams.get('config'));
 
@@ -92,21 +95,21 @@ function parseConfiguration(self, controller) {
 }
 
 // Setup listeners
-function setupListeners(self, controller) {
+function setupListeners(self) {
   // Force service worker to use the latest version
-  controller.addEventListener('install', (event) => {
-    event.waitUntil(controller.skipWaiting());
+  serviceWorker.addEventListener('install', (event) => {
+    event.waitUntil(serviceWorker.skipWaiting());
   });
 
-  controller.addEventListener('activate', (event) => {
-    event.waitUntil(controller.clients.claim());
+  serviceWorker.addEventListener('activate', (event) => {
+    event.waitUntil(serviceWorker.clients.claim());
   });
 
   // Handle clicks on notifications
   // Open the URL of the notification
   // ⚠️⚠️⚠️ THIS MUST BE PLACED BEFORE THE FIREBASE IMPORTS HANDLER ⚠️⚠️⚠️
   // https://stackoverflow.com/questions/78270541/cant-catch-fcm-notificationclick-event-in-service-worker-using-firebase-messa
-  controller.addEventListener('notificationclick', (event) => {
+  serviceWorker.addEventListener('notificationclick', (event) => {
     // Get the properties of the notification
     const notification = event.notification;
     const data = (notification.data && notification.data.FCM_MSG ? notification.data.FCM_MSG.data : null) || {};
@@ -132,7 +135,7 @@ function setupListeners(self, controller) {
 
   // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
   // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
-  controller.addEventListener('message', (event) => {
+  serviceWorker.addEventListener('message', (event) => {
     try {
       // Get the data
       const data = event.data || {};
@@ -217,13 +220,13 @@ function setupListeners(self, controller) {
 }
 
 // Import Firebase
-function importFirebase(self, controller) {
+function importFirebase(self) {
   // Import Firebase libraries
   importScripts(
-    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-app-compat.js',
-    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-messaging-compat.js',
-    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-database-compat.js',
-    'https://www.gstatic.com/firebasejs/{firebaseVersion}/firebase-firestore-compat.js',
+    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-messaging-compat.js',
+    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-database-compat.js',
+    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-firestore-compat.js',
   );
 
   // Initialize app

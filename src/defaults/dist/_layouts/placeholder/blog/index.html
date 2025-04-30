@@ -22,7 +22,7 @@ meta:
             <div class="col-lg-6 col-md-12 col-12">
               <div class="card mb-4 shadow-lg card-lift">
                 <a href="{{ site.url }}{{ post.url }}">
-                  {%- include /master/helpers/blog-image.html id=post.post.id name=post.url class="card-img-top" alt=post.post.title -%}
+                  {%- include /main/helpers/blog-image.html id=post.post.id name=post.url class="card-img-top" alt=post.post.title -%}
                 </a>
                 <div class="card-body">
                   <a href="#" class="fs-5 mb-2 fw-semibold d-block text-primary">{{ post.post.categories[0] | uj_title_case }}</a>
@@ -30,21 +30,21 @@ meta:
                   <p>{{ post.post.excerpt }}</p>
                   <div class="row align-items-center g-0 mt-4">
                     <div class="col-auto">
-                      <a class="avatar avatar-circle" href="{%- include /master/helpers/blog-author.html author=post.post.author mode="url" -%}">
-                        {%- include /master/helpers/blog-author.html author=post.post.author class="rounded-circle avatar-sm me-2" mode="image" -%}
+                      <a class="avatar avatar-circle" href="{%- include /main/helpers/blog-author.html author=post.post.author mode="url" -%}">
+                        {%- include /main/helpers/blog-author.html author=post.post.author class="rounded-circle avatar-sm me-2" mode="image" -%}
                       </a>
                     </div>
                     <div class="col lh-1 ms-2">
-                      <a class="" href="{%- include /master/helpers/blog-author.html author=post.post.author mode="url" -%}">
+                      <a class="" href="{%- include /main/helpers/blog-author.html author=post.post.author mode="url" -%}">
                         <h5 class="mb-1">
-                          {%- include /master/helpers/blog-author.html author=post.post.author mode="name" -%}
+                          {%- include /main/helpers/blog-author.html author=post.post.author mode="name" -%}
                         </h5>
                       </a>
                       <p class="fs-6 mb-0">{{ post.date | date: "%b %d, %Y" }}</p>
                     </div>
                     <div class="col-auto">
                       <p class="fs-6 mb-0">
-                        {% include /master/helpers/read-time.html content=post.content %} min read
+                        {% include /main/helpers/read-time.html content=post.content %} min read
                       </p>
                     </div>
                   </div>
@@ -55,7 +55,7 @@ meta:
           <!-- End Cards Loop -->
 
           <div class="col-12">
-            {% include /master/modules/adunits/adsense-in-feed.html index="1" %}
+            {% include /main/modules/adunits/adsense-in-feed.html index="1" %}
           </div>
 
           <!-- Load More Button -->
@@ -156,7 +156,7 @@ meta:
         <!-- Ad -->
         <div class="row">
           <div class="col-12 mb-4">
-            {% include /master/modules/adunits/adsense-in-feed.html index="1" %}
+            {% include /main/modules/adunits/adsense-in-feed.html index="1" %}
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: master/global/default
+layout: main/global/default
 permalink: /feedback
 sitemap:
   include: false
@@ -89,7 +89,7 @@ foot:
   post-bundle-script: '
 
     <!-- Theme  -->
-    {%- include /master/vendor/front-admin/v2/js/theme-prefix.html -%}
+    {%- include /main/vendor/front-admin/v2/js/theme-prefix.html -%}
 
     <!-- JS Global Compulsory  -->
     <script src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front-admin/v2/vendor/jquery/dist/jquery.min.js"></script>
@@ -104,7 +104,7 @@ foot:
 
     <!-- ITW CW -->
     <script type="text/javascript" src="{{ site.url }}/assets/js/base.js?cb={{ site.time | date: "%s" }}" async defer></script>
-    {%- include /master/misc/embed-manager.html -%}
+    {%- include /main/misc/embed-manager.html -%}
 
   '
 

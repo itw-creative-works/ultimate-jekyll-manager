@@ -6,6 +6,10 @@ const { series, parallel, watch } = require('gulp');
 const path = require('path');
 const jetpack = require('fs-jetpack');
 
+// Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+
 // Log
 logger.log('Starting...', argv);
 
@@ -34,6 +38,7 @@ global.tasks = exports;
 exports.build = series(
   // exports.setup,
   // exports.clean,
+  exports.defaults,
   exports.distribute,
   parallel(exports.sass, exports.webpack, exports.imagemin),
   exports.jekyll,

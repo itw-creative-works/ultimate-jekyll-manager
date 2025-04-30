@@ -46,8 +46,13 @@
             Sign In
           </a>
           <a href="{{ site.url }}/account" class="btn btn-gradient d-none d-md-block me-2 animation-hover-zoom">
-            <i class="bi bi-person-plus me-2"></i>
-            Get Started
+            <!-- <i class="bi bi-person-plus me-2"></i> -->
+            <span class="d-flex align-items-center ">
+              {{ site.icons.user-plus }}
+              <span class="ms-1">
+                Get Started
+              </span>
+            </span>
           </a>
         </div>
       </div>
@@ -58,8 +63,8 @@
             <a class="btn btn-light rounded-pill_ py-2 d-flex align-items-center" href="javascript:;"
               id="accountNavbarDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside"
               data-bs-dropdown-animation="">
-              <div class="avatar avatar-lg avatar-account-dropdown avatar-circle text-center me-2 ms-n1 text-dark d-flex justify-content-center align-items-center bg-dark avatar-indicators avatar-indicators-lg avatar-online">
-                <i class="bi bi-person text-light" style="font-size: 1rem;"></i>
+              <div class="avatar avatar-lg avatar-account-dropdown avatar-circle text-center me-2 ms-n1 text-light d-flex justify-content-center align-items-center bg-dark avatar-indicators avatar-indicators-lg avatar-online">
+                {{ site.icons.user }}
               </div>
               <span>My Account</span>
             </a>
@@ -112,14 +117,22 @@
                 </li>
                 <li>
                   <a class="dropdown-item" href="{{ site.url }}/account#profile">
-                    <i class="fe fe-user me-2"></i>
-                    Profile
+                    <span class="d-flex align-items-center">
+                      {{ site.icons.fingerprint }}
+                      <span class="ms-2">
+                        My account
+                      </span>
+                    </span>
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" href="{{ site.url }}/account#subscription">
-                    <i class="fe fe-star me-2"></i>
-                    Subscription
+                    <span class="d-flex align-items-center">
+                      {{ site.icons.crown }}
+                      <span class="ms-2">
+                        Subscription
+                      </span>
+                    </span>
                   </a>
                 </li>
                 <!-- <li>
@@ -133,8 +146,12 @@
               <ul class="list-unstyled">
                 <li>
                   <a class="dropdown-item text-danger auth-signout-all-btn" href="#">
-                    <i class="fe fe-power me-2 pointer-none"></i>
-                    Sign Out
+                    <span class="d-flex align-items-center">
+                      {{ site.icons.power-off }}
+                      <span class="ms-2">
+                        Sign out
+                      </span>
+                    </span>
                   </a>
                 </li>
               </ul>
@@ -180,12 +197,13 @@
         <div class="auth-state-listener animation-slide-up" data-state="signed-out">
           <li class="nav-item mt-3">
             <a href="{{ site.url }}/signin" class="btn btn-outline-primary shadow-sm me-2 d-md-none w-100">
+              {{ site.icons.right-to-bracket }}
               Sign In
             </a>
           </li>
           <li class="nav-item mt-3">
             <a href="{{ site.url }}/account" class="btn btn-gradient d-md-none me-2 animation-hover-zoom w-100">
-              <i class="bi bi-person-plus me-2"></i>
+              {{ site.icons.user-plus }}
               Get Started
             </a>
           </li>
@@ -193,6 +211,7 @@
         <div class="auth-state-listener animation-slide-up" data-state="signed-in">
           <li class="nav-item mt-3">
             <a href="{{ site.url }}/account" class="btn btn-outline-primary shadow-sm me-2 d-md-none w-100">
+              {{ site.icons.user-circle }}
               My Account
             </a>
           </li>

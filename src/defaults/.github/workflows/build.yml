@@ -17,9 +17,9 @@ concurrency:
 env:
   # GH_TOKEN: ${{ secrets.GH_TOKEN }}
   BACKEND_MANAGER_KEY: ${{ secrets.BACKEND_MANAGER_KEY }}
-  RUBY_VERSION: '{rubyVersion}'
-  BUNDLER_VERSION: '{bundlerVersion}'
-  NODE_VERSION: '{nodeVersion}'
+  RUBY_VERSION: '{ versions.ruby }'
+  BUNDLER_VERSION: '{ versions.bundler }'
+  NODE_VERSION: '{ versions.node }'
   UJ_BUILD_MODE: 'true'
   UJ_IS_SERVER: 'true'
 

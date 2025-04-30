@@ -1,8 +1,11 @@
 // Libraries
+const path = require('path');
 const jetpack = require('fs-jetpack');
-const yaml = require('js-yaml');
+const JSON5 = require('json5');
 const argv = require('yargs').argv;
 const { force } = require('node-powertools');
+const yaml = require('js-yaml');
+const version = require('wonderful-version');
 
 // Class
 function Manager() {
@@ -50,17 +53,61 @@ Manager.isServer = function () {
 }
 Manager.prototype.isServer = Manager.isServer;
 
+// isBuildMode
+Manager.isBuildMode = function () {
+  return process.env.UJ_BUILD_MODE === 'true';
+}
+Manager.prototype.isBuildMode = Manager.isBuildMode;
+
 // getEnvironment (calls isServer ? 'production' : 'development')
 Manager.getEnvironment = function () {
-  return this.isServer() ? 'production' : 'development';
+  return Manager.isServer() ? 'production' : 'development';
 }
 Manager.prototype.getEnvironment = Manager.getEnvironment;
 
 // getConfig: requires and parses config.yml
-Manager.getConfig = function () {
-  return yaml.load(jetpack.read('src/_config.yml'));
+Manager.getConfig = function (type) {
+  const basePath = type === 'project'
+    ? 'src'
+    : 'dist';
+  const resolvedPath = path.join(basePath, '_config.yml');
+
+  return yaml.load(jetpack.read(resolvedPath));
 }
 Manager.prototype.getConfig = Manager.getConfig;
+
+// getPackage: requires and parses package.json
+Manager.getPackage = function (type) {
+  const basePath = type === 'project'
+    ? process.cwd()
+    : path.resolve(__dirname, '..')
+
+  const pkgPath = path.join(basePath, 'package.json');
+
+  return JSON5.parse(jetpack.read(pkgPath));
+}
+Manager.prototype.getPackage = Manager.getPackage;
+
+// getRootPath: returns the root path of the project or package
+Manager.getRootPath = function (type) {
+  return type === 'project'
+    ? process.cwd()
+    : path.resolve(__dirname, '..')
+}
+Manager.prototype.getRootPath = Manager.getRootPath;
+
+// getCleanVersions
+Manager.getCleanVersions = function () {
+  const package = Manager.getPackage('main');
+
+  // loop through package.engines and run version.clean on each, then return the object
+  return Object.keys(package.engines).reduce((acc, key) => {
+    acc[key] = version.clean(package.engines[key]);
+    return acc;
+  }
+  , {});
+}
+Manager.prototype.getCleanVersions = Manager.getCleanVersions;
 
 // Require
 Manager.require = function (path) {

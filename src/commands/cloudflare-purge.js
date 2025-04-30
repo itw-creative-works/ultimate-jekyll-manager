@@ -1,18 +1,14 @@
 // Libraries
 const Manager = new (require('../build.js'));
 const logger = Manager.logger('cloudflare-purge');
-const path = require('path');
-const jetpack = require('fs-jetpack');
-const { execute } = require('node-powertools');
 const fetch = require('wonderful-fetch');
 
 // Load package
-const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
-const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const config = Manager.getConfig('project');
 
-// Get config
-const config = Manager.getConfig();
-
+// Export
 module.exports = async function (options) {
   // Log
   logger.log(`Running Cloudflare purge...`);

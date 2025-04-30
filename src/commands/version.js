@@ -1,12 +1,10 @@
 // Libraries
 const Manager = new (require('../build.js'));
 const logger = Manager.logger('version');
-const path = require('path');
-const jetpack = require('fs-jetpack');
 
 // Load package
-const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
-const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
 
 module.exports = async function (options) {
   // Log

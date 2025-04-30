@@ -1,18 +1,16 @@
 // Libraries
 const Manager = new (require('../build.js'));
 const logger = Manager.logger('install');
-const path = require('path');
-const jetpack = require('fs-jetpack');
 const { execute } = require('node-powertools');
 const os = require('os');
 
 // Load package
-const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
-const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
 
 module.exports = async function (options) {
   // Log
-  logger.log(`Installing Ultimate Jekyll Manager...`);
+  logger.log(`Installing ${package.name}...`);
 
   // Get type
   const type = options._[1] || 'prod';
@@ -24,8 +22,8 @@ module.exports = async function (options) {
       logger.log('Installing production...');
 
       // Install
-      await install('npm uninstall ultimate-jekyll-manager');
-      await install('npm install ultimate-jekyll-manager@latest --save-dev');
+      await install(`npm uninstall ${package.name}`);
+      await install(`npm install ${package.name}@latest --save-dev`);
 
       // Return
       return logger.log('Production installation complete.');
@@ -37,8 +35,8 @@ module.exports = async function (options) {
       logger.log('Installing development...');
 
       // Install
-      await install('npm uninstall ultimate-jekyll-manager');
-      await install(`npm install ${os.homedir()}/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager --save-dev`);
+      await install(`npm uninstall ${package.name}`);
+      await install(`npm install ${os.homedir()}/Developer/Repositories/ITW-Creative-Works/${package.name} --save-dev`);
 
       // Return
       return logger.log('Development installation complete.');

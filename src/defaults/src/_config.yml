@@ -1,13 +1,15 @@
 # Welcome to Ultimate Jekyll!
 # This is the default configuration file for your project.
 
-# Site configurations
+# Project
+app: ""
+version: 1.0.0
 url: ""
 baseurl: ""
-
-# Project
-version: 1.0.0
-app: ""
+theme:
+  id: "geeks"
+  target: "frontend"
+  appearance: "dark"
 
 # Meta
 meta:
@@ -22,8 +24,8 @@ meta:
 # Brand
 brand:
   name: ""
+  description: ""
   type: "Corporation"
-  description: "."
   logo-images: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-brandmark-black-1024x1024.png"
   logo-image-svg: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-brandmark-black-x.svg"
   address-locality: "Los Angeles"

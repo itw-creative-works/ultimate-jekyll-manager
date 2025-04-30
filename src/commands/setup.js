@@ -11,14 +11,10 @@ const glob = require('glob').globSync;
 const { minimatch } = require('minimatch');
 
 // Load package
-const package = jetpack.read(path.join(__dirname, '../../', 'package.json'), 'json');
-const project = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
-const templating = {
-  rubyVersion: version.clean(package.engines.ruby),
-  bundlerVersion: version.clean(package.engines.bundler),
-  nodeVersion: version.major(package.engines.node),
-};
-const config = Manager.getConfig();
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
+const config = Manager.getConfig('project');
+const cleanVersions = { versions: Manager.getCleanVersions()};
 
 // Dependency MAP
 const DEPENDENCY_MAP = {
@@ -60,10 +56,10 @@ const FILE_MAP = {
 
   // Files to run templating on
   '.github/workflows/build.yml': {
-    template: templating,
+    template: cleanVersions,
   },
   '.nvmrc': {
-    template: templating,
+    template: cleanVersions,
   },
 }
 
@@ -76,14 +72,14 @@ module.exports = async function (options) {
   options.checkRuby = force(options.checkRuby || true, 'boolean');
   options.checkPeerDependencies = force(options.checkPeerDependencies || true, 'boolean');
   options.setupScripts = force(options.setupScripts || true, 'boolean');
-  options.buildSiteFiles = force(options.buildSiteFiles || true, 'boolean');
-  options.buildSiteFilesInput = force(options.buildSiteFilesInput || ['**/*'], 'array');
+  // options.buildSiteFiles = force(options.buildSiteFiles || true, 'boolean');
+  // options.buildSiteFilesInput = force(options.buildSiteFilesInput || ['**/*'], 'array');
   options.createCname = force(options.createCname || true, 'boolean');
   options.fetchFirebaseAuth = force(options.fetchFirebaseAuth || true, 'boolean');
   options.checkLocality = force(options.checkLocality || true, 'boolean');
 
   // Log
-  logger.log(`Welcome to Ultimate Jekyll v${package.version}!`);
+  logger.log(`Welcome to ${package.name} v${package.version}!`);
   logger.log(`options`, options);
 
   // Prefix project
@@ -125,9 +121,9 @@ module.exports = async function (options) {
     }
 
     // Build files
-    if (options.buildSiteFiles) {
-      await buildSiteFiles({ input: options.buildSiteFilesInput });
-    }
+    // if (options.buildSiteFiles) {
+    //   await buildSiteFiles({ input: options.buildSiteFilesInput });
+    // }
 
     // Copy all files from src/defaults/dist on first run
     // await copyDefaultDistFiles();
@@ -162,8 +158,8 @@ async function updateManager() {
   const npm = new NPM();
 
   // Get the latest version
-  const installedVersion = project.devDependencies['ultimate-jekyll-manager'];
-  const latestVersion = await npm.repo('ultimate-jekyll-manager')
+  const installedVersion = project.devDependencies[package.name];
+  const latestVersion = await npm.repo(package.name)
   .package()
     .then((pkg) => {
       return pkg.version;
@@ -174,7 +170,7 @@ async function updateManager() {
   const levelDifference = version.levelDifference(installedVersion, latestVersion);
 
   // Log
-  logVersionCheck('ultimate-jekyll-manager', installedVersion, latestVersion, isUpToDate);
+  logVersionCheck(package.name, installedVersion, latestVersion, isUpToDate);
 
   // Quit if local
   if (installedVersion.startsWith('file:')) {
@@ -189,7 +185,7 @@ async function updateManager() {
     }
 
     // Install the latest version
-    await install('ultimate-jekyll-manager', latestVersion);
+    await install(package.name, latestVersion);
   }
 }
 
@@ -281,10 +277,10 @@ function setupScripts() {
 }
 
 function checkLocality() {
-  const installedVersion = project.devDependencies['ultimate-jekyll-manager'];
+  const installedVersion = project.devDependencies[package.name];
 
   if (installedVersion.startsWith('file:')) {
-    console.warn('⚠️⚠️⚠️ You are using the local version of Ultimate Jekyll Manager. This WILL NOT WORK when published. ⚠️⚠️⚠️');
+    logger.warn(`⚠️⚠️⚠️ You are using the local version of ${package.name}. This WILL NOT WORK when published. ⚠️⚠️⚠️`);
   }
 }
 
@@ -512,7 +508,7 @@ function buildSiteFiles(options) {
 // Create CNAME
 async function createCname() {
   // Get the CNAME
-  const url = config.url;
+  const url = config.url || 'https://template.itwcreativeworks.com';
   const host = new URL(url).host
 
   // Write to file
