@@ -1,0 +1,64 @@
+/*
+  Alert Box Styles
+*/
+
+.main-alert {
+  padding: 20px;
+  color: white;
+  left: 0;
+  /* 100 because modals are 101 and we want these below the modals */
+  /* z-index: 100; */
+  /* 1060 because some headers (like studymonkey) are set high */
+  z-index: 1060;
+  width: 100%;
+}
+
+.main-alert-top {
+  top: 0;
+}
+
+.main-alert-bottom {
+  bottom: 0;
+}
+
+.main-alert-fixed {
+  position: fixed;
+}
+
+.main-alert-block {
+}
+
+.main-alert a {
+  color: white;
+  text-decoration: underline;
+}
+.main-alert a:hover {
+  color: black;
+}
+
+.main-alert-close {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.main-alert-close:hover {
+  color: black;
+}
+
+.main-alert-outdated {
+  background-color: #f44336;
+}
+
+.main-alert-suspended {
+  background-color: #f44336;
+}
+
+.main-alert-sale {
+  background-color: #0d6efd;
+}

@@ -1,13 +1,10 @@
 IMP
 - aftet moving setup build files to defaults.js task, most default files fail be created
 
-- WHERE TO PUT DEFAULT SCRIPTS??
-main.js is here
-/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/assets/js/main.js
-
-popupads.js is here
-/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/defaults/dist/assets/js/popupads.js
-
+QUESTIONS
+- how do we import theme CSS and JS into the bundles?
+- how do we handle bundles for frontend and backend?
+- how do we handle bundles for different themes?
 
 - easy system for a main css, js, etc bundle BUT user can make page specific bundles
 - uncompiled should move everything inside it to css/images/js/vendor
@@ -33,6 +30,14 @@ INCLUDE THIS in css build process
 - src/defaults/dist/_includes/master/assets/css/defaults.css
 - src/defaults/dist/_includes/master/assets/css/cookieconsent.css
 - social buttons too?? or make our own??
+
+THINGS TO ADD
+- auto cached translations
+- each theme should have complex COMPONENTS to easily scaffold large parts of the site
+  - keep components consistent across themes so when we switch themes the components work still
+- checkout pages SHOULD BE IN EACH WEBSITE
+  - this way, pixel events can be sent from the actual domain
+  -
 
 // Legacy
 // TODO: REMOVE REFERENCES TO
@@ -64,6 +69,28 @@ CONTACT
   <input type="email" name="slap_honey" class="form-control" placeholder="Your Email">
 </div>
 
+# Translations
+translations:
+  enabled: false
+  default: "en"
+  languages:
+    - "en"  # English
+    - "zh"  # Chinese (Simplified)
+    - "es"  # Spanish
+    - "hi"  # Hindi
+    - "ar"  # Arabic
+    - "pt"  # Portuguese
+    - "ru"  # Russian
+    - "ja"  # Japanese
+    - "de"  # German
+    - "fr"  # French
+    - "ko"  # Korean
+    - "ur"  # Urdu
+    - "id"  # Indonesian
+    - "bn"  # Bengali
+    - "tl"  # Tagalog
+    - "vi"  # Vietnamese
+    - "it"  # Italian
 
 
 PRICING PRODUCT
@@ -204,3 +231,4 @@ MAYBE
       #       name: github-pages
 
     "deploy": "UJ_BUILD_MODE=true UJ_IS_SERVER=true npx uj setup && npm run build"
+

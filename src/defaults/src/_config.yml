@@ -10,6 +10,7 @@ theme:
   id: "geeks"
   target: "frontend"
   appearance: "dark"
+  version: "latest"
 
 # Meta
 meta:
@@ -214,6 +215,29 @@ search:
 # Sitemap
 sitemap:
   enable: true
+
+# Translations
+translations:
+  enabled: false
+  default: "en"
+  languages:
+    - "en"
+    - "zh"
+    - "es"
+    - "hi"
+    - "ar"
+    - "pt"
+    - "ru"
+    - "ja"
+    - "de"
+    - "fr"
+    - "ko"
+    - "ur"
+    - "id"
+    - "bn"
+    - "tl"
+    - "vi"
+    - "it"
 
 # Blog & Pagination
 permalink: /blog/:title

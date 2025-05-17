@@ -62,6 +62,7 @@ async function jekyll(complete) {
       Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
     ].join(','),
     '--incremental',
+    // '--disable-disk-cache',
   ]
 
   // Log command

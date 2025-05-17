@@ -105,21 +105,7 @@
 </script>
 
 <!-- JS Bundle -->
-<script type="text/javascript" src="{{ site.url }}/assets/js/main.bundle.js?cb={{ uj_cache }}" async></script>
-<script type="text/javascript" src="{{ site.url }}/assets/js/project.bundle.js?cb={{ uj_cache }}" async></script>
-
-<!-- Development Scripts -->
-{%- if site.url contains ':40' -%}
-  <script type="text/javascript">
-    // Main log
-    console.log('⚠️ Enabling development mode features...');
-
-    // Add development click handler
-    document.addEventListener('click', function (event) {
-      console.log('Click', event.target);
-    })
-  </script>
-{% endif %}
+<script type="text/javascript" src="{{ site.url }}/assets/js/main.bundle.js?cb={{ site.uj.cache_breaker }}" async></script>
 
 <!-- Script - Google Analytics Tracking Script -->
 {%- capture analytics-unused-ga %}

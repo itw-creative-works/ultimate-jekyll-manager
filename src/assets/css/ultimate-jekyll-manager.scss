@@ -1,0 +1,16 @@
+// Import the theme from src/assets/themes/{ id }
+@use 'theme' as *;
+
+// Vendor styles
+@use 'vendor/cookieconsent' as *;
+
+// Import default Ultimate Jekyll Manager styles
+@use 'global/initialize' as *;
+@use 'global/utilities' as *;
+@use 'global/animations' as *;
+@use 'global/buttons' as *;
+@use 'global/alert' as *;
+@use 'global/chatsy' as *;
+
+// Import page-specific styles
+@use '_page-specific' as *;

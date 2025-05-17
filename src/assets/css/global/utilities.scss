@@ -1,0 +1,34 @@
+/*
+  Utilities Styles
+*/
+
+// Properly hide things
+.hidden, [hidden] {
+  display: none;
+}
+
+// Pointer events - can help fix bubbling issues for click listeners
+.pointer-none {
+  pointer-events: none;
+}
+
+// API styles
+.auth-signin-provider-btn * {
+  pointer-events: none;
+}
+
+// Reset styles for HTML5 elements
+// article, aside, details, figcaption, figure,
+// footer, header, hgroup, menu, nav, section {
+//   display: block;
+// }
+
+// Filter white
+.filter-white {
+  filter: brightness(0) invert(1);
+}
+
+// Filter black
+.filter-black {
+  filter: brightness(0) invert(1) hue-rotate(180deg);
+}

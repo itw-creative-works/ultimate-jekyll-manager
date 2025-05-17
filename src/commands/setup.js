@@ -5,6 +5,7 @@ const argv = Manager.getArguments();
 const path = require('path');
 const jetpack = require('fs-jetpack');
 const version = require('wonderful-version');
+const fetch = require('wonderful-fetch');
 const { execute, template, force } = require('node-powertools');
 const NPM = require('npm-api');
 const glob = require('glob').globSync;
@@ -14,53 +15,10 @@ const { minimatch } = require('minimatch');
 const package = Manager.getPackage('main');
 const project = Manager.getPackage('project');
 const config = Manager.getConfig('project');
-const cleanVersions = { versions: Manager.getCleanVersions()};
 
 // Dependency MAP
 const DEPENDENCY_MAP = {
   'gulp': 'dev',
-}
-
-// File MAP
-const FILE_MAP = {
-  // Files to skip overwrite
-  'hooks/**/*': {
-    overwrite: false,
-  },
-  'src/**/*': {
-    overwrite: false,
-  },
-  'src/**/*.{html,md}': {
-    skip: (file) => {
-      // Get the name
-      const name = path.basename(file.name, path.extname(file.name));
-      const htmlFilePath = path.join(file.destination, `${name}.html`);
-      const mdFilePath = path.join(file.destination, `${name}.md`);
-      const htmlFileExists = jetpack.exists(htmlFilePath);
-      const mdFileExists = jetpack.exists(mdFilePath);
-      const eitherExists = htmlFileExists || mdFileExists;
-
-      // Skip if both files exist
-      return eitherExists;
-    },
-  },
-
-  // Files to rewrite path
-  // Removed because getting too confusing
-  // 'dist/pages/**/*': {
-  //   path: (file) => file.source.replace('dist/pages', 'dist'),
-  // },
-  '_.gitignore': {
-    name: (file) => file.name.replace('_.gitignore', '.gitignore'),
-  },
-
-  // Files to run templating on
-  '.github/workflows/build.yml': {
-    template: cleanVersions,
-  },
-  '.nvmrc': {
-    template: cleanVersions,
-  },
 }
 
 module.exports = async function (options) {
@@ -72,8 +30,6 @@ module.exports = async function (options) {
   options.checkRuby = force(options.checkRuby || true, 'boolean');
   options.checkPeerDependencies = force(options.checkPeerDependencies || true, 'boolean');
   options.setupScripts = force(options.setupScripts || true, 'boolean');
-  // options.buildSiteFiles = force(options.buildSiteFiles || true, 'boolean');
-  // options.buildSiteFilesInput = force(options.buildSiteFilesInput || ['**/*'], 'array');
   options.createCname = force(options.createCname || true, 'boolean');
   options.fetchFirebaseAuth = force(options.fetchFirebaseAuth || true, 'boolean');
   options.checkLocality = force(options.checkLocality || true, 'boolean');
@@ -119,11 +75,6 @@ module.exports = async function (options) {
     if (options.setupScripts) {
       await setupScripts();
     }
-
-    // Build files
-    // if (options.buildSiteFiles) {
-    //   await buildSiteFiles({ input: options.buildSiteFilesInput });
-    // }
 
     // Copy all files from src/defaults/dist on first run
     // await copyDefaultDistFiles();
@@ -312,199 +263,6 @@ function install(package, ver, location) {
   });
 }
 
-function buildSiteFiles(options) {
-  options = options || {};
-  options.input = options.input || ['**/*'];
-
-  // Loop through all files in /defaults directory
-  const dir = path.join(__dirname, '..', 'defaults');
-  const input = [
-    // Files to include
-    // '**/*',
-    ...options.input,
-
-    // Files to exclude
-    // Dist files
-    // '!dist/**',
-    '!**/.DS_Store', // TODO: NOT WORKING
-  ]
-
-  // Get all files
-  const files = glob(input, {
-    cwd: dir,
-    dot: true,
-    nodir: true,
-  });
-
-  const debug = argv.debug
-    || true;
-
-  // Log
-  logger.log(`Preparing to copy ${files.length} default files...`);
-
-  // Loop
-  for (const file of files) {
-    // Build item
-    const item = {
-      source: null,
-      destination: null,
-      name: null,
-    }
-    // Get the destination
-    // const source = path.join(dir, file);
-    // let destination = path.join(process.cwd(), file.replace('defaults/', ''));
-    // const filename = path.basename(destination);
-
-    // Set the item properties
-    item.source = path.dirname(path.join(dir, file));
-    item.name = path.basename(file);
-    item.destination = path.dirname(path.join(process.cwd(), file.replace('defaults/', '')));
-
-    // Get options
-    const options = getFileOptions(file);
-    const ogName = item.name;
-
-    // Quit if file is '_'
-    // We have files like this to trigger the creation of directories without them being ignored by git
-    if (item.name === '_') {
-      // First, create the directory around the file
-      jetpack.dir(item.destination);
-
-      // Skip
-      continue;
-    }
-
-    // Resolve name
-    if (typeof options.name === 'function') {
-      item.name = options.name(item);
-    }
-
-    // Resolve path
-    if (typeof options.path === 'function') {
-      item.destination = options.path(item);
-    }
-
-    // Resolve overwrite
-    if (typeof options.overwrite === 'function') {
-      options.overwrite = options.overwrite(item);
-    }
-
-    // Resolve skip
-    if (typeof options.skip === 'function') {
-      options.skip = options.skip(item);
-    }
-
-    // Log
-    if (debug) {
-      logger.log(`Copying defaults...`);
-      logger.log(`  name: ${item.name}`);
-      logger.log(`  from: ${item.source}`);
-      logger.log(`  to: ${item.destination}`);
-      logger.log(`  overwrite: ${options.overwrite}`);
-      logger.log(`  skip: ${options.skip}`);
-
-      // logger.log('File:', file);
-      // logger.log('filename:', filename);
-      // logger.log('options:', options);
-      // // logger.log('contents:', jetpack.read(source));
-      // logger.log('source:', source);
-      // logger.log('Destination:', destination);
-      console.log('\n');
-    }
-
-    // Skip if needed
-    if (options.skip) {
-      continue;
-    }
-
-    // Get final paths
-    const finalSource = path.join(item.source, ogName);
-    const finalDestination = path.join(item.destination, item.name);
-
-    // console.log('---finalSource', finalSource);
-    // console.log('---finalDestination', finalDestination);
-
-    // Check if the file exists
-    const exists = jetpack.exists(finalDestination);
-
-    // Skip if exists and we don't want to overwrite
-    if (!options.overwrite && exists) {
-      continue;
-    }
-
-    // Run templating if needed
-    if (options.template) {
-      // Log
-      // logger.log('Running templating on:', destination);
-
-      // Run the templating
-      const contents = jetpack.read(finalSource);
-      const templated = template(contents, options.template);
-
-      // Write the file
-      jetpack.write(finalDestination, templated);
-    } else {
-      // Copy the file
-      jetpack.copy(finalSource, finalDestination, { overwrite: true });
-    }
-  }
-}
-
-// Copy default dist files
-// async function copyDefaultDistFiles() {
-//   // Get the directory
-//   const dir = path.join(__dirname, '..', '..', 'defaults', 'dist');
-
-//   // Log
-//   logger.log(`Copying default dist files from ${dir}`);
-
-//   // Copy the files
-//   jetpack.copy(dir, 'dist', { overwrite: true });
-// }
-// async function copyDefaultDistFiles() {
-//   // Loop through all files in /defaults directory
-//   const dir = path.join(__dirname, '..', '..', 'defaults', 'dist');
-//   const input = [
-//     // Files to include
-//     '**/*',
-
-//     // Files to exclude
-//     '!**/.DS_Store', // TODO: NOT WORKING
-//   ]
-
-//   // Get all files
-//   const files = glob(input, {
-//     cwd: dir,
-//     dot: true,
-//     nodir: true,
-//   });
-
-//   // Log
-//   logger.log(`Preparing to copy ${files.length} default dist files...`);
-
-//   for (const file of files) {
-//     // const relativePath = path.relative(path.join(__dirname, '..', '..', 'defaults', 'dist'), file);
-//     // const destination = path.join(__dirname, '..', '..', 'dist', relativePath.replace('pages', ''));
-//     const source = path.join(dir, file);
-//     const destination = path.join(process.cwd(), file.replace('dist/pages', 'dist'));
-
-//     // Log
-//     if (true) {
-//       logger.log(`Copying default dist file...`);
-//       logger.log(`  file: ${file}`);
-//       logger.log(`  from: ${source}`);
-//       logger.log(`  to: ${destination}`);
-//       console.log('\n');
-//     }
-
-//     // Ensure the directory exists
-//     // await jetpack.dir(path.dirname(destination));
-
-//     // Copy the file
-//     // await jetpack.copy(file, destination, { overwrite: true });
-//   }
-// }
-
 // Create CNAME
 async function createCname() {
   // Get the CNAME
@@ -555,24 +313,21 @@ async function fetchFirebaseAuth() {
     const url = `${base}/${file.remote}`;
 
     // Get the local path
-    const fileName = file.filename ? path.basename(file.filename) : path.basename(file.remote);
-    // console.log('---fileName', fileName);
-
+    const fileName = file.filename
+      ? path.basename(file.filename)
+      : path.basename(file.remote);
     const filePath = path.join(path.dirname(file.remote), fileName);
-    // console.log('---filePath', filePath);
-
     const finalPath = path.join(output, filePath);
-    // console.log('---finalPath', finalPath);
 
     // Push to promises
     promises.push(
       fetch(url, {
         response: 'text',
+        tries: 3,
+        // log: true,
       })
       .then((r) => {
         // Write to file
-        // jetpack.write(finalPath, r);
-
         jetpack.write(finalPath,
           '---\n'
           + `permalink: /${file.remote}\n`
@@ -589,27 +344,6 @@ async function fetchFirebaseAuth() {
 
   // Log
   logger.log('Fetched firebase-auth files');
-}
-
-function getFileOptions(filePath) {
-  const defaults = {
-    overwrite: true,
-    name: null,
-    path: null,
-    template: null,
-    skip: false,
-  };
-
-  let options = { ...defaults };
-
-  // Loop through all patterns
-  for (const pattern in FILE_MAP) {
-    if (minimatch(filePath, pattern)) {
-      options = { ...options, ...FILE_MAP[pattern] };
-    }
-  }
-
-  return options;
 }
 
 function logVersionCheck(name, installedVersion, latestVersion, isUpToDate) {

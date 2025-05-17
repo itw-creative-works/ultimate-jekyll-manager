@@ -15,8 +15,8 @@ const project = Manager.getPackage('project');
 const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
-const cleanVersions = { versions: Manager.getCleanVersions()};
-console.log('---config', config);
+// const cleanVersions = { versions: Manager.getCleanVersions()};
+const cleanVersions = { versions: package.engines };
 
 // File MAP
 const FILE_MAP = {

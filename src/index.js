@@ -30,39 +30,85 @@ Manager.prototype.initialize = function () {
 
   return new Promise(function(resolve, reject) {
     // Initiate the web manager
-    self.webManager = new WebManager();
+    const webManager = new WebManager();
+    self.webManager = webManager;
 
     // Initialize
-    self.webManager.init(window.Configuration, () => {
-      // // Parse URL
-      // const url = new URL(window.location.href);
+    webManager.init(window.Configuration, () => {
+      // Get the page path (MUST BE SANITIZED because webpack wont import if page has leading slashes)
+      const page = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
+      const pagePath = !page ? 'index.js' : `${page}/index.js`;
 
-      // // Get script name
-      // console.log('---url', url);
+      // Initialize modules
+      const modules = [];
 
-      // // Log
-      // console.log('WebManager initialized');
-      // console.log('script', __dirname + '/pages' + url.pathname + '/index.js');
+      /* @dev-only:start */
+      {
+        // Main log
+        webManager.log('⚠️ Enabling development mode features...');
 
-      // // Import any default page script
-      // console.log('-----AAA');
-      // import(__dirname + '/pages' + url.pathname + '/index.js');
-      // console.log('-----BBB');
-      var page = document.body.dataset.pagePath;
+        // Add development click handler
+        document.addEventListener('click', function (event) {
+          webManager.log('Click', event.target);
+        });
 
-      import(/* webpackChunkName: "pages/[request]" */ './pages/' + page + '.js')
-        .then(function (module) {
-          if (module && typeof module.default === 'function') {
-            module.default()
+        // Log page script path
+        webManager.log('Loading page script:', `assets/js/pages/${pagePath}`);
+      }
+      /* @dev-only:end */
+
+      // Require global script
+      require('__main_assets__/js/ultimate-jekyll-manager.js')(Manager);
+
+      // Load page-specific scripts
+      Promise.all([
+        // Import the main page-specific script
+        import(`__main_assets__/js/pages/${pagePath}`)
+          .then((mod) => {
+            modules[0] = { tag: 'main', default: mod && mod.default };
+          })
+          .catch((e) => {
+            if (e.message && e.message.includes('Cannot find module')) {
+              console.warn('Framework page module not found:', page);
+            } else {
+              console.error('Error loading framework module:', e);
+            }
+          }),
+
+        // Import the project page-specific script
+        import(`__project_assets__/js/pages/${pagePath}`)
+          .then((mod) => {
+            modules[1] = { tag: 'project', default: mod && mod.default };
+          })
+          .catch((e) => {
+            if (e.message && e.message.includes('Cannot find module')) {
+              console.warn('Project page module not found:', page);
+            } else {
+              console.error('Error loading project module:', e);
+            }
+          })
+      ])
+      .then(async () => {
+        for (let i = 0; i < modules.length; i++) {
+          const mod = modules[i];
+
+          // Check if the module has a valid function
+          if (typeof mod?.default !== 'function') {
+            continue;
           }
-        })
-        .catch(function (err) {
-          console.error('Failed to load page script:', err)
-        })
 
+          // Execute the module function
+          try {
+            await mod.default(Manager);
+          } catch (err) {
+            console.error(`Error during execution of ${mod.tag} module:`, err);
+            break; // Stop execution if any module fails
+          }
+        }
+      });
 
       // Resolve
-      return resolve(self.webManager);
+      return resolve(self);
     });
   });
 };

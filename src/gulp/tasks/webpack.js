@@ -7,6 +7,7 @@ const path = require('path');
 const jetpack = require('fs-jetpack');
 const wp = require('webpack');
 const ReplacePlugin = require('../plugins/webpack/replace.js');
+const StripDevBlocksPlugin = require('../plugins/webpack/strip-dev-blocks.js')
 const yaml = require('js-yaml');
 const version = require('wonderful-version');
 
@@ -18,31 +19,52 @@ const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
 // Settings
-// const MINIFY = false;
-const MINIFY = Manager.getEnvironment() === 'production';
 const input = [
-  // Include UJ's dist files
-  `${rootPathPackage}/dist/assets/js/**/*`,
+  // Project entry point
+  'src/assets/js/main.js',
 
-  // Include the project's src files
-  'src/assets/js/**/*.js',
-
-  // Include service worker
+  // Project service worker
   'src/service-worker.js',
+
+  // Main page js
+  `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
+
+  // Project page js
+  'src/assets/js/pages/**/*.js',
 
   // Files to exclude
   // '!dist/**',
 ];
 const delay = 250;
 
+// Stable entry points
+const stableEntryPoints = [
+  'main',
+  'project',
+];
+
 const settings = {
   mode: 'production',
   target: ['web', 'es5'],
   plugins: [
+    new StripDevBlocksPlugin(),
     new ReplacePlugin(getTemplateReplaceOptions(), { type: 'template' }),
+    // new wp.DefinePlugin({
+    //   'process.env.UJ_BUILD_MODE': process.env.UJ_BUILD_MODE || 'true',
+    // })
   ],
   entry: {
     // Entry is dynamically generated
+  },
+  resolve: {
+    alias: {
+      // For importing assets in "src/index.js"
+      '__main_assets__': path.resolve(rootPathPackage, 'dist/assets'),
+      '__project_assets__': path.resolve(process.cwd(), 'src/assets'),
+
+      // For importing the theme
+      '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id, config.theme.version),
+    }
   },
   output: {
     // Set the path to the dist folder
@@ -53,8 +75,8 @@ const settings = {
 
     // https://github.com/webpack/webpack/issues/959
     chunkFilename: (data) => {
-      // Special case for the main chunk
-      if (data.chunk.name === 'main') {
+      // Main chunks get stable names
+      if (stableEntryPoints.includes(data.chunk.name)) {
         return '[name].chunk.js';
       }
 
@@ -67,8 +89,13 @@ const settings = {
         return '../../service-worker.js';
       }
 
-      // Otherwise, use the default filename
-      return '[name].bundle.js';
+      // Main bundles get stable names
+      if (stableEntryPoints.includes(data.chunk.name)) {
+        return '[name].bundle.js';
+      }
+
+      // Everything else (page-specific async imports) gets hashed
+      return '[name].bundle.[contenthash].js';
     },
   },
   resolveLoader: {
@@ -92,14 +119,31 @@ const settings = {
                 paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
               })
             ],
-            compact: MINIFY,
+            compact: Manager.isBuildMode(),
           }
         }
       }
     ]
   },
   optimization: {
-    minimize: MINIFY,
+    minimize: Manager.isBuildMode(),
+    // splitChunks: {
+    //   chunks: 'all',
+    //   cacheGroups: {
+    //     defaultVendors: {
+    //       test: /[\\/]node_modules[\\/]/,
+    //       name: 'vendors',
+    //       chunks: 'all',
+    //       enforce: true,
+    //     },
+    //     default: {
+    //       minChunks: 2,
+    //       reuseExistingChunk: true,
+    //       enforce: true,
+    //     },
+    //   },
+    // },
+    // runtimeChunk: 'single',
   },
 }
 
@@ -149,18 +193,80 @@ function webpackWatcher(complete) {
   return complete();
 }
 
+// function updateEntryPoints() {
+//   // Get all JS files
+//   const files = glob(input);
+
+//   console.log('---rootPathPackage', rootPathPackage);
+//   console.log('---rootPathProject', rootPathProject);
+//   console.log('---FILES', files);
+
+//   // Update from src
+//   settings.entry = files.reduce((acc, file) => {
+//     console.log('---ITEM', file);
+
+//     // Get the file name
+//     const name = path.basename(file, path.extname(file));
+
+//     // Add to entry points starting with "./"
+//     // acc[name] = `./${file}`;
+//     acc[name] = path.resolve(file);
+
+//     // Return
+//     return acc;
+//   }, {});
+
+//   // Log
+//   logger.log('Updated entry points:', settings.entry);
+// }
+
 function updateEntryPoints() {
   // Get all JS files
-  const files = glob(input);
+  const files = glob(input).map((f) => path.resolve(f));
+
+  // console.log('---rootPathPackage', rootPathPackage);
+  // console.log('---rootPathProject', rootPathProject);
+
+  // Sort: main files first
+  files.sort((a, b) => {
+    const aIsMain = a.startsWith(rootPathPackage);
+    const bIsMain = b.startsWith(rootPathPackage);
+    return aIsMain === bIsMain ? 0 : aIsMain ? -1 : 1;
+  });
+
+  // console.log('🚩🚩🚩🚩🚩', 1, ); // FLAG
+  // console.log('---FILES', files);
 
   // Update from src
   settings.entry = files.reduce((acc, file) => {
-    // Get the file name
-    const name = path.basename(file, path.extname(file));
+    const isProject = file.startsWith(rootPathProject);
+    const root = isProject ? rootPathProject : rootPathPackage;
+    const relativePath = path.relative(root, file).replace(/\\/g, '/').replace(/\.js$/, '');
 
-    // Add to entry points starting with "./"
-    // acc[name] = `./${file}`;
-    acc[name] = path.resolve(file);
+    // Remove known base paths
+    let name = relativePath
+      .replace(/^dist\/assets\/js\//, '')
+      .replace(/^src\/assets\/js\//, '')
+      .replace(/^src\//, '');
+
+    // If it's in a "pages" folder, suffix with .main or .project
+    if (name.includes('pages/')) {
+      name += isProject ? '.project' : '.main';
+    } else {
+      // For all others not in "pages", just use the base filename
+      name = path.basename(name);
+    }
+
+    // Dont include pages in the entry points
+    if (
+      file.includes('assets/js/pages/')
+      || file.includes('assets/js/global.js')
+    ) {
+      return acc;
+    }
+
+    // Update entry points
+    acc[name] = file;
 
     // Return
     return acc;
@@ -169,54 +275,6 @@ function updateEntryPoints() {
   // Log
   logger.log('Updated entry points:', settings.entry);
 }
-
-// function updateEntryPoints() {
-//   const files = glob(input)
-
-//   settings.entry = files.reduce((acc, file) => {
-//     // Remove the root base path (project root or UJ root)
-//     let relative = path.relative(path.resolve(process.cwd(), 'dist/assets/js'), file)
-
-//     // Fall back to relative to project src if still absolute
-//     if (relative.startsWith('..')) {
-//       relative = path.relative(path.resolve(process.cwd(), 'src/assets/js'), file)
-//     }
-
-//     // Remove extension
-//     const entryName = relative.replace(/\.js$/, '')
-
-//     // Normalize to POSIX paths for consistency across OSes
-//     acc[entryName.split(path.sep).join('/')] = path.resolve(file)
-
-//     return acc
-//   }, {})
-
-//   logger.log('Updated entry points:', settings.entry)
-// }
-
-// function updateEntryPoints() {
-//   const files = glob(input)
-
-//   settings.entry = files.reduce((acc, file) => {
-//     // Remove the root base path (project root or UJ root)
-//     let relative = path.relative(path.resolve(process.cwd(), 'dist/assets/js'), file)
-
-//     // Fall back to relative to project src if still absolute
-//     if (relative.startsWith('..')) {
-//       relative = path.relative(path.resolve(process.cwd(), 'src/assets/js'), file)
-//     }
-
-//     // Remove extension
-//     const entryName = relative.replace(/\.js$/, '')
-
-//     // Normalize to POSIX paths for consistency across OSes
-//     acc[entryName.split(path.sep).join('/')] = path.resolve(file)
-
-//     return acc
-//   }, {})
-
-//   logger.log('Updated entry points:', settings.entry)
-// }
 
 function getTemplateReplaceOptions() {
   // Load variables

@@ -1,6 +1,7 @@
 // Libraries
 const path = require('path');
 const jetpack = require('fs-jetpack');
+const fs = require('fs');
 const JSON5 = require('json5');
 const argv = require('yargs').argv;
 const { force } = require('node-powertools');
@@ -96,18 +97,37 @@ Manager.getRootPath = function (type) {
 }
 Manager.prototype.getRootPath = Manager.getRootPath;
 
-// getCleanVersions
-Manager.getCleanVersions = function () {
-  const package = Manager.getPackage('main');
+// Create dummy file in project dist to force jekyll to build
+Manager.triggerRebuild = function (files, logger) {
+  // Ensure logger is defined
+  logger = logger || console;
 
-  // loop through package.engines and run version.clean on each, then return the object
-  return Object.keys(package.engines).reduce((acc, key) => {
-    acc[key] = version.clean(package.engines[key]);
-    return acc;
+  // Normalize files into an array of file names
+  if (typeof files === 'string') {
+    files = [files]; // Single string file name
+  } else if (Array.isArray(files)) {
+    // Already an array, no changes needed
+  } else if (typeof files === 'object' && files !== null) {
+    files = Object.keys(files); // Extract keys from object
+  } else {
+    logger.error('[sass] Invalid files argument');
+    return;
   }
-  , {});
+
+  // Set current time
+  const now = new Date();
+
+  // Touch all files to update mtime (so Jekyll notices)
+  files.forEach((file) => {
+    try {
+      fs.utimesSync(file, now, now);
+      logger.log(`Triggered build: ${file}`);
+    } catch (e) {
+      logger.error(`Failed to trigger build ${file}`, e);
+    }
+  });
 }
-Manager.prototype.getCleanVersions = Manager.getCleanVersions;
+Manager.prototype.triggerRebuild = Manager.triggerRebuild;
 
 // Require
 Manager.require = function (path) {
