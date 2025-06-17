@@ -55,6 +55,8 @@ npm start -- --browser=false
 ```bash
 npm start -- --debug=true
 ```
+* `--ujPluginDevMode=true` - Enables the development mode for the [Ultimate Jekyll Ruby plugin](https://github.com/itw-creative-works/jekyll-uj-powertools).
+```bash
 
 <!-- Developing -->
 ## 🛠 Developing

@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -23,7 +23,7 @@
   },
   "projectScripts": {
     "preinstall": "bundle install && bundle update",
-    "start": "npx uj clean && npx uj setup && bundle exec npm run gulp --",
+    "start": "npx uj setup && bundle exec npm run gulp --",
     "gulp": "gulp --cwd ./ --gulpfile ./node_modules/ultimate-jekyll-manager/dist/gulp/main.js",
     "build": "UJ_BUILD_MODE=true bundle exec npm run gulp -- build"
   },
@@ -60,10 +60,13 @@
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.2",
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@octokit/rest": "^22.0.0",
     "@popperjs/core": "^2.11.8",
+    "adm-zip": "^0.5.16",
     "babel-loader": "^10.0.0",
     "browser-sync": "^3.0.4",
     "chalk": "^4.1.2",
+    "cheerio": "^1.1.0",
     "fs-jetpack": "^5.1.0",
     "glob": "^11.0.2",
     "gulp-clean-css": "^4.3.0",
@@ -87,7 +90,7 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "gulp": "^5.0.0"
+    "gulp": "^5.0.1"
   },
   "devDependencies": {
     "prepare-package": "^1.1.14"

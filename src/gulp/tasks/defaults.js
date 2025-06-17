@@ -58,6 +58,13 @@ const FILE_MAP = {
   '.nvmrc': {
     template: cleanVersions,
   },
+  'Gemfile': {
+    template: {
+      ujPowertoolsVersion: argv.ujPluginDevMode === 'true'
+        ? `path: File.expand_path('~/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools')`
+        : '"~> 1.0"'
+    },
+  }
 }
 
 // Glob
@@ -189,6 +196,8 @@ function customTransform() {
             target: config?.theme?.target || 'frontend',
           },
         },
+      }, {
+        brackets: ['[', ']'],
       });
 
       // Update file contents
@@ -214,7 +223,7 @@ function defaultsWatcher(complete) {
 
   // Watch for changes
   watch(input, { delay: delay, dot: true }, defaults)
-  .on('change', function(path) {
+  .on('change', (path) => {
     logger.log(`[watcher] File ${path} was changed`);
   });
 

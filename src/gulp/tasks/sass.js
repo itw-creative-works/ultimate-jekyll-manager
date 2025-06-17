@@ -112,7 +112,7 @@ function sassWatcher(complete) {
 
   // Watch for changes
   watch(input, { delay: delay, dot: true }, sass)
-  .on('change', function(path) {
+  .on('change', (path) => {
     logger.log(`[watcher] File ${path} was changed`);
   });
 
@@ -121,11 +121,8 @@ function sassWatcher(complete) {
 }
 
 function generatePageScss() {
-  const glob = require('glob');
-  const path = require('path');
-
   // Get all JS files
-  const files = glob.sync(input).map((f) => path.resolve(f));
+  const files = glob(input).map((f) => path.resolve(f));
 
   // Create a map to store the pages
   const pagesMap = {};

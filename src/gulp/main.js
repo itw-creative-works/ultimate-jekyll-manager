@@ -20,6 +20,10 @@ const tasks = jetpack.list(path.join(__dirname, 'tasks'));
 global.tasks = {};
 global.browserSync = null;
 
+// Set default env variables
+process.env.UJ_BUILD_MODE = Manager.isBuildMode() ? 'true' : 'false';
+process.env.UJ_IS_SERVER = Manager.isServer() ? 'true' : 'false';
+
 // Load tasks
 tasks.forEach((file) => {
   const name = file.replace('.js', '');
@@ -38,11 +42,12 @@ global.tasks = exports;
 exports.build = series(
   // exports.setup,
   // exports.clean,
+  exports.setup,
   exports.defaults,
   exports.distribute,
   parallel(exports.sass, exports.webpack, exports.imagemin),
-  exports.translate,
   exports.jekyll,
+  exports.translation,
 );
 
 // Compose task scheduler

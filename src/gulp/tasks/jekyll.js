@@ -24,6 +24,9 @@ const input = [
   // Files to include
   'dist/**/*',
 
+  // Include plugin so we can live-reload it
+  `${rootPathPackage}/../jekyll-uj-powertools/**/*`,
+
   // Files to exclude
   '!dist/.jekyll-cache/**',
   '!dist/.jekyll-metadata',
@@ -49,6 +52,7 @@ async function jekyll(complete) {
 
   // Build Jekyll
   const command = [
+    // Jekyll command
     'bundle exec jekyll build',
     '--source dist',
     '--config ' + [
@@ -104,8 +108,15 @@ function jekyllWatcher(complete) {
 
   // Watch for changes
   watch(input, { delay: delay, dot: true }, jekyll)
-  .on('change', function(path) {
+  .on('change', (path) => {
     logger.log(`[watcher] File ${path} was changed`);
+
+    // Check if changed file is a .rb file
+    if (path.endsWith('.rb')) {
+      logger.log(`[watcher] Detected .rb file, removing Jekyll cache...`);
+      jetpack.remove('dist/.jekyll-cache');
+      jetpack.remove('dist/.jekyll-metadata');
+    }
   });
 
   // Complete

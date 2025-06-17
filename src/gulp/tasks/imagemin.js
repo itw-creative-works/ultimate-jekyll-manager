@@ -129,7 +129,7 @@ function imageminWatcher(complete) {
 
   // Watch for changes
   watch(input, { delay: delay, dot: true }, imagemin)
-  .on('change', function(path) {
+  .on('change', (path) => {
     logger.log(`[watcher] File ${path} was changed`);
   });
 

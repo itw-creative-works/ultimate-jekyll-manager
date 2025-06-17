@@ -69,8 +69,8 @@ CONTACT
   <input type="email" name="slap_honey" class="form-control" placeholder="Your Email">
 </div>
 
-# Translations
-translations:
+# Translation
+translation:
   enabled: false
   default: "en"
   languages:

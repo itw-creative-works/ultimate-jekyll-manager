@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: themes/{ site.theme.id }/frontend/plain
+layout: themes/[ site.theme.id ]/frontend/plain
 sitemap:
   include: true
 
@@ -19,6 +19,12 @@ settings:
     }
   "
 ---
+              TEST:
+              <br>
+              site.uj.cache_breaker={{ site.uj.cache_breaker }}
+              <br>
+              page.random_id={{ page.random_id }}
+              <br>
 
 {% capture brand %}**{{ site.brand.name | liquify }}**{% endcapture %}
 {% capture breadcrumb %}{{ page.meta.breadcrumb | default: layout.meta.breadcrumb | liquify }}{% endcapture %}

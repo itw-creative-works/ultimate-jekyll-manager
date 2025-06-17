@@ -216,12 +216,11 @@ search:
 sitemap:
   enable: true
 
-# Translations
-translations:
+# Translation
+translation:
   enabled: false
   default: "en"
   languages:
-    - "en"
     - "zh"
     - "es"
     - "hi"

@@ -17,7 +17,7 @@ const dirs = [
 
 module.exports = async function (options) {
   // Log
-  logger.log(`Cleaning up _site, .jekyll-cache, and .jekyll-metadata...`);
+  logger.log(`Cleaning up .temp, dist, and _site directories (including .jekyll-cache and .jekyll-metadata)`);
 
   try {
     // Loop through dirs

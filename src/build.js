@@ -97,6 +97,17 @@ Manager.getRootPath = function (type) {
 }
 Manager.prototype.getRootPath = Manager.getRootPath;
 
+// get Working URL
+// If this is called BEFORE BrowserSync is initialized, it will return the project URL from config
+Manager.getWorkingUrl = function () {
+  try {
+    return global.browserSync.instance.options.get('urls').get('external');
+  } catch (error) {
+    return Manager.getConfig('project').url;
+  }
+}
+Manager.prototype.getWorkingUrl = Manager.getWorkingUrl;
+
 // Create dummy file in project dist to force jekyll to build
 Manager.triggerRebuild = function (files, logger) {
   // Ensure logger is defined
