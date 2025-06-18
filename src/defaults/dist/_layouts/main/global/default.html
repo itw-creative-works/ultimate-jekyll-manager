@@ -8,7 +8,7 @@ layout: null
 
 <!DOCTYPE html>
 <html
-  lang="en"
+  lang="{{ site.translation.default |  default: 'en' }}"
   class="{{ layout.html.class }} {{ page.html.class }}" {{ layout.html.attributes }} {{ page.html.attributes }}
 
   data-theme-id="{{ site.theme.id }}"
@@ -26,6 +26,9 @@ layout: null
   <body
     class="{{ layout.body.class }} {{ page.body.class }}" {{ layout.body.attributes }} {{ page.body.attributes }}
     >
+
+    <!-- Head -->
+    {%- include /main/global/body.html -%}
 
     <!-- Header -->
     {%- if page.settings.include-app-header == false -%}

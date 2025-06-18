@@ -47,6 +47,7 @@ exports.build = series(
   exports.distribute,
   parallel(exports.sass, exports.webpack, exports.imagemin),
   exports.jekyll,
+  exports.audit,
   exports.translation,
 );
 

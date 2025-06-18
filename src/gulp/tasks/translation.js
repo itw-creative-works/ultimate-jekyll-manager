@@ -29,11 +29,13 @@ const rootPathProject = Manager.getRootPath('project');
 // push the updated translation JSON to the branch uj-translations
 
 // Settings
-const CACHE_DIR = '.temp/translations'
-const RECHECK_DAYS = 30
+const CACHE_DIR = '.temp/translations';
+const RECHECK_DAYS = 0;
 // const AI_MODEL = 'gpt-4.1-nano';
 const AI_MODEL = 'gpt-4.1-mini';
 const TRANSLATION_BRANCH = 'uj-translations';
+const LOUD = false;
+// const LOUD = true;
 
 const TRANSLATION_DELAY_MS = 500; // wait between each translation
 const TRANSLATION_BATCH_SIZE = 25; // wait longer every N translations
@@ -124,9 +126,9 @@ async function processTranslation() {
   }
 
   // Pull latest cached translations from uj-translations branch
-  if (Manager.isBuildMode()) {
+  // if (Manager.isBuildMode()) {
     await fetchTranslationsBranch();
-  }
+  // }
 
   // Get files
   const allFiles = glob(input, {
@@ -168,29 +170,98 @@ async function processTranslation() {
     const textNodes = [];
 
     // Get text nodes from body
-    $('body *').each((_, el) => {
+    // $('body *').each((_, el) => {
+    //   const node = $(el);
+
+    //   // Skip script tags or any other tags you want to ignore
+    //   if (node.is('script')) {
+    //     return;
+    //   }
+
+    //   // Find text nodes that are not empty
+    //   node.contents().each((_, child) => {
+    //     if (child.type === 'text' && child.data?.trim()) {
+    //       const i = textNodes.length;
+    //       const text = child.data
+    //         .replace(/^(\s+)\s*/, '$1') // Preserve original leading whitespace
+    //         .replace(/\s*(\s+)$/, '$1') // Preserve original trailing whitespace
+    //         .replace(/\s+/g, ' ')       // Normalize internal whitespace
+
+    //       // Tag the text node with a unique index
+    //       textNodes.push({
+    //         reference: child,
+    //         text: text,
+    //         tagged: `[${i}]${text}[/${i}]`,
+    //       });
+    //     }
+    //   });
+    // });
+    // Get translatable text nodes from both body and head
+    $('*').each((_, el) => {
       const node = $(el);
 
-      // Skip script tags or any other tags you want to ignore
-      if (node.is('script')) {
+      // Skip scripts and style tags
+      if (node.is('script') || node.is('style')) {
+        return;
+      };
+
+      // Handle <title>
+      if (node.is('title')) {
+        const i = textNodes.length;
+        const text = node.text().trim();
+        if (text) {
+          textNodes.push({
+            attr: 'text',
+            node,
+            text,
+            tagged: `[${i}]${text}[/${i}]`
+          });
+        }
         return;
       }
 
-      // Find text nodes that are not empty
+      // Handle meta tags with translatable content
+      if (node.is('meta')) {
+        const metaSelectors = [
+          'description',
+          'og:title',
+          'og:description',
+          'twitter:title',
+          'twitter:description'
+        ];
+        const name = node.attr('name');
+        const property = node.attr('property');
+
+        const key = name || property;
+        if (metaSelectors.includes(key)) {
+          const content = node.attr('content')?.trim();
+          if (content) {
+            const i = textNodes.length;
+            textNodes.push({
+              attr: 'content',
+              node,
+              text: content,
+              tagged: `[${i}]${content}[/${i}]`
+            });
+          }
+        }
+        return;
+      }
+
+      // Handle regular DOM text nodes
       node.contents().each((_, child) => {
         if (child.type === 'text' && child.data?.trim()) {
           const i = textNodes.length;
           const text = child.data
-            .replace(/^(\s+)\s*/, '$1') // Preserve original leading whitespace
-            .replace(/\s*(\s+)$/, '$1') // Preserve original trailing whitespace
-            .replace(/\s+/g, ' ')       // Normalize internal whitespace
+            .replace(/^(\s+)\s*/, '$1')
+            .replace(/\s*(\s+)$/, '$1')
+            .replace(/\s+/g, ' ');
 
-          // Tag the text node with a unique index
           textNodes.push({
+            reference: child,
             node,
-            originalNode: child,
-            text: text,
-            tagged: `[${i}]${text}[/${i}]`,
+            text,
+            tagged: `[${i}]${text}[/${i}]`
           });
         }
       });
@@ -220,8 +291,13 @@ async function processTranslation() {
       const task = async () => {
         const meta = metas[lang].meta;
         const cachePath = path.join(CACHE_DIR, lang, 'pages', relativePath);
-        const outPath = path.join('_site', lang, relativePath);
+        // const outPath = path.join('_site', lang, relativePath);
+        const isHomepage = relativePath === 'index.html';
+        const outPath = isHomepage
+          ? path.join('_site', `${lang}.html`)
+          : path.join('_site', lang, relativePath);
 
+        // Log
         logger.log(`🌐 Translating: ${relativePath} → [${lang}]`);
 
         // Skip if the file is not in the meta or if it has no text nodes
@@ -240,6 +316,10 @@ async function processTranslation() {
         } else {
           try {
             const { result, usage } = await translateWithAPI(openAIKey, bodyText, lang);
+
+            // Log
+            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            logger.log(`✅ Translated: ${relativePath} [${lang}] (Elapsed time: ${elapsedTime}s)`);
 
             // Set translated result
             translated = result;
@@ -276,28 +356,68 @@ async function processTranslation() {
         textNodes.forEach((n, i) => {
           const regex = new RegExp(`\\[${i}\\](.*?)\\[/${i}\\]`, 's');
           const match = translated.match(regex);
+          const translation = match?.[1];
 
-          if (match && match[1]) {
-            const translation = match[1];
-            n.originalNode.data = translation;
-            logger.log(`${i}: ${n.text} → ${translation}`);
-          } else {
-            logger.warn(`⚠️ Could not find translated tag for index ${i}`);
+          if (!translation) {
+            return logger.warn(`⚠️ Could not find translated tag for index ${i}`);
           }
+
+          if (n.attr === null) {
+            n.reference.data = translation;
+          } else if (n.attr === 'text') {
+            n.node.text(translation);
+          } else {
+            n.node.attr(n.attr, translation);
+          }
+          if (LOUD) logger.log(`${i}: ${n.text} → ${translation}`);
         });
+
+        // textNodes.forEach((n, i) => {
+        //   const m = translated.match(new RegExp(`\$begin:math:display$${i}\\$end:math:display$(.*?)\$begin:math:display$/${i}\\$end:math:display$`, 's'));
+        //   if (!m || !m[1]) {
+        //     logger.warn(`⚠️ Missing translation for tag ${i}`);
+        //     return;
+        //   }
+        //   const t = m[1];
+
+        //   if (n.attr === null) {                       // body text node
+        //     n.reference.data = t;
+        //   } else if (n.attr === 'text') {              // <title>
+        //     n.node.text(t);
+        //   } else {                                     // meta attributes
+        //     n.node.attr(n.attr, t);
+        //   }
+
+        //   if (LOUD) logger.log(`${i}: ${n.original} → ${t}`);
+        // });
 
         // Rewrite links
         rewriteLinks($, lang);
 
+        // Set the lang attribute on the <html> tag
+        $('html').attr('lang', lang);
+
+        // Update <link rel="canonical">
+        const canonicalUrl = getCanonicalUrl(lang, relativePath);
+        $('link[rel="canonical"]').attr('href', canonicalUrl);
+
+        // Update <meta property="og:url">
+        $('meta[property="og:url"]').attr('content', canonicalUrl);
+
+        // Insert language tags on this translation
+        insertLanguageTags($, languages, relativePath);
+
+        // Insert language tags in original file
+        insertLanguageTags(cheerio.load(originalHtml), languages, relativePath, filePath);
+
         // Save output
         jetpack.write(outPath, $.html());
-        logger.log(`✅ Wrote: ${outPath}`);
+        // logger.log(`✅ Wrote: ${outPath}`);
 
         // Track updated files only if it's new or updated
-        if (!useCached || !entry || entry.hash !== hash) {
-          // updatedFiles.add(cachePath);
-          // updatedFiles.add(metas[lang].path);
-        }
+        // if (!useCached || !entry || entry.hash !== hash) {
+        // }
+        // Track updated files
         updatedFiles.add(cachePath);
         updatedFiles.add(metas[lang].path);
       };
@@ -360,7 +480,8 @@ async function translateWithAPI(openAIKey, content, lang) {
       'Content-Type': 'application/json',
     },
     timeout: 60000 * 4,
-    body: JSON.stringify({
+    tries: 2,
+    body: {
       // model: 'gpt-4o',
       model: AI_MODEL,
       messages: [
@@ -369,7 +490,7 @@ async function translateWithAPI(openAIKey, content, lang) {
       ],
       max_tokens: 1024 * 16,
       temperature: 0.2,
-    }),
+    },
   });
 
   // Get result
@@ -410,13 +531,13 @@ function rewriteLinks($, lang) {
         || href.startsWith('!#')
         || href.startsWith('javascript:')
       ) {
-        logger.log(`⚠️ Ignoring link: ${href} (empty or invalid)`);
+        if (LOUD) logger.log(`⚠️ Ignoring link: ${href} (empty or invalid)`);
         return;
       }
 
       // Quit early if the URL is external (not part of the current site)
       if (url.origin !== new URL(baseUrl).origin) {
-        logger.log(`⚠️ Ignoring external link: ${href} (origin mismatch)`);
+        if (LOUD) logger.log(`⚠️ Ignoring external link: ${href} (origin mismatch)`)
         return;
       }
 
@@ -426,7 +547,7 @@ function rewriteLinks($, lang) {
         ignoredPages.files.includes(relativePath)
         || ignoredPages.folders.some(folder => relativePath.startsWith(folder + '/'))
       ) {
-        logger.log(`⚠️ Ignoring link: ${href} (ignored page)`);
+        if (LOUD) logger.log(`⚠️ Ignoring link: ${href} (ignored page)`);
         return;
       }
 
@@ -437,12 +558,40 @@ function rewriteLinks($, lang) {
       $(el).attr('href', url.toString());
 
       // Log the rewritten link
-      logger.log(`🔗 Rewrote link: ${href} → ${url.toString()}`);
+      if (LOUD) logger.log(`🔗 Rewrote link: ${href} → ${url.toString()}`);
     } catch (error) {
       // Log an error if the URL is invalid
-      logger.warn(`⚠️ Invalid URL: ${href} — ${error.message}`);
+      if (LOUD) logger.warn(`⚠️ Invalid URL: ${href} — ${error.message}`);
     }
   });
+}
+
+function insertLanguageTags($, languages, relativePath, filePath) {
+  // Add <link rel="alternate"> tags for all languages
+  // Locate the existing language tags
+  const existingLanguageTags = $(`head link[rel="alternate"][hreflang="${config?.translation?.default}"]`);
+
+  // Insert new language tags directly after the existing ones
+  if (existingLanguageTags.length) {
+    let newLanguageTags = '';
+    for (const targetLang of languages) {
+      const alternateUrl = getCanonicalUrl(targetLang, relativePath);
+
+      // Check if the tag already exists
+      const tagExists = $(`head link[rel="alternate"][hreflang="${targetLang}"]`).length > 0;
+      if (!tagExists) {
+        newLanguageTags += `\n<link rel="alternate" href="${alternateUrl}" hreflang="${targetLang}">`;
+      }
+    }
+
+    // Insert new tags after the last existing language tag
+    existingLanguageTags.last().after(newLanguageTags);
+  }
+
+  // Save the modified HTML back to the file if filePath
+  if (filePath) {
+    jetpack.write(filePath, $.html());
+  }
 }
 
 function getIgnoredPages() {
@@ -497,6 +646,7 @@ function getIgnoredPages() {
 
       // Other
       '404',
+      'sitemap',
 
       // Redirects
       ...redirectPermalinks,
@@ -617,7 +767,7 @@ async function pushTranslationBranch(updatedFiles) {
   // Convert Set to array
   const files = [...updatedFiles];
   logger.log(`📤 Pushing ${files.length} updated file(s) to '${TRANSLATION_BRANCH}'`);
-  console.log(files);
+  // console.log(files);
 
   // Abort if .temp/translations doesn't exist
   if (!jetpack.exists(localRoot)) {
@@ -692,6 +842,7 @@ async function fetchOpenAIKey() {
     const response = await fetch(url, {
       method: 'GET',
       response: 'json',
+      tries: 2,
       headers: {
         'Authorization': `Bearer ${process.env.GH_TOKEN}`,
       },
@@ -701,11 +852,29 @@ async function fetchOpenAIKey() {
     });
 
     // Log
-    logger.log('OpenAI API response:', response);
+    // logger.log('OpenAI API response:', response);
 
     // Return
     return response.openai.ultimate_jekyll.translation;
   } catch (error) {
     logger.error('Error:', error);
   }
+}
+
+function getCanonicalUrl(lang, relativePath) {
+  const baseUrl = Manager.getWorkingUrl();
+
+  // Remove 'index.html' from the end
+  let cleanedPath = relativePath.replace(/index\.html$/, '');
+
+  // Remove '.html' from the end
+  cleanedPath = cleanedPath.replace(/\.html$/, '');
+
+  // Remove trailing slashes
+  cleanedPath = cleanedPath.replace(/\/+$/, '');
+
+  // Remove leading slashes
+  cleanedPath = cleanedPath.replace(/^\/+/, '');
+
+  return `${baseUrl}/${lang}/${cleanedPath}`;
 }
