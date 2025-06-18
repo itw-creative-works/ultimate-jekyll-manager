@@ -42,7 +42,7 @@ function distribute() {
     await createBuildJSON();
 
     // Complete
-    return src(input, { base: 'src' })
+    return src(input, { base: 'src', dot: true, })
       // .pipe(customTransform())
       .pipe(dest(output))
       .on('end', () => {

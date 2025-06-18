@@ -52,9 +52,6 @@ const FILE_MAP = {
   },
 
   // Files to run templating on
-  '.github/workflows/build.yml': {
-    template: cleanVersions,
-  },
   '.nvmrc': {
     template: cleanVersions,
   },
@@ -64,6 +61,11 @@ const FILE_MAP = {
         ? `path: File.expand_path('~/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools')`
         : '"~> 1.0"'
     },
+  },
+
+  // Files to skip
+  '.DS_Store': {
+    skip: true,
   }
 }
 
@@ -71,10 +73,6 @@ const FILE_MAP = {
 const input = [
   // Files to include
   `${rootPathPackage}/dist/defaults/**/*`,
-  `${rootPathPackage}/dist/defaults/**/.*`,
-
-  // Files to exclude
-  '!**/.DS_Store',
 ];
 const output = './';
 const delay = 250;
@@ -91,11 +89,18 @@ function defaults(complete) {
   logger.log('Starting...');
   logger.log('input', input)
 
+  // Log files being used
+  logger.log('Files being used:');
+
   // Complete
   // return src(input, { base: 'src' })
   // src(input, { base: `${rootPathPackage}/dist/defaults` })
-  return src(input)
-  // src(input)
+  return src(input, { dot: true, })
+    // .pipe(through2.obj(function (file, _, callback) {
+    //   // Log each file being processed
+    //   logger.log(`  - ${file.path}`);
+    //   callback(null, file);
+    // }))
     .pipe(customTransform())
     .pipe(dest(output))
     .on('finish', () => {
@@ -213,7 +218,7 @@ function customTransform() {
 }
 function defaultsWatcher(complete) {
   // Quit if in build mode
-  if (Manager.isBuildMode()) {
+  if (Manager.isBuildMode() || process.env.UJ_SKIP_DEFAULTS_WATCHER === 'true') {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }

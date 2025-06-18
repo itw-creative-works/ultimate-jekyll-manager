@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.24",
+  "version": "0.0.29",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -23,6 +23,7 @@
   },
   "projectScripts": {
     "preinstall": "bundle install && bundle update",
+    "postinstall": "npx uj clean && npx uj setup && UJ_SKIP_DEFAULTS_WATCHER=true bundle exec npm run gulp -- defaults",
     "start": "npx uj clean && npx uj setup && bundle exec npm run gulp --",
     "gulp": "gulp --cwd ./ --gulpfile ./node_modules/ultimate-jekyll-manager/dist/gulp/main.js",
     "build": "npx uj clean && npx uj setup && UJ_BUILD_MODE=true bundle exec npm run gulp -- build"
