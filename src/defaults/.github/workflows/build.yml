@@ -65,9 +65,10 @@ jobs:
           echo "Ruby: $(ruby -v)"
           echo "Bundler: $(bundle -v)"
           echo "Gem: $(gem -v)"
+          echo "Jekyll: $(jekyll -v)"
           echo "Node: $(node -v)"
           echo "NPM: $(npm -v)"
-          echo "Ultimat Jekyll: $(npx uj version)"
+          echo "Ultimate Jekyll: $(npx uj version)"
           echo -e "\n"
 
           echo "💎 Gem Versions: "

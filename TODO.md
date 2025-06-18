@@ -33,6 +33,8 @@ INCLUDE THIS in css build process
 
 THINGS TO ADD
 - auto cached translations
+  - sitemap for each translation?
+  - need to add HTML tags for each equivalent translation (not all pages have translations!!!!)
 - each theme should have complex COMPONENTS to easily scaffold large parts of the site
   - keep components consistent across themes so when we switch themes the components work still
 - checkout pages SHOULD BE IN EACH WEBSITE
