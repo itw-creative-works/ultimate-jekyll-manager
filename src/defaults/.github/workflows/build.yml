@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   BACKEND_MANAGER_KEY: ${{ secrets.BACKEND_MANAGER_KEY }}
   RUBY_VERSION: '{ versions.ruby }'
   BUNDLER_VERSION: '{ versions.bundler }'
