@@ -221,7 +221,7 @@ function customTransform() {
 }
 function defaultsWatcher(complete) {
   // Quit if in build mode
-  if (Manager.isBuildMode() || process.env.UJ_SKIP_DEFAULTS_WATCHER === 'true') {
+  if (Manager.isBuildMode()) {
     logger.log('[watcher] Skipping watcher in build mode');
     return complete();
   }

@@ -114,12 +114,16 @@ async function processTranslation() {
   if (!languages.length) {
     return logger.warn('🚫 No target languages configured.');
   }
-  if (!process.env.OPENAI_API_KEY) {
-    return logger.error('❌ OPENAI_API_KEY not set.');
-  }
 
   // For testing purposes
+  const openAIKey = await fetchOpenAIKey();
   const ujOnly = process.env.UJ_TRANSLATION_ONLY;
+
+  // console.log('--openAIKey', openAIKey);
+
+  if (!openAIKey) {
+    return logger.error('❌ openAIKey not set. Translation requires OpenAI API key.');
+  }
 
   // Pull latest cached translations from uj-translations branch
   if (Manager.isBuildMode()) {
@@ -237,7 +241,7 @@ async function processTranslation() {
           logger.log(`📦 Using cached translation for ${relativePath} [${lang}]`);
         } else {
           try {
-            const { result, usage } = await translateWithAPI(bodyText, lang);
+            const { result, usage } = await translateWithAPI(openAIKey, bodyText, lang);
 
             // Set translated result
             translated = result;
@@ -339,7 +343,7 @@ async function processTranslation() {
   }
 }
 
-async function translateWithAPI(content, lang) {
+async function translateWithAPI(openAIKey, content, lang) {
   // Prompt
   const systemPrompt = `
     You are a professional translator.
@@ -354,7 +358,7 @@ async function translateWithAPI(content, lang) {
     response: 'json',
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Authorization': `Bearer ${openAIKey}`,
       'Content-Type': 'application/json',
     },
     timeout: 60000 * 4,
@@ -681,4 +685,26 @@ async function pushTranslationBranch(updatedFiles) {
   }
 
   logger.log(`🎉 Finished pushing ${files.length} file(s) to '${TRANSLATION_BRANCH}'`);
+}
+
+
+async function fetchOpenAIKey() {
+  const url = 'https://api.itwcreativeworks.com/get-api-keys';
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      response: 'json',
+      headers: {
+        'Authorization': `Bearer ${process.env.GH_TOKEN}`,
+      },
+      body: {
+        authorizationKeyName: 'github',
+      }
+    });
+
+    return response.openai.ultimate_jekyll.translation;
+  } catch (error) {
+    console.error('Error:', error);
+  }
 }
