@@ -52,6 +52,9 @@ const FILE_MAP = {
   },
 
   // Files to run templating on
+  '.github/workflows/build.yml': {
+    template: cleanVersions,
+  },
   '.nvmrc': {
     template: cleanVersions,
   },
