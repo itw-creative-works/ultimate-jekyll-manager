@@ -33,6 +33,7 @@ module.exports = async function (options) {
   options.createCname = force(options.createCname || true, 'boolean');
   options.fetchFirebaseAuth = force(options.fetchFirebaseAuth || true, 'boolean');
   options.checkLocality = force(options.checkLocality || true, 'boolean');
+  options.updateBundle = force(options.updateBundle || true, 'boolean');
 
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
@@ -92,6 +93,11 @@ module.exports = async function (options) {
     // Check which locality we are using
     if (options.checkLocality) {
       await checkLocality();
+    }
+
+    // Check which locality we are using
+    if (options.updateBundle && !Manager.isServer()) {
+      await updateBundle();
     }
   } catch (e) {
     // Throw error
@@ -191,7 +197,7 @@ async function ensurePeerDependencies() {
 
   // Loop through and make sure project has AT LEAST the required version
   for (let [dependency, ver] of Object.entries(requiredPeerDependencies)) {
-    const projectDependencyVersion = version.clean(project.dependencies[dependency] || project.devDependencies[dependency]);
+    const projectDependencyVersion = version.clean(project?.dependencies?.[dependency] || project?.devDependencies?.[dependency]);
     const location = DEPENDENCY_MAP[dependency] === 'dev' ? '--save-dev' : '';
     const isUpToDate = version.is(projectDependencyVersion, '>=', ver);
 
@@ -233,6 +239,16 @@ function checkLocality() {
   if (installedVersion.startsWith('file:')) {
     logger.warn(`⚠️⚠️⚠️ You are using the local version of ${package.name}. This WILL NOT WORK when published. ⚠️⚠️⚠️`);
   }
+}
+
+async function updateBundle() {
+  // Log
+  logger.log('Running bundle install...');
+  await execute('bundle install', { log: true })
+
+  // Log
+  logger.log('Running bundle update...');
+  await execute('bundle update', { log: true })
 }
 
 function install(package, ver, location) {

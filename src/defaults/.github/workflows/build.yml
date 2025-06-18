@@ -42,9 +42,12 @@ jobs:
           bundler-cache: false
       - name: Install specific bundler version
         run: gem install bundler -v ${{ env.BUNDLER_VERSION }}
-      - name: Run bundle install # TODO: [DEPRECATED] MIGRATE TO: bundle config set --local path 'vendor/bundle'
+      # - name: Run bundle install # TODO: [DEPRECATED] MIGRATE TO: bundle config set --local path 'vendor/bundle'
+      #   run: |
+      #     bundle install --path vendor/bundle
+      - name: Run bundle install
         run: |
-          bundle install --path vendor/bundle
+          bundle install
       - name: Setup node
         uses: actions/setup-node@v4
         with:
