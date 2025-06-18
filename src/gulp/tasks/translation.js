@@ -119,8 +119,6 @@ async function processTranslation() {
   const openAIKey = await fetchOpenAIKey();
   const ujOnly = process.env.UJ_TRANSLATION_ONLY;
 
-  // console.log('--openAIKey', openAIKey);
-
   if (!openAIKey) {
     return logger.error('❌ openAIKey not set. Translation requires OpenAI API key.');
   }
@@ -687,7 +685,6 @@ async function pushTranslationBranch(updatedFiles) {
   logger.log(`🎉 Finished pushing ${files.length} file(s) to '${TRANSLATION_BRANCH}'`);
 }
 
-
 async function fetchOpenAIKey() {
   const url = 'https://api.itwcreativeworks.com/get-api-keys';
 
@@ -698,13 +695,17 @@ async function fetchOpenAIKey() {
       headers: {
         'Authorization': `Bearer ${process.env.GH_TOKEN}`,
       },
-      body: {
+      query: {
         authorizationKeyName: 'github',
       }
     });
 
+    // Log
+    logger.log('OpenAI API response:', response);
+
+    // Return
     return response.openai.ultimate_jekyll.translation;
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error);
   }
 }
