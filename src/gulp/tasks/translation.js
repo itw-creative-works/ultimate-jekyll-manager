@@ -818,7 +818,7 @@ async function fetchTranslationsBranch() {
 }
 
 // Git Sync: Push
-async function pushTranslationBranch( ) {
+async function pushTranslationBranch(updatedFiles) {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const localRoot = path.join('.temp', 'translations');
 
