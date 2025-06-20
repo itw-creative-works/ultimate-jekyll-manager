@@ -265,6 +265,8 @@ async function processTranslation() {
 
         // Reset the DOM to avoid conflicts between languages
         const $ = cheerio.load(originalHtml);
+        // Collect text nodes with tags
+        const textNodes = collectTextNodes($, { tag: true });
 
         // Replace original text nodes with translated versions
         textNodes.forEach((n, i) => {
@@ -300,7 +302,7 @@ async function processTranslation() {
         $('meta[property="og:url"]').attr('content', canonicalUrl);
 
         // Insert language tags on this translation
-        await insertLanguageTags($, languages, relativePath);
+        await insertLanguageTags($, languages, relativePath, outPath);
 
         // Insert language tags in original file
         await insertLanguageTags(cheerio.load(originalHtml), languages, relativePath, filePath);
@@ -311,10 +313,15 @@ async function processTranslation() {
         await insertLanguageTags(cheerio.load(sitemapXml, { xmlMode: true }), languages, relativePath, sitemapPath);
 
         // Save output
-        const formatted = await formatDocument($.html(), 'html');
+        // const formatted = await formatDocument($.html(), 'html');
+
+        // console.log('----relativePath', relativePath);
+        // console.log('----filePath', filePath);
+        // console.log('----outPath', outPath);
+        // console.log('----FORMATTED.ERROR', formatted.error);
 
         // Write the translated file
-        jetpack.write(outPath, formatted.content);
+        // jetpack.write(outPath, formatted.content);
         // logger.log(`✅ Wrote: ${outPath}`);
 
         // Track updated files only if it's new or updated
@@ -542,6 +549,9 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
   if (filePath) {
     const format = isHtml ? 'html' : 'xml';
     const formatted = await formatDocument($.html(), format);
+
+    console.log('---SAVING filePath', filePath);
+    console.log('---SAVING formatted.error', formatted.error);
 
     // Write the formatted content back to the file
     jetpack.write(filePath, formatted.content);
