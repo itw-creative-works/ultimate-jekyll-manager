@@ -466,7 +466,7 @@ async function processTranslation() {
 
   // Push updated translation cache back to uj-translations
   if (Manager.isBuildMode()) {
-    await pushTranslationBranch( );
+    await pushTranslationBranch(updatedFiles);
   }
 }
 
