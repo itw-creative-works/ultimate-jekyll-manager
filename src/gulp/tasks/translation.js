@@ -259,9 +259,10 @@ async function processTranslation() {
         const outPath = isHomepage
           ? path.join('_site', `${lang}.html`)
           : path.join('_site', lang, relativePath);
+        const logTag = `[${lang}] ${relativePath}`;
 
         // Log
-        logger.log(`🌐 Translating: ${relativePath} → [${lang}]`);
+        logger.log(`🌐 Translation started: ${logTag}`);
 
         // Skip if the file is not in the meta or if it has no text nodes
         let translated = null;
@@ -294,14 +295,14 @@ async function processTranslation() {
           && jetpack.exists(cachePath)
         ) {
           translated = jetpack.read(cachePath);
-          logger.log(`📦 Using cached translation for ${relativePath} [${lang}]`);
+          logger.log(`📦 Translation cache: ${logTag}`);
         } else {
           try {
             const { result, usage } = await translateWithAPI(openAIKey, bodyText, lang);
 
             // Log
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            logger.log(`✅ Translated: ${relativePath} [${lang}] (Elapsed time: ${elapsedTime}s)`);
+            logger.log(`✅ Translation succeeded: ${logTag} (Elapsed time: ${elapsedTime}s)`);
 
             // Set translated result
             translated = result;
@@ -317,7 +318,7 @@ async function processTranslation() {
             setResult(true);
           } catch (e) {
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            logger.error(`⚠️ Translation failed: ${relativePath} [${lang}] — ${e.message} (Elapsed time: ${elapsedTime}s)`);
+            logger.error(`❌ Translation failed: ${logTag} — ${e.message} (Elapsed time: ${elapsedTime}s)`);
 
             // Set translated result
             translated = bodyText;
@@ -342,7 +343,7 @@ async function processTranslation() {
           const translation = match?.[1];
 
           if (!translation) {
-            return logger.warn(`⚠️ Could not find translated tag for index ${i}`);
+            return logger.warn(`⚠️ Translation warning: ${logTag} - Could not find translated tag for index ${i}`);
           }
 
           // Extract original leading and trailing whitespace
@@ -372,13 +373,13 @@ async function processTranslation() {
           controlTag.length === 0
           || controlTag.text() !== CONTROL
         ) {
-          logger.error(`⚠️ Control tag mismatch in ${relativePath} [${lang}]`);
+          logger.error(`❌ Translation failed: ${logTag} — Control tag mismatch or missing`);
 
           return setResult(false);
-        } else {
-          // Delete the control tag
-          controlTag.remove();
         }
+
+        // Delete the control tag
+        // controlTag.remove();
 
         // Set the lang attribute on the <html> tag
         $('html').attr('lang', lang);
