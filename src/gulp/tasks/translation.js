@@ -148,7 +148,11 @@ async function processTranslation() {
   // logger.log(allFiles);
 
   // Prepare meta caches per language
-  const metas = {};
+  const metas = {
+    global: {
+      skipped: new Set(),
+    }
+  };
   for (const lang of languages) {
     const metaPath = path.join(CACHE_DIR, lang, 'meta.json');
     let meta = {};
@@ -159,7 +163,7 @@ async function processTranslation() {
         logger.warn(`⚠️ Failed to parse meta for [${lang}], starting fresh`);
       }
     }
-    metas[lang] = { meta, path: metaPath, skipped: [] };
+    metas[lang] = { meta, path: metaPath, skipped: new Set() };
   }
 
   // Track token usage
@@ -183,9 +187,8 @@ async function processTranslation() {
 
     // Skip all except the specified HTML file
     if (ujOnly && relativePath !== ujOnly) {
-      for (const lang of languages) {
-        metas[lang].skipped.push(`${relativePath} (UJ_TRANSLATION_ONLY set)`);
-      }
+      // Update to work with the new SET protocol
+      metas.global.skipped.add(`${relativePath} (UJ_TRANSLATION_ONLY set)`);
       continue;
     }
 
@@ -260,6 +263,9 @@ async function processTranslation() {
         // Log result
         // console.log('---translated---', translated);
 
+        // Reset the DOM to avoid conflicts between languages
+        const $ = cheerio.load(originalHtml);
+
         // Replace original text nodes with translated versions
         textNodes.forEach((n, i) => {
           const regex = new RegExp(`\\[${i}\\](.*?)\\[/${i}\\]`, 's');
@@ -305,7 +311,10 @@ async function processTranslation() {
         await insertLanguageTags(cheerio.load(sitemapXml, { xmlMode: true }), languages, relativePath, sitemapPath);
 
         // Save output
-        jetpack.write(outPath, await formatDocument($.html(), undefined, false));
+        const formatted = await formatDocument($.html(), 'html');
+
+        // Write the translated file
+        jetpack.write(outPath, formatted.content);
         // logger.log(`✅ Wrote: ${outPath}`);
 
         // Track updated files only if it's new or updated
@@ -334,13 +343,23 @@ async function processTranslation() {
     }
   }
 
+  // Log skipped files
+  logger.warn('🚫 Skipped files:');
+  let totalSkipped = 0;
+  for (const [lang, meta] of Object.entries(metas)) {
+    if (meta.skipped.size > 0) {
+      logger.warn(`  [${lang}] ${meta.skipped.size} skipped files:`);
+      meta.skipped.forEach(f => logger.warn(`    ${f}`));
+      totalSkipped += meta.skipped.size;
+    }
+  }
+  if (totalSkipped === 0) {
+    logger.warn('  NONE');
+  }
+
   // Save all updated meta files
   for (const lang of languages) {
     jetpack.write(metas[lang].path, metas[lang].meta);
-    if (metas[lang].skipped.length) {
-      logger.warn('🚫 Skipped files:');
-      metas[lang].skipped.forEach(f => logger.warn(f));
-    }
   }
 
   // Log total token usage
@@ -521,9 +540,11 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
 
   // Save the modified HTML back to the file if filePath
   if (filePath) {
-    // const format = isHtml ? 'html' : 'xml';
-    const format = 'html';
-    jetpack.write(filePath, await formatDocument($.html(), format));
+    const format = isHtml ? 'html' : 'xml';
+    const formatted = await formatDocument($.html(), format);
+
+    // Write the formatted content back to the file
+    jetpack.write(filePath, formatted.content);
   }
 }
 

@@ -6,10 +6,9 @@ const path = require('path');
 // Load package
 const rootPathPackage = Manager.getRootPath('main');
 
-module.exports = async function formatHTML(content, format, throwError) {
+module.exports = async (content, format) => {
   // Set default format to 'html' if not provided
   format = format || 'html';
-  throwError = typeof throwError === 'undefined' ? true : throwError;
 
   // Setup Prettier options
   const options = {
@@ -30,16 +29,19 @@ module.exports = async function formatHTML(content, format, throwError) {
   return prettier
     .format(content, options)
     .then((formatted) => {
-      return removeMultipleNewlines(formatted);
+      return {
+        content: removeMultipleNewlines(formatted),
+        error: null,
+      };
     })
     .catch((e) => {
-      if (throwError) {
-        throw e;
-      }
-      return removeMultipleNewlines(content);
+      return {
+        content: removeMultipleNewlines(content),
+        error: e,
+      };
     });
 };
 
 function removeMultipleNewlines(content) {
-  return content.replace(/\n\s*\n+/g, '\n');
+  return content.replace(/\n\s*\n+/g, '\n').trim();
 }

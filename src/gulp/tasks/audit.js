@@ -72,10 +72,15 @@ async function validateFormat(file, content) {
     (async () => {
       try {
         // Format the content using Prettier
-        const formatted = await formatDocument(content, format, true);
+        const formatted = await formatDocument(content, format);
 
         // Save the formatted content back to the file
-        jetpack.write(file, formatted);
+        jetpack.write(file, formatted.content);
+
+        // Quit if there is an error
+        if (formatted.error) {
+          throw formatted.error;
+        }
 
         return { valid: true, messages: [] };
       } catch (e) {
