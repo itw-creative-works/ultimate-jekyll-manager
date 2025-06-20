@@ -1,7 +1,19 @@
 ---
 ### ALL PAGES ###
-layout: themes/geeks/frontend/default
+layout: main/global/default
 
 ### REGULAR PAGES ###
+
 ---
-{{ content }}
+{%- include /themes/bootstrap/header.html -%}
+
+<!-- ========== MAIN CONTENT ========== -->
+<main>
+  {% if page.extension == '.md' %}
+    {{ content | liquify | markdownify }}
+  {%- else -%}
+    {{ content | liquify }}
+  {%- endif -%}
+</main>
+
+{%- include /themes/bootstrap/footer.html -%}

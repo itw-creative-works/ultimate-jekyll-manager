@@ -58,6 +58,6 @@ exports.default = series(
   // exports.clean,
   exports.serve,
   exports.build,
-  exports.developmentRebuild,
+  // exports.developmentRebuild,
   // exports.watcher,
 );

@@ -41,11 +41,7 @@ settings:
 
 <!-- ========== MAIN CONTENT ========== -->
 <main class="bg-white">
-  {% if page.extension == '.md' %}
-    {{ content | liquify | markdownify }}
-  {%- else -%}
-    {{ content | liquify }}
-  {%- endif -%}
+  {{ content | liquify | markdownify }}
 </main>
 
 {%- include /themes/geeks/footer.html -%}
