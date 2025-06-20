@@ -57,7 +57,27 @@ npm start -- --debug=true
 ```
 * `--ujPluginDevMode=true` - Enables the development mode for the [Ultimate Jekyll Ruby plugin](https://github.com/itw-creative-works/jekyll-uj-powertools).
 ```bash
+npm start -- --ujPluginDevMode=true
+```
 
+## Running Specific Tasks
+You can run specific tasks using the `npm run gulp` command with the appropriate task name.
+
+Some of these require environment variables to be set and other tasks to be run first.
+
+Here are some examples:
+
+### Run the `audit` task:
+```bash
+npx uj audit
+```
+
+### Run the `translation` task:
+```bash
+GH_TOKEN=XXX \
+GITHUB_REPOSITORY=XXX \
+npx uj translation
+```
 <!-- Developing -->
 ## 🛠 Developing
 1. Clone the repo to your local machine.

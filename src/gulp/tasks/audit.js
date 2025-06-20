@@ -6,9 +6,14 @@ const glob = require('glob').globSync;
 const path = require('path');
 const jetpack = require('fs-jetpack');
 const spellchecker = require('spellchecker');
-const { HtmlValidate } = require('html-validate')
-// const SpellChecker = require('simple-spellchecker');
-// const dictionary = SpellChecker.getDictionarySync('en-US');
+const cheerio = require('cheerio');
+const { HtmlValidate } = require('html-validate');
+const { XMLParser } = require('fast-xml-parser');
+
+// Utils
+const collectTextNodes = require('./utils/collectTextNodes');
+const dictionary = require('./utils/dictionary');
+const formatDocument = require('./utils/formatDocument');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -20,7 +25,7 @@ const rootPathProject = Manager.getRootPath('project');
 // Glob
 const input = [
   // Files to include
-  '_site/**/*.html',
+  '_site/**/*.{html,xml}',
 ];
 const output = '';
 const delay = 250;
@@ -30,8 +35,8 @@ async function audit(complete) {
   // Log
   logger.log('Starting...');
 
-  // Quit if NOT in build mode and UJ_AUDIT_FORCE is not true
-  if (!Manager.isBuildMode() && process.env.UJ_AUDIT_FORCE !== 'true') {
+  // Quit if NOT in build mode and UJ_FORCE_AUDIT is not true
+  if (!Manager.isBuildMode() && process.env.UJ_FORCE_AUDIT !== 'true') {
     logger.log('Skipping audit in development mode');
     return complete();
   }
@@ -49,81 +54,173 @@ async function audit(complete) {
 // Default Task
 module.exports = series(audit);
 
-async function validateHTML(file, content) {
+async function validateFormat(file, content) {
   // Log
-  logger.log(`➡️ Validating HTML in ${file}`);
+  // logger.log(`➡️ Validating HTML in ${file}`);
 
-  // Validate HTML using html-validate
-  const validator = new HtmlValidate({
-    root: true,
-    extends: ['html-validate:recommended'],
-    rules: {
-      'no-inline-style': 'error',
-      'void-style': ['error', { style: 'selfclosing' }],
-      'prefer-button': 'warn',
-      'doctype-style': 'error',
-      'no-dup-id': 'error'
-    }
-  });
+  // Initialize an array to hold formatted messages
+  let valid = true;
+  let formattedMessages = [];
 
-  // validate the HTML content
-  const report = await validator.validateString(content);
-  const results = report.results[0];
+  // Get format
+  const format = file.endsWith('.html')
+    ? 'html'
+    : 'xml';
 
-  const formattedMessages = results.messages.map(msg => {
-    return `[${msg.ruleId}] ${msg.message} (${file}:${msg.line}:${msg.column})`;
-  });
+  // Run pretty validation and HTML/XML validation in parallel
+  const [prettyValidationResult, validationResult] = await Promise.all([
+    (async () => {
+      try {
+        // Format the content using Prettier
+        const formatted = await formatDocument(content, format, true);
 
+        // Save the formatted content back to the file
+        jetpack.write(file, formatted);
+
+        return { valid: true, messages: [] };
+      } catch (e) {
+        return { valid: false, messages: [`[format] ${format.toUpperCase()} is not well-formatted @ ${file} \n${e.message}`] };
+      }
+    })(),
+    (async () => {
+      if (format === 'html') {
+        const validator = new HtmlValidate({
+          root: true,
+          extends: ['html-validate:recommended'],
+          rules: {
+            // Custom rules
+            'no-inline-style': 'error',
+            'void-style': ['error', { style: 'selfclosing' }],
+            'prefer-button': 'warn',
+            'doctype-style': 'error',
+            'no-dup-id': 'error',
+
+            // Ignore certain rules for this audit
+            'no-conditional-comment': 'off',
+            'no-trailing-whitespace': 'off',
+            'no-inline-style': 'off',
+            'script-type': 'off',
+          }
+        });
+
+        const report = await validator.validateString(content);
+        const results = report.results[0];
+        const messages = results?.messages || [];
+
+        return {
+          valid: report.valid,
+          messages: messages.map(msg => {
+            return `[${msg.ruleId}] ${msg.message} @ ${file}:${msg.line}:${msg.column} (${msg.ruleUrl})`;
+          })
+        };
+      } else if (format === 'xml') {
+        try {
+          const parser = new XMLParser({
+            ignoreAttributes: false,
+            allowBooleanAttributes: true
+          });
+          parser.parse(content);
+          return { valid: true, messages: [] };
+        } catch (e) {
+          return { valid: false, messages: [`[format] ${format.toUpperCase()} is not well-formatted @ ${file} \n${e.message}`] };
+        }
+      }
+    })()
+  ]);
+
+  // Combine results
+  valid = prettyValidationResult.valid && validationResult.valid;
+  formattedMessages.push(...prettyValidationResult.messages, ...validationResult.messages);
+
+  // Return validation result
   return {
-    valid: report.valid,
+    valid,
     messages: formattedMessages,
   };
 }
 
-async function validateSpelling(file, content, brand) {
+async function validateSpelling(file, content) {
   // Log
-  logger.log(`➡️ Validating spelling in ${file}`);
+  // logger.log(`➡️ Validating spelling in ${file}`);
 
-  return {
-    valid: true,
-    misspelledWords: [],
-  };
+  const $ = cheerio.load(content);
+  const textNodes = collectTextNodes($);
 
-  const words = content.match(/\b\w+\b/g) || [];
-  const misspelledWords = words.filter((word) => {
-    // Ignore words that are part of the brand name
-    if (word.toLowerCase() === brand.toLowerCase()) {
-      return false;
-    }
+  const brand = (config?.brand?.name || 'BrandName').toLowerCase();
 
-    // Check if the word is misspelled
-    return spellchecker.isMisspelled(word);
+  const misspelledWords = textNodes.flatMap(({ text }) => {
+
+  // Split text into words using regex
+  const words = text.match(/\b[\w’']+\b/g) || [];
+
+  // Filter out words that are part of the brand name or are not misspelled
+  return words
+    .filter(word => {
+      const lowerWord = word.toLowerCase();
+      const baseWord = lowerWord.endsWith("'s") ? lowerWord.slice(0, -2) : lowerWord; // Remove possessive 's if present
+
+      if (
+        baseWord === brand ||
+        dictionary.includes(baseWord)
+      ) {
+        return false;
+      }
+
+      return spellchecker.isMisspelled(word);
+    })
+    .map(word => {
+      // Find the sentence containing the word
+      const lines = content.split('\n');
+      let lineIndex = 0;
+      let column = 0;
+
+      // Iterate through lines to find the full text
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const textIndex = line.indexOf(text);
+        if (textIndex !== -1) {
+          lineIndex = i + 1; // Convert to 1-based index
+          column = textIndex + 1; // Convert to 1-based index
+          break;
+        }
+      }
+
+      return `[spelling] ${word} in "${text}" @ ${file}:${lineIndex}:${column}`;
+    });
   });
 
   return {
     valid: misspelledWords.length === 0,
-    misspelledWords
+    misspelledWords,
   };
 }
 
 async function processAudit() {
-  const htmlFiles = glob(input, { nodir: true });
-  const brand = config?.brand?.name || 'BrandName';
+  const htmlFiles = glob(input, {
+    nodir: true,
+    ignore: [
+      // Auth files
+      '_site/__/auth/**/*',
+
+      // Sitemap
+      '**/sitemap.html',
+    ]
+  });
 
   // Run validations in parallel
   const results = await Promise.all(
     htmlFiles.map(async (file) => {
       const content = jetpack.read(file);
 
-      // Validate HTML
-      const htmlValidation = await validateHTML(file, content);
-
-      // Spellcheck
-      const spellingValidation = await validateSpelling(file, content, brand);
+      // Run format and spellcheck in parallel
+      const [formatValidation, spellingValidation] = await Promise.all([
+        validateFormat(file, content),
+        validateSpelling(file, content)
+      ]);
 
       return {
         file,
-        htmlValidation,
+        formatValidation,
         spellingValidation
       };
     })
@@ -136,22 +233,24 @@ async function processAudit() {
     invalidFiles: 0
   };
 
-  results.forEach(({ file, htmlValidation, spellingValidation }) => {
+  results.forEach(({ file, formatValidation, spellingValidation }) => {
     logger.log(`🔍 Results for file: ${file}`);
 
-    if (htmlValidation.valid) {
-      logger.log(`✅ HTML validation passed.`);
+    if (formatValidation.valid) {
+      logger.log(`✅ Format validation passed.`);
     } else {
-      logger.log(`❌ HTML validation failed:\n`, format(htmlValidation.messages));
+      logger.log(`❌ Format validation failed:`);
+      console.log(format(formatValidation.messages));
     }
 
     if (spellingValidation.valid) {
-      logger.log(`✅ No spelling errors found.`);
+      logger.log(`✅ Spelling validation passed.`);
     } else {
-      logger.log(`❌ Spelling errors found:\n`, format(spellingValidation.misspelledWords));
+      logger.log(`❌ Spelling validation failed:`);
+      console.log(format(spellingValidation.misspelledWords));
     }
 
-    if (htmlValidation.valid && spellingValidation.valid) {
+    if (formatValidation.valid && spellingValidation.valid) {
       summary.validFiles++;
     } else {
       summary.invalidFiles++;

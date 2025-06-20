@@ -13,6 +13,10 @@ const { execute, wait } = require('node-powertools');
 const { Octokit } = require('@octokit/rest')
 const AdmZip = require('adm-zip') // npm install adm-zip
 
+// Utils
+const collectTextNodes = require('./utils/collectTextNodes');
+const formatDocument = require('./utils/formatDocument');
+
 // Load package
 const package = Manager.getPackage('main');
 const project = Manager.getPackage('project');
@@ -60,8 +64,8 @@ async function translation(complete) {
   // Get ignored pages
   const ignoredPages = getIgnoredPages();
 
-  // Quit if NOT in build mode and UJ_TRANSLATION_FORCE is not true
-  if (!Manager.isBuildMode() && process.env.UJ_TRANSLATION_FORCE !== 'true') {
+  // Quit if NOT in build mode and UJ_FORCE_TRANSLATION is not true
+  if (!Manager.isBuildMode() && process.env.UJ_FORCE_TRANSLATION !== 'true') {
     logger.log('Skipping translation in development mode');
     return complete();
   }
@@ -167,105 +171,9 @@ async function processTranslation() {
     const relativePath = filePath.replace(/^_site[\\/]/, '');
     const originalHtml = jetpack.read(filePath);
     const $ = cheerio.load(originalHtml);
-    const textNodes = [];
 
-    // Get text nodes from body
-    // $('body *').each((_, el) => {
-    //   const node = $(el);
-
-    //   // Skip script tags or any other tags you want to ignore
-    //   if (node.is('script')) {
-    //     return;
-    //   }
-
-    //   // Find text nodes that are not empty
-    //   node.contents().each((_, child) => {
-    //     if (child.type === 'text' && child.data?.trim()) {
-    //       const i = textNodes.length;
-    //       const text = child.data
-    //         .replace(/^(\s+)\s*/, '$1') // Preserve original leading whitespace
-    //         .replace(/\s*(\s+)$/, '$1') // Preserve original trailing whitespace
-    //         .replace(/\s+/g, ' ')       // Normalize internal whitespace
-
-    //       // Tag the text node with a unique index
-    //       textNodes.push({
-    //         reference: child,
-    //         text: text,
-    //         tagged: `[${i}]${text}[/${i}]`,
-    //       });
-    //     }
-    //   });
-    // });
-    // Get translatable text nodes from both body and head
-    $('*').each((_, el) => {
-      const node = $(el);
-
-      // Skip scripts and style tags
-      if (node.is('script') || node.is('style')) {
-        return;
-      };
-
-      // Handle <title>
-      if (node.is('title')) {
-        const i = textNodes.length;
-        const text = node.text().trim();
-        if (text) {
-          textNodes.push({
-            attr: 'text',
-            node,
-            text,
-            tagged: `[${i}]${text}[/${i}]`
-          });
-        }
-        return;
-      }
-
-      // Handle meta tags with translatable content
-      if (node.is('meta')) {
-        const metaSelectors = [
-          'description',
-          'og:title',
-          'og:description',
-          'twitter:title',
-          'twitter:description'
-        ];
-        const name = node.attr('name');
-        const property = node.attr('property');
-
-        const key = name || property;
-        if (metaSelectors.includes(key)) {
-          const content = node.attr('content')?.trim();
-          if (content) {
-            const i = textNodes.length;
-            textNodes.push({
-              attr: 'content',
-              node,
-              text: content,
-              tagged: `[${i}]${content}[/${i}]`
-            });
-          }
-        }
-        return;
-      }
-
-      // Handle regular DOM text nodes
-      node.contents().each((_, child) => {
-        if (child.type === 'text' && child.data?.trim()) {
-          const i = textNodes.length;
-          const text = child.data
-            .replace(/^(\s+)\s*/, '$1')
-            .replace(/\s*(\s+)$/, '$1')
-            .replace(/\s+/g, ' ');
-
-          textNodes.push({
-            reference: child,
-            node,
-            text,
-            tagged: `[${i}]${text}[/${i}]`
-          });
-        }
-      });
-    });
+    // Collect text nodes with tags
+    const textNodes = collectTextNodes($, { tag: true });
 
     // Build body text from tagged nodes
     const bodyText = textNodes.map(n => n.tagged).join('\n');
@@ -362,34 +270,15 @@ async function processTranslation() {
             return logger.warn(`⚠️ Could not find translated tag for index ${i}`);
           }
 
-          if (n.attr === null) {
+          if (n.type === 'data') {
             n.reference.data = translation;
-          } else if (n.attr === 'text') {
+          } else if (n.type === 'text') {
             n.node.text(translation);
-          } else {
+          } else if (n.type === 'attr') {
             n.node.attr(n.attr, translation);
           }
           if (LOUD) logger.log(`${i}: ${n.text} → ${translation}`);
         });
-
-        // textNodes.forEach((n, i) => {
-        //   const m = translated.match(new RegExp(`\$begin:math:display$${i}\\$end:math:display$(.*?)\$begin:math:display$/${i}\\$end:math:display$`, 's'));
-        //   if (!m || !m[1]) {
-        //     logger.warn(`⚠️ Missing translation for tag ${i}`);
-        //     return;
-        //   }
-        //   const t = m[1];
-
-        //   if (n.attr === null) {                       // body text node
-        //     n.reference.data = t;
-        //   } else if (n.attr === 'text') {              // <title>
-        //     n.node.text(t);
-        //   } else {                                     // meta attributes
-        //     n.node.attr(n.attr, t);
-        //   }
-
-        //   if (LOUD) logger.log(`${i}: ${n.original} → ${t}`);
-        // });
 
         // Rewrite links
         rewriteLinks($, lang);
@@ -405,13 +294,18 @@ async function processTranslation() {
         $('meta[property="og:url"]').attr('content', canonicalUrl);
 
         // Insert language tags on this translation
-        insertLanguageTags($, languages, relativePath);
+        await insertLanguageTags($, languages, relativePath);
 
         // Insert language tags in original file
-        insertLanguageTags(cheerio.load(originalHtml), languages, relativePath, filePath);
+        await insertLanguageTags(cheerio.load(originalHtml), languages, relativePath, filePath);
+
+        // Insert language tags in sitemap.xml
+        const sitemapPath = path.join('_site', 'sitemap.xml');
+        const sitemapXml = jetpack.read(sitemapPath);
+        await insertLanguageTags(cheerio.load(sitemapXml, { xmlMode: true }), languages, relativePath, sitemapPath);
 
         // Save output
-        jetpack.write(outPath, $.html());
+        jetpack.write(outPath, await formatDocument($.html(), undefined, false));
         // logger.log(`✅ Wrote: ${outPath}`);
 
         // Track updated files only if it's new or updated
@@ -566,31 +460,70 @@ function rewriteLinks($, lang) {
   });
 }
 
-function insertLanguageTags($, languages, relativePath, filePath) {
+async function insertLanguageTags($, languages, relativePath, filePath) {
   // Add <link rel="alternate"> tags for all languages
-  // Locate the existing language tags
-  const existingLanguageTags = $(`head link[rel="alternate"][hreflang="${config?.translation?.default}"]`);
+  // Log whether $ is html or xml
+  const isHtml = $('html').length > 0;
 
-  // Insert new language tags directly after the existing ones
-  if (existingLanguageTags.length) {
-    let newLanguageTags = '';
-    for (const targetLang of languages) {
-      const alternateUrl = getCanonicalUrl(targetLang, relativePath);
+  if (isHtml) {
+    // Locate the existing language tags
+    const existingLanguageTags = $(`head link[rel="alternate"][hreflang="${config?.translation?.default}"]`);
 
-      // Check if the tag already exists
-      const tagExists = $(`head link[rel="alternate"][hreflang="${targetLang}"]`).length > 0;
-      if (!tagExists) {
-        newLanguageTags += `\n<link rel="alternate" href="${alternateUrl}" hreflang="${targetLang}">`;
+    // Insert new language tags directly after the existing ones
+    if (existingLanguageTags.length) {
+      let newLanguageTags = '';
+      for (const targetLang of languages) {
+        const alternateUrl = getCanonicalUrl(targetLang, relativePath);
+
+        // Check if the tag already exists
+        const tagExists = $(`head link[rel="alternate"][hreflang="${targetLang}"]`).length > 0;
+        if (!tagExists) {
+          newLanguageTags += `\n<link rel="alternate" href="${alternateUrl}" hreflang="${targetLang}">`;
+        }
       }
-    }
 
-    // Insert new tags after the last existing language tag
-    existingLanguageTags.last().after(newLanguageTags);
+      // Insert new tags after the last existing language tag
+      existingLanguageTags.last().after(newLanguageTags);
+    }
+  } else {
+    // Locate the existing language tags
+    const existingLanguageTags = $(`loc`);
+
+    // Loop thru loc elements and find one that matches canonical URL
+    let matchingLoc = null;
+    existingLanguageTags.each((_, loc) => {
+      const locUrl = $(loc).text();
+
+      if (locUrl === getCanonicalUrl(null, relativePath)) {
+        matchingLoc = loc;
+      }
+    });
+
+    // Insert new language tags after the matching <loc> element
+    if (matchingLoc) {
+
+      let newLanguageTags = '';
+      for (const targetLang of languages) {
+        const alternateUrl = getCanonicalUrl(targetLang, relativePath);
+
+        // Check if the tag already exists
+        // const tagExists = existingLanguageTags.filter((_, loc) => $(loc).text() === alternateUrl).length > 0;
+        const tagExists = $(`xhtml\\:link[rel="alternate"][hreflang="${targetLang}"][href="${alternateUrl}"]`).length > 0;
+        if (!tagExists) {
+          newLanguageTags += `\n<xhtml:link rel="alternate" hreflang="${targetLang}" href="${alternateUrl}" />`;
+        }
+      }
+
+      // Insert new tags after the matching <loc> element
+      $(matchingLoc).after(newLanguageTags);
+    }
   }
 
   // Save the modified HTML back to the file if filePath
   if (filePath) {
-    jetpack.write(filePath, $.html());
+    // const format = isHtml ? 'html' : 'xml';
+    const format = 'html';
+    jetpack.write(filePath, await formatDocument($.html(), format));
   }
 }
 
@@ -748,7 +681,7 @@ async function fetchTranslationsBranch() {
   // Get the name of the root folder from the extracted archive
   const extractedRoot = jetpack.list(extractDir).find(name => name.startsWith(`${owner}-${repo}-`))
   const extractedFullPath = path.join(extractDir, extractedRoot)
-  const targetPath = path.join(extractDir, 'translations')
+  const targetPath = path.join(extractDir, 'translations');
 
   // Remove any existing 'translations' folder and move the extracted folder there
   if (jetpack.exists(targetPath)) jetpack.remove(targetPath)
@@ -876,5 +809,11 @@ function getCanonicalUrl(lang, relativePath) {
   // Remove leading slashes
   cleanedPath = cleanedPath.replace(/^\/+/, '');
 
+  // If no language is specified, return the base URL with the cleaned path
+  if (!lang) {
+    return `${baseUrl}/${cleanedPath}`;
+  }
+
+  // Return
   return `${baseUrl}/${lang}/${cleanedPath}`;
 }

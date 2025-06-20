@@ -10,6 +10,9 @@ const ALIASES = {
   install: ['-i', 'i', '--install'],
   setup: ['-s', '--setup'],
   version: ['-v', '--version'],
+  // Tasks
+  audit: ['-a', '--audit'],
+  translation: ['-t', '--translation'],
 };
 
 // Function to resolve command name from aliases

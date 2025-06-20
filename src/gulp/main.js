@@ -5,6 +5,7 @@ const argv = Manager.getArguments();
 const { series, parallel, watch } = require('gulp');
 const path = require('path');
 const jetpack = require('fs-jetpack');
+const glob = require('glob').globSync;
 
 // Load package
 const package = Manager.getPackage('main');
@@ -14,7 +15,7 @@ const project = Manager.getPackage('project');
 logger.log('Starting...', argv);
 
 // Load tasks
-const tasks = jetpack.list(path.join(__dirname, 'tasks'));
+const tasks = glob('*.js', { cwd: `${__dirname}/tasks` });
 
 // Init global
 global.tasks = {};

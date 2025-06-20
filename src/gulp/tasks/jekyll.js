@@ -3,6 +3,7 @@ const Manager = new (require('../../build.js'));
 const logger = Manager.logger('jekyll');
 const argv = Manager.getArguments();
 const { series, watch } = require('gulp');
+const glob = require('glob').globSync;
 const path = require('path');
 const { execute } = require('node-powertools');
 const jetpack = require('fs-jetpack');
@@ -48,7 +49,7 @@ async function jekyll(complete) {
   }
 
   // Run buildpre hook
-  await hook('build:pre', index)
+  await hook('build:pre', index);
 
   // Build Jekyll
   const command = [
@@ -76,7 +77,7 @@ async function jekyll(complete) {
   await execute(command.join(' '), {log: true});
 
   // Run buildpost hook
-  await hook('build:post', index)
+  await hook('build:post', index);
 
   // Log
   logger.log('Finished!');
@@ -232,4 +233,3 @@ async function isBrowserTabOpen(url) {
     return false;
   }
 }
-
