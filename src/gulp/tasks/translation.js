@@ -1,7 +1,7 @@
 // Libraries
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('translation');
-const { series } = require('gulp');
+const { series, watch } = require('gulp');
 const glob = require('glob').globSync;
 const path = require('path');
 const fetch = require('wonderful-fetch');
@@ -9,7 +9,7 @@ const jetpack = require('fs-jetpack');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
 const yaml = require('js-yaml');
-const { execute, wait } = require('node-powertools');
+const { execute, wait, template } = require('node-powertools');
 const { Octokit } = require('@octokit/rest')
 const AdmZip = require('adm-zip') // npm install adm-zip
 
@@ -38,12 +38,24 @@ const RECHECK_DAYS = 0;
 // const AI_MODEL = 'gpt-4.1-nano';
 const AI_MODEL = 'gpt-4.1-mini';
 const TRANSLATION_BRANCH = 'uj-translations';
-const LOUD = false;
-// const LOUD = true;
+// const LOUD = false;
+const LOUD = process.env.UJ_LOUD_LOGS === 'true';
 
 const TRANSLATION_DELAY_MS = 500; // wait between each translation
 const TRANSLATION_BATCH_SIZE = 25; // wait longer every N translations
 const TRANSLATION_BATCH_DELAY_MS = 10000; // longer wait after batch
+
+// Prompt
+const SYSTEM_PROMPT = `
+  You are a professional translator.
+  Translate the provided content, preserving all original formatting, HTML structure, metadata, and links.
+  Do not explain anything — just return the translated content.
+  The content is TAGGED with [0]...[/0], etc. to mark the text. You MUST KEEP THESE TAGS IN PLACE IN YOUR RESPONSE and OPEN ([0]) and CLOSE ([/0]) them PROPERLY.
+  DO NOT translate URLs or other non-text elements.
+  DO NOT translate the brand.
+  Brand: {brand}
+  Translate to {lang}
+`;
 
 // Variables
 let octokit;
@@ -60,9 +72,6 @@ const delay = 250;
 async function translation(complete) {
   // Log
   logger.log('Starting...');
-
-  // Get ignored pages
-  const ignoredPages = getIgnoredPages();
 
   // Quit if NOT in build mode and UJ_TRANSLATION_FORCE is not true
   if (!Manager.isBuildMode() && process.env.UJ_TRANSLATION_FORCE !== 'true') {
@@ -103,6 +112,34 @@ async function translation(complete) {
   return complete();
 };
 
+// TODO: Currently this does not work because it will run an infinite loop
+function translationWatcher(complete) {
+  // Quit if in build mode
+  if (Manager.isBuildMode()) {
+    logger.log('[watcher] Skipping watcher in build mode');
+    return complete();
+  }
+
+  // Log
+  logger.log('[watcher] Watching for changes...');
+
+  // Get ignored pages
+  const ignoredPages = getIgnoredPages();
+  const ignore = [
+    ...ignoredPages.files.map(key => `_site/${key}.html`),
+    ...ignoredPages.folders.map(folder => `_site/${folder}/**/*`)
+  ]
+
+  // Watch for changes
+  watch(input, { delay: delay, ...getGlobOptions(), }, translation)
+  .on('change', (path) => {
+    logger.log(`[watcher] File changed (${path})`);
+  });
+
+  // Complete
+  return complete();
+}
+
 // Default Task
 module.exports = series(translation);
 
@@ -110,7 +147,6 @@ module.exports = series(translation);
 async function processTranslation() {
   const enabled = config?.translation?.enabled !== false;
   const languages = config?.translation?.languages || [];
-  const ignoredPages = getIgnoredPages();
   const updatedFiles = new Set();
 
   // Quit if translation is disabled or no languages are configured
@@ -135,13 +171,7 @@ async function processTranslation() {
   // }
 
   // Get files
-  const allFiles = glob(input, {
-    nodir: true,
-    ignore: [
-      ...ignoredPages.files.map(key => `_site/${key}.html`),
-      ...ignoredPages.folders.map(folder => `_site/${folder}/**/*`)
-    ]
-  });
+  const allFiles = glob(input, getGlobOptions());
 
   // Log
   logger.log(`Translating ${allFiles.length} files for ${languages.length} supported languages: ${languages.join(', ')}`);
@@ -153,6 +183,8 @@ async function processTranslation() {
       skipped: new Set(),
     }
   };
+  const promptHash = crypto.createHash('sha256').update(SYSTEM_PROMPT).digest('hex');
+
   for (const lang of languages) {
     const metaPath = path.join(CACHE_DIR, lang, 'meta.json');
     let meta = {};
@@ -163,6 +195,15 @@ async function processTranslation() {
         logger.warn(`⚠️ Failed to parse meta for [${lang}], starting fresh`);
       }
     }
+
+    // Check if the promptHash matches; if not, invalidate the cache
+    if (meta.prompt?.hash !== promptHash) {
+      logger.warn(`⚠️ Prompt hash mismatch for [${lang}]. Invalidating cache.`);
+      meta = {};
+    }
+
+    // Store the current promptHash in the meta file
+    meta.prompt = { hash: promptHash };
     metas[lang] = { meta, path: metaPath, skipped: new Set() };
   }
 
@@ -217,11 +258,16 @@ async function processTranslation() {
         const age = entry?.timestamp
           ? (Date.now() - new Date(entry.timestamp).getTime()) / (1000 * 60 * 60 * 24)
           : Infinity;
-        const useCached = entry && entry.hash === hash && (RECHECK_DAYS === 0 || age < RECHECK_DAYS);
+        const useCached = entry
+          && entry.hash === hash
+          && (RECHECK_DAYS === 0 || age < RECHECK_DAYS);
         const startTime = Date.now();
 
         // Check if we can use cached translation
-        if (useCached && jetpack.exists(cachePath)) {
+        if (
+          (useCached || process.env.UJ_TRANSLATION_CACHE === 'true')
+          && jetpack.exists(cachePath)
+        ) {
           translated = jetpack.read(cachePath);
           logger.log(`📦 Using cached translation for ${relativePath} [${lang}]`);
         } else {
@@ -278,14 +324,22 @@ async function processTranslation() {
             return logger.warn(`⚠️ Could not find translated tag for index ${i}`);
           }
 
+          // Extract original leading and trailing whitespace
+          const originalText = n.text;
+          const leadingWhitespace = originalText.match(/^\s*/)?.[0] || '';
+          const trailingWhitespace = originalText.match(/\s*$/)?.[0] || '';
+
+          // Reapply the original whitespace to the translation
+          const adjustedTranslation = `${leadingWhitespace}${translation.trim()}${trailingWhitespace}`;
+
           if (n.type === 'data') {
-            n.reference.data = translation;
+            n.reference.data = adjustedTranslation;
           } else if (n.type === 'text') {
-            n.node.text(translation);
+            n.node.text(adjustedTranslation);
           } else if (n.type === 'attr') {
-            n.node.attr(n.attr, translation);
+            n.node.attr(n.attr, adjustedTranslation);
           }
-          if (LOUD) logger.log(`${i}: ${n.text} → ${translation}`);
+          if (LOUD) logger.log(`${i}: "${n.text.trim()}" → "${adjustedTranslation.trim()}"`);
         });
 
         // Rewrite links
@@ -382,14 +436,11 @@ async function processTranslation() {
 }
 
 async function translateWithAPI(openAIKey, content, lang) {
-  // Prompt
-  const systemPrompt = `
-    You are a professional translator.
-    Translate the provided content, preserving all original formatting, HTML structure, metadata, and links.
-    Do not explain anything — just return the translated content.
-    The content is TAGGED with [0]...[/0], etc. to mark the text. You MUST KEEP THESE TAGS IN PLACE IN YOUR RESPONSE and OPEN ([0]) and CLOSE ([/0]) them PROPERLY.
-    Translate to ${lang}.
-  `;
+  const brand = config?.brand?.name || 'Unknown Brand';
+  const systemPrompt = template(SYSTEM_PROMPT, {
+    lang,
+    brand
+  });
 
   // Request
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -623,6 +674,17 @@ function getIgnoredPages() {
       '__/auth',
     ],
   };
+}
+
+function getGlobOptions() {
+  const ignoredPages = getIgnoredPages();
+  return {
+    nodir: true,
+    ignore: [
+      ...ignoredPages.files.map(key => `_site/${key}.html`),
+      ...ignoredPages.folders.map(folder => `_site/${folder}/**/*`)
+    ]
+  }
 }
 
 // Git Sync: Pull

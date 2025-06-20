@@ -76,6 +76,7 @@ npx uj audit
 ```bash
 GH_TOKEN=XXX \
 GITHUB_REPOSITORY=XXX \
+UJ_TRANSLATION_CACHE=true \
 npx uj translation
 ```
 <!-- Developing -->

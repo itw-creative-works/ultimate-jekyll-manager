@@ -21,14 +21,14 @@ const collectTextNodes = ($, options) => {
       const i = textNodes.length;
       const text = node.text().trim();
       if (text) {
+
+        // Push
         textNodes.push({
           node,
           type: 'text',
           attr: null,
           text,
           tagged: `[${i}]${text}[/${i}]`,
-          line: el.startIndex || 0, // Add line information
-          column: 0 // Column is not directly available, default to 0
         });
       }
       return;
@@ -51,14 +51,14 @@ const collectTextNodes = ($, options) => {
         const text = node.attr('content')?.trim();
         if (text) {
           const i = textNodes.length;
+
+          // Push
           textNodes.push({
             node,
             type: 'attr',
             attr: 'content',
             text,
             tagged: `[${i}]${text}[/${i}]`,
-            line: el.startIndex || 0, // Add line information
-            column: 0 // Column is not directly available, default to 0
           });
         }
       }
@@ -70,10 +70,15 @@ const collectTextNodes = ($, options) => {
       if (child.type === 'text' && child.data?.trim()) {
         const i = textNodes.length;
         const text = child.data
-          .replace(/^\s+/, '')
-          .replace(/\s+$/, '')
-          .replace(/\s+/g, ' ');
+          // Preserve a single leading whitespace if it exists
+          .replace(/^\s*(\s)\s*/, '$1')
+          // Preserve a single trailing whitespace if it exists
+          .replace(/\s*(\s)\s*$/, '$1')
+          // Normalize internal whitespace
+          .replace(/\s+/g, ' ')
+        // const text = trimPreserveOneCleanInner(child.data);
 
+        // Push
         textNodes.push({
           node,
           type: 'data',
@@ -81,8 +86,6 @@ const collectTextNodes = ($, options) => {
           reference: child,
           text,
           tagged: `[${i}]${text}[/${i}]`,
-          line: el.startIndex || 0, // Add line information
-          column: 0 // Column is not directly available, default to 0
         });
       }
     });
@@ -92,3 +95,12 @@ const collectTextNodes = ($, options) => {
 };
 
 module.exports = collectTextNodes;
+
+
+function trimPreserveOneCleanInner(str) {
+  const match = str.match(/^(\s*)(.*?)(\s*)$/);
+  const leading = match[1] ? match[1][0] || '' : '';
+  const content = match[2].replace(/\s+/g, ' ');
+  const trailing = match[3] ? match[3][0] || '' : '';
+  return leading + content + trailing;
+}

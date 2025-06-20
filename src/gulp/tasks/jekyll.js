@@ -79,9 +79,6 @@ async function jekyll(complete) {
   // Run buildpost hook
   await hook('build:post', index);
 
-  // QUIT
-  // QUIT
-
   // Log
   logger.log('Finished!');
 
