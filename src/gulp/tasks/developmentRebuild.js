@@ -91,7 +91,7 @@ function developmentRebuildWatcher(complete) {
   // Watch for changes
   watch(input, { delay: delay, dot: true }, developmentRebuild)
   .on('change', (path) => {
-    logger.log(`[watcher] File ${path} was changed`);
+    logger.log(`[watcher] File changed (${path})`);
   });
 
   // Complete

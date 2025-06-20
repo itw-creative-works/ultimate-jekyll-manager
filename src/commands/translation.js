@@ -11,5 +11,5 @@ module.exports = async function (options) {
   // Log
   logger.log(`Starting translation...`);
 
-  await execute('UJ_FORCE_TRANSLATION=true bundle exec npm run gulp -- translation', { log: true })
+  await execute('UJ_TRANSLATION_FORCE=true bundle exec npm run gulp -- translation', { log: true })
 };

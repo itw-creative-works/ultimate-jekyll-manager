@@ -11,5 +11,5 @@ module.exports = async function (options) {
   // Log
   logger.log(`Starting audit...`);
 
-  await execute('UJ_FORCE_AUDIT=true bundle exec npm run gulp -- audit', { log: true })
+  await execute('UJ_AUDIT_FORCE=true bundle exec npm run gulp -- audit', { log: true })
 };

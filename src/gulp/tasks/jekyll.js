@@ -113,7 +113,7 @@ function jekyllWatcher(complete) {
   // Watch for changes
   watch(input, { delay: delay, dot: true }, jekyll)
   .on('change', (path) => {
-    logger.log(`[watcher] File ${path} was changed`);
+    logger.log(`[watcher] File changed (${path})`);
 
     // Check if changed file is a .rb file
     if (path.endsWith('.rb')) {

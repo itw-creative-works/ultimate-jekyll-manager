@@ -35,8 +35,8 @@ async function audit(complete) {
   // Log
   logger.log('Starting...');
 
-  // Quit if NOT in build mode and UJ_FORCE_AUDIT is not true
-  if (!Manager.isBuildMode() && process.env.UJ_FORCE_AUDIT !== 'true') {
+  // Quit if NOT in build mode and UJ_AUDIT_FORCE is not true
+  if (!Manager.isBuildMode() && process.env.UJ_AUDIT_FORCE !== 'true') {
     logger.log('Skipping audit in development mode');
     return complete();
   }

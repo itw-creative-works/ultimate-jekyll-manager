@@ -186,7 +186,7 @@ function webpackWatcher(complete) {
   watch(input, { delay: delay, dot: true }, webpack)
   .on('change', (path) => {
     // Log
-    logger.log(`[watcher] File ${path} was changed`);
+    logger.log(`[watcher] File changed (${path})`);
   });
 
   // Complete

@@ -64,8 +64,8 @@ async function translation(complete) {
   // Get ignored pages
   const ignoredPages = getIgnoredPages();
 
-  // Quit if NOT in build mode and UJ_FORCE_TRANSLATION is not true
-  if (!Manager.isBuildMode() && process.env.UJ_FORCE_TRANSLATION !== 'true') {
+  // Quit if NOT in build mode and UJ_TRANSLATION_FORCE is not true
+  if (!Manager.isBuildMode() && process.env.UJ_TRANSLATION_FORCE !== 'true') {
     logger.log('Skipping translation in development mode');
     return complete();
   }
@@ -549,9 +549,6 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
   if (filePath) {
     const format = isHtml ? 'html' : 'xml';
     const formatted = await formatDocument($.html(), format);
-
-    console.log('---SAVING filePath', filePath);
-    console.log('---SAVING formatted.error', formatted.error);
 
     // Write the formatted content back to the file
     jetpack.write(filePath, formatted.content);
