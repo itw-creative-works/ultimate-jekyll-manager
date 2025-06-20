@@ -40,6 +40,7 @@ const AI_MODEL = 'gpt-4.1-mini';
 const TRANSLATION_BRANCH = 'uj-translations';
 // const LOUD = false;
 const LOUD = process.env.UJ_LOUD_LOGS === 'true';
+const CONTROL = 'UJ-TRANSLATION-CONTROL';
 
 const TRANSLATION_DELAY_MS = 500; // wait between each translation
 const TRANSLATION_BATCH_SIZE = 25; // wait longer every N translations
@@ -51,9 +52,12 @@ const SYSTEM_PROMPT = `
   Translate the provided content, preserving all original formatting, HTML structure, metadata, and links.
   Do not explain anything — just return the translated content.
   The content is TAGGED with [0]...[/0], etc. to mark the text. You MUST KEEP THESE TAGS IN PLACE IN YOUR RESPONSE and OPEN ([0]) and CLOSE ([/0]) them PROPERLY.
-  DO NOT translate URLs or other non-text elements.
-  DO NOT translate the brand.
-  Brand: {brand}
+
+  DO NOT translate the following elements (but still keep them in place):
+  - URLs or other non-text elements.
+  - the brand name ({brand}).
+  - the control tag (${CONTROL}).
+
   Translate to {lang}
 `;
 
@@ -214,8 +218,15 @@ async function processTranslation() {
   for (const filePath of allFiles) {
     // Get relative path and original HTML
     const relativePath = filePath.replace(/^_site[\\/]/, '');
-    const originalHtml = jetpack.read(filePath);
+    let originalHtml = jetpack.read(filePath);
     const $ = cheerio.load(originalHtml);
+
+    // Inject hidden control tag as last child of <body>
+    const controlTag = `<span id="${CONTROL}" style="display:none;">${CONTROL}</span>`;
+    $('body').append(controlTag);
+
+    // Reset originalHtml
+    originalHtml = $.html();
 
     // Collect text nodes with tags
     const textNodes = collectTextNodes($, { tag: true });
@@ -263,6 +274,20 @@ async function processTranslation() {
           && (RECHECK_DAYS === 0 || age < RECHECK_DAYS);
         const startTime = Date.now();
 
+        function setResult(success) {
+          if (success) {
+            meta[relativePath] = {
+              timestamp: new Date().toISOString(),
+              hash,
+            };
+          } else {
+            meta[relativePath] = {
+              timestamp: 0,
+              hash: '__fail__',
+            };
+          }
+        }
+
         // Check if we can use cached translation
         if (
           (useCached || process.env.UJ_TRANSLATION_CACHE === 'true')
@@ -287,10 +312,9 @@ async function processTranslation() {
 
             // Save to cache
             jetpack.write(cachePath, translated);
-            meta[relativePath] = {
-              timestamp: new Date().toISOString(),
-              hash,
-            };
+
+            // Set result
+            setResult(true);
           } catch (e) {
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
             logger.error(`⚠️ Translation failed: ${relativePath} [${lang}] — ${e.message} (Elapsed time: ${elapsedTime}s)`);
@@ -299,10 +323,7 @@ async function processTranslation() {
             translated = bodyText;
 
             // Save failure to cache
-            meta[relativePath] = {
-              timestamp: 0,
-              hash: '__fail__',
-            };
+            setResult(false);
           }
         }
 
@@ -344,6 +365,20 @@ async function processTranslation() {
 
         // Rewrite links
         rewriteLinks($, lang);
+
+        // Check that the control tag matches the expected value
+        const controlTag = $(`#${CONTROL}`);
+        if (
+          controlTag.length === 0
+          || controlTag.text() !== CONTROL
+        ) {
+          logger.error(`⚠️ Control tag mismatch in ${relativePath} [${lang}]`);
+
+          return setResult(false);
+        } else {
+          // Delete the control tag
+          controlTag.remove();
+        }
 
         // Set the lang attribute on the <html> tag
         $('html').attr('lang', lang);
@@ -431,7 +466,7 @@ async function processTranslation() {
 
   // Push updated translation cache back to uj-translations
   if (Manager.isBuildMode()) {
-    await pushTranslationBranch(updatedFiles);
+    await pushTranslationBranch( );
   }
 }
 
@@ -783,7 +818,7 @@ async function fetchTranslationsBranch() {
 }
 
 // Git Sync: Push
-async function pushTranslationBranch(updatedFiles) {
+async function pushTranslationBranch( ) {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const localRoot = path.join('.temp', 'translations');
 

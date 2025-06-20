@@ -44,3 +44,11 @@ By vising {{ brand }}, you agree to comply.
 - Account page: [/account](/account)
 - Admin page: [/admin](/admin)
 - Admin sub-page: [/admin/subpage](/admin/subpage)
+
+## This is an input
+<div class="form-group">
+  <input type="email" name="slap_honey" class="form-control" placeholder="Your Email">
+</div>
+
+## This button has a title
+<a href="https://itwcreativeworks.com" class="btn btn-primary" title="Visit ITW Creative Works">Visit ITW Creative Works</a>

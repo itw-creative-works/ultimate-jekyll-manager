@@ -65,6 +65,24 @@ const collectTextNodes = ($, options) => {
       return;
     }
 
+    // Handle attributes like title and placeholder
+    const translatableAttributes = ['title', 'placeholder', 'alt', 'aria-label', 'aria-placeholder', 'aria-describedby', 'aria-labelledby', 'value', 'label'];
+    translatableAttributes.forEach(attr => {
+      const text = node.attr(attr)?.trim();
+      if (text) {
+        const i = textNodes.length;
+
+        // Push
+        textNodes.push({
+          node,
+          type: 'attr',
+          attr,
+          text,
+          tagged: `[${i}]${text}[/${i}]`,
+        });
+      }
+    });
+
     // Handle regular DOM text nodes
     node.contents().each((_, child) => {
       if (child.type === 'text' && child.data?.trim()) {
@@ -75,8 +93,7 @@ const collectTextNodes = ($, options) => {
           // Preserve a single trailing whitespace if it exists
           .replace(/\s*(\s)\s*$/, '$1')
           // Normalize internal whitespace
-          .replace(/\s+/g, ' ')
-        // const text = trimPreserveOneCleanInner(child.data);
+          .replace(/\s+/g, ' ');
 
         // Push
         textNodes.push({
