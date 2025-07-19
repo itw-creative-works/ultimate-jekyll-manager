@@ -5,12 +5,15 @@
 @use 'vendor/cookieconsent' as *;
 
 // Import default Ultimate Jekyll Manager styles
-@use 'global/initialize' as *;
-@use 'global/utilities' as *;
-@use 'global/animations' as *;
-@use 'global/buttons' as *;
-@use 'global/alert' as *;
-@use 'global/chatsy' as *;
+@use 'core/initialize' as *;
+@use 'core/utilities' as *;
+@use 'core/animations' as *;
+@use 'core/buttons' as *;
+@use 'core/alert' as *;
+@use 'core/chatsy' as *;
+
+// Import custom styles
+@use 'core/custom-font-awesome' as *;
 
 // Import page-specific styles
 @use '_page-specific' as *;

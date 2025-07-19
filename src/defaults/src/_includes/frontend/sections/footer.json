@@ -1,0 +1,17 @@
+{
+  logo: {
+
+  },
+  links: [
+    {
+      label: 'Home',
+      href: '/'
+    },
+  ],
+  socials: {
+  },
+  copyright: {
+  },
+  legal: {
+  },
+}

@@ -39,7 +39,7 @@ permalink: /feeds/posts.json
             "url": "{{ post.image }}"
           }
         ],
-        "summary": "{{ post.post.excerpt | strip_html | strip_newlines | uj_json_escape }}",
+        "summary": "{{ post.post.description | strip_html | strip_newlines | uj_json_escape }}",
         "tags": {{ tags }}
       }{% if forloop.last == false %},{% endif %}
     {% endfor %}

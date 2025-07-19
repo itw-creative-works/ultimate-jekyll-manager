@@ -1,11 +1,7 @@
 ---
 ### ALL PAGES ###
-layout: placeholder/extension
+layout: blueprint/extension
 permalink: /extension
 
 ### REGULAR PAGES ###
-meta:
-  title: null
-  description: null
-  breadcrumb: null
 ---

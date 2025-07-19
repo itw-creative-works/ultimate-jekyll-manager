@@ -13,18 +13,6 @@ function Manager() {
 }
 
 // Initialize
-// Manager.prototype.initialize = function (callback) {
-//   const self = this;
-
-//   // Initiate the web manager
-//   self.webManager = new WebManager();
-
-//   // Initialize
-//   self.webManager.init(window.Configuration, callback);
-
-//   // Return
-//   return self.webManager;
-// };
 Manager.prototype.initialize = function () {
   const self = this;
 
@@ -38,27 +26,30 @@ Manager.prototype.initialize = function () {
       // Get the page path (MUST BE SANITIZED because webpack wont import if page has leading slashes)
       const page = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
       const pagePath = !page ? 'index.js' : `${page}/index.js`;
+      const fullModulePath = `assets/js/pages/${pagePath}`;
+
+      // Module options
+      const options = {
+        pagePath: pagePath,
+      }
 
       // Initialize modules
       const modules = [];
 
       /* @dev-only:start */
       {
-        // Main log
-        webManager.log('⚠️ Enabling development mode features...');
-
-        // Add development click handler
-        document.addEventListener('click', function (event) {
-          webManager.log('Click', event.target);
-        });
-
-        // Log page script path
-        webManager.log('Loading page script:', `assets/js/pages/${pagePath}`);
+        // Initialize development features
+        const initDev = require('__main_assets__/js/libs/dev.js');
+        initDev(self, options);
       }
       /* @dev-only:end */
 
       // Require global script
-      require('__main_assets__/js/ultimate-jekyll-manager.js')(Manager);
+      require('__main_assets__/js/ultimate-jekyll-manager.js')(self, options);
+
+      /* @dev-only:start */
+      webManager.log(`Page module loading (${fullModulePath})`);
+      /* @dev-only:end */
 
       // Load page-specific scripts
       Promise.all([
@@ -69,9 +60,9 @@ Manager.prototype.initialize = function () {
           })
           .catch((e) => {
             if (e.message && e.message.includes('Cannot find module')) {
-              console.warn('Framework page module not found:', page);
+              console.warn(`Page module #main not found (${fullModulePath})`);
             } else {
-              console.error('Error loading framework module:', e);
+              console.error(`Page module #main error (${fullModulePath})`, e);
             }
           }),
 
@@ -82,9 +73,9 @@ Manager.prototype.initialize = function () {
           })
           .catch((e) => {
             if (e.message && e.message.includes('Cannot find module')) {
-              console.warn('Project page module not found:', page);
+              console.warn(`Project module #project not found (${fullModulePath})`);
             } else {
-              console.error('Error loading project module:', e);
+              console.error(`Project module #project error (${fullModulePath})`, e);
             }
           })
       ])
@@ -99,9 +90,14 @@ Manager.prototype.initialize = function () {
 
           // Execute the module function
           try {
-            await mod.default(Manager);
-          } catch (err) {
-            console.error(`Error during execution of ${mod.tag} module:`, err);
+            // Log page script path
+            /* @dev-only:start */
+            webManager.log(`Page module #${mod.tag} loaded (${fullModulePath})`);
+            /* @dev-only:end */
+
+            await mod.default(self, options);
+          } catch (e) {
+            console.error(`Page module #${mod.tag} error (${fullModulePath})`, e);
             break; // Stop execution if any module fails
           }
         }

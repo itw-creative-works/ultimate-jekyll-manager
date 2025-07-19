@@ -73,7 +73,7 @@ permalink: /feeds/posts.xml
             {% if post.meta.description %}
               {{ post.meta.description }}
             {% else %}
-              {{ post.post.excerpt }}
+              {{ post.post.description }}
             {% endif %}
           ]]>
         </description>

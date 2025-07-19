@@ -1,11 +1,7 @@
 ---
 ### ALL PAGES ###
-layout: placeholder/pricing
+layout: blueprint/pricing
 permalink: /pricing
 
 ### REGULAR PAGES ###
-meta:
-  title: null
-  description: null
-  breadcrumb: null
 ---

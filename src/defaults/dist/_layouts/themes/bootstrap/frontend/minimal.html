@@ -1,7 +1,42 @@
 ---
 ### ALL PAGES ###
-layout: themes/geeks/frontend/minimal
+layout: themes/bootstrap/frontend/base
 
-### REGULAR PAGES ###
+### THEME CONFIG ###
+theme:
+  nav:
+    enabled: true
+  # main:
+  #   class: ""
+  footer:
+    enabled: true
 ---
-{{ content }}
+
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-12 col-12">
+        <div class="text-center">
+          <h1 class="display-3 fw-bold">
+            {{ page.resolved.meta.breadcrumb }}
+          </h1>
+          <p class="lead px-8">
+            {{ page.resolved.meta.description }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        {{ content | uj_content_format }}
+      </div>
+    </div>
+  </div>
+</section>
+
+

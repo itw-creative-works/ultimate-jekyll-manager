@@ -87,3 +87,57 @@ npx uj translation
 npm install
 npm run prepare:watch
 ```
+
+## Page Frontmatter
+You can add the following frontmatter to your pages to customize their behavior:
+```yaml
+---
+# Control the page's meta tags
+meta:
+  index: true # Set to false to disable indexing by search engines
+  title: 'Page Title' # Custom meta title for the page
+  description: 'Page description goes here.' # Custom meta description for the page
+  breadcrumb: '' # Custom breadcrumb for the page
+
+# Control the page's theme and layout
+theme:
+  nav:
+    enabled: true # Enable theme's nav on the page
+  footer:
+    enabled: true # Enable theme's footer on the page
+  body:
+    class: '' # Add custom classes to the body tag
+    main:
+      class: '' # Add custom classes to the main tag
+  head:
+    content: '' # Injected at the end of the head tag
+  foot:
+    content: '' # Injected at the end of the foot tag (inside <body>)
+
+# Post pages
+post:
+  title: 'Post Title' # Custom post title for the page
+  description: 'Post description goes here.' # Custom post description for the page
+---
+```
+
+> This project is "ultimate-jekyll", an NPM module that helps   │
+│   streamline development of Jekyll websites. A "consuming       │
+│   project" will require this NPM module to take advantage of    │
+│   its features like automatic folder structure setup, themes,   │
+│   and default pages to get a website up and running in          │
+│   seconds, while allowing further customization down the line.  │
+│   Right now i am struggling on the theme portion of this        │
+│   project. I want the user to be able to define the theme in    │
+│   their _config.yml (which currently they do by setting         │
+│   theme.id). I have some themes from the official bootstrap     │
+│   team. usually a theme comes with a frontend, a backend/admin  │
+│   dashboard, and docs. these 3 subparts of the theme have       │
+│   different html structure and css and js requirements. so i    │
+│   need a super easy system that allows me to make a file in     │
+│   the consuming project, say its the index.html for example,    │
+│   and i should easily be able to put which subseciton (or       │
+│   target as i call it) of the theme to use. so for an agency    │
+│   website i will probably use the frontend target, while for a  │
+│   chat app i will probably use the backend target. however, i   │
+│   need to be able to use

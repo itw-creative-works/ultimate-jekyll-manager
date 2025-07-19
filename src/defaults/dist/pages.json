@@ -1,6 +1,9 @@
 ---
+### ALL PAGES ###
 layout: null
 permalink: /pages.json
+
+### REGULAR PAGES ###
 sitemap:
   include: false
 
@@ -10,34 +13,31 @@ meta:
 
 {% assign pages = site.pages %}
 {% assign posts = site.posts %}
-{% assign data = pages | concat: posts %}
+{% assign items = pages | concat: posts %}
 
 [
-  {%- if site.search.enable != false -%}
-    {% for page in data %}
+  {% for item in items %}
+    {%- if item.layout contains 'post' and item.post.id != null and item.post.id != '' -%}
+      {% assign page-type = 'post' %}
+    {% else %}
+      {% assign page-type = null %}
+    {% endif %}
 
-      {%- if page.layout contains 'post' and page.post.id != null and page.post.id != '' -%}
-        {% assign page-type = 'post' %}
-      {% else %}
-        {% assign page-type = null %}
-      {% endif %}
+    {%- if item.url contains '/@reference' or item.layout contains 'redirect' or item.search.include == false -%}
+      {%- continue -%}
+    {%- endif -%}
 
-      {%- if page.url contains '/@reference' or page.layout contains 'redirect' or page.search.enable == false -%}
-        {%- continue -%}
-      {%- endif -%}
+    {%- if item.url contains '.js' -%}
+      {%- continue -%}
+    {%- endif -%}
 
-      {%- if page.url contains '.js' -%}
-        {%- continue -%}
-      {%- endif -%}
-
-      {
-        "url": "{{ site.url }}{{ page.url }}",
-        "title": "{{ page.meta.title | liquify }}",
-        "desc": "{{ page.meta.description | liquify }}",
-        "breadcrumb": "{{ page.meta.breadcrumb | liquify }}",
-        "category": "{{ page.search.category | default: page.post.category | liquify }}",
-        "type": "{{ page-type | default: page.settings.page-type | liquify }}"
-      }{% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  {%- endif -%}
+    {
+      "url": "{{ site.url }}{{ item.url }}",
+      "title": "{{ item.meta.title | liquify }}",
+      "desc": "{{ item.meta.description | liquify }}",
+      "breadcrumb": "{{ item.meta.breadcrumb | liquify }}",
+      "category": "{{ item.search.category | default: item.post.category | liquify }}",
+      "type": "{{ page-type | default: item.settings.page-type | liquify }}"
+    }{% unless forloop.last %},{% endunless %}
+  {% endfor %}
 ]

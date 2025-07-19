@@ -3,10 +3,7 @@ const Manager = new (require('../../build.js'));
 const logger = Manager.logger('distribute');
 const { src, dest, watch, series } = require('gulp');
 const through2 = require('through2');
-const jetpack = require('fs-jetpack');
 const path = require('path');
-const JSON5 = require('json5');
-const { execute } = require('node-powertools');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -38,11 +35,8 @@ function distribute() {
     // Log
     logger.log('Starting...');
 
-    // Create build JSON
-    await createBuildJSON();
-
     // Complete
-    return src(input, { base: 'src', dot: true, })
+    return src(input, { base: 'src', dot: true })
       // .pipe(customTransform())
       .pipe(dest(output))
       .on('end', () => {
@@ -111,61 +105,5 @@ function distributeWatcher(complete) {
 
 // Default Task
 module.exports = series(distribute, distributeWatcher);
-
-
-// Get git info
-async function getGitInfo() {
-  return await execute('git remote -v')
-  .then((r) => {
-    // Split on whitespace
-    const split = r.split(/\s+/);
-    const url = split[1];
-
-    // Get user and repo
-    const user = url.split('/')[3];
-    const name = url.split('/')[4].replace('.git', '');
-
-    // Return
-    return {user, name};
-  })
-}
-
-// Create build.json
-async function createBuildJSON() {
-  // Create build log JSON
-  try {
-    // Get info first
-    const git = await getGitInfo();
-
-    // Create JSON
-    const json = {
-      timestamp: new Date().toISOString(),
-      repo: {
-        user: git.user,
-        name: git.name,
-      },
-      environment: Manager.getEnvironment(),
-      packages: {
-        'web-manager': require('web-manager/package.json').version,
-        [package.name]: package.version,
-      },
-      config: config,
-
-      // Legacy
-      // TODO: REMOVE
-      'npm-build': new Date().toISOString(),
-      brand: config.brand,
-      'admin-dashboard': JSON5.parse(config['admin-dashboard']),
-    }
-
-    // Write to file
-    jetpack.write('dist/build.json', JSON.stringify(json, null, 2));
-
-    // Log
-    logger.log('Created build.json');
-  } catch (e) {
-    console.error('Error updating build.json', e);
-  }
-}
 
 

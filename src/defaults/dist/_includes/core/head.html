@@ -1,0 +1,146 @@
+<!-- Page Variables -->
+{% assign page-is-post = false %}
+{%- iftruthy page.resolved.post.id -%}
+  {% assign page-is-post = true %}
+{% endiftruthy %}
+
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, minimum-scale=1, maximum-scale=5"> --> <!-- DISABLED 4/8/23 to prevent auto-zooming on text fields -->
+{% assign page-viewport = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" %}
+{%- iftruthy page.resolved.meta.viewport -%}
+  {% assign page-viewport = page.resolved.meta.viewport | liquify %}
+{% endiftruthy %}
+
+{% assign page-referrer = 'strict-origin-when-cross-origin' %}
+{%- iftruthy page.resolved.meta.referrer -%}
+  {% assign page-referrer = page.resolved.meta.referrer | liquify %}
+{%- endiftruthy -%}
+
+{% assign page-keywords = '' %}
+{%- iftruthy page.resolved.meta.keywords -%}
+  {% assign page-keywords = page.resolved.meta.keywords | liquify %}
+{%- endiftruthy -%}
+
+{% assign page-title = page.resolved.meta.title | liquify %}
+{%- iftruthy page.resolved.post.title -%}
+  {% assign page-title = page.resolved.post.title | liquify %}
+{%- endiftruthy -%}
+
+{% assign page-description = page.resolved.meta.description | liquify %}
+{%- iftruthy page.resolved.post.description -%}
+  {% assign page-description = page.resolved.post.description | liquify %}
+{%- endiftruthy -%}
+
+{%- if page-is-post and page.post.id != null and page.post.id != '' -%}
+  {% capture page-image %}{{ site.url }}/assets/images/blog/posts/post-{{ page.post.id }}/{{ page.canonical.url | split: '/' | last }}.jpg{% endcapture %}
+{%- elsif page.meta.og-image != null and page.meta.og-image != '' -%}
+  {% capture page-image %}{%- if page.meta.og-image contains '://' -%}{%- else -%}{{ site.url }}/assets/images/og{%- endif -%}{{ page.meta.og-image }}{% endcapture %}
+{%- else -%}
+  {% capture page-image %}{%- if site.meta.og-image contains '://' -%}{%- else -%}{{ site.url }}/assets/images/og{%- endif -%}{{ site.meta.og-image }}{% endcapture %}
+{%- endif -%}
+
+{% assign page-og-type = 'website' %}
+{%- if page-is-post -%}
+  {% assign page-og-type = 'article' %}
+{%- endif -%}
+
+{% assign favicon-path = site.url | append: '/assets/images/favicon' %}
+{%- iftruthy page.resolved.favicon.path -%}
+  {% assign favicon-path = page.resolved.favicon.path %}
+{%- endiftruthy -%}
+
+{% assign page-robots = 'index' %}
+{%- if page.resolved.meta.index == false -%}
+  {% assign page-robots = 'noindex' %}
+{%- endif -%}
+
+<!-- Prefetch -->
+<link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
+<link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net"/>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"/>
+
+<!-- Meta -->
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta name="viewport" content="{{ page-viewport }}"/>
+<meta name="HandheldFriendly" content="True"/>
+<meta name="MobileOptimized" content="320"/>
+<meta name="generator" content="Ultimate Jekyll"/>
+
+<!-- Referrer -->
+<meta name="referrer" content="{{ page-referrer }}"/>
+
+<!-- Canonical -->
+<link rel="canonical" href="{{ page.canonical.url }}"/>
+
+<!-- Robots -->
+<meta name="robots" content="{{ page-robots }}"/>
+
+<!-- Keywords -->
+<meta name="keywords" content="{{ page-keywords }}"/>
+
+<!-- Manifest.json -->
+<link rel="manifest" href="{{ site.url }}/manifest.json"/>
+
+<!-- Title -->
+<title>{{ page-title }}</title>
+<meta name="twitter:title" content="{{ page-title }}"/>
+<meta property="og:title" content="{{ page-title }}"/>
+
+<!-- Description -->
+<meta name="description" content="{{ page-description }}"/>
+<meta name="twitter:description" content="{{ page-description }}"/>
+<meta property="og:description" content="{{ page-description }}"/>
+
+<!-- Image -->
+<meta name="twitter:image" content="{{ page-image }}"/>
+<meta property="og:image" content="{{ page-image }}"/>
+
+<!-- OG: Twitter -->
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:site" content="@{{ site.socials.twitter }}"/>
+<meta name="twitter:widgets:theme" content="light"/>
+
+<!-- OG: Facebook / Open Graph -->
+<meta property="og:url" content="{{ page.canonical.url }}"/>
+<meta property="og:type" content="{{ page-og-type }}"/>
+
+<!-- Main Feed -->
+<link href="{{ site.url }}/feeds/posts.xml" type="application/atom+xml" rel="alternate" title="{{ site.brand.name }} Feed"/>
+
+<!-- Language Tags -->
+<link rel="alternate" href="{{ page.canonical.url }}" hreflang="x-default"/>
+<link rel="alternate" href="{{ page.canonical.url }}" hreflang="{{ site.translation.default |  default: 'en' }}"/>
+
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ favicon-path }}/apple-touch-icon.png?cb={{ site.uj.cache_breaker }}"/>
+<link rel="icon" type="image/png" sizes="32x32" href="{{ favicon-path }}/favicon-32x32.png?cb={{ site.uj.cache_breaker }}"/>
+<link rel="icon" type="image/png" sizes="16x16" href="{{ favicon-path }}/favicon-16x16.png?cb={{ site.uj.cache_breaker }}"/>
+<link rel="mask-icon" href="{{ favicon-path }}/safari-pinned-tab.svg?cb={{ site.uj.cache_breaker }}" color="{{ page.resolved.favicon.safari-pinned-tab }}"/>
+<link rel="shortcut icon" type="image/x-icon" href="{{ favicon-path }}/favicon.ico?cb={{ site.uj.cache_breaker }}"/>
+<meta name="msapplication-TileColor" content="{{ page.resolved.favicon.msapp-tile-color }}"/>
+<meta name="msapplication-config" content="{{ favicon-path }}/browserconfig.xml?cb={{ site.uj.cache_breaker }}"/>
+<meta name="theme-color" content="{{ page.resolved.favicon.theme-color }}"/>
+
+<!-- Browser Support -->
+<!--[if lte IE 9]>
+  <link rel="stylesheet" type="text/css" href="/assets/css/main/lte-ie9.css?cb={{ site.uj.cache_breaker }}"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!-- CSS Bundle -->
+<link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+
+<!-- Style - Scripts are Disabled -->
+<noscript>
+  <style media="screen">
+    .main-alert-outdated {
+      display: block !important;
+    }
+  </style>
+</noscript>
+
+<!-- Page - Injected head -->
+{{ page.resolved.head.content | uj_content_format }}

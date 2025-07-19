@@ -67,7 +67,7 @@ function sass(complete) {
         path.resolve(rootPathPackage, 'dist/assets/css'),
 
         // So we can use "@use 'themes/{theme}' as *;" in the project
-        path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id, config.theme.version),
+        path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
 
         // So we can load _pages.scss from the project's dist
         path.resolve(rootPathProject, 'dist/assets/css'),

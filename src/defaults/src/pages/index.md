@@ -1,11 +1,7 @@
 ---
 ### ALL PAGES ###
-layout: placeholder/index
+layout: blueprint/index
 permalink: /
 
 ### REGULAR PAGES ###
-meta:
-  title: null
-  description: null
-  breadcrumb: null
 ---

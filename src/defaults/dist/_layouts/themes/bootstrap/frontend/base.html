@@ -1,7 +1,28 @@
 ---
 ### ALL PAGES ###
-layout: themes/geeks/frontend/base
+layout: core/root
 
-### REGULAR PAGES ###
+### THEME CONFIG ###
+theme:
+  # html:
+  #   class: ""
+  body:
+    class: "d-flex flex-column min-vh-100"
+  # main:
+  #   class: "flex-fill"
 ---
-{{ content }}
+
+<!-- Nav (controlled by page/layout front matter) -->
+{% unless page.resolved.theme.nav.enabled == false %}
+  {%- include /frontend/sections/nav.html -%}
+{% endunless %}
+
+<!-- Main Content -->
+<main class="container flex-fill {{ page.resolved.theme.main.class }} py-5">
+  {{ content | uj_content_format }}
+</main>
+
+<!-- Footer (controlled by page/layout front matter) -->
+{% unless page.resolved.theme.footer.enabled == false %}
+  {%- include /frontend/sections/footer.html -%}
+{% endunless %}

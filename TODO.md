@@ -1,5 +1,21 @@
-IMP
-- aftet moving setup build files to defaults.js task, most default files fail be created
+TEST:
+<br>
+site.uj.cache_breaker={{ site.uj.cache_breaker }}
+<br>
+page.random_id={{ page.random_id }}
+<br>
+
+FIX THE settings like
+* layout.settings.manager-configuration
+THey are super disorganized and not consistent and some are not needed anymore
+* Maybe make each setting  a key in settings, like
+settings:
+  manager-configuration:
+    firebase: "
+      {}
+    "
+That way, we can take advantage of the page.resolved to OVERRRIDE EVYERHING!
+
 
 QUESTIONS
 - how do we import theme CSS and JS into the bundles?
@@ -13,18 +29,47 @@ QUESTIONS
 - we shoudl be able to MERGE site settings
   - so site is default, then merge layount, then merge page (each OVERWRITING the previous one)
 
+TEMPORARY THAT WE NEED TO REMOVE
+src/assets/js/pages/terms/helper.js
+src/assets/js/pages/terms/index.js
+src/assets/js/pages/index.js
+src/assets/css/pages/index.scss
+src/assets/css/pages/terms/index.scss
+
 MIGRATIONS
 - @output/build/build.json --> build.json
   - there are some references inside that changed too:
     - npm-build --> timestamp
     - brand --> config.brand
     - admin-dashboard --> config.admin-dashboard
+- modules/adunits/adsense/adsense-display --> modules/adunits/adsense
+  - and then type="display"
+  - Same goes for every adsense type
+    - adsense-in-article
+    - adsense-in-feed
+    - adsense-multiplex
+post:
+  excerpt: ---> description: (IN THE ACTUAL POSTS)
 
-site.time | date: '%s'  --> uj_cache
+site.time | date: '%s'  --> site.uj.cache_breaker
 
 uj-website-json -- uj-schema-website
 
 facebook-pixel --> meta-pixel
+
+/@output/build/build.json --> /build.json
+// Legacy
+// TODO: REMOVE
+// 'npm-build': new Date().toISOString(),
+// brand: config.brand,
+// 'admin-dashboard': JSON5.parse(config['admin-dashboard']),
+
+Manager.properties.global, and other Manager.properties (IN UJ TOO!)
+
+IMP
+- src/defaults/dist/_includes/modules/adunits/fallback.html SCRIPT IS PROBABLY MESSED UP
+  - MOVE IT TO A SEPARETE MODULE!
+
 
 INCLUDE THIS in css build process
 - src/defaults/dist/_includes/master/assets/css/defaults.css

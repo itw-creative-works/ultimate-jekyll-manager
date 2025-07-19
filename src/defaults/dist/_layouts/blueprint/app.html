@@ -1,0 +1,49 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/cover
+sitemap:
+  include: true
+
+### REGULAR PAGES ###
+meta:
+  title: "{{ site.brand.name }} - App Launcher"
+  description: "{{ site.brand.name }} app launcher"
+  breadcrumb: "Launcher"
+---
+
+{% assign download_href = page.resolved.launcher.download %}
+{% iffalsy download_href == null or download_href == '' %}
+  {% capture download_href %}{{ site.url }}/download{% endcapture %}
+{% endiffalsy %}
+
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <a class="" href="{{ site.url }}">
+    <img class="zi-2" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 8rem;">
+  </a>
+  <h1 class="mb-1">
+    Welcome to {{ site.brand.name }}!
+  </h1>
+  <p class="lead mb-1">
+    Launch the app or download it to get started.
+  </p>
+  <div class="mb-3">
+    <div class="alert alert-danger mb-0" id="error-alert" hidden>
+      <strong>Error:</strong>
+      Please ensure the app is installed and try again.
+    </div>
+  </div>
+  <div class="d-grid gap-2 d-sm-block">
+    <a id="launch-button" class="btn btn-outline-primary btn-lg mb-2 mb-sm-0 me-md-2 disabled" href="{{ site.brand.id }}://dashboard" disabled>
+      <span class="d-inline-flex align-items-center">
+        {% uj_icon 'rocket', 'fa-lg me-2' %}
+        Launch App
+      </span>
+    </a>
+    <a id="download-button" class="btn btn-primary btn-lg disabled" href="{{ download_href }}" disabled>
+      <span class="d-inline-flex align-items-center">
+        {% uj_icon 'download', 'fa-lg me-2' %}
+        Download App
+      </span>
+    </a>
+  </div>
+</div>

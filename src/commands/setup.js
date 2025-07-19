@@ -294,8 +294,8 @@ async function createCname() {
 
 // Fetch firebase-auth files
 async function fetchFirebaseAuth() {
-  const managerConfig = config.settings['manager-configuration'];
-  const firebase = eval(`(${managerConfig})`)?.libraries?.firebase_app?.config;
+  const managerConfig = config['web-manager'];
+  const firebase = managerConfig?.firebase_app?.config;
   const projectId = firebase.projectId || 'ultimate-jekyll';
   const base = `https://${projectId}.firebaseapp.com`;
   const files = [

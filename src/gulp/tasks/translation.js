@@ -644,13 +644,28 @@ async function translateWithAPI(openAIKey, content, lang) {
     if (batchResult.error) {
       // Log
       logger.error(`❌ Batch ${batchResult.batchNumber} failed: ${batchResult.error.message}`);
-
-      // Use original content for failed batch
-      const originalBatchLines = lines.slice(batchResult.startIndex, batchResult.endIndex + 1);
-      for (let i = 0; i < originalBatchLines.length; i++) {
-        translatedLines[batchResult.startIndex + i] = originalBatchLines[i];
+      
+      // Try to subdivide the failed batch
+      const failedBatchLines = lines.slice(batchResult.startIndex, batchResult.endIndex + 1);
+      try {
+        logger.log(`🔄 Attempting to subdivide failed batch ${batchResult.batchNumber} (${failedBatchLines.length} lines)`);
+        const subdivisionResult = await subdivideAndTranslate(openAIKey, failedBatchLines, lang, batchResult.batchNumber);
+        
+        // Place subdivided results in correct positions
+        for (let i = 0; i < subdivisionResult.length; i++) {
+          translatedLines[batchResult.startIndex + i] = subdivisionResult[i];
+        }
+        
+        logger.log(`✅ Successfully subdivided batch ${batchResult.batchNumber}`);
+      } catch (subdivisionError) {
+        logger.error(`❌ Subdivision failed for batch ${batchResult.batchNumber}: ${subdivisionError.message}`);
+        
+        // Final fallback: use original content
+        for (let i = 0; i < failedBatchLines.length; i++) {
+          translatedLines[batchResult.startIndex + i] = failedBatchLines[i];
+        }
+        hasErrors = true;
       }
-      hasErrors = true;
     } else {
       const resultLines = batchResult.result.split('\n');
 
@@ -678,7 +693,57 @@ async function translateWithAPI(openAIKey, content, lang) {
   };
 }
 
-async function translateBatch(openAIKey, content, lang, batchNumber) {
+async function subdivideAndTranslate(openAIKey, lines, lang, originalBatchNumber, depth = 0) {
+  const maxDepth = 10; // Prevent infinite recursion
+  
+  if (depth > maxDepth) {
+    throw new Error(`Maximum subdivision depth reached for batch ${originalBatchNumber}`);
+  }
+  
+  // If only one line, try to translate it directly
+  if (lines.length === 1) {
+    try {
+      const singleLineResult = await translateBatch(openAIKey, lines[0], lang, `${originalBatchNumber}.${depth}`, true);
+      return [singleLineResult.result];
+    } catch (error) {
+      logger.warn(`⚠️ Single line translation failed, using original: ${error.message}`);
+      return lines; // Return original line if single line fails
+    }
+  }
+  
+  // Divide the batch into smaller sub-batches (half the size, minimum 1)
+  const subBatchSize = Math.max(1, Math.floor(lines.length / 2));
+  const subBatches = [];
+  
+  for (let i = 0; i < lines.length; i += subBatchSize) {
+    subBatches.push(lines.slice(i, i + subBatchSize));
+  }
+  
+  logger.log(`🔀 Subdividing into ${subBatches.length} sub-batches of ~${subBatchSize} lines each`);
+  
+  const results = [];
+  
+  // Process sub-batches sequentially to avoid overwhelming the API
+  for (let i = 0; i < subBatches.length; i++) {
+    const subBatch = subBatches[i];
+    const subBatchContent = subBatch.join('\n');
+    
+    try {
+      const subResult = await translateBatch(openAIKey, subBatchContent, lang, `${originalBatchNumber}.${depth}.${i}`);
+      results.push(...subResult.result.split('\n'));
+    } catch (error) {
+      logger.warn(`⚠️ Sub-batch ${i} failed, attempting further subdivision: ${error.message}`);
+      
+      // Recursively subdivide this failed sub-batch
+      const recursiveResult = await subdivideAndTranslate(openAIKey, subBatch, lang, originalBatchNumber, depth + 1);
+      results.push(...recursiveResult);
+    }
+  }
+  
+  return results;
+}
+
+async function translateBatch(openAIKey, content, lang, batchNumber, isSingleLine = false) {
   const brand = config?.brand?.name || 'Unknown Brand';
   const inputLines = content.split('\n');
 
@@ -735,7 +800,8 @@ async function translateBatch(openAIKey, content, lang, batchNumber) {
     // Loop thru and log the translated lines
     outputLines.forEach((line, index) => {
       // Log "original line -> translated line"
-      logger.log(`🔤 Translated line [batch=[${batchNumber}], line=${index + 1}]: "${inputLines[index]}" → "${line}"`);
+      const prefix = isSingleLine ? '🔸' : '🔤';
+      logger.log(`${prefix} Translated line [batch=[${batchNumber}], line=${index + 1}]: "${inputLines[index]}" → "${line}"`);
     });
   }
 

@@ -4,11 +4,11 @@ module.exports = (Manager) => {
     // Shortcuts
     const { webManager } = Manager;
 
+    // Log
+    webManager.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
+
     // Import the theme from src/assets/themes/{ id }
     require('__theme__/_theme.js');
-
-    // Log
-    console.error('------- XXX global.js 2', Manager);
 
     // Resolve
     return resolve();

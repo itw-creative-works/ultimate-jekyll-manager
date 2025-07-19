@@ -46,6 +46,7 @@ exports.build = series(
   // exports.setup,
   exports.defaults,
   exports.distribute,
+  exports['json-to-html'],
   parallel(exports.sass, exports.webpack, exports.imagemin),
   exports.jekyll,
   exports.audit,

@@ -27,18 +27,20 @@ const FILE_MAP = {
   'src/**/*': {
     overwrite: false,
   },
-  'src/**/*.{html,md}': {
+  'src/**/*.{html,md,json}': {
     skip: (file) => {
       // Get the name
       const name = path.basename(file.name, path.extname(file.name));
       const htmlFilePath = path.join(file.destination, `${name}.html`);
       const mdFilePath = path.join(file.destination, `${name}.md`);
+      const jsonFilePath = path.join(file.destination, `${name}.json`);
       const htmlFileExists = jetpack.exists(htmlFilePath);
       const mdFileExists = jetpack.exists(mdFilePath);
-      const eitherExists = htmlFileExists || mdFileExists;
+      const jsonFileExists = jetpack.exists(jsonFilePath);
+      const anyExists = htmlFileExists || mdFileExists || jsonFileExists;
 
-      // Skip if both files exist
-      return eitherExists;
+      // Skip if any of the files exist
+      return anyExists;
     },
   },
 
@@ -67,9 +69,12 @@ const FILE_MAP = {
   },
 
   // Files to skip
-  '.DS_Store': {
+  '**/.DS_Store': {
     skip: true,
-  }
+  },
+  '**/__temp/**/*': {
+    skip: true,
+  },
 }
 
 // Glob
@@ -179,7 +184,10 @@ function customTransform() {
     // logger.log(`  destination: ${item.destination}`);
     // logger.log(`  overwrite: ${options.overwrite}`);
     // logger.log(`  skip: ${options.skip}`);
+    // logger.log(`  rule: ${options.rule}`);
     // logger.log(`  _FINAL: ${fullOutputPath}`);
+    // logger.log(`  _TEST_TEMP: ${minimatch(relativePath, 'dist/__temp/**/*')}`);
+    // logger.log(`  _TEST_DS: ${minimatch(relativePath, '.DS_Store')}`);
 
     // Run template if required
     if (options.template) {
@@ -249,6 +257,7 @@ function getFileOptions(filePath) {
     path: null,
     template: null,
     skip: false,
+    rule: null,
   };
 
   let options = { ...defaults };
@@ -256,6 +265,7 @@ function getFileOptions(filePath) {
   for (const pattern in FILE_MAP) {
     if (minimatch(filePath, pattern)) {
       options = { ...options, ...FILE_MAP[pattern] };
+      options.rule = pattern;
     }
   }
 

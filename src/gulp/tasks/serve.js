@@ -120,6 +120,17 @@ const settings = {
         req.url = '/blog.html';
       }
 
+      // Strip query parameters and hash fragments from the URL for file path lookup
+      const cleanUrl = req.url.split('?')[0].split('#')[0];
+      const rawFilePath = path.join(rootPathProject, '_site', cleanUrl);
+
+      // Serve 404.html if the file does not exist
+      if (!jetpack.exists(rawFilePath) && rawFilePath.endsWith('.html')) {
+        // Log
+        logger.log(`File not found: ${req.url}. Serving 404.html instead.`);
+        req.url = '/404.html';
+      }
+
       // Continue
       return next();
     },

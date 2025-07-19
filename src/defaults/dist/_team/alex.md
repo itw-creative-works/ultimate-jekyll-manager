@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: placeholder/team/profile
+layout: blueprint/team/profile
 sitemap:
   include: true
 

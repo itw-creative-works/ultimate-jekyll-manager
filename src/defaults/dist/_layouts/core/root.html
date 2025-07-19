@@ -1,0 +1,35 @@
+---
+layout: null
+---
+
+<!DOCTYPE html>
+<html
+  lang="{{ site.translation.default |  default: 'en' }}"
+  class="{{ page.resolved.theme.html.class }}" {{ page.resolved.theme.html.attributes }}
+
+  data-theme-id="{{ page.resolved.theme.id }}"
+  data-theme-target="{{ page.resolved.theme.target }}"
+  data-theme-appearance="{{ page.resolved.theme.appearance }}"
+  data-page-path="{{ page.canonical.path }}"
+
+  data-bs-theme="{{ page.resolved.theme.appearance }}"
+  >
+  <head>
+    <!-- Head -->
+    {%- include /core/head.html -%}
+  </head>
+
+  <body
+    class="{{ page.resolved.theme.body.class }}" {{ page.resolved.theme.body.attributes }}
+    >
+
+    <!-- Head -->
+    {%- include /core/body.html -%}
+
+    <!-- Content -->
+    {{ content }}
+
+    <!-- Foot -->
+    {%- include /core/foot.html -%}
+  </body>
+</html>

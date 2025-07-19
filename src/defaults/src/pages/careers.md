@@ -1,11 +1,7 @@
 ---
 ### ALL PAGES ###
-layout: placeholder/careers
+layout: blueprint/careers
 permalink: /careers
 
 ### REGULAR PAGES ###
-meta:
-  title: null
-  description: null
-  breadcrumb: null
 ---

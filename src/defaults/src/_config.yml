@@ -2,21 +2,31 @@
 # This is the default configuration file for your project.
 
 # Project
-app: ""
-version: 1.0.0
 url: ""
 baseurl: ""
+
+# Theme
 theme:
-  id: "geeks"
+  id: "classy"
   target: "frontend"
   appearance: "dark"
   version: "latest"
+  html:
+    class: ""
+  body:
+    class: ""
+  nav:
+    enabled: true
+  main:
+    class: ""
+  footer:
+    enabled: true
 
 # Meta
 meta:
   title: ""
   description: ""
-  og-images: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/socials/itw-creative-works-brandmark-square-black-1024x1024.png"
+  og-image: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/socials/itw-creative-works-brandmark-square-black-1024x1024.png"
   keywords: ""
   viewport: ""
   index: true
@@ -24,20 +34,81 @@ meta:
 
 # Brand
 brand:
+  id: ""
   name: ""
   description: ""
   type: "Corporation"
-  logo-images: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-brandmark-black-1024x1024.png"
-  logo-image-svg: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-brandmark-black-x.svg"
-  address-locality: "Los Angeles"
-  address-country: "United States"
+  images:
+    brandmark: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-brandmark-black-x.svg"
+    wordmark: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-wordmark-black-x.svg"
+    combomark: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-combomark-black-x.svg"
+  contact:
+    email: ""
+    phone: ""
+    slapform-form-id: ""
+  address:
+    line1: "4001 Inglewood Ave"
+    line2: "Suite 385"
+    region: "CA"
+    postal-code: "90278"
+    city: "Redondo Beach"
+    locality: "Los Angeles"
+    country: "United States"
 
-# Favicon
-favicon:
-  path: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/favicon"
-  safari-pinned-tab: "#5bbad5"
-  msapp-tile-color: "#da532c"
-  theme-color: "#ffffff"
+# Web Manager
+web-manager:
+  firebase_app:
+    enabled: true
+    config:
+      apiKey: ""
+      authDomain: ""
+      databaseURL: ""
+      projectId: ""
+      storageBucket: ""
+      messagingSenderId: ""
+      appId: ""
+      measurementId: ""
+  firebase_appCheck:
+    enabled: false
+    config:
+      siteKey: ""
+  cookieconsent:
+    enabled: true
+    config:
+      palette:
+        popup:
+          background: "#fd5631"
+          text: "#fff"
+        button:
+          background: "#fff"
+          text: "#fd5631"
+  chatsy:
+    enabled: true
+    config:
+      accountId: ""
+      chatId: ""
+      settings:
+        openChatButton:
+          background: "#fd5631"
+          text: "#fff"
+  sentry:
+    enabled: true
+    config:
+      dsn: ""
+      release: ""
+      replaysSessionSampleRate: 0.01
+      replaysOnErrorSampleRate: 0.01
+  exitPopup:
+    enabled: true
+    config:
+      timeout: 1000 * 60 * 60 * 4
+      handler: null
+      title: "Want 50% off your gift?"
+      messages: "There are some gifts on sale today for as much as 50% off. Click the button below to claim your discount!"
+      okButton:
+        text: "Claim 50% Discount"
+        link: "https://giftly.app"
+  validRedirectHosts: []
 
 # Socials
 socials:
@@ -57,32 +128,22 @@ socials:
   spotify: null
   mixcloud: null
 
-# Cloudflare
-cloudflare:
-  zone: null
-
 # Tracking
 tracking:
   google-analytics: null
-  facebook-pixel: null
+  meta-pixel: null
   tiktok-pixel: null
 
-# Contact
-contact:
-  email: ""
-  phone: ""
-  slapform-form-id: ""
-
-# Manifest
-manifest:
-  name: ""
-  short-name: ""
+# Favicon
+favicon:
+  path: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/favicon"
+  safari-pinned-tab: "#5bbad5"
+  msapp-tile-color: "#da532c"
   theme-color: "#ffffff"
-  background-color: "#ffffff"
-  display: "standalone"
-  start-url: "/?source=pwa"
-  scope: "/"
-  orientation: "portrait"
+
+# Cloudflare
+cloudflare:
+  zone: null
 
 # Download
 download:
@@ -101,120 +162,16 @@ extension:
   safari: ""
   edge: ""
 
-# Site settings
-settings:
-  include-app-head: true
-  include-app-foot: true
-  include-script-bundle: true
-  include-script-bundle-optimization: "async"
-  include-script-core: false
-  include-script-core-optimization: "async"
-  include-script-slapform: false
-  include-script-slapform-optimization: "async"
-  include-css-bundle: true
-  include-css-normalize: false
-  include-css-reset: false
-  include-css-defaults: true
-  include-html5shiv: true
-  include-socialsharekit: true
-  include-debug-performance: false
-  blog-post-image-class: ""
-  blog-author-image-class: ""
-  manager-configuration: "
-    {
-      libraries: {
-        firebase_app: {
-          enabled: true,
-          config: {
-            apiKey: '',
-            authDomain: '',
-            databaseURL: '',
-            projectId: '',
-            storageBucket: '',
-            messagingSenderId: '',
-            appId: '',
-            measurementId: '',
-          },
-        },
-        firebase_appCheck: {
-          enabled: false,
-          config: {
-            siteKey: '',
-          },
-        },
-        cookieconsent: {
-          enabled: true,
-          config: {
-            palette: {
-              popup: {
-                background: '#fd5631',
-                text: '#fff',
-              },
-              button: {
-                background: '#fff',
-                text: '#fd5631',
-              },
-            },
-          },
-        },
-        chatsy: {
-          enabled: true,
-          config: {
-            accountId: '',
-            chatId: '',
-            settings: {
-              openChatButton: {
-                background: '#fd5631',
-                text: '#fff',
-              },
-            },
-          },
-        },
-        sentry: {
-          enabled: true,
-          config: {
-            dsn: '',
-            release: '',
-            replaysSessionSampleRate: 0.01,
-            replaysOnErrorSampleRate: 0.01,
-          },
-        },
-      },
-      exitPopup: {
-        enabled: true,
-        config: {
-          timeout: 1000 * 60 * 60 * 4,
-          handler: null,
-          title: 'Want 50% off your gift?',
-          messages: 'There are some gifts on sale today for as much as 50% off. Click the button below to claim your discount!',
-          okButton: {
-            text: 'Claim 50% Discount',
-            link: 'https://giftly.app',
-          },
-        },
-      },
-    }
-  "
-
-# Custom admin dashboard pages
-admin-dashboard: "{
-  pages: [
-  ]
-}"
-
-# Schema
-schema:
-  breadcrumbs: true
-  brand: true
-  sitelinks: true
-
-# Search
-search:
-  enable: true
-
-# Sitemap
-sitemap:
-  enable: true
+# Manifest
+manifest:
+  name: ""
+  short-name: ""
+  theme-color: "#ffffff"
+  background-color: "#ffffff"
+  display: "standalone"
+  start-url: "/?source=pwa"
+  scope: "/"
+  orientation: "portrait"
 
 # Translation
 translation:

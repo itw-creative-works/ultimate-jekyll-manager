@@ -1,6 +1,9 @@
 ---
+### ALL PAGES ###
 layount: null
 permalink: /budget.json
+
+### REGULAR PAGES ###
 sitemap:
   include: false
 ---

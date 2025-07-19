@@ -1,0 +1,23 @@
+---
+### FULLSCREEN LAYOUT ###
+layout: themes/bootstrap/frontend/base
+
+### FULLSCREEN PAGES ###
+theme:
+  nav:
+    enabled: false
+  main:
+    class: "d-flex align-items-center justify-content-center"
+  footer:
+    enabled: false
+---
+
+<section class="">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 text-center">
+        {{ content | uj_content_format }}
+      </div>
+    </div>
+  </div>
+</section>

@@ -26,22 +26,39 @@ const input = [
   // Project service worker
   'src/service-worker.js',
 
-  // Main page js
+  // Page-specific js
   `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
-
-  // Project page js
   'src/assets/js/pages/**/*.js',
+
+  // Modules (standalone webpacked scripts)
+  `${rootPathPackage}/dist/assets/js/modules/**/*.js`,
+  'src/assets/js/modules/**/*.js',
 
   // Files to exclude
   // '!dist/**',
 ];
+
+// Files to copy directly without webpack processing
+const copy = [
+  // `${rootPathPackage}/dist/assets/js/utilities/**/*.js`,
+];
+
 const delay = 250;
 
-// Stable entry points
-const stableEntryPoints = [
-  'main',
-  'project',
-];
+// Bundle naming configuration
+const bundleNaming = {
+  // Files that should have stable (non-hashed) names
+  stable: {
+    exact: ['main', 'project', 'service-worker'],
+    patterns: [
+      /^modules\//,  // All module files get stable names
+    ]
+  },
+  // Special output paths (relative to dist/assets/js/)
+  specialPaths: {
+    'service-worker': '../../service-worker.js'
+  }
+};
 
 const settings = {
   mode: 'production',
@@ -63,8 +80,8 @@ const settings = {
       '__project_assets__': path.resolve(process.cwd(), 'src/assets'),
 
       // For importing the theme
-      '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id, config.theme.version),
-    }
+      '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
+    },
   },
   output: {
     // Set the path to the dist folder
@@ -75,26 +92,30 @@ const settings = {
 
     // https://github.com/webpack/webpack/issues/959
     chunkFilename: (data) => {
-      // Main chunks get stable names
-      if (stableEntryPoints.includes(data.chunk.name)) {
+      const name = data.chunk.name;
+      
+      // Check if this chunk should have a stable name
+      if (shouldHaveStableName(name)) {
         return '[name].chunk.js';
       }
 
-      // Otherwise, use the default chunk filename
+      // Otherwise, use hashed filename
       return '[name].chunk.[chunkhash].js';
     },
     filename: (data) => {
-      // Special case for the service-worker chunk
-      if (data.chunk.name === 'service-worker') {
-        return '../../service-worker.js';
+      const name = data.chunk.name;
+      
+      // Check for special output paths
+      if (bundleNaming.specialPaths[name]) {
+        return bundleNaming.specialPaths[name];
       }
 
-      // Main bundles get stable names
-      if (stableEntryPoints.includes(data.chunk.name)) {
+      // Check if this bundle should have a stable name
+      if (shouldHaveStableName(name)) {
         return '[name].bundle.js';
       }
 
-      // Everything else (page-specific async imports) gets hashed
+      // Everything else gets hashed
       return '[name].bundle.[contenthash].js';
     },
   },
@@ -147,6 +168,17 @@ const settings = {
   },
 }
 
+// Helper function to determine if a bundle should have a stable name
+function shouldHaveStableName(name) {
+  // Check exact matches
+  if (bundleNaming.stable.exact.includes(name)) {
+    return true;
+  }
+  
+  // Check patterns
+  return bundleNaming.stable.patterns.some(pattern => pattern.test(name));
+}
+
 // Task
 function webpack(complete) {
   // Log
@@ -155,8 +187,11 @@ function webpack(complete) {
   // Update entry points
   updateEntryPoints();
 
+  // Copy files
+  copyFilesDirectly();
+
   // Compiler
-  const compiler = wp(settings, (e, stats) => {
+  wp(settings, (e, stats) => {
     // Log
     logger.log('Finished!');
 
@@ -193,39 +228,9 @@ function webpackWatcher(complete) {
   return complete();
 }
 
-// function updateEntryPoints() {
-//   // Get all JS files
-//   const files = glob(input);
-
-//   console.log('---rootPathPackage', rootPathPackage);
-//   console.log('---rootPathProject', rootPathProject);
-//   console.log('---FILES', files);
-
-//   // Update from src
-//   settings.entry = files.reduce((acc, file) => {
-//     console.log('---ITEM', file);
-
-//     // Get the file name
-//     const name = path.basename(file, path.extname(file));
-
-//     // Add to entry points starting with "./"
-//     // acc[name] = `./${file}`;
-//     acc[name] = path.resolve(file);
-
-//     // Return
-//     return acc;
-//   }, {});
-
-//   // Log
-//   logger.log('Updated entry points:', settings.entry);
-// }
-
 function updateEntryPoints() {
   // Get all JS files
   const files = glob(input).map((f) => path.resolve(f));
-
-  // console.log('---rootPathPackage', rootPathPackage);
-  // console.log('---rootPathProject', rootPathProject);
 
   // Sort: main files first
   files.sort((a, b) => {
@@ -233,9 +238,6 @@ function updateEntryPoints() {
     const bIsMain = b.startsWith(rootPathPackage);
     return aIsMain === bIsMain ? 0 : aIsMain ? -1 : 1;
   });
-
-  // console.log('🚩🚩🚩🚩🚩', 1, ); // FLAG
-  // console.log('---FILES', files);
 
   // Update from src
   settings.entry = files.reduce((acc, file) => {
@@ -249,15 +251,20 @@ function updateEntryPoints() {
       .replace(/^src\/assets\/js\//, '')
       .replace(/^src\//, '');
 
-    // If it's in a "pages" folder, suffix with .main or .project
+    // Determine naming based on file type
     if (name.includes('pages/')) {
+      // Pages: add .main or .project suffix
       name += isProject ? '.project' : '.main';
+    } else if (name.includes('modules/')) {
+      // Modules: keep the full path structure for clarity
+      // This ensures modules/redirect becomes modules/redirect
+      // and modules/analytics/tracker becomes modules/analytics/tracker
     } else {
-      // For all others not in "pages", just use the base filename
+      // Everything else: just use the base filename
       name = path.basename(name);
     }
 
-    // Dont include pages in the entry points
+    // Don't include pages in the entry points
     if (
       file.includes('assets/js/pages/')
       || file.includes('assets/js/global.js')
@@ -274,6 +281,39 @@ function updateEntryPoints() {
 
   // Log
   logger.log('Updated entry points:', settings.entry);
+}
+
+function copyFilesDirectly() {
+  // Get files to copy
+  const filesToCopy = glob(copy);
+
+  // Log
+  logger.log('Copying files directly:', filesToCopy.length);
+
+  // If no files to copy, return
+  if (filesToCopy.length === 0) {
+    return;
+  }
+
+  // Copy files
+  filesToCopy.forEach(file => {
+    const absolutePath = path.resolve(file);
+    const relativePath = path.relative(rootPathPackage, absolutePath);
+
+    // Extract the part after dist/assets/js/
+    const match = relativePath.match(/^dist\/assets\/js\/(.+)$/);
+    if (match) {
+      const outputPath = path.join(process.cwd(), 'dist/assets/js', match[1]);
+
+      // Ensure directory exists
+      jetpack.dir(path.dirname(outputPath));
+
+      // Copy file
+      jetpack.copy(absolutePath, outputPath, { overwrite: true });
+
+      logger.log(`Copied: ${match[1]}`);
+    }
+  });
 }
 
 function getTemplateReplaceOptions() {

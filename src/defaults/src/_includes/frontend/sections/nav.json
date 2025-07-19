@@ -1,0 +1,43 @@
+{
+  logo: {
+
+  },
+  links: [
+    {
+      label: 'Home',
+      href: '/'
+    },
+    {
+      label: 'Services',
+      href: '/services',
+      children: [
+        {
+          label: 'Web Development',
+          href: '/services/web-development'
+        },
+        {
+          label: 'Marketing',
+          href: '/services/marketing',
+          children: [
+            {
+              label: 'SEO',
+              href: '/services/marketing/seo'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: 'Blog',
+      href: '/blog'
+    },
+    {
+      label: 'Contact',
+      href: '/contact'
+    }
+  ],
+  action: {
+    label: 'Sign Up',
+    href: '/signup'
+  }
+}

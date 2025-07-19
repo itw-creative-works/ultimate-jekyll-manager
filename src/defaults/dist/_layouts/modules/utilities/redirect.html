@@ -1,0 +1,56 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/cover
+sitemap:
+  include: false
+
+### REGULAR PAGES ###
+meta:
+  index: false
+---
+{% capture url %}{{ page.resolved.redirect.url | default: site.url | liquify }}{% endcapture %}
+{% capture querystring %}{{ page.resolved.redirect.querystring }}{% endcapture %}
+{% capture modifier %}{{ page.resolved.redirect.modifier | default: "" }}{% endcapture %}
+
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <a class="" href="{{ site.url }}">
+    <img class="zi-2" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 8rem;">
+  </a>
+  <div class="d-inline-flex justify-content-between align-items-center">
+    <h1>Redirecting...</h1>
+    <div class="spinner-border spinner-border-md text-primary ms-3" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  <p class="lead mb-3">
+    Taking you to the page you requested.
+  </p>
+  <div class="d-grid gap-2 d-sm-block">
+    <a id="home-button" class="btn btn-outline-primary btn-lg mb-2 mb-sm-0 me-md-2" href="{{ site.url }}">
+      <span class="d-inline-flex align-items-center">
+        {% uj_icon 'house', 'fa-lg me-2' %}
+        Return home
+      </span>
+    </a>
+    <noscript>
+      <a id="redirect-button" class="btn btn-primary btn-lg mb-2 mb-sm-0 me-md-2" href="{{ url }}">
+        <span class="d-inline-flex align-items-center">
+          {% uj_icon 'rocket', 'fa-lg me-2' %}
+          Take me there
+        </span>
+      </a>
+    </noscript>
+  </div>
+</div>
+
+<!-- Redirect configuration for external script -->
+<div id="redirect-config" style="display: none;"
+  data-url="{{ url }}"
+  data-querystring="{{ querystring }}"
+  data-modifier="{{ modifier }}"
+  data-site-url="{{ site.url }}"
+  data-environment="{{ site.uj.environment }}">
+</div>
+
+<!-- Load redirect module script -->
+<script type="text/javascript" src="{{ site.url }}/assets/js/modules/redirect.bundle.js?cb={{ site.uj.cache_breaker }}" async></script>

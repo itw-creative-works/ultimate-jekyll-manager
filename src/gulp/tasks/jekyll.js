@@ -11,6 +11,7 @@ const jetpack = require('fs-jetpack');
 // Load package
 const package = Manager.getPackage('main');
 const project = Manager.getPackage('project');
+const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
@@ -63,8 +64,10 @@ async function jekyll(complete) {
       `./node_modules/${package.name}/dist/config/_config_default.yml`,
       // This is the user's project config file
       'dist/_config.yml',
-      // Add browsesrsync IF BUILD_MODE is not true
+      // Add browsersync config IF BUILD_MODE is not true
       Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
+      // Add development config IF BUILD_MODE is not true
+      Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
     ].join(','),
     '--incremental',
     // '--disable-disk-cache',
@@ -78,6 +81,9 @@ async function jekyll(complete) {
 
   // Run buildpost hook
   await hook('build:post', index);
+
+  // Create build JSON with runtime config
+  await createBuildJSON();
 
   // Log
   logger.log('Finished!');
@@ -231,5 +237,89 @@ async function isBrowserTabOpen(url) {
     return result.trim() === 'true'; // Convert to boolean
   } catch (error) {
     return false;
+  }
+}
+
+// Get git info
+async function getGitInfo() {
+  return await execute('git remote -v')
+  .then((r) => {
+    // Split on whitespace
+    const split = r.split(/\s+/);
+    const url = split[1];
+
+    // Get user and repo
+    const user = url.split('/')[3];
+    const name = url.split('/')[4].replace('.git', '');
+
+    // Return
+    return {user, name};
+  })
+}
+
+// Get runtime Jekyll config
+async function getRuntimeConfig() {
+  try {
+    // Check if Jekyll generated the site config file
+    const siteConfigPath = '_site/config.json';
+    if (jetpack.exists(siteConfigPath)) {
+      const runtimeConfig = jetpack.read(siteConfigPath, 'json');
+      logger.log('Using runtime Jekyll config from config.json');
+      return runtimeConfig;
+    }
+
+    // Fallback to static config if runtime config not found
+    logger.log('No runtime config found at _site/config.json, using static config');
+    return config;
+  } catch (e) {
+    logger.error('Error reading runtime config:', e);
+    return config;
+  }
+}
+
+// Create build.json
+async function createBuildJSON() {
+  // Create build log JSON
+  try {
+    // Get info first
+    const git = await getGitInfo();
+
+    // Get runtime config
+    const runtimeConfig = await getRuntimeConfig();
+
+    // Create JSON
+    const json = {
+      timestamp: new Date().toISOString(),
+      repo: {
+        user: git.user,
+        name: git.name,
+      },
+      environment: Manager.getEnvironment(),
+      packages: {
+        'web-manager': require('web-manager/package.json').version,
+        [package.name]: package.version,
+      },
+      config: runtimeConfig,
+    }
+
+    // Add legacy properties
+    // TODO: REMOVE WHEN THE SITE HAS BEEN ACTIVE FOR SOME TIME SO USERS ARE FORCED TO NEW BUILD.JSON
+    {
+      json['npm-build'] = new Date().toISOString();
+      // json.brand = config.brand;
+      // json['admin-dashboard'] = JSON.parse(config['admin-dashboard']);
+    }
+
+    // Write to file
+    jetpack.write('_site/build.json', JSON.stringify(json, null, 2));
+
+    // Write to legacy file /@output/build/build.json
+    // TODO: REMOVE WHEN THE SITE HAS BEEN ACTIVE FOR SOME TIME SO USERS ARE FORCED TO NEW BUILD.JSON
+    jetpack.write('_site/@output/build/build.json', JSON.stringify(json, null, 2));
+
+    // Log
+    logger.log('Created build.json with runtime config');
+  } catch (e) {
+    console.error('Error updating build.json', e);
   }
 }

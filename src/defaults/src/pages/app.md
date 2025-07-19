@@ -1,11 +1,7 @@
 ---
 ### ALL PAGES ###
-layout: placeholder/app
+layout: blueprint/app
 permalink: /app
 
 ### REGULAR PAGES ###
-meta:
-  title: null
-  description: null
-  breadcrumb: null
 ---

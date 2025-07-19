@@ -1,6 +1,9 @@
 ---
+### ALL PAGES ###
 layount: null
 permalink: /robots.txt
+
+### REGULAR PAGES ###
 sitemap:
   include: false
 ---

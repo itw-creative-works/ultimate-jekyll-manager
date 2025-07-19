@@ -1,0 +1,5 @@
+---
+layout: null
+permalink: /config.json
+---
+{{ page.resolved | uj_jsonify }}
