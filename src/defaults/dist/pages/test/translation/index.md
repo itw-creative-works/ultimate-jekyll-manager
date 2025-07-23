@@ -1,6 +1,8 @@
 ---
 ### ALL PAGES ###
-layout: themes/[ site.theme.id ]/frontend/plain
+layout: themes/[ site.theme.id ]/frontend/minimal
+permalink: /test/translation
+
 sitemap:
   include: true
 
@@ -10,10 +12,11 @@ meta:
   description: "This is a test Translation page for the Ultimate Jekyll Manager."
   breadcrumb: "Test Translation Page"
 
-web-manager:
+web_manager:
   exitPopup:
     enabled: false
 ---
+
 {% capture brand %}**{{ site.brand.name | liquify }}**{% endcapture %}
 {% capture breadcrumb %}{{ page.resolved.meta.breadcrumb | liquify }}{% endcapture %}
 

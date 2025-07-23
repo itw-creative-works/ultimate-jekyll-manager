@@ -56,29 +56,30 @@ function customTransform() {
       return callback(null, file);
     }
 
-    // Get relative path
-    const relativePath = path.relative(file.base, file.path);
+    // Get relative path from src base
+    const relativePath = path.relative(file.base, file.path).replace(/\\/g, '/');
 
     // Log
-    // logger.log(`Processing file 111: ${relativePath}`);
+    logger.log(`Processing file: ${relativePath}`);
 
     // Change path if it starts with 'pages/'
     if (relativePath.startsWith('pages/')) {
+      // Remove 'pages/' prefix
       const newRelativePath = relativePath.replace(/^pages\//, '');
+      
+      // Update file path to remove pages directory
+      // This will make src/pages/index.html -> dist/index.html
       file.path = path.join(file.base, newRelativePath);
 
       // Log
-      // logger.log(`Changed path to 222: ${file.path}`);
+      logger.log(`  -> Moving from pages/ to root: ${newRelativePath}`);
     }
-
-    // Log
-    // logger.log(`Processing file 333: ${file.path}`);
 
     // Push the file
     this.push(file);
 
     // Continue
-    callback(null, file);
+    callback();
   });
 }
 

@@ -8,7 +8,7 @@ Manager.initialize()
   const { webManager } = Manager;
 
   // Log
-  webManager.log('Ultimate Jekyll Manager initialized successfully');
+  console.log('Ultimate Jekyll Manager initialized successfully');
 
   // Custom code
   // ...

@@ -17,19 +17,21 @@ sitemap:
           <div class="">
             {{ page.date | date: "%b %d, %Y" }}
           </div>
-          <div class="badge bg-primary">{%- include /main/helpers/read-time.html content=post.content -%} min read</div>
+          <div class="badge bg-primary">{%- uj_readtime -%} min read</div>
         </div>
 
         <!-- Media -->
         <div class="d-flex justify-content-between align-items-center mb-5">
           <div class="d-flex align-items-center">
-            <a href="{%- include /main/helpers/blog-author.html author=page.post.author mode="url" -%}">
-              {%- include /main/helpers/blog-author.html author=page.post.author class="rounded-circle avatar-md" mode="image" -%}
+            <a href="{%- uj_member page.post.author, 'url' -%}">
+              <!-- rounded-circle avatar-md -->
+              {%- uj_member page.post.author, 'image' -%}
             </a>
             <div class="ms-2 lh-1">
               <h5 class="mb-1">
-                <a class="text-dark" href="{%- include /main/helpers/blog-author.html author=page.post.author mode="url" -%}">
-                  {%- include /main/helpers/blog-author.html author=page.post.author class="avatar-img" mode="name" -%}
+                <a class="text-dark" href="{%- uj_member page.post.author, 'url' -%}">
+                  <!-- avatar-img -->
+                  {%- uj_member page.post.author, 'name' -%}
                 </a>
               </h5>
               <!-- <span class="d-block small">{{ page.date | date: "%b %d, %Y" }}</span> -->
@@ -38,7 +40,10 @@ sitemap:
           </div>
           <div>
             <div class="d-flex gap-2">
-              {%- include /main/modules/engagement/social-share-kit.html -%}
+              {% comment %}
+                {%- include /main/modules/engagement/social-share-kit.html -%}
+              {% endcomment %}
+              @TODO: Implement social share kit
             </div>
           </div>
         </div>
@@ -47,14 +52,17 @@ sitemap:
 
     <div class="row justify-content-center">
       <div class="col-xl-10 col-lg-10 col-md-12 col-12 mb-6">
-        {%- include /main/helpers/blog-image.html id=page.post.id name=page.url class="img-fluid rounded-3 w-100" alt=page.post.title -%}
+        {% comment %}
+          {%- include /main/helpers/blog-image.html id=page.post.id name=page.url class="img-fluid rounded-3 w-100" alt=page.post.title -%}
+        {% endcomment %}
+        @TODO: implement uj_image
       </div>
     </div>
 
     <div class="row justify-content-center mb-3">
       <div class="col-xl-8 col-lg-8 col-md-12 col-12">
         <div>
-          {{ content }}
+          {{ content | uj_content_format }}
         </div>
       </div>
     </div>
@@ -63,7 +71,10 @@ sitemap:
       <div class="col-xl-8 col-lg-8 col-md-12 col-12">
         <div class="d-flex justify-content-between">
           <h3 class="h2">Tags</h3>
-          {%- include /main/modules/engagement/social-share-kit.html -%}
+            {% comment %}
+              {%- include /main/modules/engagement/social-share-kit.html -%}
+            {% endcomment %}
+            @TODO: Implement social share kit
         </div>
 
         <div class="">
@@ -88,22 +99,23 @@ sitemap:
         <div class="d-sm-flex">
           <div class="flex-shrink-0 mb-3 mb-sm-0">
             <a href="">
-              {%- include /main/helpers/blog-author.html author=page.post.author class="avatar avatar-xl avatar-circle" mode="image" -%}
+              <!-- avatar avatar-xl avatar-circle -->
+              {% uj_member page.post.author, 'image' %}
             </a>
           </div>
           <div class="flex-grow-1 ms-sm-4">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <a href="{%- include /main/helpers/blog-author.html author=page.post.author mode="url" -%}">
+              <a href="{% uj_member page.post.author, 'url' %}">
                 <h4 class="mb-0">
-                  {%- include /main/helpers/blog-author.html author=page.post.author mode="name" -%}
+                  {%- uj_member page.post.author, 'name' -%}
                 </h4>
               </a>
-              <a class="btn btn-outline-primary btn-sm" href="{%- include /main/helpers/blog-author.html author=page.post.author mode="url" -%}">
+              <a class="btn btn-outline-primary btn-sm" href="{% uj_member page.post.author, 'url' %}">
                 <i class="bi-person-plus-fill me-1"></i> Follow
               </a>
             </div>
             <p>
-              {%- include /main/helpers/blog-author.html author=page.post.author mode="content" -%}
+              {%- uj_member page.post.author, 'content' -%}
             </p>
           </div>
         </div>
@@ -114,7 +126,7 @@ sitemap:
       <div class="col-xl-8 col-lg-8 col-md-12 col-12">
         <h3 class="h2">Comments</h3>
 
-        {%- include /main/modules/engagement/giscus.html -%}
+        {%- include modules/engagement/giscus.html -%}
       </div>
     </div>
 
@@ -154,7 +166,10 @@ sitemap:
                   <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                     <div class="card mb-4 shadow-lg card-lift">
                       <a href="{{ post.url }}">
-                        {%- include /main/helpers/blog-image.html id=post.post.id name=post.url class="card-img-top" alt=post.post.title -%}
+                        {% comment %}
+                          {%- include /main/helpers/blog-image.html id=post.post.id name=post.url class="card-img-top" alt=post.post.title -%}
+                        {% endcomment %}
+                        @TODO: implement uj_image
                       </a>
                       <div class="card-body">
                         <a href="{{ post.url }}" class="fs-5 fw-semibold d-block mb-3 text-primary">{{ post.post.categories[0] | uj_title_case }}</a>
@@ -164,22 +179,25 @@ sitemap:
                         <p>{{ post.description | strip_html | truncatewords: 20 }}</p>
                         <div class="row align-items-center g-0 mt-4">
                           <div class="col-auto">
-                            <a href="{%- include /main/helpers/blog-author.html author=post.author mode="url" -%}">
-                              {%- include /main/helpers/blog-author.html author=post.author class="rounded-circle avatar-sm me-2" mode="image" -%}
+                            <a href="{% uj_member post.author, 'url' %}">
+                              {% comment %}
+                                {%- include /main/helpers/blog-author.html author=post.author class="rounded-circle avatar-sm me-2" mode="image" -%}
+                              {% endcomment %}
+                              @TODO: implement uj_image
                             </a>
                           </div>
                           <div class="col lh-1">
                             <h5 class="mb-1">
-                              <a href="{%- include /main/helpers/blog-author.html author=post.author mode="url" -%}">
+                              <a href="{% uj_member post.author, 'url' %}">
                                 <h5 class="mb-0">
-                                  {%- include /main/helpers/blog-author.html author=post.author mode="name" -%}
+                                  {% uj_member post.author, 'name' %}
                                 </h5>
                               </a>
                             </h5>
                             <p class="fs-6 mb-0">{{ post.date | date: "%b %d, %Y" }}</p>
                           </div>
                           <div class="col-auto">
-                            <p class="fs-6 mb-0">{%- include /main/helpers/read-time.html content=post.content -%} min read</p>
+                            <p class="fs-6 mb-0">{%- uj_readtime -%} min read</p>
                           </div>
                         </div>
                       </div>

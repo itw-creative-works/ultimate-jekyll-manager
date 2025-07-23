@@ -1,5 +1,10 @@
 ---
+### ALL PAGES ###
 layout: null
 permalink: /config.json
+
+### REGULAR PAGES ###
+sitemap:
+  include: false
 ---
 {{ page.resolved | uj_jsonify }}

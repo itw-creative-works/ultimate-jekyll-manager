@@ -33,10 +33,13 @@ const rootPathProject = Manager.getRootPath('project');
 // push the updated translation JSON to the branch uj-translations
 
 // Settings
+const AI = {
+  model: 'gpt-4.1-mini',
+  inputCost: 0.40, // $0.40 per 1M tokens
+  outputCost: 1.60, // $1.60 per 1M tokens
+}
 const CACHE_DIR = '.temp/translations';
 const RECHECK_DAYS = 0;
-// const AI_MODEL = 'gpt-4.1-nano';
-const AI_MODEL = 'gpt-4.1-mini';
 const TRANSLATION_BRANCH = 'uj-translations';
 // const LOUD = false;
 const LOUD = Manager.isServer() || process.env.UJ_LOUD_LOGS === 'true';
@@ -70,115 +73,6 @@ const SYSTEM_PROMPT = `
   Output Tags: { tags }
   Output Language: { lang }
 `;
-
-// const SYSTEM_PROMPT = `
-// You are a professional translator.
-
-// Translate the provided content to **{lang}**, preserving **100% of the original structure, formatting, tags, metadata, and order**. Your ONLY job is to replace **translatable text inside tags** with the target language equivalent — nothing more.
-
-// ---
-
-// STRICT RULES:
-
-// 1. Each line is enclosed in **TAGGED format** like "[0]...[/0]".
-// 2. You **MUST NOT**:
-//    - Combine or merge tags.
-//    - Reorder tags.
-//    - Drop or skip tags.
-//    - Translate outside the tags.
-//    - Translate variables like "{ brand }", "${CONTROL}", or URLs.
-
-// 3. Each tag must be preserved **exactly as-is**, with:
-//    - The **original index** (e.g. "[42]...[/42]"),
-//    - The **same spacing/whitespace** around or inside content.
-
-// 4. If content is **split across multiple tags**, you must **translate each tag individually**, but still consider surrounding context to ensure natural grammar.
-
-// ---
-
-// EXAMPLES YOU MUST FOLLOW:
-
-// Input:
-// [174]. Yes there is a [/174]
-// [175] 14-day free trial [/175]
-
-// Output (German):
-// [174]. Ja, es gibt eine [/174]
-// [175] 14-tägige kostenlose Testphase [/175]
-
-// ❌ DO NOT COMBINE into:
-// [174]Ja, es gibt eine 14-tägige kostenlose Testphase[/174]
-
-// ---
-
-// Final Output Instructions:
-// - Output each line in its own "[tag]...[/tag]" format.
-// - Do **NOT** add extra commentary or explanation.
-// - The output must contain the same **number of tags** as the input.
-// - Tags **must be in the exact same order** as input.
-// - Return only the translated lines.
-
-// ---
-
-// OUTPUT TAGS: { tags }
-// LANGUAGE: { lang }
-
-// // Strict mode enabled: Disallow tag combination, enforce exact structure
-// `
-
-// const SYSTEM_PROMPT = `
-// You are a professional translator.
-
-// Translate the following content into {lang}.
-
-// ---
-
-// RULES – YOU MUST FOLLOW THESE EXACTLY:
-
-// 1. Each line is formatted as a tagged unit like: [123]Text[/123]
-//    You MUST return each tag exactly as received: same index, same spacing.
-
-// 2. NEVER combine, merge, split, reorder, or delete tags.
-//    One tag in → One tag out. No exceptions.
-
-// 3. DO NOT translate:
-//    - URLs
-//    - Anything in { curly braces }
-//    - Tags themselves (e.g. keep "[123]" and "[/123]" as-is)
-
-// 4. Do not add, remove, or change punctuation outside the tagged content.
-
-// 5. If the content across multiple tags forms a sentence, you MUST translate each tag individually **but maintain fluency using context only — do not merge**.
-
-// ---
-
-// EXAMPLES:
-
-// Input:
-// [1]Yes, there is a[/1]
-// [2]14-day free trial[/2]
-
-// ✅ Correct:
-// [1]Ja, es gibt eine[/1]
-// [2]14-tägige kostenlose Testphase[/2]
-
-// ❌ Wrong (combined):
-// [1]Ja, es gibt eine 14-tägige kostenlose Testphase[/1]
-
-// ---
-
-// DO NOT explain anything.
-// DO NOT combine output.
-// JUST return one translated line per tag.
-// Maintain the same number of tags, in the same order.
-
-// ---
-
-// OUTPUT FORMAT: { tags }
-// TARGET LANGUAGE: { lang }
-
-// Your response must contain **only** the translated lines, in exact tag order, with no commentary.
-// `
 
 // Variables
 let octokit;
@@ -331,7 +225,7 @@ async function processTranslation() {
   }
 
   // Track token usage
-  const tokens = { prompt: 0, completion: 0 };
+  const tokens = { input: 0, output: 0 };
   const queue = [];
 
   for (const filePath of allFiles) {
@@ -428,8 +322,8 @@ async function processTranslation() {
             translated = result;
 
             // Update token totals
-            tokens.prompt += usage.prompt_tokens || 0;
-            tokens.completion += usage.completion_tokens || 0;
+            tokens.input += usage.input_tokens || 0;
+            tokens.output += usage.output_tokens || 0;
 
             // Save to cache
             jetpack.write(cachePath, translated);
@@ -526,6 +420,9 @@ async function processTranslation() {
         // Update <meta property="og:url">
         $('meta[property="og:url"]').attr('content', canonicalUrl);
 
+        // Update <meta property="og:locale"> to current language
+        $('meta[property="og:locale"]').attr('content', lang);
+
         // Insert language tags on this translation
         await insertLanguageTags($, languages, relativePath, outPath);
 
@@ -594,11 +491,22 @@ async function processTranslation() {
     jetpack.write(metas[lang].path, metas[lang].meta);
   }
 
+  // Calculate costs using AI pricing (per 1M tokens)
+  const inputCost = (tokens.input / 1000000) * AI.inputCost;
+  const outputCost = (tokens.output / 1000000) * AI.outputCost;
+  const totalCost = inputCost + outputCost;
+
   // Log total token usage
   logger.log('🧠 OpenAI Token Usage Summary:');
-  logger.log(`   🟣 Prompt tokens:     ${tokens.prompt.toLocaleString()}`);
-  logger.log(`   🟢 Completion tokens: ${tokens.completion.toLocaleString()}`);
-  logger.log(`   🔵 Total tokens:      ${(tokens.prompt + tokens.completion).toLocaleString()}`);
+  logger.log(`   🟣 Input tokens:      ${tokens.input.toLocaleString()}`);
+  logger.log(`   🟢 Output tokens:     ${tokens.output.toLocaleString()}`);
+  logger.log(`   🔵 Total tokens:      ${(tokens.input + tokens.output).toLocaleString()}`);
+  
+  // Cost summary
+  logger.log('💰 Cost Breakdown:');
+  logger.log(`   📥 Input cost:  $${inputCost.toFixed(4)}`);
+  logger.log(`   📤 Output cost: $${outputCost.toFixed(4)}`);
+  logger.log(`   💵 Total cost:  $${totalCost.toFixed(4)}`);
 
   // Push updated translation cache back to uj-translations
   if (Manager.isBuildMode()) {
@@ -637,29 +545,29 @@ async function translateWithAPI(openAIKey, content, lang) {
 
   // Reconstruct translation maintaining order
   const translatedLines = new Array(lines.length);
-  let totalUsage = { prompt_tokens: 0, completion_tokens: 0 };
+  let totalUsage = { input_tokens: 0, output_tokens: 0 };
   let hasErrors = false;
 
   for (const batchResult of batchResults) {
     if (batchResult.error) {
       // Log
       logger.error(`❌ Batch ${batchResult.batchNumber} failed: ${batchResult.error.message}`);
-      
+
       // Try to subdivide the failed batch
       const failedBatchLines = lines.slice(batchResult.startIndex, batchResult.endIndex + 1);
       try {
         logger.log(`🔄 Attempting to subdivide failed batch ${batchResult.batchNumber} (${failedBatchLines.length} lines)`);
         const subdivisionResult = await subdivideAndTranslate(openAIKey, failedBatchLines, lang, batchResult.batchNumber);
-        
+
         // Place subdivided results in correct positions
         for (let i = 0; i < subdivisionResult.length; i++) {
           translatedLines[batchResult.startIndex + i] = subdivisionResult[i];
         }
-        
+
         logger.log(`✅ Successfully subdivided batch ${batchResult.batchNumber}`);
       } catch (subdivisionError) {
         logger.error(`❌ Subdivision failed for batch ${batchResult.batchNumber}: ${subdivisionError.message}`);
-        
+
         // Final fallback: use original content
         for (let i = 0; i < failedBatchLines.length; i++) {
           translatedLines[batchResult.startIndex + i] = failedBatchLines[i];
@@ -676,8 +584,8 @@ async function translateWithAPI(openAIKey, content, lang) {
       for (let i = 0; i < resultLines.length; i++) {
         translatedLines[batchResult.startIndex + i] = resultLines[i];
       }
-      totalUsage.prompt_tokens += batchResult.usage.prompt_tokens || 0;
-      totalUsage.completion_tokens += batchResult.usage.completion_tokens || 0;
+      totalUsage.input_tokens += batchResult.usage.input_tokens || 0;
+      totalUsage.output_tokens += batchResult.usage.output_tokens || 0;
     }
   }
 
@@ -695,11 +603,11 @@ async function translateWithAPI(openAIKey, content, lang) {
 
 async function subdivideAndTranslate(openAIKey, lines, lang, originalBatchNumber, depth = 0) {
   const maxDepth = 10; // Prevent infinite recursion
-  
+
   if (depth > maxDepth) {
     throw new Error(`Maximum subdivision depth reached for batch ${originalBatchNumber}`);
   }
-  
+
   // If only one line, try to translate it directly
   if (lines.length === 1) {
     try {
@@ -710,36 +618,36 @@ async function subdivideAndTranslate(openAIKey, lines, lang, originalBatchNumber
       return lines; // Return original line if single line fails
     }
   }
-  
+
   // Divide the batch into smaller sub-batches (half the size, minimum 1)
   const subBatchSize = Math.max(1, Math.floor(lines.length / 2));
   const subBatches = [];
-  
+
   for (let i = 0; i < lines.length; i += subBatchSize) {
     subBatches.push(lines.slice(i, i + subBatchSize));
   }
-  
+
   logger.log(`🔀 Subdividing into ${subBatches.length} sub-batches of ~${subBatchSize} lines each`);
-  
+
   const results = [];
-  
+
   // Process sub-batches sequentially to avoid overwhelming the API
   for (let i = 0; i < subBatches.length; i++) {
     const subBatch = subBatches[i];
     const subBatchContent = subBatch.join('\n');
-    
+
     try {
       const subResult = await translateBatch(openAIKey, subBatchContent, lang, `${originalBatchNumber}.${depth}.${i}`);
       results.push(...subResult.result.split('\n'));
     } catch (error) {
       logger.warn(`⚠️ Sub-batch ${i} failed, attempting further subdivision: ${error.message}`);
-      
+
       // Recursively subdivide this failed sub-batch
       const recursiveResult = await subdivideAndTranslate(openAIKey, subBatch, lang, originalBatchNumber, depth + 1);
       results.push(...recursiveResult);
     }
   }
-  
+
   return results;
 }
 
@@ -757,7 +665,7 @@ async function translateBatch(openAIKey, content, lang, batchNumber, isSingleLin
   content = content.trim();
 
   // Request
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch('https://api.openai.com/v1/responses', {
     response: 'json',
     method: 'POST',
     headers: {
@@ -767,18 +675,17 @@ async function translateBatch(openAIKey, content, lang, batchNumber, isSingleLin
     timeout: 60000 * 4,
     tries: 2,
     body: {
-      model: AI_MODEL,
-      messages: [
+      model: AI.model,
+      input: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: content }
       ],
-      max_tokens: 1024 * 16,
       temperature: 0.2,
     },
   });
 
   // Get result
-  const result = res?.choices?.[0]?.message?.content;
+  const result = res?.output?.[0]?.content?.[0]?.text;
   const usage = res?.usage || {};
   const trimmed = result?.trim();
 
@@ -880,6 +787,9 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
   const isHtml = $('html').length > 0;
 
   if (isHtml) {
+    // Get the current page's language from the og:locale or html lang attribute
+    const currentLang = $('meta[property="og:locale"]').attr('content') || $('html').attr('lang') || config?.translation?.default;
+    
     // Locate the existing language tags
     const existingLanguageTags = $(`head link[rel="alternate"][hreflang="${config?.translation?.default}"]`);
 
@@ -898,6 +808,37 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
 
       // Insert new tags after the last existing language tag
       existingLanguageTags.last().after(newLanguageTags);
+    }
+
+    // Add og:locale:alternate meta tags after og:locale
+    const ogLocaleTag = $('head meta[property="og:locale"]');
+    if (ogLocaleTag.length) {
+      let newOgLocaleTags = '';
+      
+      // Add default language if it's not the current language
+      if (config?.translation?.default && config.translation.default !== currentLang) {
+        const tagExists = $(`head meta[property="og:locale:alternate"][content="${config.translation.default}"]`).length > 0;
+        if (!tagExists) {
+          newOgLocaleTags += `\n<meta property="og:locale:alternate" content="${config.translation.default}">`;
+        }
+      }
+      
+      // Add all alternate languages except the current one
+      for (const targetLang of languages) {
+        // Skip if this is the current page's language
+        if (targetLang === currentLang) continue;
+        
+        // Check if the tag already exists
+        const tagExists = $(`head meta[property="og:locale:alternate"][content="${targetLang}"]`).length > 0;
+        if (!tagExists) {
+          newOgLocaleTags += `\n<meta property="og:locale:alternate" content="${targetLang}">`;
+        }
+      }
+
+      // Insert new tags after the og:locale tag
+      if (newOgLocaleTags) {
+        ogLocaleTag.after(newOgLocaleTags);
+      }
     }
   } else {
     // Locate the existing language tags

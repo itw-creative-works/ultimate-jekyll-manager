@@ -6,7 +6,7 @@ module.exports = function (Manager, options) {
   const { webManager } = Manager;
 
   // Main log
-  webManager.log('⚠️ Enabling development mode features!');
+  console.log('⚠️ Enabling development mode features!');
 
   // Setup handlers
   setupHandlers(webManager);
@@ -18,7 +18,7 @@ module.exports = function (Manager, options) {
 function setupHandlers(webManager) {
   // Add development click handler
   document.addEventListener('click', function (event) {
-    webManager.log('Click', event.target);
+    console.log('Click', event.target);
   });
 }
 

@@ -88,10 +88,22 @@ npm install
 npm run prepare:watch
 ```
 
+### Run the `blogify` task:
+Create 12 test blog posts in the `_posts` directory with the `blogify` task. This is useful for testing and development purposes.
+```bash
+npx uj blogify
+```
+
 ## Page Frontmatter
 You can add the following frontmatter to your pages to customize their behavior:
+
+### All pages
 ```yaml
 ---
+# Layout and Internals
+layout: themes/[ site.theme.id ]/frontend/minimal # The layout to use for the page, usually 'default' or 'page'
+permalink: /path/to/page # The URL path for the page, can be relative
+
 # Control the page's meta tags
 meta:
   index: true # Set to false to disable indexing by search engines
@@ -113,11 +125,28 @@ theme:
     content: '' # Injected at the end of the head tag
   foot:
     content: '' # Injected at the end of the foot tag (inside <body>)
+---
+```
 
+### Post pages
+```yaml
+---
 # Post pages
 post:
-  title: 'Post Title' # Custom post title for the page
-  description: 'Post description goes here.' # Custom post description for the page
+  title: "Post Title" # Custom post title for the page
+  description: "Post description goes here." # Custom post description for the page
+  author: "author-id" # ID of the author from _data/authors.yml
+  id: 1689484669 # Unique ID for the post, used for permalink
+---
+```
+
+### Team Member pages
+```yaml
+---
+# Team Member pages
+member:
+  id: "member-id" # ID of the member from _data/members.yml
+  name: "Member Name" # Name of the member
 ---
 ```
 

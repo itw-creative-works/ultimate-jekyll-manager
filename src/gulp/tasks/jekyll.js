@@ -130,6 +130,7 @@ function jekyllWatcher(complete) {
   return complete();
 }
 
+
 // Default Task
 module.exports = series(jekyll, jekyllWatcher);
 

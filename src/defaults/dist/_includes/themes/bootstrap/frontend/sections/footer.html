@@ -114,7 +114,7 @@
             {% capture copyright_text %}{{ data.copyright.text }}{% endcapture %}
           {% else %}
             {% capture copyright_text %}
-              © {{ site.time | date: "%Y" }} <strong>{{ site.brand.name }}</strong> by <a href="https://itwcreativeworks.com">ITW Creative Works</a>. All rights reserved.
+              {{ site.characters.copyright }} {{ site.uj.date.year }} <strong>{{ site.brand.name }}</strong> by <a href="https://itwcreativeworks.com">ITW Creative Works</a>. All rights reserved.
               <br>
               By using this site and our services, you agree to our <a href="/terms">Terms</a> & <a href="/privacy">Privacy Policy</a>.
             {% endcapture %}

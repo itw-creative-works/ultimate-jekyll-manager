@@ -201,25 +201,6 @@ function customTransform() {
     // Update path
     file.path = path.join(file.base, finalRelativePath);
 
-    // Special handling for files inside src/defaults/dist/
-    const normalizedOriginalPath = path.relative(rootPathPackage, file.path).replace(/\\/g, '/');
-    if (normalizedOriginalPath.startsWith('dist/defaults/dist/')) {
-      const contents = file.contents.toString();
-      const templated = template(contents, {
-        site: {
-          theme: {
-            id: config?.theme?.id || 'geeks',
-            target: config?.theme?.target || 'frontend',
-          },
-        },
-      }, {
-        brackets: ['[', ']'],
-      });
-
-      // Update file contents
-      file.contents = Buffer.from(templated);
-    }
-
     // Push transformed file
     this.push(file);
 

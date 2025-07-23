@@ -46,16 +46,16 @@
   </div>
 </div>
 
-<!-- Performance -->
-<!-- <script type="text/javascript">
-  try {
-    window.performance.mark('manager_preBundle');
-  } catch (e) {}
-</script> -->
-
 <!-- Configuration -->
 <script type="text/javascript">
-  var Configuration = {{ page.resolved.web-manager }};
+  var Configuration = {
+    environment: "{{ site.uj.environment }}",
+    cacheBreaker: "{{ site.uj.cache_breaker }}",
+    brand: {{ page.resolved.brand | jsonify }},
+    {% for item in page.resolved.web_manager %}
+      {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
+    {% endfor %}
+  };
 </script>
 
 <!-- JS Bundle -->
@@ -132,8 +132,8 @@
 {% endiffalsy %}
 
 <!-- Script - Google Adsense -->
-{% iftruthy page.resolved.advertising.google-adsense %}
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-{{ site.advertising.google-adsense }}" crossorigin="anonymous"></script>
+{% iftruthy page.resolved.advertising.google-adsense.client %}
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-{{ site.advertising.google-adsense.client }}" crossorigin="anonymous"></script>
 {% endiftruthy %}
 
 <!-- Schema - Breadcrumbs -->
@@ -316,5 +316,48 @@
   </script>
 {% endif %}
 
-<!-- Page - Injected head -->
-{{ page.resolved.foot.content | uj_content_format }}
+<!-- Schema - Product -->
+{%- if page-is-product == true -%}
+  <script id="uj-schema-product" type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Product",
+      "@id": "{{ site.url }}{{ page.url }}#Product",
+      "url": "{{ site.url }}{{ page.url }}",
+      "name": "{{ page.product.title | liquify }}",
+      "description": "{{ page.product.description | liquify }}",
+      "image": [
+        "{{ site.url }}/assets/images/products/product-{{ page.product.id }}/{{ page.url | split: '/' | last }}.jpg"
+      ],
+      "brand": {
+        "@id": "{{ site.url }}#{{ site.brand.type }}"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "{{ site.url }}{{ page.url }}",
+        "priceCurrency": "{{ site.currency }}",
+        "price": "{{ page.product.price }}",
+        "itemCondition": "http://schema.org/NewCondition",
+        "availability": "http://schema.org/InStock"
+      }
+    }
+  </script>
+{% endif %}
+
+<!-- Schema - ContactPage -->
+{%- if page-is-contact == true -%}
+  <script id="uj-schema-contact" type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "ContactPage",
+      "@id": "{{ site.url }}{{ page.url }}#ContactPage",
+      "url": "{{ site.url }}{{ page.url }}",
+      "name": "{{ page.meta.title | liquify }}",
+      "description": "{{ page.meta.description | liquify }}",
+      "mainEntity": {
+        "@type": "Organization",
+        "@id": "{{ site.url }}#{{ site.brand.type }}"
+      }
+    }
+  </script>
+{% endif %}

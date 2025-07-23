@@ -36,8 +36,7 @@ advertising:
     site-id: "5ad46a4c7412db0ae" # example: 5ad46a4c7412db0ae
 
 # Escape shortcuts
-escapes:
-  underscore: "_"
+characters:
   asterisk: "*"
   brace-left: "{"
   brace-right: "}"
@@ -45,6 +44,8 @@ escapes:
   bracket-left: "["
   bracket-right: "]"
   bracket-both: "[]"
+  copyright: "©"
+  underscore: "_"
 
 # Icons (Go to https://fontawesome.com/icons/github?f=classic&s=brands > SVG > Then add --> width="16" height="16" fill="currentColor")
 icons:

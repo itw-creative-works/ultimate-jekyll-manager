@@ -5,7 +5,7 @@ module.exports = (Manager) => {
     const { webManager } = Manager;
 
     // Log
-    webManager.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
+    console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
 
     // Import the theme from src/assets/themes/{ id }
     require('__theme__/_theme.js');

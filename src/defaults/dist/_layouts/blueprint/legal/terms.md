@@ -10,7 +10,7 @@ meta:
   description: "By accessing and using our products and services, you agree to comply with the Terms of Use listed here."
   breadcrumb: "Terms of Service"
 
-web-manager:
+web_manager:
   exitPopup:
     enabled: false
 ---

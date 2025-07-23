@@ -5,6 +5,22 @@ site.uj.cache_breaker={{ site.uj.cache_breaker }}
 page.random_id={{ page.random_id }}
 <br>
 
+
+REMOVE
+settings.include-socialsharekit
+settings.blog-post-image-class
+settings.blog-author-image-class
+
+admin-dashboard:
+
+REMAKE main/misc/embed-manager.html in UJ
+REMAKE the dashboard one in UJ
+FINISH redirec.js in UJ
+
+
+
+
+
 FIX THE settings like
 * layout.settings.manager-configuration
 THey are super disorganized and not consistent and some are not needed anymore
@@ -279,3 +295,13 @@ MAYBE
 
     "deploy": "UJ_BUILD_MODE=true UJ_IS_SERVER=true npx uj setup && npm run build"
 
+
+tempalte names
+
+- clear
+- glass
+- classy
+- glassy
+- flassy
+- modern
+-

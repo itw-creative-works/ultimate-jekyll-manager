@@ -107,8 +107,6 @@ const performRedirect = () => {
     console.log(`[Redirect] Delaying redirect by ${timeout}ms for development mode`);
   }
 
-  return
-
   // Perform the redirect
   setTimeout(() => {
     window.location.href = finalUrl;

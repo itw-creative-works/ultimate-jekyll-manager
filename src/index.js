@@ -18,14 +18,17 @@ Manager.prototype.initialize = function () {
 
   return new Promise(function(resolve, reject) {
     // Initiate the web manager
-    const webManager = new WebManager();
-    self.webManager = webManager;
+    self.webManager = WebManager;
+
+    console.log('---self.webManager', self.webManager);
 
     // Initialize
-    webManager.init(window.Configuration, () => {
+    self.webManager.init(window.Configuration, () => {
       // Get the page path (MUST BE SANITIZED because webpack wont import if page has leading slashes)
       const page = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
-      const pagePath = !page ? 'index.js' : `${page}/index.js`;
+      const pagePath = !page
+        ? 'index.js'
+        : `${page}/index.js`;
       const fullModulePath = `assets/js/pages/${pagePath}`;
 
       // Module options
@@ -48,7 +51,7 @@ Manager.prototype.initialize = function () {
       require('__main_assets__/js/ultimate-jekyll-manager.js')(self, options);
 
       /* @dev-only:start */
-      webManager.log(`Page module loading (${fullModulePath})`);
+      console.log(`Page module loading (${fullModulePath})`);
       /* @dev-only:end */
 
       // Load page-specific scripts
@@ -92,7 +95,7 @@ Manager.prototype.initialize = function () {
           try {
             // Log page script path
             /* @dev-only:start */
-            webManager.log(`Page module #${mod.tag} loaded (${fullModulePath})`);
+            console.log(`Page module #${mod.tag} loaded (${fullModulePath})`);
             /* @dev-only:end */
 
             await mod.default(self, options);

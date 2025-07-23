@@ -48,7 +48,7 @@ brand:
     slapform-form-id: ""
   address:
     line1: "4001 Inglewood Ave"
-    line2: "Suite 385"
+    line2: "Suite 101-385"
     region: "CA"
     postal-code: "90278"
     city: "Redondo Beach"
@@ -56,23 +56,31 @@ brand:
     country: "United States"
 
 # Web Manager
-web-manager:
-  firebase_app:
+web_manager:
+  auth:
     enabled: true
     config:
-      apiKey: ""
-      authDomain: ""
-      databaseURL: ""
-      projectId: ""
-      storageBucket: ""
-      messagingSenderId: ""
-      appId: ""
-      measurementId: ""
-  firebase_appCheck:
-    enabled: false
-    config:
-      siteKey: ""
-  cookieconsent:
+      policy: null
+      redirects:
+        authenticated: "/account"
+        unauthenticated: "/signin"
+  firebase:
+    app:
+      enabled: true
+      config:
+        apiKey: ""
+        authDomain: ""
+        databaseURL: ""
+        projectId: ""
+        storageBucket: ""
+        messagingSenderId: ""
+        appId: ""
+        measurementId: ""
+    appCheck:
+      enabled: false
+      config:
+        siteKey: ""
+  cookieConsent:
     enabled: true
     config:
       palette:
@@ -104,10 +112,14 @@ web-manager:
       timeout: 1000 * 60 * 60 * 4
       handler: null
       title: "Want 50% off your gift?"
-      messages: "There are some gifts on sale today for as much as 50% off. Click the button below to claim your discount!"
+      message: "There are some gifts on sale today for as much as 50% off. Click the button below to claim your discount!"
       okButton:
         text: "Claim 50% Discount"
         link: "https://giftly.app"
+  pushNotifications:
+    enabled: true
+    config:
+      autoRequest: 1000 * 60
   validRedirectHosts: []
 
 # Socials
@@ -194,6 +206,9 @@ translation:
     - "tl"
     - "vi"
     - "it"
+
+# Custom Icons
+icons:
 
 # Blog & Pagination
 permalink: /blog/:title

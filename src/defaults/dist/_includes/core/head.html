@@ -53,6 +53,16 @@
   {% assign page-robots = 'noindex' %}
 {%- endif -%}
 
+{% capture page-ie-script %}
+  <style media="screen">
+    .main-alert-outdated {
+      display: block !important;
+    }
+  </style>
+{% endcapture %}
+
+{% assign page-translation-default = page.resolved.translation.default | default: 'en' | liquify %}
+
 <!-- Prefetch -->
 <link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
 <link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin/>
@@ -61,12 +71,12 @@
 
 <!-- Meta -->
 <meta charset="utf-8"/>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
 <meta name="viewport" content="{{ page-viewport }}"/>
 <meta name="HandheldFriendly" content="True"/>
 <meta name="MobileOptimized" content="320"/>
 <meta name="generator" content="Ultimate Jekyll"/>
+<meta name="author" content="{{ site.brand.name }}"/>
+<meta name="copyright" content="{{ site.characters.copyright }} {{ site.uj.date.year }} {{ site.brand.name }}">
 
 <!-- Referrer -->
 <meta name="referrer" content="{{ page-referrer }}"/>
@@ -105,13 +115,15 @@
 <!-- OG: Facebook / Open Graph -->
 <meta property="og:url" content="{{ page.canonical.url }}"/>
 <meta property="og:type" content="{{ page-og-type }}"/>
+<meta property="og:locale" content="{{ page-translation-default }}"/>
+<meta property="og:site_name" content="{{ site.brand.name }}" />
 
 <!-- Main Feed -->
 <link href="{{ site.url }}/feeds/posts.xml" type="application/atom+xml" rel="alternate" title="{{ site.brand.name }} Feed"/>
 
 <!-- Language Tags -->
 <link rel="alternate" href="{{ page.canonical.url }}" hreflang="x-default"/>
-<link rel="alternate" href="{{ page.canonical.url }}" hreflang="{{ site.translation.default |  default: 'en' }}"/>
+<link rel="alternate" href="{{ page.canonical.url }}" hreflang="{{ page-translation-default }}"/>
 
 <!-- Favicon -->
 <link rel="apple-touch-icon" sizes="180x180" href="{{ favicon-path }}/apple-touch-icon.png?cb={{ site.uj.cache_breaker }}"/>
@@ -124,10 +136,11 @@
 <meta name="theme-color" content="{{ page.resolved.favicon.theme-color }}"/>
 
 <!-- Browser Support -->
-<!--[if lte IE 9]>
-  <link rel="stylesheet" type="text/css" href="/assets/css/main/lte-ie9.css?cb={{ site.uj.cache_breaker }}"/>
+<!--[if lte IE 11]>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+  {{ page-ie-script }}
 <![endif]-->
 
 <!-- CSS Bundle -->
@@ -135,11 +148,7 @@
 
 <!-- Style - Scripts are Disabled -->
 <noscript>
-  <style media="screen">
-    .main-alert-outdated {
-      display: block !important;
-    }
-  </style>
+  {{ page-ie-script }}
 </noscript>
 
 <!-- Page - Injected head -->

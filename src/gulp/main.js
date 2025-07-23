@@ -46,11 +46,13 @@ exports.build = series(
   // exports.setup,
   exports.defaults,
   exports.distribute,
-  exports['json-to-html'],
-  parallel(exports.sass, exports.webpack, exports.imagemin),
+  parallel(exports.webpack, exports.sass, exports.imagemin),
+  exports.jsonToHtml,
+  exports.preprocess,
   exports.jekyll,
   exports.audit,
   exports.translation,
+  exports.minifyHtml,
 );
 
 // Compose task scheduler
