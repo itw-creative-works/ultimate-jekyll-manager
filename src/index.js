@@ -25,15 +25,19 @@ Manager.prototype.initialize = function () {
     self.webManager.initialize(window.Configuration)
     .then(() => {
       // Get the page path (MUST BE SANITIZED because webpack wont import if page has leading slashes)
-      const page = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
-      const pagePath = !page
-        ? 'index.js'
-        : `${page}/index.js`;
-      const fullModulePath = `assets/js/pages/${pagePath}`;
+      const pagePath = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
+      const pageModulePath = pagePath
+        ? `${pagePath}/index.js`
+        : 'index.js';
+      const pageModulePathFull = `assets/js/pages/${pageModulePath}`;
 
       // Module options
       const options = {
-        pagePath: pagePath,
+        paths: {
+          pagePath: `/${pagePath}`,
+          // pageModulePath: `/${pageModulePath}`,
+          // pageModulePathFull: `/${pageModulePathFull}`,
+        },
       }
 
       // Initialize modules
@@ -51,34 +55,34 @@ Manager.prototype.initialize = function () {
       require('__main_assets__/js/ultimate-jekyll-manager.js')(self, options);
 
       /* @dev-only:start */
-      console.log(`Page module loading (${fullModulePath})`);
+      console.log(`Page module loading (${pageModulePathFull})`);
       /* @dev-only:end */
 
       // Load page-specific scripts
       Promise.all([
         // Import the main page-specific script
-        import(`__main_assets__/js/pages/${pagePath}`)
+        import(`__main_assets__/js/pages/${pageModulePath}`)
           .then((mod) => {
             modules[0] = { tag: 'main', default: mod && mod.default };
           })
           .catch((e) => {
             if (e.message && e.message.includes('Cannot find module')) {
-              console.warn(`Page module #main not found (${fullModulePath})`);
+              console.warn(`Page module #main not found (${pageModulePathFull})`);
             } else {
-              console.error(`Page module #main error (${fullModulePath})`, e);
+              console.error(`Page module #main error (${pageModulePathFull})`, e);
             }
           }),
 
         // Import the project page-specific script
-        import(`__project_assets__/js/pages/${pagePath}`)
+        import(`__project_assets__/js/pages/${pageModulePath}`)
           .then((mod) => {
             modules[1] = { tag: 'project', default: mod && mod.default };
           })
           .catch((e) => {
             if (e.message && e.message.includes('Cannot find module')) {
-              console.warn(`Project module #project not found (${fullModulePath})`);
+              console.warn(`Project module #project not found (${pageModulePathFull})`);
             } else {
-              console.error(`Project module #project error (${fullModulePath})`, e);
+              console.error(`Project module #project error (${pageModulePathFull})`, e);
             }
           })
       ])
@@ -95,12 +99,12 @@ Manager.prototype.initialize = function () {
           try {
             // Log page script path
             /* @dev-only:start */
-            console.log(`Page module #${mod.tag} loaded (${fullModulePath})`);
+            console.log(`Page module #${mod.tag} loaded (${pageModulePathFull})`);
             /* @dev-only:end */
 
             await mod.default(self, options);
           } catch (e) {
-            console.error(`Page module #${mod.tag} error (${fullModulePath})`, e);
+            console.error(`Page module #${mod.tag} error (${pageModulePathFull})`, e);
             break; // Stop execution if any module fails
           }
         }

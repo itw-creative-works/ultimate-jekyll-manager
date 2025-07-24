@@ -1,5 +1,5 @@
 // Module
-module.exports = (Manager) => {
+module.exports = (Manager, options) => {
   return new Promise(function(resolve, reject) {
     // Shortcuts
     const { webManager } = Manager;
@@ -8,7 +8,7 @@ module.exports = (Manager) => {
     console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
 
     // Cache visited pages for offline use
-    require('./core/service-worker.js')();
+    require('./core/service-worker.js')(Manager, options);
 
     // Import the theme from src/assets/themes/{ id }
     require('__theme__/_theme.js');
