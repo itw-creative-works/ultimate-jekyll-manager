@@ -9,6 +9,9 @@ const terser = require('terser');
 // Load package
 const package = Manager.getPackage('main');
 const project = Manager.getPackage('project');
+const config = Manager.getConfig('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
 
 // Glob
 const input = [
@@ -51,11 +54,11 @@ function minifyHtmlTask(complete) {
       if (file.isBuffer()) {
         try {
           let htmlContent = file.contents.toString();
-          
+
           // Extract and temporarily replace JSON-LD scripts
           const jsonLdScripts = [];
           const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-          
+
           htmlContent = htmlContent.replace(jsonLdRegex, (match, jsonContent) => {
             // Minify the JSON content
             try {
@@ -67,11 +70,11 @@ function minifyHtmlTask(complete) {
             }
             return `__JSON_LD_PLACEHOLDER_${jsonLdScripts.length - 1}__`;
           });
-          
+
           // Extract and temporarily replace IE conditional comments
           const conditionalComments = [];
           const conditionalRegex = /<!--\[if[^>]*\]>([\s\S]*?)<!\[endif\]-->/gi;
-          
+
           htmlContent = htmlContent.replace(conditionalRegex, (match, content) => {
             // Minify the content inside the conditional comment
             try {
@@ -85,21 +88,21 @@ function minifyHtmlTask(complete) {
             }
             return `__CONDITIONAL_COMMENT_PLACEHOLDER_${conditionalComments.length - 1}__`;
           });
-          
+
           // Minify the HTML content
           const minified = await minify(htmlContent, options);
-          
+
           // Restore the JSON-LD scripts and conditional comments
           let finalHtml = minified;
           jsonLdScripts.forEach((jsonContent, index) => {
             const scriptTag = `<script type=application/ld+json>${jsonContent}</script>`;
             finalHtml = finalHtml.replace(`__JSON_LD_PLACEHOLDER_${index}__`, scriptTag);
           });
-          
+
           conditionalComments.forEach((commentContent, index) => {
             finalHtml = finalHtml.replace(`__CONDITIONAL_COMMENT_PLACEHOLDER_${index}__`, commentContent);
           });
-          
+
           file.contents = Buffer.from(finalHtml);
         } catch (err) {
           logger.error(`Error minifying ${file.path}: ${err.message}`);

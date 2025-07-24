@@ -10,10 +10,6 @@ function Manager() {
 
   // Defaults
   self.config = {};
-  self.version = '';
-  self.brand = {
-    name: 'Default',
-  };
   self.app = 'default';
   self.environment = 'production';
   self.libraries = {
@@ -40,62 +36,68 @@ Manager.prototype.initialize = function () {
     self.serviceWorker = serviceWorker;
 
     // Parse config file
-    parseConfiguration(self);
+    self.parseConfiguration();
 
     // Setup listeners
-    setupListeners(self);
+    self.setupListeners();
 
     // Import firebase
-    importFirebase(self);
+    self.importFirebase();
+
+    // Update cache
+    self.updateCache();
 
     // Log
-    self.log('Initialized!', self.location.pathname, self.version, self.cache.name, self);
+    console.log('Initialized!', serviceWorker.location.pathname, serviceWorker);
 
     // Return
-    return resolve(self);
+    return resolve(serviceWorker);
   });
 };
 
-['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
-  Manager.prototype[method] = function() {
-    // Get arguments
-    const time = new Date().toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+// ['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
+//   Manager.prototype[method] = function() {
+//     // Get arguments
+//     const time = new Date().toLocaleTimeString('en-US', {
+//       hour12: false,
+//       hour: '2-digit',
+//       minute: '2-digit',
+//       second: '2-digit'
+//     });
 
-    // Add prefix
-    const args = [`[${time}] service-worker:`, ...Array.from(arguments)];
+//     // Add prefix
+//     const args = [`[${time}] service-worker:`, ...Array.from(arguments)];
 
-    // Call the original console method
-    console[method].apply(console, args);
-  };
-});
+//     // Call the original console method
+//     console[method].apply(console, args);
+//   };
+// });
 
 // Parse configuration
-function parseConfiguration(self) {
-  try {
-    self.config = JSON.parse(new URL(self.location).searchParams.get('config'));
+Manager.prototype.parseConfiguration = function () {
+  const self = this;
 
-    // Set up self
-    self.version = self.config.v || self.config.version;
-    self.environment = self.config.env || self.config.environment;
-    self.brand.name = self.config.name;
-    self.app = self.config.id || (self.brand.name.toLowerCase().replace(' ', '-') || 'default');
+  try {
+    const params = new URLSearchParams(serviceWorker.location.search);
+    self.config = JSON.parse(params.get('config'));
+
+    // Fix config defaults
+    self.environment = self.config.environment;
+    self.app = self.config.id || 'default';
     self.cache.breaker = self.config.cb;
     self.cache.name = self.app + '-' + self.cache.breaker;
 
     // Log
-    self.log('Parsed configuration', self.config);
+    console.log('Parsed configuration', self.config);
   } catch (e) {
-    self.error('Error parsing configuration', e);
+    console.error('Error parsing configuration', e);
   }
 }
 
 // Setup listeners
-function setupListeners(self) {
+Manager.prototype.setupListeners = function () {
+  const self = this;
+
   // Force service worker to use the latest version
   serviceWorker.addEventListener('install', (event) => {
     event.waitUntil(serviceWorker.skipWaiting());
@@ -119,10 +121,10 @@ function setupListeners(self) {
     const clickAction = payload.click_action || data.click_action || '/';
 
     // Log
-    self.log('Event: notificationclick event', event);
-    self.log('Event: notificationclick data', data);
-    self.log('Event: notificationclick payload', payload);
-    self.log('Event: notificationclick clickAction', clickAction);
+    console.log('notificationclick event', event);
+    console.log('notificationclick data', data);
+    console.log('notificationclick payload', payload);
+    console.log('notificationclick clickAction', clickAction);
 
     // Handle the click
     event.waitUntil(
@@ -136,97 +138,48 @@ function setupListeners(self) {
   // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
   // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
   serviceWorker.addEventListener('message', (event) => {
-    try {
-      // Get the data
-      const data = event.data || {};
-      const response = {
-        status: 'success',
-        command: '',
-        data: {}
-      };
+    // Get the data
+    const data = event.data || {};
 
-      // Parse the data
-      data.command = data.command || '';
-      data.args = data.args || {};
-      response.command = data.command;
+    // Parse the data
+    const command = data.command || '';
+    const payload = data.payload || {};
 
-      // Quit if no command
-      if (data.command === '') { return };
+    // Quit if no command
+    if (!command) return;
 
-      // Log
-      self.log('Event: postMessage', data);
+    // Log
+    console.log('message', command, payload, event);
 
-      // Handle the command
-      if (data.command === 'function') {
-        data.args.function = data.args.function || function() {};
-        data.args.function();
-      } else if (data.command === 'debug') {
-        self.log('Debug data =', data);
-        event.ports[0].postMessage(response);
-      } else if (data.command === 'skipWaiting') {
-        self.skipWaiting();
-        event.ports[0].postMessage(response);
-      } else if (data.command === 'unregister') {
-        self.registration.unregister()
+    // Handle commands
+    if (command === 'update-cache') {
+      const pages = payload.pages || [];
+      self.updateCache(pages)
         .then(() => {
-          event.ports[0].postMessage(response);
+          event.ports[0]?.postMessage({ status: 'success' });
         })
-        .catch(() => {
-          response.status = 'fail';
-          event.ports[0].postMessage(response);
+        .catch(error => {
+          event.ports[0]?.postMessage({ status: 'error', error: error.message });
         });
-      } else if (data.command === 'cache') {
-        data.args.pages = data.args.pages || [];
-        var defaultPages =
-        [
-          '/',
-          '/index.html',
-          /* '/?homescreen=1', */
-          '/assets/css/main.css',
-          '/assets/js/main.js',
-        ];
-        var pagesToCache = arrayUnique(data.args.pages.concat(defaultPages));
-        caches.open(SWManager.cache.name).then(cache => {
-          return cache.addAll(
-            pagesToCache
-          )
-          .then(() => {
-            self.log('Cached resources.');
-            event.ports[0].postMessage(response);
-          })
-          .catch(() => {
-            response.status = 'fail';
-            event.ports[0].postMessage(response);
-            self.log('Failed to cache resources.')
-          });
-        })
-      }
-
-      event.ports[0].postMessage(response);
-    } catch (e) {
-      // Set up a response
-      response.success = 'fail';
-
-      // Try to send a response
-      try { event.ports[0].postMessage(response) } catch (e) {}
-
-      // Log
-      self.log('Failed to receive message:', data, e);
     }
   });
 
   // Log
-  self.log('Set up listeners');
+  console.log('Set up listeners');
 }
 
-// Import Firebase
-function importFirebase(self) {
+Manager.prototype.importFirebase = function () {
+  const self = this;
+
+  // Log
+  console.log('Importing Firebase libraries v%%% firebaseVersion %%%');
+
   // Import Firebase libraries
   importScripts(
     'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-messaging-compat.js',
-    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-database-compat.js',
-    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-firestore-compat.js',
+    // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-database-compat.js',
+    // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-firestore-compat.js',
   );
 
   // Initialize app
@@ -239,20 +192,27 @@ function importFirebase(self) {
   self.libraries.firebase = firebase;
 }
 
-function arrayUnique(array) {
-  var a = array.concat();
+Manager.prototype.updateCache = function (pages) {
+  const self = this;
 
-  // Loop through array
-  for(var i=0; i<a.length; ++i) {
-    for(var j=i+1; j<a.length; ++j) {
-      if(a[i] === a[j]) {
-        a.splice(j--, 1);
-      }
-    }
-  }
+  // Set default pages to cache
+  const defaults = [
+    '/',
+    '/assets/css/main.bundle.css',
+    '/assets/js/main.bundle.js',
+  ];
 
-  // Return
-  return a;
+  // Ensure pages is an array
+  pages = pages || [];
+
+  // Merge with additional pages
+  const pagesToCache = [...new Set([...defaults, ...pages])];
+
+  // Open cache and add pages
+  return caches.open(self.cache.name)
+    .then(cache => cache.addAll(pagesToCache))
+    .then(() => console.log('Cached resources:', pagesToCache))
+    .catch(error => console.error('Failed to cache resources:', error));
 }
 
 // Export

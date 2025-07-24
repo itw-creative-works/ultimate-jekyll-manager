@@ -18,12 +18,12 @@ Manager.prototype.initialize = function () {
 
   return new Promise(function(resolve, reject) {
     // Initiate the web manager
-    self.webManager = WebManager;
-
-    console.log('---self.webManager', self.webManager);
+    // self.webManager = WebManager;
+    self.webManager = new WebManager.Manager();
 
     // Initialize
-    self.webManager.init(window.Configuration, () => {
+    self.webManager.initialize(window.Configuration)
+    .then(() => {
       // Get the page path (MUST BE SANITIZED because webpack wont import if page has leading slashes)
       const page = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
       const pagePath = !page

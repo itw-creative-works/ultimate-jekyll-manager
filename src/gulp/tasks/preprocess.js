@@ -8,7 +8,11 @@ const jetpack = require('fs-jetpack');
 const path = require('path');
 
 // Load package
+const package = Manager.getPackage('main');
+const project = Manager.getPackage('project');
 const config = Manager.getConfig('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
 
 // Glob patterns for files to process
 const input = [

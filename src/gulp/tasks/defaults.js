@@ -15,6 +15,8 @@ const project = Manager.getPackage('project');
 const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
+
+// Get clean versions
 // const cleanVersions = { versions: Manager.getCleanVersions()};
 const cleanVersions = { versions: package.engines };
 

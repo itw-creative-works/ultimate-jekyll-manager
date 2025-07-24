@@ -19,12 +19,9 @@ const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
 // Settings
-const input = [
+const inputMain = [
   // Project entry point
   'src/assets/js/main.js',
-
-  // Project service worker
-  'src/service-worker.js',
 
   // Page-specific js
   `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
@@ -36,6 +33,11 @@ const input = [
 
   // Files to exclude
   // '!dist/**',
+];
+
+const inputServiceWorker = [
+  // Project service worker
+  'src/service-worker.js',
 ];
 
 // Files to copy directly without webpack processing
@@ -61,15 +63,29 @@ const bundleNaming = {
 };
 
 const settings = {
-  mode: 'production',
+  mode: Manager.isBuildMode() ? 'production' : 'development',
   target: ['web', 'es5'],
+  devtool: Manager.isBuildMode() ? 'source-map' : 'eval-source-map',
+  // devtool: false,
   plugins: [
     new StripDevBlocksPlugin(),
     new ReplacePlugin(getTemplateReplaceOptions(), { type: 'template' }),
+    // new wp.IgnorePlugin({
+    //   resourceRegExp: /^\.\/locale$/,
+    //   contextRegExp: /moment$/,
+    // }),
+    // new wp.SourceMapDevToolPlugin({
+    //   filename: '[file].map',
+    //   test: new RegExp('\.[js|css|mjs].*'),
+    //   // exclude: /vendor/,
+    // }),
     // new wp.DefinePlugin({
     //   'process.env.UJ_BUILD_MODE': process.env.UJ_BUILD_MODE || 'true',
     // })
   ],
+  // ignoreWarnings: [
+  //   /Failed to parse source map/,
+  // ],
   entry: {
     // Entry is dynamically generated
   },
@@ -82,6 +98,11 @@ const settings = {
       // For importing the theme
       '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
     },
+    // modules: [
+    //   path.resolve(process.cwd(), 'node_modules'),
+    //   path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules'),
+    //   'node_modules',
+    // ],
   },
   output: {
     // Set the path to the dist folder
@@ -93,7 +114,7 @@ const settings = {
     // https://github.com/webpack/webpack/issues/959
     chunkFilename: (data) => {
       const name = data.chunk.name;
-      
+
       // Check if this chunk should have a stable name
       if (shouldHaveStableName(name)) {
         return '[name].chunk.js';
@@ -104,7 +125,7 @@ const settings = {
     },
     filename: (data) => {
       const name = data.chunk.name;
-      
+
       // Check for special output paths
       if (bundleNaming.specialPaths[name]) {
         return bundleNaming.specialPaths[name];
@@ -134,7 +155,7 @@ const settings = {
         use: {
           loader: 'babel-loader',
           options: {
-            // presets: ['@babel/preset-env'],
+            sourceMaps: true,
             presets: [
               require.resolve('@babel/preset-env', {
                 paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
@@ -143,7 +164,13 @@ const settings = {
             compact: Manager.isBuildMode(),
           }
         }
-      }
+      },
+      // {
+      //   test: /\.js$/,
+      //   include: /node_modules/,
+      //   use: ['source-map-loader'],
+      //   enforce: 'pre',
+      // }
     ]
   },
   optimization: {
@@ -174,7 +201,7 @@ function shouldHaveStableName(name) {
   if (bundleNaming.stable.exact.includes(name)) {
     return true;
   }
-  
+
   // Check patterns
   return bundleNaming.stable.patterns.some(pattern => pattern.test(name));
 }
@@ -184,14 +211,47 @@ function webpack(complete) {
   // Log
   logger.log('Starting...');
 
-  // Update entry points
-  updateEntryPoints();
-
   // Copy files
   copyFilesDirectly();
 
+  // Build configs array
+  const configs = [];
+
+  // Main entries config
+  const mainEntries = updateEntryPoints(inputMain);
+  if (Object.keys(mainEntries).length > 0) {
+    configs.push({
+      ...settings,
+      entry: mainEntries
+    });
+  }
+
+  // Service worker config
+  const serviceWorkerEntries = updateEntryPoints(inputServiceWorker);
+  if (Object.keys(serviceWorkerEntries).length > 0) {
+    configs.push({
+      ...settings,
+      entry: serviceWorkerEntries,
+      output: {
+        ...settings.output,
+        // Set global object for service worker
+        globalObject: 'self',
+        // Disable chunk loading since we're using dynamic imports
+        chunkFormat: 'module',
+      },
+      target: 'webworker',
+      optimization: {
+        ...settings.optimization,
+        // Disable runtime chunk for service worker
+        runtimeChunk: false,
+        // Disable splitting for service worker to avoid chunk loading issues
+        splitChunks: false
+      }
+    });
+  }
+
   // Compiler
-  wp(settings, (e, stats) => {
+  wp(configs, (e, stats) => {
     // Log
     logger.log('Finished!');
 
@@ -217,8 +277,16 @@ function webpackWatcher(complete) {
   // Log
   logger.log('[watcher] Watching for changes...');
 
+  // Build watched input
+  const inputWatched = [
+    ...inputMain,
+    ...inputServiceWorker,
+    // So we can watch for changes while we're developing web-manager
+    `${rootPathPackage}/../web-manager/src`,
+  ];
+
   // Watch for changes
-  watch(input, { delay: delay, dot: true }, webpack)
+  watch(inputWatched, { delay: delay, dot: true }, webpack)
   .on('change', (path) => {
     // Log
     logger.log(`[watcher] File changed (${path})`);
@@ -228,9 +296,9 @@ function webpackWatcher(complete) {
   return complete();
 }
 
-function updateEntryPoints() {
+function updateEntryPoints(inputArray) {
   // Get all JS files
-  const files = glob(input).map((f) => path.resolve(f));
+  const files = glob(inputArray).map((f) => path.resolve(f));
 
   // Sort: main files first
   files.sort((a, b) => {
@@ -240,7 +308,7 @@ function updateEntryPoints() {
   });
 
   // Update from src
-  settings.entry = files.reduce((acc, file) => {
+  const entries = files.reduce((acc, file) => {
     const isProject = file.startsWith(rootPathProject);
     const root = isProject ? rootPathProject : rootPathPackage;
     const relativePath = path.relative(root, file).replace(/\\/g, '/').replace(/\.js$/, '');
@@ -280,7 +348,8 @@ function updateEntryPoints() {
   }, {});
 
   // Log
-  logger.log('Updated entry points:', settings.entry);
+  logger.log('Updated entry points:', entries);
+  return entries;
 }
 
 function copyFilesDirectly() {

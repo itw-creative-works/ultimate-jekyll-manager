@@ -57,7 +57,7 @@ function sass(complete) {
   generatePageScss();
 
   // Compile
-  return src(input)
+  return src(input, { sourcemaps: true })
     // Skip page partials
     .pipe(filter(file => !isPagePartial(file.path), { restore: true }))
     // Compile SASS
@@ -86,7 +86,8 @@ function sass(complete) {
       const fullPath = path.resolve(output, `${file.basename}${file.extname}`);
       compiled[fullPath] = true;
     }))
-    .pipe(dest(output))
+    .pipe(dest(output, { sourcemaps: '.' }))
+    // .pipe(dest(output))
     .on('end', () => {
       // Log
       logger.log('Finished!');

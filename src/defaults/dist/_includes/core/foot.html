@@ -50,7 +50,7 @@
 <script type="text/javascript">
   var Configuration = {
     environment: "{{ site.uj.environment }}",
-    cacheBreaker: "{{ site.uj.cache_breaker }}",
+    buildTime: {{ site.uj.cache_breaker }},
     brand: {{ page.resolved.brand | jsonify }},
     {% for item in page.resolved.web_manager %}
       {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
