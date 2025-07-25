@@ -187,7 +187,7 @@ web_manager:
 
 </ul>
 
-{{ content | liquify | markdownify }}
+{{ content | uj_content_format }}
 
 <p>
   <strong>More Information</strong>

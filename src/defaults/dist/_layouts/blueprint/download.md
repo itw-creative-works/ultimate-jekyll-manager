@@ -46,4 +46,4 @@ If you encounter any issues during the download or have any questions about the 
 
 Elevate your productivity and take your {{ site.brand.name }} experience to the next level with our desktop app. Download now and unlock the full potential of our tools and services right from your desktop.
 
-{{ content | liquify | markdownify }}
+{{ content | uj_content_format }}

@@ -44,4 +44,4 @@ Having trouble with installation or have any questions? Our support team is avai
 
 Upgrade your {{ site.brand.name }} experience with our powerful browser extension. Install now and explore the extended functionality of our services right from your browser. Welcome to a more efficient and integrated browsing experience with {{ site.brand.name }}.
 
-{{ content | liquify | markdownify }}
+{{ content | uj_content_format }}

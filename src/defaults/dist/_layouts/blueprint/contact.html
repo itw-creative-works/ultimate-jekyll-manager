@@ -7,15 +7,6 @@ meta:
   title: "Contact - {{ site.brand.name }}"
   description: "Contact {{ site.brand.name }} if you need assistance with anything."
   breadcrumb: "Contact"
-
-foot:
-  post-bundle-script: '
-    <script type="text/javascript" src="{{ site.url }}/assets/js/slapform-processor.js?cb={{ site.time | date: "%s" }}"></script>
-    <script>
-      Manager.ready(function () {
-        var Slapform = new _SlapformProcessor();
-        Slapform.init();
-      })
-    </script>
-  '
 ---
+
+{{ content | uj_content_format }}

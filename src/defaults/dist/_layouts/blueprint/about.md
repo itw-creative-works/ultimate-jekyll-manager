@@ -45,4 +45,4 @@ We invite you to join us on our journey as we continue to revolutionize the digi
 
 Thank you for choosing {{ site.brand.name }}. We look forward to being a part of your success story.
 
-{{ content | liquify | markdownify }}
+{{ content | uj_content_format }}

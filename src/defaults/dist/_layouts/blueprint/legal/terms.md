@@ -157,7 +157,7 @@ You agree to defend, indemnify, and hold the {{ brand }} and our officers, direc
 
 If any provision of this agreement is determined to be invalid, illegal, or unenforceable in any jurisdiction, such provision shall be deemed modified to the minimum extent necessary to make it valid, legal, and enforceable. If such modification is not possible, the provision shall be severed from this agreement. The invalidity, illegality, or unenforceability of such provision shall not affect the validity, legality, or enforceability of the remaining provisions of this agreement, which shall continue in full force and effect.
 
-{{ content | liquify | markdownify }}
+{{ content | uj_content_format }}
 
 ## Guarantee
 Unless otherwise expressed, {{ brand }} expressly disclaims all warranties and conditions of any kind, whether expressed or implied, including but not limited to, warranties and conditions of merchantability, fitness for a particular purpose, and non-infringement.

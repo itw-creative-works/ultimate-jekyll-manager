@@ -84,7 +84,7 @@ If you would like your personally identifiable information to be deleted from ou
 ## Acceptance of This Policy
 Use of our site signifies your acceptance of this policy. If you do not accept the policy then please do not use this site. When registering, we will further request your explicit acceptance of the privacy policy.
 
-{{ content | liquify | markdownify }}
+{{ content | uj_content_format }}
 
 ## How to Contact Us:
 You can contact us at: [{{ site.url }}/contact]({{ site.url }}/contact).
