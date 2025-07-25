@@ -18,6 +18,12 @@ $fa-sizes: (
   '6xl': 4rem
 );
 
+.fa svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
 @each $name, $size in $fa-sizes {
   .fa-#{$name} {
     font-size: $size;
