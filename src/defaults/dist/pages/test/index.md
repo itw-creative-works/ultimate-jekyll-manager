@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: themes/[ site.theme.id ]/frontend/minimal
+layout: themes/[ site.theme.id ]/frontend/core/minimal
 permalink: /test
 
 sitemap:

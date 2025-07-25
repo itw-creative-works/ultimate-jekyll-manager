@@ -101,7 +101,7 @@ You can add the following frontmatter to your pages to customize their behavior:
 ```yaml
 ---
 # Layout and Internals
-layout: themes/[ site.theme.id ]/frontend/minimal # The layout to use for the page, usually 'default' or 'page'
+layout: themes/[ site.theme.id ]/frontend/core/minimal # The layout to use for the page, usually 'default' or 'page'
 permalink: /path/to/page # The URL path for the page, can be relative
 
 # Control the page's meta tags

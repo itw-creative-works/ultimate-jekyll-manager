@@ -1,8 +1,6 @@
 ---
 ### ALL PAGES ###
 layout: modules/utilities/redirect
-sitemap:
-  include: true
 
 ### REGULAR PAGES ###
 meta:

@@ -1,8 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: themes/[ site.theme.id ]/frontend/base
-sitemap:
-  include: true
+layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### REGULAR PAGES ###
 meta:

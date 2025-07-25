@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: blueprint/team/profile
+layout: blueprint/team/member
 sitemap:
   include: true
 

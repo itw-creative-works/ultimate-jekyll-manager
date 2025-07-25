@@ -245,5 +245,5 @@ DONT FORGET THE FLOW (goes from top to bottom)
 
 │   src/defaults/dist/_layouts/placeholder/app.html\                                                    │
 │   src/defaults/dist/_layouts/themes/bootstrap/frontend/fullscreen.html\                               │
-│   src/defaults/dist/_layouts/themes/bootstrap/frontend/base.html\                                     │
+│   src/defaults/dist/_layouts/themes/bootstrap/frontend/core/base.html\                                     │
 │   src/defaults/dist/_layouts/core/root.html\

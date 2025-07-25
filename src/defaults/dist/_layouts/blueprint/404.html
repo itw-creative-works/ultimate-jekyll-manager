@@ -1,6 +1,6 @@
 ---
 ### ALL PAGES ###
-layout: themes/[ site.theme.id ]/frontend/cover
+layout: themes/[ site.theme.id ]/frontend/pages/404
 sitemap:
   include: false
 
@@ -12,25 +12,3 @@ meta:
   index: false
 ---
 
-<div class="d-flex justify-content-center align-items-center flex-column">
-  <a class="" href="{{ site.url }}">
-    <img class="zi-2" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 8rem;">
-  </a>
-  <h1 class="mb-1">
-    Oops!
-  </h1>
-  <p class="lead mb-1">
-    This page doesn't exist. Please let us know so we can fix the broken link.
-  </p>
-  <div class="mb-3">
-    <strong>URL:</strong> <code id="page-url">{{ page.canonical.url }}</code>
-  </div>
-  <div class="w-50">
-    <a id="launch-button" class="btn btn-primary btn-lg" href="{{ site.url }}">
-      <span class="d-inline-flex align-items-center">
-        {% uj_icon 'house', 'fa-lg me-2' %}
-        Return Home
-      </span>
-    </a>
-  </div>
-</div>

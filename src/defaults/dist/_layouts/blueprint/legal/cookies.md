@@ -1,12 +1,10 @@
 ---
 ### ALL PAGES ###
-layout: themes/[ site.theme.id ]/frontend/minimal
-sitemap:
-  include: true
+layout: themes/[ site.theme.id ]/frontend/core/minimal
 
 ### REGULAR PAGES ###
 meta:
-  title: "Cookie Policy"
+  title: "Cookie Policy - {{ site.brand.name }}"
   description: "This cookie policy has been compiled to better serve those who are concerned with how their personal information is being used online."
   breadcrumb: "Cookie Policy"
 

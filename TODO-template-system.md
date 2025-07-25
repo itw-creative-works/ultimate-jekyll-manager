@@ -47,9 +47,9 @@ src/defaults/dist/_layouts/placeholder/legal/terms.md
 * The theme ID is dynamically inserted by the gulp preprocessor as set in _config.yml
 
 src/defaults/dist/_layouts/themes/bootstrap/frontend/legal.html
-* Uses "themes/bootstrap/frontend/base"
+* Uses "themes/bootstrap/frontend/core/base"
 
-src/defaults/dist/_layouts/themes/bootstrap/frontend/base.html
+src/defaults/dist/_layouts/themes/bootstrap/frontend/core/base.html
 * Uses "core/root"
 
 src/defaults/dist/_layouts/core/root.html
@@ -58,7 +58,7 @@ src/defaults/dist/_layouts/core/root.html
 
 
 Each theme should have a central file that the various other theme layouts use, like in this example
-* "src/defaults/dist/_layouts/themes/bootstrap/frontend/legal.html" USES "themes/bootstrap/frontend/base.html"
+* "src/defaults/dist/_layouts/themes/bootstrap/frontend/legal.html" USES "themes/bootstrap/frontend/core/base.html"
 
 Each theme's central file will always use "core/root.html"
 * And this file will always include the components that are used by all themes, like the header, footer, and body.
