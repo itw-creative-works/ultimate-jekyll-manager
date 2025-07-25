@@ -4,7 +4,7 @@ layout: themes/[ site.theme.id ]/frontend/core/minimal
 
 ### REGULAR PAGES ###
 meta:
-  title: "{{ site.brand.name }} - About"
+  title: "About - {{ site.brand.name }}"
   description: "Discover {{ site.brand.name }} and learn what we're all about"
   breadcrumb: "About"
 ---

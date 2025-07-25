@@ -4,7 +4,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### REGULAR PAGES ###
 meta:
-  title: "{{ site.brand.name }} - Browser Extension"
+  title: "Browser Extension - {{ site.brand.name }}"
   description: "The {{ site.brand.name }} browser extension is free to use on Chrome, Firefox & Opera. Get started for free today!"
   breadcrumb: "Extension"
 ---

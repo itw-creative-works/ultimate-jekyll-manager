@@ -4,7 +4,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### REGULAR PAGES ###
 meta:
-  title: "{{ site.brand.name }} - Download"
+  title: "Download - {{ site.brand.name }}"
   description: "{{ site.brand.name }} is free to use on Windows, Mac & Linux. Get started for free today!"
   breadcrumb: "Download"
 ---

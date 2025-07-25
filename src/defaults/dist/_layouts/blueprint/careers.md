@@ -4,7 +4,7 @@ layout: modules/utilities/redirect
 
 ### REGULAR PAGES ###
 meta:
-  title: "{{ site.brand.name }} - Careers"
+  title: "Careers - {{ site.brand.name }}"
   description: "We are always looking for new talent to join the {{ site.brand.name }} team. If you are interested in working with us, please fill out the form."
   breadcrumb: "Careers"
   index: true
