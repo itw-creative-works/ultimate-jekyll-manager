@@ -7,6 +7,7 @@ const jetpack = require('fs-jetpack');
 const path = require('path');
 const { minimatch } = require('minimatch');
 const { template } = require('node-powertools');
+const createTemplateTransform = require('./utils/template-transform');
 const argv = require('yargs').argv;
 
 // Load package
@@ -112,6 +113,7 @@ function defaults(complete) {
     //   callback(null, file);
     // }))
     .pipe(customTransform())
+    .pipe(createTemplateTransform({site: config}))
     .pipe(dest(output))
     .on('finish', () => {
       // Log

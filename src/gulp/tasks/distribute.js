@@ -4,6 +4,7 @@ const logger = Manager.logger('distribute');
 const { src, dest, watch, series } = require('gulp');
 const through2 = require('through2');
 const path = require('path');
+const createTemplateTransform = require('./utils/template-transform');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -37,7 +38,8 @@ function distribute() {
 
     // Complete
     return src(input, { base: 'src', dot: true })
-      // .pipe(customTransform())
+      .pipe(customTransform())
+      .pipe(createTemplateTransform({site: config}))
       .pipe(dest(output))
       .on('end', () => {
         // Log
@@ -66,7 +68,7 @@ function customTransform() {
     if (relativePath.startsWith('pages/')) {
       // Remove 'pages/' prefix
       const newRelativePath = relativePath.replace(/^pages\//, '');
-      
+
       // Update file path to remove pages directory
       // This will make src/pages/index.html -> dist/index.html
       file.path = path.join(file.base, newRelativePath);

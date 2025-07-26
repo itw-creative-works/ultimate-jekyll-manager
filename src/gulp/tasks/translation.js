@@ -44,6 +44,7 @@ const TRANSLATION_BRANCH = 'uj-translations';
 // const LOUD = false;
 const LOUD = Manager.isServer() || process.env.UJ_LOUD_LOGS === 'true';
 const CONTROL = 'UJ-TRANSLATION-CONTROL';
+const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ku', 'yi', 'ji', 'ckb', 'dv', 'arc', 'aii', 'syr'];
 
 const TRANSLATION_DELAY_MS = 500; // wait between each translation
 const TRANSLATION_BATCH_SIZE = 25; // wait longer every N translations
@@ -413,6 +414,10 @@ async function processTranslation() {
         // Set the lang attribute on the <html> tag
         $('html').attr('lang', lang);
 
+        // Set the dir attribute for RTL languages
+        const isRTL = RTL_LANGUAGES.includes(lang);
+        $('html').attr('dir', isRTL ? 'rtl' : 'ltr');
+
         // Update <link rel="canonical">
         const canonicalUrl = getCanonicalUrl(lang, relativePath);
         $('link[rel="canonical"]').attr('href', canonicalUrl);
@@ -501,7 +506,7 @@ async function processTranslation() {
   logger.log(`   🟣 Input tokens:      ${tokens.input.toLocaleString()}`);
   logger.log(`   🟢 Output tokens:     ${tokens.output.toLocaleString()}`);
   logger.log(`   🔵 Total tokens:      ${(tokens.input + tokens.output).toLocaleString()}`);
-  
+
   // Cost summary
   logger.log('💰 Cost Breakdown:');
   logger.log(`   📥 Input cost:  $${inputCost.toFixed(4)}`);
@@ -789,7 +794,7 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
   if (isHtml) {
     // Get the current page's language from the og:locale or html lang attribute
     const currentLang = $('meta[property="og:locale"]').attr('content') || $('html').attr('lang') || config?.translation?.default;
-    
+
     // Locate the existing language tags
     const existingLanguageTags = $(`head link[rel="alternate"][hreflang="${config?.translation?.default}"]`);
 
@@ -814,7 +819,7 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
     const ogLocaleTag = $('head meta[property="og:locale"]');
     if (ogLocaleTag.length) {
       let newOgLocaleTags = '';
-      
+
       // Add default language if it's not the current language
       if (config?.translation?.default && config.translation.default !== currentLang) {
         const tagExists = $(`head meta[property="og:locale:alternate"][content="${config.translation.default}"]`).length > 0;
@@ -822,12 +827,12 @@ async function insertLanguageTags($, languages, relativePath, filePath) {
           newOgLocaleTags += `\n<meta property="og:locale:alternate" content="${config.translation.default}">`;
         }
       }
-      
+
       // Add all alternate languages except the current one
       for (const targetLang of languages) {
         // Skip if this is the current page's language
         if (targetLang === currentLang) continue;
-        
+
         // Check if the tag already exists
         const tagExists = $(`head meta[property="og:locale:alternate"][content="${targetLang}"]`).length > 0;
         if (!tagExists) {

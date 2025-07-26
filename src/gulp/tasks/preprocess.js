@@ -17,9 +17,12 @@ const rootPathProject = Manager.getRootPath('project');
 // Glob patterns for files to process
 const input = [
   // Files to include
-  // 'dist/**/*.{html,md,liquid,json}',
-  'dist/pages/**/*.{html,md,liquid,json}',
-  'dist/redirects/**/*.{html,md,liquid,json}',
+  // NOTE: CANT DO THIS BECAUSE IT WILL CREATE INFINITE LOOP
+  'dist/**/*.{html,md,liquid,json}',
+
+  // Pages and redirects
+  // 'dist/pages/**/*.{html,md,liquid,json}',
+  // 'dist/redirects/**/*.{html,md,liquid,json}',
 
   // Files to exclude
   '!dist/.jekyll-cache/**',
@@ -42,7 +45,8 @@ async function preprocess(complete) {
     await processTemplates();
 
     // Step 2: Move files from dist/pages and dist/redirects up one level
-    await moveDirectoryFilesUp();
+    // NOTE: NO POINT BECAUSE NESTED FILES (/pages/auth/signup.html) WOULD STILL BE IN a subfolder (/auth)
+    // await moveDirectoryFilesUp();
 
     logger.log('Preprocessing finished!');
     return complete();

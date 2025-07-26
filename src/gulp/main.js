@@ -48,7 +48,7 @@ exports.build = series(
   exports.distribute,
   parallel(exports.webpack, exports.sass, exports.imagemin),
   exports.jsonToHtml,
-  exports.preprocess,
+  // exports.preprocess, // Disabled - template processing now happens in defaults.js and distribute.js
   exports.jekyll,
   exports.audit,
   exports.translation,
