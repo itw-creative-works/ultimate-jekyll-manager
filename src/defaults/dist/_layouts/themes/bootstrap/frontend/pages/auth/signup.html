@@ -1,6 +1,109 @@
 ---
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/cover
+
+benefits:
+  - title: "Free Forever"
+    description: "Start with our free plan and upgrade when you're ready"
+    icon: "gift"
+  - title: "No Setup Fees"
+    description: "Get started instantly with no hidden costs or setup fees"
+    icon: "credit-card"
+  - title: "24/7 Support"
+    description: "Our support team is always here to help you succeed"
+    icon: "headset"
 ---
+
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+    <div class="card border-0 shadow-lg bg-body-tertiary">
+      <div class="card-body p-5">
+        <!-- Logo -->
+        <div class="text-center mb-4">
+          <a href="{{ site.url }}">
+            <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
+          </a>
+        </div>
+
+        <!-- Header -->
+        <div class="text-center mb-4">
+          <h1 class="h3 fw-bold mb-2">Create Your Account</h1>
+          <p class="text-muted">Get started with {{ site.brand.name }} in seconds</p>
+        </div>
+
+        <!-- Social Signup (Optional) -->
+        <div class="mb-4">
+          <button class="btn btn-adaptive w-100 mb-3 d-flex align-items-center justify-content-center">
+            {% uj_icon "google", "fa-lg me-2" %}
+            Sign up with Google
+          </button>
+          <button class="btn btn-adaptive w-100 mb-3 d-flex align-items-center justify-content-center">
+            {% uj_icon "github", "fa-lg me-2" %}
+            Sign up with GitHub
+          </button>
+        </div>
+
+        <!-- Divider -->
+        <div class="position-relative mb-4">
+          <hr class="text-muted">
+          <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small">or</span>
+        </div>
+
+        <!-- Sign Up Form -->
+        <form>
+          <!-- <div class="row g-3 mb-3 text-start">
+            <div class="col-md-6">
+              <label for="firstName" class="form-label fw-semibold">First Name</label>
+              <input type="text" class="form-control form-control-md" id="firstName" placeholder="John" required>
+            </div>
+            <div class="col-md-6">
+              <label for="lastName" class="form-label fw-semibold">Last Name</label>
+              <input type="text" class="form-control form-control-md" id="lastName" placeholder="Doe" required>
+            </div>
+          </div> -->
+
+          <div class="mb-3 text-start">
+            <label for="email" class="form-label fw-semibold">Email Address</label>
+            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="john@example.com" required>
+          </div>
+
+          <div class="mb-3 text-start">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <input type="password" class="form-control form-control-md" id="password" name="password" placeholder="Create a strong password" required>
+            <!-- <div class="form-text">Must be at least 8 characters with letters and numbers</div> -->
+          </div>
+
+          <div class="mb-4 text-start">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="marketing" name="marketing" required>
+              <label class="form-check-label small" for="marketing">
+                I agree to sign up for account promotions and receive marketing newsletters. Learn more in our <a href="/privacy" class="text-decoration-none">Privacy Policy</a>.
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="terms" name="terms" required>
+              <label class="form-check-label small" for="terms">
+                I agree to the <a href="/terms" class="text-decoration-none">Terms of Service</a>.
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+            {% uj_icon "user-plus", "me-2" %}
+            Create Account
+          </button>
+        </form>
+
+        <!-- Sign In Link -->
+        <div class="text-center">
+          <p class="text-muted mb-0">
+            Already have an account?
+            <a href="/signin" class="text-decoration-none fw-semibold">Sign in here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 {{ content | uj_content_format }}

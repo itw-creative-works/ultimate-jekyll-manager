@@ -12,8 +12,8 @@
   pointer-events: none;
 }
 
-// API styles
-.auth-signin-provider-btn * {
+// Prevent pointer events on icons inside buttons and links
+button i, a i {
   pointer-events: none;
 }
 

@@ -1,29 +1,124 @@
 ---
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/cover
+
+suggested_pages:
+  - title: "Home"
+    description: "Return to our homepage"
+    icon: "house"
+    link: "/"
+  - title: "Pricing"
+    description: "View our plans and pricing"
+    icon: "tag"
+    link: "/pricing"
+  - title: "Contact"
+    description: "Get in touch with us"
+    icon: "envelope"
+    link: "/contact"
+  - title: "Team"
+    description: "Meet our amazing team"
+    icon: "users"
+    link: "/team"
 ---
 
 <div class="d-flex justify-content-center align-items-center flex-column">
-  <a class="" href="{{ site.url }}">
-    <img class="zi-2" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 8rem;">
-  </a>
-  <h1 class="mb-1">
-    Oops!
-  </h1>
-  <p class="lead mb-1">
-    This page doesn't exist. Please let us know so we can fix the broken link.
-  </p>
-  <div class="mb-3">
-    <strong>URL:</strong> <code id="page-url">{{ page.canonical.url }}</code>
-  </div>
-  <div class="w-50">
-    <a id="launch-button" class="btn btn-primary btn-lg" href="{{ site.url }}">
-      <span class="d-inline-flex align-items-center">
-        {% uj_icon 'house', 'fa-lg me-2' %}
-        Return Home
-      </span>
-    </a>
+  <div class="col-12 col-lg-8">
+    <!-- Logo -->
+    <!-- <div class="mb-4">
+      <a href="{{ site.url }}">
+        <img class="mb-4" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 6rem;">
+      </a>
+    </div> -->
+
+    <!-- 404 Icon -->
+    <div class="mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient text-white" style="width: 120px; height: 120px;">
+        {% uj_icon "exclamation-triangle", "display-4" %}
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <h1 class="display-1 fw-bold text-primary mb-2">404</h1>
+    <h2 class="h3 fw-bold mb-3">Oops! Page Not Found</h2>
+    <p class="fs-5 text-muted mb-4">
+      Sorry, the page you're looking for doesn't exist or has been moved. Don't worry, it happens to the best of us!
+    </p>
+
+    <!-- URL Display -->
+    <div class="bg-body-tertiary rounded-3 p-3 mb-4">
+      <small class="text-muted">
+        <strong>Requested URL:</strong> <code id="page-url">{{ page.canonical.url }}</code>
+      </small>
+    </div>
+
+    <!-- Primary CTA -->
+    <div class="mb-5">
+      <a href="{{ site.url }}" class="btn btn-primary btn-lg px-5 py-3 me-3">
+        {% uj_icon "house", "me-2" %}
+        Back to Home
+      </a>
+      <button class="btn btn-outline-primary btn-lg px-4 py-3" onclick="window.history.back()">
+        {% uj_icon "arrow-left", "me-2" %}
+        Go Back
+      </button>
+    </div>
+
+    <!-- Suggested Pages -->
+    {% comment %}
+    <div class="mt-5">
+      <h3 class="h5 fw-bold mb-4">Or try these popular pages:</h3>
+      <div class="row g-3">
+        {% for page in layout.suggested_pages %}
+        <div class="col-lg-3 col-md-6">
+          <a href="{{ page.link }}" class="card h-100 border-0 bg-body-tertiary text-decoration-none card-hover">
+            <div class="card-body p-4 text-center">
+              <div class="mb-3">
+                {% uj_icon page.icon, "text-primary fs-2" %}
+              </div>
+              <h4 class="h6 fw-bold mb-2 text-dark">{{ page.title }}</h4>
+              <p class="small text-muted mb-0">{{ page.description }}</p>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endcomment %}
+
+    <!-- Help Section -->
+    <div class="mt-5 pt-4 border-top">
+      <p class="text-muted">
+        Still can't find what you're looking for?
+        <a href="/contact" class="text-decoration-none fw-semibold">Contact our support team</a>
+        and we'll help you out!
+      </p>
+    </div>
   </div>
 </div>
+
+<style>
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+#page-url {
+  word-break: break-all;
+}
+</style>
+
+<script>
+// Update the page URL display with the actual current URL
+document.addEventListener('DOMContentLoaded', function() {
+  const pageUrlElement = document.getElementById('page-url');
+  if (pageUrlElement) {
+    pageUrlElement.textContent = window.location.pathname;
+  }
+});
+</script>
 
 {{ content | uj_content_format }}

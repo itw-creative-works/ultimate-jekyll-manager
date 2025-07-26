@@ -84,7 +84,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
               {% endunless %}
             {% endfor %}
           {% for tag in tags %}
-            <a href="{{ site.url }}/blog?tag={{ tag }}" class="btn btn-light btn-xs mb-2">{{ tag }}</a>
+            <a href="{{ site.url }}/blog?tag={{ tag }}" class="btn btn-adaptive btn-xs mb-2">{{ tag }}</a>
           {% endfor %}
         </div>
       </div>
@@ -97,22 +97,22 @@ layout: themes/[ site.theme.id ]/frontend/core/base
           <div class="flex-shrink-0 mb-3 mb-sm-0">
             <a href="">
               <!-- avatar avatar-xl avatar-circle -->
-              {% uj_member page.post.author, 'image' %}
+              {% uj_member page.post.author, "image" %}
             </a>
           </div>
           <div class="flex-grow-1 ms-sm-4">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <a href="{% uj_member page.post.author, 'url' %}">
+              <a href="{% uj_member page.post.author, "url" %}">
                 <h4 class="mb-0">
-                  {%- uj_member page.post.author, 'name' -%}
+                  {%- uj_member page.post.author, "name" -%}
                 </h4>
               </a>
-              <a class="btn btn-outline-primary btn-sm" href="{% uj_member page.post.author, 'url' %}">
+              <a class="btn btn-outline-primary btn-sm" href="{% uj_member page.post.author, "url" %}">
                 <i class="bi-person-plus-fill me-1"></i> Follow
               </a>
             </div>
             <p>
-              {%- uj_member page.post.author, 'content' -%}
+              {%- uj_member page.post.author, "content" -%}
             </p>
           </div>
         </div>
@@ -176,7 +176,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
                         <p>{{ post.description | strip_html | truncatewords: 20 }}</p>
                         <div class="row align-items-center g-0 mt-4">
                           <div class="col-auto">
-                            <a href="{% uj_member post.author, 'url' %}">
+                            <a href="{% uj_member post.author, "url" %}">
                               {% comment %}
                                 {%- include /main/helpers/blog-author.html author=post.author class="rounded-circle avatar-sm me-2" mode="image" -%}
                               {% endcomment %}
@@ -185,9 +185,9 @@ layout: themes/[ site.theme.id ]/frontend/core/base
                           </div>
                           <div class="col lh-1">
                             <h5 class="mb-1">
-                              <a href="{% uj_member post.author, 'url' %}">
+                              <a href="{% uj_member post.author, "url" %}">
                                 <h5 class="mb-0">
-                                  {% uj_member post.author, 'name' %}
+                                  {% uj_member post.author, "name" %}
                                 </h5>
                               </a>
                             </h5>

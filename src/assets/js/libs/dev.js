@@ -13,6 +13,9 @@ module.exports = function (Manager, options) {
 
   // Setup helpers
   setupHelpers(webManager);
+
+  // Setup breakpoint logger
+  setupBreakpointLogger();
 }
 
 function setupHandlers(webManager) {
@@ -25,6 +28,7 @@ function setupHandlers(webManager) {
 function setupHelpers(webManager) {
   // Add development helper functions
 
+  // Log opening tags of common HTML elements
   window.logOpeningTags = function (detail) {
     const tags = ['html', 'body', 'nav', 'main', 'footer'];
 
@@ -50,6 +54,18 @@ function setupHelpers(webManager) {
     // Log the result
     console.log('Opening tags:\n', result);
   };
+
+  // Change theme to the argument or flip it
+  window.changeTheme = function (theme) {
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+    if (theme) {
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    } else {
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-bs-theme', newTheme);
+    }
+    console.log(`Theme changed to: ${document.documentElement.getAttribute('data-bs-theme')}`);
+  };
 }
 
 function getOpeningTag(tagName) {
@@ -59,4 +75,39 @@ function getOpeningTag(tagName) {
     .map(attr => ` ${attr.name}="${attr.value}"`)
     .join('');
   return `<${el.tagName.toLowerCase()}${attrs}>`;
+}
+
+function setupBreakpointLogger() {
+  let lastBreakpoint = null;
+
+  function getCurrentBreakpoint() {
+    const width = window.innerWidth;
+
+    if (width >= 1400) return 'xxl';
+    if (width >= 1200) return 'xl';
+    if (width >= 992) return 'lg';
+    if (width >= 768) return 'md';
+    if (width >= 576) return 'sm';
+    return 'xs';
+  }
+
+  function logBreakpoint() {
+    const breakpoint = getCurrentBreakpoint();
+
+    if (breakpoint !== lastBreakpoint) {
+      const width = window.innerWidth;
+      console.log(`📱 Current breakpoint: ${breakpoint} (${width}px)`);
+      lastBreakpoint = breakpoint;
+    }
+  }
+
+  // Log breakpoint on page load
+  logBreakpoint();
+
+  // Log breakpoint on resize
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(logBreakpoint, 100);
+  });
 }

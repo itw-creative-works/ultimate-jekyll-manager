@@ -1,510 +1,379 @@
 ---
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/base
+
+### PRICING PAGE ###
+plans:
+  - name: Plus
+    tagline: "best for stock video"
+    price: 28
+    price_per_credit: 2.8
+    billed_yearly: 336
+    credits: 10
+    features:
+      - text: "10 Credits"
+        icon: "sparkles"
+      - text: "Unlimited exports"
+        icon: "download"
+
+  - name: Max
+    tagline: "best for stock video"
+    price: 50
+    price_per_credit: 1.3
+    billed_yearly: 600
+    credits: 40
+    features:
+      - text: "40 Credits"
+        icon: "sparkles"
+      - text: "Unlimited exports"
+        icon: "download"
+
+  - name: Generative
+    tagline: "best for ads and films"
+    price: 100
+    price_per_credit: 1
+    billed_yearly: 1200
+    credits: 100
+    popular: true
+    features:
+      - text: "100 Credits"
+        icon: "sparkles"
+      - text: "Unlimited exports"
+        icon: "download"
+
+  - name: Team
+    tagline: "best for teams"
+    price: 899
+    price_per_credit: 0.9
+    billed_yearly: 10788
+    credits: 1000
+    features:
+      - text: "1000 Credits"
+        icon: "sparkles"
+      - text: "Unlimited exports"
+        icon: "download"
+      - text: "1000 Credits"
+        icon: "sparkles"
+      - text: "Unlimited exports"
+        icon: "download"
+      - text: "1000 Credits"
+        icon: "sparkles"
+      - text: "Unlimited exports"
+        icon: "download"
+
+testimonials:
+  - initial: "j"
+    quote: "Holy f***! This thing is kinda insane"
+    author: "theone98"
+    source: "Discord"
+  - initial: "g"
+    quote: "Looks really good, huge potential!"
+    author: "ohnojonsnow"
+    source: "Discord"
+  - initial: "t"
+    quote: "The service helped me, thanks!"
+    author: "stormtrooper59"
+    source: "Discord"
+  - initial: "b"
+    quote: "Great. will recommend to friends"
+    author: "breaksignals"
+    source: "Discord"
+
+faqs:
+  # - question: "Is {{ site.brand.name }} AI included with my existing {{ site.brand.name }} Studio plan?"
+  #   answer: "No, {{ site.brand.name }} AI and {{ site.brand.name }} Studio function as separate products with individual pricing plans. If you were an active lifetime deal holder of {{ site.brand.name }} Studio and had purchased it before August 15, 2023, you'll qualify for free {{ site.brand.name }} AI credits. These will be phased in gradually, and you'll be notified via email when they become available. As for other {{ site.brand.name }} Studio subscribers, we're actively exploring ways to offer some benefits to help you get started on {{ site.brand.name }} AI. Stay tuned for more announcements.<br><br>PS: This is available exclusively to users who have purchased their {{ site.brand.name }} accounts from {{ site.brand.name }}."
+  # - question: "What happens after I cancel my subscription?"
+  #   answer: "After canceling your subscription, you'll continue to have access to your plan features until the end of your current billing period. Once the period ends, your account will be downgraded to the free plan."
+  # - question: "What should I do if I run out of my quotas mid-month?"
+  #   answer: "If you run out of quotas mid-month, you can upgrade to a higher plan or wait until your quotas reset at the beginning of your next billing cycle."
+  # - question: "Will my exports, generation & iStock credits roll-over into the next month or billing cycle?"
+  #   answer: "No, unused credits and quotas do not roll over to the next billing cycle. Your quotas reset at the beginning of each new billing period."
+  - question: "Can I cancel at anytime?"
+    answer: "Yes. You can cancel anytime, no questions asked. However, we would highly appreciate if you are able to give us some feedback so we can improve."
+  - question: "Is there a free trial?"
+    answer: "Yes. Yes there is a 14 day free trial of the paid plans. You can cancel your subscription at any time during the trial period for a full refund."
+  - question: "What is your refund policy?"
+    answer: "We offer a 14 day free trial of the premium plans. You can cancel any time during your trial for a full refund. After the trial period, you can cancel and you may receive a prorated refund for the remaining time on your subscription."
 ---
 
-<div class="overflow-hidden">
-  <!-- Hero -->
-  <div class="position-relative bg-img-start" style="background-image: url(https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/components/card-11.svg);">
-    <div class="container content-space-t-3 content-space-t-lg-5 content-space-b-2 content-space-b-lg-3">
-      <!-- Heading -->
-      <div class="w-md-75 w-lg-50 text-center mx-auto mb-9">
-        <h1>Find the right plan for your business</h1>
-      </div>
-      <!-- End Heading -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="text-center mb-5">
+          <h1 class="display-4 fw-bold mb-5">
+            The right plans, <span class="gradient-text">for the right price</span>
+          </h1>
 
-      <!-- Form Switch -->
-      <div class="d-flex justify-content-center">
-        <div class="form-check form-switch form-switch-between">
-          <label class="form-check-label">Monthly</label>
-          <input class="js-toggle-switch form-check-input pricing-toggle" type="checkbox" checked disabled>
-          <label class="form-check-label form-switch-promotion" for="pricing-toggle">
-            Annually
-            <span class="form-switch-promotion-container">
-              <span class="form-switch-promotion-body">
-                <svg class="form-switch-promotion-arrow" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 99.3 57" width="48">
-                  <path fill="none" stroke="#bdc5d1" stroke-width="4" stroke-linecap="round" stroke-miterlimit="10" d="M2,39.5l7.7,14.8c0.4,0.7,1.3,0.9,2,0.4L27.9,42"></path>
-                  <path fill="none" stroke="#bdc5d1" stroke-width="4" stroke-linecap="round" stroke-miterlimit="10" d="M11,54.3c0,0,10.3-65.2,86.3-50"></path>
-                </svg>
-                <span class="form-switch-promotion-text">
-                  <span class="badge bg-primary rounded-pill ms-1 pricing-savings">Save each month!</span>
-                </span>
+          <div class="btn-group" role="group" aria-label="Billing toggle">
+            <input type="radio" class="btn-check" name="billing" id="monthly" autocomplete="off" checked data-billing="monthly">
+            <label class="btn btn-outline-adaptive rounded-start-pill" for="monthly">Monthly</label>
+
+            <input type="radio" class="btn-check" name="billing" id="yearly" autocomplete="off" data-billing="yearly">
+            <label class="btn btn-outline-adaptive rounded-end-pill position-relative" for="yearly">
+              Yearly
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                upto 20% off
+                <span class="visually-hidden">discount</span>
               </span>
-            </span>
-          </label>
+            </label>
+          </div>
         </div>
-      </div>
-      <!-- End Form Switch -->
-    </div>
-  </div>
-  <!-- End Hero -->
 
-  <!-- Pricing -->
-  <div class="container mt-n5 mt-lg-n10">
-    <div class="position-relative zi-1 mb-10">
-      <div class="row">
+        <div class="row row-cols-1 {% if layout.plans.size == 4 %}row-cols-lg-2 row-cols-xl-4{% else %}row-cols-lg-{{ layout.plans.size }}{% endif %} g-4 mb-5">
+          {% for plan in layout.plans %}
+          <div class="col">
+            <div class="card h-100 {% if plan.popular %}border-primary border-3{% else %}border{% endif %} position-relative">
+              {% if plan.popular %}
+              <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2">
+                Most Popular
+              </span>
+              {% endif %}
 
-      <!-- Swiper -->
-      <div class="js-swiper-responsive-breakpoint swiper" style="overflow: visible;">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide">
-            <div class="col-md mb-3 mb-md-0">
-              <!-- Card -->
-              <div class="card h-100 zi-1">
-                <div class="card-header text-center">
-                  <div class="mb-2">
-                    <span class="fs-5 align-top text-dark fw-semibold"></span>
-                    <span id="pricingCount1" class="fs-1 text-dark fw-semibold">free</span>
-                    <span>/ forever</span>
+              <div class="card-body p-0">
+                <div class="row g-0 h-100">
+                  <div class="col-12 col-sm-6 col-lg-12 p-4">
+                    <div class="mb-4">
+                      <h3 class="card-title h2 fw-bold mb-1">{{ plan.name }}</h3>
+                      <p class="text-muted small mb-0">{{ plan.tagline }}</p>
+                    </div>
+
+                    <div class="mb-2">
+                      <span class="display-4 fw-bold">
+                        <span class="fs-3">$</span><span class="amount" data-monthly="{{ plan.price }}" data-yearly="{{ plan.billed_yearly | divided_by: 12 | round }}">{{ plan.price }}</span>
+                      </span>
+                      <span class="text-muted">/month</span>
+                    </div>
+                    <p class="text-muted small mb-4">${{ plan.price_per_credit }} per credit</p>
+
+                    <button class="btn btn-primary btn-lg fw-semibold mb-3 w-100">
+                      Get {{ plan.name }}
+                    </button>
+
+                    <p class="text-center text-muted small mb-4 mb-sm-0">
+                      <span class="billing-info" data-monthly="Billed ${{ plan.price }} monthly" data-yearly="Billed ${{ plan.billed_yearly }} yearly">
+                        Billed ${{ plan.price }} monthly
+                      </span>
+                    </p>
                   </div>
 
-                  <h3 class="card-title">Basic</h3>
-                  <p class="card-text">All the basics for starting a new business</p>
-                </div>
-
-                <div class="card-body d-flex justify-content-center py-0">
-                  <!-- List Checked -->
-                  <ul class="list-checked list-checked-soft-bg-primary">
-                    <li class="list-checked-item">
-                      1 Project
-                    </li>
-                    <li class="list-checked-item">
-                      <strong>100 requests</strong> per month
-                    </li>
-                    <li class="list-checked-item">
-                      Standard support
-                    </li>
-                  </ul>
-                  <!-- End List Checked -->
-                </div>
-
-                <div class="card-footer text-center">
-                  <div class="d-grid mb-2">
-                    <a href="{{ site.url }}/account" class="btn btn-soft-primary">Get started</a>
+                  <div class="col-12 col-sm-6 col-lg-12 bg-body-tertiary p-4">
+                    <ul class="list-unstyled mb-0">
+                      {% for feature in plan.features %}
+                      <li class="d-flex align-items-center mb-3">
+                        {% uj_icon feature.icon, "fa-md me-3" %}
+                        <span>{{ feature.text }}</span>
+                      </li>
+                      {% endfor %}
+                    </ul>
                   </div>
-                  <p class="card-text text-muted small">Upgrade at your convenience</p>
                 </div>
               </div>
-              <!-- End Card -->
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="row g-4 mt-3">
+          <div class="col-md-6">
+            <div class="card bg-body-tertiary border-0 h-100">
+              <div class="card-body p-4">
+                <h2 class="h3 fw-bold mb-3">Free</h2>
+                <p class="display-6 fw-bold mb-3">$0</p>
+                <p class="mb-3">10 Video mins and 1 AI credit per week, 1 Express avatar, 4 Exports per week with invideo watermark.</p>
+                <p class="text-muted mb-4">No access to generative features.</p>
+                <button class="btn btn-adaptive btn-lg">Try for free</button>
+              </div>
             </div>
           </div>
 
-          <div class="swiper-slide">
-            <div class="col-md mb-3 mb-md-0">
-              <!-- Card -->
-              <div class="card h-100 zi-1">
-                <div class="card-header text-center">
-                  <div class="mb-2">
-                    <span class="fs-5 align-top text-dark fw-semibold">$</span>
-                    <span id="pricingCount3" class="fs-1 text-dark fw-semibold pricing-amount" data-product-id="starter">19</span>
-                    <span>/ month</span>
-                  </div>
-
-                  <h3 class="card-title">Starter</h3>
-                  <p class="card-text">Everything you need for a growing business</p>
-                </div>
-
-                <div class="card-body d-flex justify-content-center py-0">
-                  <!-- List Checked -->
-                  <ul class="list-checked list-checked-soft-bg-primary">
-                    <li class="list-checked-item">
-                      1 Project
-                    </li>
-                    <li class="list-checked-item">
-                      <strong>500 requests</strong> per month
-                    </li>
-                    <li class="list-checked-item">
-                      Priority support
-                    </li>
-                  </ul>
-                  <!-- End List Checked -->
-                </div>
-
-                <div class="card-footer text-center">
-                  <div class="d-grid mb-2">
-                    <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="starter" disabled>Try free for 14 days</a>
-                  </div>
-                  <p class="card-text text-muted small">Cancel anytime</p>
-                </div>
+          <div class="col-md-6">
+            <div class="card bg-body-tertiary border-0 h-100">
+              <div class="card-body p-4">
+                <h2 class="h3 fw-bold mb-3">Enterprise</h2>
+                <p class="display-6 fw-bold mb-3">Custom</p>
+                <p class="mb-4">Custom solutions for large organizations. Advanced security and flexible pricing based on your needs.</p>
+                <button class="btn btn-primary btn-lg">Contact us</button>
               </div>
-              <!-- End Card -->
-            </div>
-          </div>
-
-          <div class="swiper-slide">
-            <div class="col-md mb-3 mb-md-0">
-              <!-- Card -->
-              <div class="card bg-primary h-100 zi-1">
-                <div class="card-header text-center">
-                  <div class="text-white mb-2">
-                    <span class="fs-5 align-top fw-semibold">$</span>
-                    <span id="pricingCount2" class="fs-1 fw-semibold pricing-amount" data-product-id="pro">29</span>
-                    <span>/ month</span>
-                  </div>
-
-                  <h3 class="card-title text-white">Pro</h3>
-                  <p class="card-text text-white-70">Advanced features for scaling your business</p>
-                </div>
-
-                <div class="card-body d-flex justify-content-center py-0">
-                  <!-- List Checked -->
-                  <ul class="list-checked list-checked-soft-bg-light">
-                    <li class="list-checked-item text-white">
-                      1 Project
-                    </li>
-                    <li class="list-checked-item text-white">
-                      <strong>3000 requests</strong> per month
-                    </li>
-                    <li class="list-checked-item text-white">
-                      Priority support
-                    </li>
-                  </ul>
-                  <!-- End List Checked -->
-                </div>
-
-                <div class="card-footer text-center">
-                  <div class="d-grid mb-2">
-                    <a class="btn btn-light pricing-btn disabled" href="#" data-product-id="pro" disabled>Try free for 14 days</a>
-                  </div>
-                  <p class="card-text text-white-70 small">Cancel anytime</p>
-                </div>
-              </div>
-              <!-- End Card -->
-            </div>
-            <!-- End Col -->
-          </div>
-
-          <div class="swiper-slide">
-            <div class="col-md mb-3 mb-md-0">
-              <!-- Card -->
-              <div class="card h-100 zi-1">
-                <div class="card-header text-center">
-                  <div class="mb-2">
-                    <span class="fs-5 align-top text-dark fw-semibold">$</span>
-                    <span id="pricingCount3" class="fs-1 text-dark fw-semibold pricing-amount" data-product-id="business">39</span>
-                    <span>/ month</span>
-                  </div>
-
-                  <h3 class="card-title">Business</h3>
-                  <p class="card-text">Premium tools for offering support in any language</p>
-                </div>
-
-                <div class="card-body d-flex justify-content-center py-0">
-                  <!-- List Checked -->
-                  <ul class="list-checked list-checked-soft-bg-primary">
-                    <li class="list-checked-item">
-                      3 Projects
-                    </li>
-                    <li class="list-checked-item">
-                      <strong>5000 requests</strong> per month
-                    </li>
-                    <li class="list-checked-item">
-                      Priority support
-                    </li>
-                  </ul>
-                  <!-- End List Checked -->
-                </div>
-
-                <div class="card-footer text-center">
-                  <div class="d-grid mb-2">
-                    <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="business" disabled>Try free for 14 days</a>
-                  </div>
-                  <p class="card-text text-muted small">Cancel anytime</p>
-                </div>
-              </div>
-              <!-- End Card -->
-            </div>
-          </div>
-
-          <div class="swiper-slide">
-            <div class="col-md mb-3 mb-md-0">
-              <!-- Card -->
-              <div class="card h-100 zi-1">
-                <div class="card-header text-center">
-                  <div class="mb-2">
-                    <span class="fs-5 align-top text-dark fw-semibold">$</span>
-                    <span id="pricingCount3" class="fs-1 text-dark fw-semibold pricing-amount" data-product-id="business-plus">39</span>
-                    <span>/ month</span>
-                  </div>
-
-                  <h3 class="card-title">Business+</h3>
-                  <p class="card-text">Elite services for offering top-tier support</p>
-                </div>
-
-                <div class="card-body d-flex justify-content-center py-0">
-                  <!-- List Checked -->
-                  <ul class="list-checked list-checked-soft-bg-primary">
-                    <li class="list-checked-item">
-                      5 Projects
-                    </li>
-                    <li class="list-checked-item">
-                      <strong>10000 requests</strong> per month
-                    </li>
-                    <li class="list-checked-item">
-                      Priority support
-                    </li>
-                  </ul>
-                  <!-- End List Checked -->
-                </div>
-
-                <div class="card-footer text-center">
-                  <div class="d-grid mb-2">
-                    <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="business-plus" disabled>Try free for 14 days</a>
-                  </div>
-                  <p class="card-text text-muted small">Cancel anytime</p>
-                </div>
-              </div>
-              <!-- End Card -->
             </div>
           </div>
         </div>
 
-        <!-- Arrows -->
-        <div class="js-swiper-responsive-breakpoint-button-next swiper-button-next me-n4"></div>
-        <div class="js-swiper-responsive-breakpoint-button-prev swiper-button-prev ms-n4"></div>
       </div>
-      <!-- End Swiper -->
-
-      <!-- Swiper Pagination -->
-      <div class="js-swiper-responsive-breakpoint-pagination swiper-pagination mt-3"></div>
-
-      <!-- SVG Elements -->
-      <figure class="position-absolute bottom-0 start-0 mb-n7 ms-n7" style="width: 9rem;">
-        <svg viewBox="0 0 522 504" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path opacity="0.5" d="M332 504H510.4C516.8 504 522 498.8 522 492.4V314C522 209.1 436.9 124 332 124C227.1 124 142 209.1 142 314C142 418.9 227.1 504 332 504Z" fill="#00C9A7"/>
-          <path d="M190 380H11.6C5.2 380 0 374.8 0 368.4V190C0 85.1 85.1 0 190 0C294.9 0 380 85.1 380 190C380 294.9 294.9 380 190 380Z" fill="#377dff"/>
-        </svg>
-      </figure>
-
-      <figure class="position-absolute top-0 end-0 mt-n8 me-n8" style="width: 10rem;">
-        <img class="img-fluid" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/components/dots-lg.svg" alt="Image Description">
-      </figure>
-      <!-- End SVG Elements -->
     </div>
+  </div>
+</section>
 
-    <!-- Card Info -->
-    <div class="text-center mt-3">
-      <div class="card card-info-link card-sm">
-        <div class="card-body">
-          Prefer to start with the trial version?  <a class="card-link ms-2" href="{{ site.url }}/account">Get started <span class="bi-chevron-right small ms-1"></span></a>
+<!-- Social Proof Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="row text-center g-4">
+      <div class="col-6 col-md-3">
+        <h2 class="display-5 fw-bold mb-1">5M</h2>
+        <p class="text-muted mb-0">Customers</p>
+        <p class="small text-muted">90 countries</p>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="d-flex justify-content-center align-items-center mb-2">
+          <h2 class="display-5 fw-bold mb-0 ms-2">#1</h2>
+        </div>
+        <p class="small text-muted mb-0">Product of the month</p>
+        <p class="text-muted mb-0">Product Hunt</p>
+      </div>
+      <div class="col-6 col-md-3">
+        <h2 class="display-5 fw-bold mb-1">4.8</h2>
+        <div class="mb-1">
+          {% for i in (1..5) %}
+            {% uj_icon "star", "text-primary" %}
+          {% endfor %}
+        </div>
+        <p class="text-muted mb-0">Capterra</p>
+      </div>
+      <div class="col-6 col-md-3">
+        <h2 class="display-5 fw-bold mb-1">4.8</h2>
+        <div class="mb-1">
+          {% for i in (1..5) %}
+            {% uj_icon "star", "text-danger" %}
+          {% endfor %}
+        </div>
+        <p class="text-muted mb-0">G2</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-8">
+  <div class="container">
+    <!-- style="background: linear-gradient(135deg, #2d2d2d 0%, #673ab7 50%, #2196f3 100%);" -->
+    <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient">
+      <div class="row align-items-center py-4">
+        <div class="col-lg-7 text-white">
+          <h2 class="display-4 fw-bold lh-sm mb-4">
+            Need help finding the
+            right <strong class="">{{ site.brand.name }} plan</strong>
+            for your needs?
+          </h2>
+          <p class="fs-5 text-white-50 mb-4">Talk to our support team 24/7</p>
+          <a href="/contact" class="btn btn-adaptive btn-lg px-5 py-3 rounded-pill">
+            {% uj_icon "comments", "fa-lg me-2" %}
+            Talk to Us
+          </a>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block position-relative">
+          <div class="text-end">
+            <div class="d-inline-block position-relative">
+              <!-- <div class="rounded-circle bg-white bg-opacity-25 p-5" style="backdrop-filter: blur(10px);">
+                <img src="https://via.placeholder.com/300x300/ffffff00/ffffff?text=👩‍💻"
+                     alt="Support"
+                     class="img-fluid"
+                     style="filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+              </div> -->
+              <!-- <div class="position-absolute bottom-0 end-0 bg-white rounded-circle p-3 shadow-lg">
+              </div> -->
+              <div class="position-absolute bottom-0 end-0 p-3">
+                {% uj_icon "comment-dots", "text-white display-1" %}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- Decorative elements -->
+      <!-- <div class="position-absolute top-0 end-0 opacity-25">
+        <div class="rounded-circle" style="width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); transform: translate(50%, -50%);"></div>
+      </div>
+      <div class="position-absolute bottom-0 start-0 opacity-25">
+        <div class="rounded-circle" style="width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); transform: translate(-50%, 50%);"></div>
+      </div> -->
     </div>
-    <!-- End Card Info -->
   </div>
-  <!-- End Pricing -->
-</div>
+</section>
 
-<!-- Pricing Table -->
-<div class="container">
-  <!-- Heading -->
-  <div class="w-md-75 w-lg-50 text-center mx-md-auto mb-5 mb-md-9">
-    <h2>Explore {{ site.brand.name }} plans in detail</h2>
+<!-- Testimonials Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
+    </div>
+
+    {% if layout.testimonials %}
+    <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-indicators">
+        {% for testimonial in layout.testimonials %}
+        <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
+        {% endfor %}
+      </div>
+
+      <div class="carousel-inner">
+        {% for testimonial in layout.testimonials %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="row justify-content-center">
+            <div class="col-md-8">
+              <div class="card border-0 shadow-sm bg-body-tertiary">
+                <div class="card-body p-5 text-center">
+                  <div class="d-flex justify-content-center mb-4">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                      <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+                    </div>
+                  </div>
+                  <blockquote class="mb-4">
+                    <p class="fs-4 fw-bold">"{{ testimonial.quote }}"</p>
+                  </blockquote>
+                  <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.source }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+    {% endif %}
   </div>
-  <!-- End Heading -->
+</section>
 
-  <!-- Table -->
-  <div class="table-responsive-lg _w-lg-75 mx-lg-auto">
-    <table class="table table-lg table-striped table-borderless table-nowrap table-vertical-border-striped">
-      <thead class="table-text-center">
-        <tr>
-          <th scope="col" style="width: 40%;"></th>
+<!-- FAQ Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="text-center mb-5">
+          <h2 class="display-5 fw-bold mb-3">
+            Want to<br>
+            <span class="gradient-text">know more?</span>
+          </h2>
+        </div>
 
-          <th scope="col" style="width: 20%;">
-            <span class="d-block">Basic</span>
-            <span class="d-block text-muted small">
-              free / forever
-            </span>
-          </th>
-
-          <th scope="col" style="width: 20%;">
-            <span class="d-block">Starter</span>
-            <span class="d-block text-muted small">
-              $<span class="pricing-amount" data-product-id="starter">19</span> / month
-            </span>
-          </th>
-
-          <th scope="col" style="width: 20%;">
-            <span class="d-block">Pro <span class="badge bg-warning text-dark rounded-pill ms-1">Hot</span></span>
-            <span class="d-block text-muted small">
-              $<span class="pricing-amount" data-product-id="pro">29</span> / month
-            </span>
-          </th>
-
-          <th scope="col" style="width: 20%;">
-            <span class="d-block">Business</span>
-            <span class="d-block text-muted small">
-              $<span class="pricing-amount" data-product-id="business">39</span> / month
-            </span>
-          </th>
-
-          <th scope="col" style="width: 20%;">
-            <span class="d-block">Business+</span>
-            <span class="d-block text-muted small">
-              $<span class="pricing-amount" data-product-id="business-plus">49</span> / month
-            </span>
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <th scope="row" class="text-dark">Chatbots</th>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">1</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">1</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">1</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">3</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">5</span></td>
-        </tr>
-
-        <tr>
-          <th scope="row" class="text-dark">14-days free trial</th>
-          <td class="table-text-center"></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-        </tr>
-
-        <tr>
-          <th scope="row" class="text-dark">Another feature</th>
-          <td class="table-text-center">Capable</td>
-          <td class="table-text-center">Capable</td>
-          <td class="table-text-center">Capable</td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-        </tr>
-
-        <tr>
-          <th scope="row" class="text-dark">Priority support</th>
-          <td class="table-text-center"></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-          <td class="table-text-center"><i class="bi-check-circle text-success me-2"></i></td>
-        </tr>
-
-        <tr>
-          <th scope="row" class="text-dark">Requests per month</th>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">100</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">500</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">1000</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">3000</span></td>
-          <td class="table-text-center"><span class="badge bg-soft-primary text-primary rounded-pill">3000</span></td>
-        </tr>
-
-        <tr>
-          <th scope="row" class="text-dark"></th>
-          <td>
-            <a class="btn btn-soft-secondary pricing-btn" href="{{ site.url }}">Get started</a>
-          </td>
-          <td>
-            <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="starter" disabled>Try free</a>
-          </td>
-          <td>
-            <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="pro" disabled>Try free</a>
-          </td>
-          <td>
-            <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="business" disabled>Try free</a>
-          </td>
-          <td>
-            <a class="btn btn-soft-primary pricing-btn disabled" href="#" data-product-id="business-plus" disabled>Try free</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        {% if layout.faqs %}
+        <div class="accordion" id="faqAccordion">
+          {% for faq in layout.faqs %}
+          <div class="accordion-item border-0 mb-3">
+            <h2 class="accordion-header">
+              <button class="accordion-button bg-body-tertiary collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
+                <span class="fw-semibold">{{ faq.question }}</span>
+              </button>
+            </h2>
+            <div id="faq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body bg-body-tertiary text-muted">
+                {{ faq.answer }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  <!-- End Table -->
-</div>
-<!-- End Pricing Table -->
-
-<!-- Clients -->
-<div class="container content-space-2 content-space-lg-3">
-  <!-- Heading -->
-  <div class="w-md-75 w-lg-50 text-center mx-md-auto mb-5 mb-md-9">
-    <h2>
-      Trusted by leading companies and more than 500,000 of you!
-    </h2>
-  </div>
-  <!-- End Heading -->
-
-  <div class="row justify-content-center text-center">
-    <div class="col-4 col-sm-3 col-md-2 py-3">
-      <img class="avatar avatar-lg avatar-4x3 avatar-centered" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/brands/google-dark.svg" alt="Logo">
-    </div>
-    <!-- End Col -->
-
-    <div class="col-4 col-sm-3 col-md-2 py-3">
-      <img class="avatar avatar-lg avatar-4x3 avatar-centered" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/brands/shopify-dark.svg" alt="Logo">
-    </div>
-    <!-- End Col -->
-
-    <div class="col-4 col-sm-3 col-md-2 py-3">
-      <img class="avatar avatar-lg avatar-4x3 avatar-centered" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/brands/vidados-dark.svg" alt="Logo">
-    </div>
-    <!-- End Col -->
-
-    <div class="col-4 col-sm-3 col-md-2 py-3">
-      <img class="avatar avatar-lg avatar-4x3 avatar-centered" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/brands/forbes-dark.svg" alt="Logo">
-    </div>
-    <!-- End Col -->
-
-    <div class="col-4 col-sm-3 col-md-2 py-3">
-      <img class="avatar avatar-lg avatar-4x3 avatar-centered" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/brands/business-insider-dark.svg" alt="Logo">
-    </div>
-    <!-- End Col -->
-
-    <div class="col-4 col-sm-3 col-md-2 py-3">
-      <img class="avatar avatar-lg avatar-4x3 avatar-centered" src="https://cdn.itwcreativeworks.com/assets/ultimate-jekyll/vendor/front/v4.3.1/svg/brands/hubspot-dark.svg" alt="Logo">
-    </div>
-    <!-- End Col -->
-  </div>
-  <!-- End Row -->
-</div>
-<!-- End Clients -->
-
-<!-- FAQ -->
-<div class="container content-space-2 content-space-lg-3">
-  <!-- Heading -->
-  <div class="w-md-75 w-lg-50 text-center mx-lg-auto mb-5 mb-md-9">
-    <h2>Frequently Asked Questions</h2>
-  </div>
-  <!-- End Heading -->
-
-  <div class="row justify-content-md-center">
-    <div class="col-sm-6 col-lg-5 mb-3 mb-md-5">
-      <h4>Can I cancel at anytime?</h4>
-      <p>
-        <strong>Yes</strong>. You can cancel anytime, no questions asked. However, we would highly appreciate if you will give us some feedback so we can improve.
-      </p>
-    </div>
-    <!-- End Col -->
-
-    <div class="col-sm-6 col-lg-5 mb-3 mb-md-5">
-      <h4>Is there a free trial?</h4>
-      <p>
-        <strong>Yes</strong>. Yes there is a <strong>14 day free trial</strong> of the paid plans. You can cancel your subscription at any time during the trial period for a full refund.
-      </p>
-    </div>
-    <!-- End Col -->
-
-    <div class="col-sm-6 col-lg-5 mb-3 mb-md-5">
-      <h4>What is your refund policy?</h4>
-      <p>
-        We offer a <strong>14 day free trial</strong> of the premium plans. You can cancel any time during your trial for a <strong>full refund</strong>. After the trial period, all sales are final.
-      </p>
-    </div>
-
-    <div class="col-sm-6 col-lg-5 mb-3 mb-md-5">
-      <h4>How secure is {{ site.brand.name }}?</h4>
-      <p>
-        <strong>Very secure</strong>. Protecting the data you trust to <strong>{{ site.brand.name }} </strong> is our first priority. We use secure third-party services like PayPal & Stripe to process all payments.
-      </p>
-    </div>
-    <!-- End Col -->
-  </div>
-  <!-- End Row -->
-</div>
-<!-- End FAQ -->
+</section>
 
 {{ content | uj_content_format }}

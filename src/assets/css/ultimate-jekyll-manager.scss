@@ -15,5 +15,8 @@
 // Import custom styles
 @use 'core/custom-font-awesome' as *;
 
+// @TODO: Remove this when done with custom theme
+@use 'core/temp-custom' as *;
+
 // Import page-specific styles
 @use '_page-specific' as *;

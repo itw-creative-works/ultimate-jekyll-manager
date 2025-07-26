@@ -3,4 +3,82 @@
 layout: themes/[ site.theme.id ]/frontend/core/cover
 ---
 
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+    <div class="card border-0 shadow-lg bg-body-tertiary">
+      <div class="card-body p-5">
+        <!-- Logo -->
+        <div class="text-center mb-4">
+              <a href="{{ site.url }}">
+                <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
+              </a>
+            </div>
+
+        <!-- Icon -->
+        {% comment %}
+          <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient text-white" style="width: 80px; height: 80px;">
+              {% uj_icon "key", "fs-2" %}
+            </div>
+          </div>
+        {% endcomment %}
+
+        <!-- Header -->
+        <div class="text-center mb-4">
+              <h1 class="h3 fw-bold mb-2">Reset Your Password</h1>
+              <p class="text-muted">Enter your email address and we'll send you a link to reset your password.</p>
+            </div>
+
+        <!-- Reset Form -->
+        <form>
+          <div class="mb-4 text-start">
+            <label for="email" class="form-label fw-semibold">Email Address</label>
+            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email address" required>
+          </div>
+
+          <button type="submit" class="btn btn-success btn-lg w-100 mb-4">
+            {% uj_icon "paper-plane", "me-2" %}
+            Send Reset Link
+          </button>
+        </form>
+
+        <!-- Back to Sign In -->
+        <div class="text-center">
+          <p class="text-muted mb-0">
+            Remember your password?
+            <a href="/signin" class="text-decoration-none fw-semibold">
+              Sign in now
+            </a>
+          </p>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-4 pt-4 border-top text-center">
+          <p class="text-muted small mb-2">Need help?</p>
+          <a href="/contact" class="btn btn-outline-adaptive btn-sm">
+            {% uj_icon "headset", "me-1" %}
+            Contact Support
+          </a>
+        </div>
+
+        <!-- Additional Info -->
+        {% comment %}
+          <div class="text-center mt-4">
+            <div class="bg-body rounded-3 p-4">
+              <div class="d-flex align-items-center justify-content-center mb-3">
+                {% uj_icon "shield-check", "text-success fs-3 me-2" %}
+                <h3 class="h6 fw-bold mb-0">Secure & Private</h3>
+              </div>
+              <p class="text-muted small mb-0">
+                We'll only send a password reset link to your registered email address.
+                The link expires in 1 hour for your security.
+              </p>
+            </div>
+          </div>
+        {% endcomment %}
+      </div>
+    </div>
+  </div>
+</div>
+
 {{ content | uj_content_format }}

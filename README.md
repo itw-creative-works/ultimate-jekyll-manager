@@ -150,6 +150,19 @@ member:
 ---
 ```
 
+### Special Class
+`uj-language-dropdown`
+`uj-language-dropdown-item`
+
+### Icons
+* Fontawesome
+  * https://fontawesome.com/search
+* Flags
+  * https://www.freepik.com/icon/england_4720360#fromView=resource_detail&position=1
+* More
+  * Language
+    * https://www.freepik.com/icon/language_484531#fromView=family&page=1&position=0&uuid=651a2f0f-9023-4063-a495-af9a4ef72304
+
 > This project is "ultimate-jekyll", an NPM module that helps   │
 │   streamline development of Jekyll websites. A "consuming       │
 │   project" will require this NPM module to take advantage of    │

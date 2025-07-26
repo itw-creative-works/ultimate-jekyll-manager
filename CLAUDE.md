@@ -28,3 +28,5 @@ SOME SPECIAL LIQUID FUNCTIONS:
 * iffalsy = same but opposite of iftruthy.
 * page.resolved = a custom page object property of all site, layout, and page variables deeply merged together, with page variables taking precedence over layout, and layout variables taking precedence over site variables. This allows a system of site defaults, layout overrides, and page-specific overrides.
 
+Specifics:
+* {% uj_icon icon-name, "fa-md" %} = Custom tag for inserting fontawesome icons. "icon-name" can be a string or a variable. If its a string, put it in quotes like "rocket" (dont include "fa-")

@@ -1,6 +1,278 @@
 ---
 ### ALL PAGES ###
-layout: themes/[ site.theme.id ]/frontend/core/minimal
+layout: themes/[ site.theme.id ]/frontend/core/base
+
+team_members:
+  - name: "Sarah Johnson"
+    role: "CEO & Founder"
+    bio: "Serial entrepreneur with 15+ years in tech. Previously founded two successful startups and led product teams at Google."
+    image: "/assets/images/team/sarah.jpg"
+    social:
+      linkedin: "https://linkedin.com/in/sarahjohnson"
+      twitter: "https://twitter.com/sarahjohnson"
+      github: "https://github.com/sarahjohnson"
+  - name: "Michael Chen"
+    role: "CTO"
+    bio: "Full-stack engineer and architecture expert. Built scalable systems for millions of users at Netflix and Airbnb."
+    image: "/assets/images/team/michael.jpg"
+    social:
+      linkedin: "https://linkedin.com/in/michaelchen"
+      twitter: "https://twitter.com/michaelchen"
+      github: "https://github.com/michaelchen"
+  - name: "Emily Rodriguez"
+    role: "Head of Design"
+    bio: "Design leader passionate about creating intuitive user experiences. Previously at Apple and Figma."
+    image: "/assets/images/team/emily.jpg"
+    social:
+      linkedin: "https://linkedin.com/in/emilyrodriguez"
+      dribbble: "https://dribbble.com/emilyrodriguez"
+      behance: "https://behance.net/emilyrodriguez"
+  - name: "David Kim"
+    role: "VP of Engineering"
+    bio: "Engineering leader with expertise in distributed systems and team management. Former tech lead at Spotify."
+    image: "/assets/images/team/david.jpg"
+    social:
+      linkedin: "https://linkedin.com/in/davidkim"
+      github: "https://github.com/davidkim"
+  - name: "Lisa Thompson"
+    role: "Head of Marketing"
+    bio: "Growth marketing expert who has scaled startups from 0 to millions of users. Former marketing director at Slack."
+    image: "/assets/images/team/lisa.jpg"
+    social:
+      linkedin: "https://linkedin.com/in/lisathompson"
+      twitter: "https://twitter.com/lisathompson"
+  - name: "Alex Martinez"
+    role: "Lead Developer"
+    bio: "Full-stack developer specializing in React and Node.js. Open source contributor and tech conference speaker."
+    image: "/assets/images/team/alex.jpg"
+    social:
+      linkedin: "https://linkedin.com/in/alexmartinez"
+      github: "https://github.com/alexmartinez"
+      twitter: "https://twitter.com/alexmartinez"
+
+company_values:
+  - title: "Innovation First"
+    description: "We push boundaries and challenge the status quo to create breakthrough solutions"
+    icon: "lightbulb"
+  - title: "Customer Obsessed"
+    description: "Everything we do is focused on delivering exceptional value to our customers"
+    icon: "heart"
+  - title: "Team Excellence"
+    description: "We hire the best talent and create an environment where everyone can thrive"
+    icon: "users"
+  - title: "Transparent Culture"
+    description: "We believe in open communication, honest feedback, and shared decision-making"
+    icon: "eye"
+
+company_stats:
+  - number: "2019"
+    label: "Founded"
+    icon: "calendar"
+  - number: "50+"
+    label: "Team Members"
+    icon: "users"
+  - number: "100K+"
+    label: "Happy Customers"
+    icon: "smile"
+  - number: "25+"
+    label: "Countries Served"
+    icon: "globe"
 ---
+
+<!-- Hero Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          {% uj_icon "users", "text-primary display-4 mb-4" %}
+        </div>
+        <h1 class="display-3 fw-bold mb-4">
+          Meet Our <span class="gradient-text">Amazing Team</span>
+        </h1>
+        <p class="fs-5 text-muted mb-5">
+          We're a diverse group of passionate individuals working together to build the future of {{ site.brand.name }}. Get to know the people behind the magic.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Company Stats -->
+<section class="py-8 bg-body-tertiary">
+  <div class="container">
+    <div class="row text-center g-4">
+      {% for stat in layout.company_stats %}
+      <div class="col-lg-3 col-md-6">
+        <div class="mb-3">
+          {% uj_icon stat.icon, "text-primary display-4" %}
+        </div>
+        <h3 class="display-5 fw-bold mb-2">{{ stat.number }}</h3>
+        <p class="text-muted mb-0">{{ stat.label }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Team Members Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold mb-3">Leadership Team</h2>
+      <p class="fs-5 text-muted">The visionaries and experts driving our mission forward</p>
+    </div>
+
+    <div class="row g-4">
+      {% for member in layout.team_members %}
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm team-member-card">
+          <div class="card-body p-4 text-center">
+            <div class="position-relative mb-4">
+              <div class="rounded-circle mx-auto overflow-hidden" style="width: 150px; height: 150px;">
+                <img src="{{ member.image }}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover" onerror="this.src='https://via.placeholder.com/150x150/6c63ff/white?text={{ member.name | slice: 0 | upcase }}'">
+              </div>
+              <div class="position-absolute bottom-0 end-0 bg-primary rounded-circle p-2">
+                {% uj_icon "check", "text-white" %}
+              </div>
+            </div>
+
+            <h4 class="fw-bold mb-1">{{ member.name }}</h4>
+            <p class="text-primary fw-semibold mb-3">{{ member.role }}</p>
+            <p class="text-muted small mb-4">{{ member.bio }}</p>
+
+            {% if member.social %}
+            <div class="d-flex justify-content-center gap-2">
+              {% if member.social.linkedin %}
+              <a href="{{ member.social.linkedin }}" class="btn btn-outline-primary btn-sm rounded-circle" target="_blank" rel="noopener">
+                {% uj_icon "linkedin", "" %}
+              </a>
+              {% endif %}
+              {% if member.social.twitter %}
+              <a href="{{ member.social.twitter }}" class="btn btn-outline-primary btn-sm rounded-circle" target="_blank" rel="noopener">
+                {% uj_icon "twitter", "" %}
+              </a>
+              {% endif %}
+              {% if member.social.github %}
+              <a href="{{ member.social.github }}" class="btn btn-outline-primary btn-sm rounded-circle" target="_blank" rel="noopener">
+                {% uj_icon "github", "" %}
+              </a>
+              {% endif %}
+              {% if member.social.dribbble %}
+              <a href="{{ member.social.dribbble }}" class="btn btn-outline-primary btn-sm rounded-circle" target="_blank" rel="noopener">
+                {% uj_icon "dribbble", "" %}
+              </a>
+              {% endif %}
+              {% if member.social.behance %}
+              <a href="{{ member.social.behance }}" class="btn btn-outline-primary btn-sm rounded-circle" target="_blank" rel="noopener">
+                {% uj_icon "behance", "" %}
+              </a>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Company Values Section -->
+<section class="py-8 bg-body-tertiary">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold mb-3">
+        Our <span class="gradient-text">Core Values</span>
+      </h2>
+      <p class="fs-5 text-muted">The principles that guide everything we do</p>
+    </div>
+
+    <div class="row g-4">
+      {% for value in layout.company_values %}
+      <div class="col-lg-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm text-center">
+          <div class="card-body p-4">
+            <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+              {% uj_icon value.icon, "text-white fs-2" %}
+            </div>
+            <h4 class="fw-bold mb-3">{{ value.title }}</h4>
+            <p class="text-muted">{{ value.description }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Mission Statement Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="bg-primary bg-gradient rounded-4 p-5 text-white">
+          <h2 class="display-5 fw-bold mb-4">Our Mission</h2>
+          <p class="fs-4 fw-medium mb-4 opacity-90">
+            "To empower individuals and businesses with innovative technology solutions that simplify complex challenges and unlock new possibilities for growth and success."
+          </p>
+          <div class="d-flex justify-content-center align-items-center">
+            <div class="border border-white rounded-circle p-3 me-3">
+              {% uj_icon "quote-left", "fs-3" %}
+            </div>
+            <div class="text-start">
+              <div class="fw-bold">{{ layout.team_members[0].name }}</div>
+              <div class="opacity-75">{{ layout.team_members[0].role }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Join Our Team CTA -->
+<section class="py-8 bg-body-tertiary">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          {% uj_icon "briefcase", "text-primary display-4 mb-4" %}
+        </div>
+        <h2 class="display-5 fw-bold mb-4">
+          Want to Join Our <span class="gradient-text">Team</span>?
+        </h2>
+        <p class="fs-5 text-muted mb-4">
+          We're always looking for talented, passionate people to join our mission. Check out our open positions and become part of something amazing.
+        </p>
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+          <a href="/careers" class="btn btn-primary btn-lg px-5 py-3">
+            {% uj_icon "search", "me-2" %}
+            View Open Positions
+          </a>
+          <a href="/contact" class="btn btn-outline-adaptive btn-lg px-5 py-3">
+            {% uj_icon "envelope", "me-2" %}
+            Get in Touch
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.team-member-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}
+</style>
 
 {{ content | uj_content_format }}

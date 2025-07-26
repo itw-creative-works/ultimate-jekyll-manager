@@ -207,8 +207,9 @@ translation:
     - "vi"
     - "it"
 
-# Custom Icons
+# Icons
 icons:
+  style: "solid"
 
 # Blog & Pagination
 permalink: /blog/:title
