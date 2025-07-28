@@ -1,6 +1,7 @@
 This is Ultimate Jekyll, it is a template project that other "consuming" projects can use to build a Jekyll site. It comes installed as an NPM module and is helpful for setting up, configuring, and maintaining a Jekyll site with best practices in mind.
 
 It is not a stand-alone project, but rather a collection of components that can be used to build a Jekyll site quickly and efficiently.
+* You cannot use `npm start` or `npm run build` in this project.
 
 Ultimate Jekll has the following structure:
 src/gulp/tasks = Gulp tasks that are used to build the Jekyll site.
@@ -15,9 +16,11 @@ Other Ultimate Jekyll Components:
 src/assets/css/ultimate-jekyll-manager.scss = Main stylesheet used by Ultimate Jekyll to style the site
 src/assets/css/global = Global styles that are used by Ultimate Jekyll
 src/assets/css/pages = Page-specific styles that are used by Ultimate Jekyll
+* If you are making a page, put the styles in this directory like so: `src/assets/css/pages/[page-name]/index.scss`
 
 src/assets/js/ultimate-jekyll-manager.js = Main JavaScript file used by Ultimate Jekyll to manage the site
 src/assets/js/pages = Page-specific JavaScript files that are used by Ultimate Jekyll
+* If you are making a page, put the JavaScript in this directory like so: `src/assets/js/pages/[page-name]/index.js`
 
 src/assets/themes = Theme scss and js files that are can be picked and used by the consuming project.
 

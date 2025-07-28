@@ -1,0 +1,32 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/cover
+---
+
+<!-- Cart Redirect Page -->
+<section class="py-5 d-flex align-items-center">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 text-center">
+        <div class="mb-4">
+          {% uj_icon "shopping-cart", "text-primary cart-icon display-1 mb-4" %}
+        </div>
+        <h1 class="display-5 fw-bold mb-3 redirect-message">Preparing Your Cart</h1>
+        <p class="fs-5 text-muted mb-4 redirect-message">Please wait while we prepare your checkout...</p>
+
+        <div class="spinner-border spinner-border-lg text-primary" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+
+        <!-- Progress bar (hidden by default, shown via JS) -->
+        <div class="progress-indicator d-none mt-4 mx-auto" style="max-width: 300px;">
+          <div class="progress" style="height: 4px;">
+            <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ content | uj_content_format }}

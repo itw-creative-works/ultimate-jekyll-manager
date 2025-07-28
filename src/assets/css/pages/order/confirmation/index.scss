@@ -1,0 +1,80 @@
+// Order Confirmation Page Styles
+
+// Success icon styling
+.success-icon {
+  width: 120px;
+  height: 120px;
+
+  .icon {
+    font-size: 3rem; // Equivalent to display-3
+  }
+}
+
+// Order summary card
+.order-summary-card {
+  .order-detail-row {
+    padding: 0.5rem 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--bs-gray-200);
+    }
+  }
+}
+
+// Subscription info alert
+.subscription-alert {
+  background-color: var(--bs-info-bg-subtle);
+  border-color: var(--bs-info-border-subtle);
+  color: var(--bs-info-text);
+}
+
+// Action buttons section
+.action-buttons {
+  .btn {
+    min-width: 200px;
+
+    @media (max-width: 575.98px) {
+      min-width: 100%;
+    }
+  }
+}
+
+// Support section
+.support-section {
+  .support-link {
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: var(--bs-primary) !important;
+    }
+  }
+}
+
+// Confetti animation fallback message
+.confetti-fallback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+
+  &.celebrate {
+    animation: celebrate 1s ease-out;
+  }
+}
+
+@keyframes celebrate {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

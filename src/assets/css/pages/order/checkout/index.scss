@@ -1,0 +1,38 @@
+// Checkout Page Styles - Minimal custom CSS
+
+// Order summary sticky behavior (can't be done with Bootstrap)
+.order-summary-sticky {
+  position: sticky;
+  top: 2rem;
+}
+
+// Product thumbnail size (specific dimension needed)
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+}
+
+// Save badge positioning adjustment
+.badge.position-absolute {
+  right: -0.5rem;
+  top: -0.5rem;
+}
+
+// Billing cycle toggle - custom selected state
+.btn-check:checked + .btn {
+  border-color: var(--bs-primary) !important;
+  color: var(--bs-primary) !important;
+  background-color: transparent !important;
+}
+
+// Mobile responsiveness for sticky
+@media (max-width: 991.98px) {
+  .order-summary-sticky {
+    position: static;
+  }
+}
+// .btn-check:checked + .btn {
+//     color: var(--bs-btn-active-color);
+//     background-color: var(--bs-btn-active-bg);
+//     border-color: var(--bs-btn-active-border-color);
+// }

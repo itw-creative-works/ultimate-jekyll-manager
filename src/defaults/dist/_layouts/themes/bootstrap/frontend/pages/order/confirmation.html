@@ -1,0 +1,91 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/cover
+---
+
+<!-- Confirmation Section -->
+<section class="py-8">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <!-- Success Icon -->
+      <div class="text-center mb-5">
+        <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-4 success-icon">
+          {% uj_icon "check", "text-white icon" %}
+        </div>
+        <h1 class="display-5 fw-bold mb-3">Thank You for Your Purchase!</h1>
+        <p class="fs-5 text-muted">Your order has been successfully processed.</p>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="card border-0 shadow-sm mb-4 order-summary-card">
+        <div class="card-body p-4">
+          <h4 class="fw-bold mb-4">Order Summary</h4>
+
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-muted">Order Number:</span>
+            <span class="fw-semibold" id="order-number">Loading...</span>
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <h6 class="fw-semibold mb-2" id="product-name">Loading...</h6>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Total Paid:</span>
+              <span class="fw-bold fs-5" id="total-paid">$--</span>
+            </div>
+          </div>
+
+          <div id="subscription-info" class="d-none">
+            <hr>
+            <div class="alert alert-info mb-0 subscription-alert">
+              <p class="mb-0 small" id="billing-info"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">What's Next?</h5>
+          <ol class="mb-0">
+            <li class="mb-2">Check your email for the order confirmation and receipt</li>
+            <li class="mb-2">Access your purchase from your <a href="/account">account dashboard</a></li>
+            <li class="mb-2">If you have any questions, <a href="/contact">contact our support team</a></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center action-buttons">
+        <a href="/account" class="btn btn-primary btn-lg px-5">
+          {% uj_icon "user", "me-2" %}
+          Go to Dashboard
+        </a>
+        <a href="/" class="btn btn-outline-adaptive btn-lg px-5">
+          {% uj_icon "home", "me-2" %}
+          Back to Home
+        </a>
+      </div>
+
+      <!-- Support Section -->
+      <div class="text-center mt-5 pt-5 border-top support-section">
+        <h5 class="fw-bold mb-3">Need Help?</h5>
+        <p class="text-muted mb-4">Our support team is here to assist you</p>
+        <div class="d-flex justify-content-center gap-4">
+          <a href="mailto:support@{{ site.brand.domain }}" class="text-decoration-none support-link">
+            {% uj_icon "envelope", "me-2" %}
+            <span>support@{{ site.brand.domain }}</span>
+          </a>
+          <a href="/contact" class="text-decoration-none support-link">
+            {% uj_icon "comments", "me-2" %}
+            <span>Live Chat</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ content | uj_content_format }}

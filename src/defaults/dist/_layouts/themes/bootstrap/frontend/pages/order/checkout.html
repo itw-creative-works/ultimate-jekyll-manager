@@ -1,0 +1,306 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/cover
+
+### THEME CONFIG ###
+# theme:
+#   main:
+#     class: "d-flex align-items-center justify-content-center"
+
+### CHECKOUT PAGE ###
+test_product:
+  id: "pro-plan"
+  name: "Pro Plan"
+  description: "Advanced features for power users"
+  price_monthly: 29
+  price_yearly: 290
+  is_subscription: true
+  has_free_trial: true
+  free_trial_days: 14
+---
+
+<!-- Fullscreen Preloader -->
+<div id="checkout-preloader" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-body" style="z-index: 9999;">
+  <div class="text-center">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <h5 class="text-muted">Loading secure checkout...</h5>
+    <p class="text-muted small mb-0">Please be patient while your order is prepared.</p>
+  </div>
+</div>
+
+<!-- Checkout Section -->
+<section class="_py-5">
+  <!-- Title Row -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="h2 fw-bold mb-0">Checkout</h1>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="row">
+    <!-- Left Column - Payment Form -->
+    <div class="col-lg-7 mb-4">
+      <!-- Billing Cycle Selection -->
+      <div class="card border-1 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h3 class="h5 fw-bold mb-4">Billing Cycle</h3>
+
+          <!-- Subscription Toggle (hidden by default) -->
+          <div id="subscription-toggle" class="d-none">
+            <div class="row g-3">
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="billing-cycle" id="yearly" value="yearly">
+                <label class="btn btn-outline-secondary w-100 p-3 position-relative border-2 rounded-3 _animation-hover-up" for="yearly">
+                  <span id="savings-badge" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2">Save --</span>
+                  <div class="d-flex align-items-center justify-content-center mb-2">
+                    <span class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                      {% uj_icon "check", "small" %}
+                    </span>
+                  </div>
+                  <div class="fw-bold fs-4 mb-1" id="yearly-price-lg">$--</div>
+                  <div class="text-muted small">Pay Yearly</div>
+                </label>
+              </div>
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="billing-cycle" id="monthly" value="monthly">
+                <label class="btn btn-outline-secondary w-100 p-3 border-2 rounded-3 _animation-hover-up" for="monthly">
+                  <div class="d-flex align-items-center justify-content-center mb-2">
+                    <span class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                      {% uj_icon "check", "small" %}
+                    </span>
+                  </div>
+                  <div class="fw-bold fs-4 mb-1" id="monthly-price-lg">$--</div>
+                  <div class="text-muted small">Pay Monthly</div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Free Trial Badge -->
+            <div id="trial-badge" class="alert alert-success mt-3 mb-0 p-2 d-none">
+              <small class="d-flex align-items-center mb-0">
+                {% uj_icon "gift", "me-2" %}
+                <span id="trial-message"></span>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Method Card -->
+      <div class="card border-1 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h3 class="h5 fw-bold mb-4">Payment Method</h3>
+
+          <!-- Payment Method Tabs -->
+          <div class="mb-4">
+            <div class="btn-group w-100 d-flex gap-2" role="group" aria-label="Payment methods">
+              <input type="radio" class="btn-check" name="payment-method" id="method-card" value="card" checked>
+              <label class="btn btn-outline-secondary flex-fill rounded py-2 border-2 fw-medium" for="method-card">
+                {% uj_icon "credit-card", "me-2" %}
+                Credit Card
+              </label>
+
+              <input type="radio" class="btn-check" name="payment-method" id="method-paypal" value="paypal">
+              <label class="btn btn-outline-secondary flex-fill rounded py-2 border-2 fw-medium" for="method-paypal">
+                {% uj_icon "paypal", "me-2" %}
+                PayPal
+              </label>
+
+              <input type="radio" class="btn-check" name="payment-method" id="method-crypto" value="crypto">
+              <label class="btn btn-outline-secondary flex-fill rounded py-2 border-2 fw-medium" for="method-crypto">
+                {% uj_icon "bitcoin", "me-2" %}
+                Crypto
+              </label>
+            </div>
+          </div>
+
+          <!-- Credit Card Form -->
+          <div id="payment-form-card" class="payment-form">
+            <form id="card-form">
+              <div class="mb-3">
+                <label for="email" class="form-label fw-medium text-secondary">Email</label>
+                <input type="email" class="form-control form-control-lg rounded-3 border py-3 px-3" id="email" placeholder="your@email.com" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="cardNumber" class="form-label fw-medium text-secondary">Card Number</label>
+                <div class="input-group">
+                  <input type="text" class="form-control form-control-lg rounded-start-3 border py-3 px-3" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                  <span class="input-group-text bg-white rounded-end-3 border px-3">
+                    {% uj_icon "credit-card", "text-muted" %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="cardExpiry" class="form-label fw-medium text-secondary">Expiry Date</label>
+                  <input type="text" class="form-control form-control-lg rounded-3 border py-3 px-3" id="cardExpiry" placeholder="MM / YY" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="cardCVC" class="form-label fw-medium text-secondary">Security Code</label>
+                  <input type="text" class="form-control form-control-lg rounded-3 border py-3 px-3" id="cardCVC" placeholder="CVC" required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="cardName" class="form-label fw-medium text-secondary">Name on Card</label>
+                <input type="text" class="form-control form-control-lg rounded-3 border py-3 px-3" id="cardName" placeholder="John Doe" required>
+              </div>
+
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="" id="saveCard">
+                <label class="form-check-label" for="saveCard">
+                  Save card for future purchases
+                </label>
+              </div>
+            </form>
+          </div>
+
+          <!-- PayPal Form -->
+          <div id="payment-form-paypal" class="payment-form d-none">
+            <div class="text-center py-5">
+              <img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_200x51.png" alt="PayPal" class="mb-3" height="50">
+              <p class="text-muted">You will be redirected to PayPal to complete your purchase securely.</p>
+            </div>
+          </div>
+
+          <!-- Crypto Form -->
+          <div id="payment-form-crypto" class="payment-form d-none">
+            <div class="mb-3">
+              <label class="form-label">Select Cryptocurrency</label>
+              <select class="form-select" id="cryptoSelect">
+                <option value="btc">Bitcoin (BTC)</option>
+                <option value="eth">Ethereum (ETH)</option>
+                <option value="usdt">Tether (USDT)</option>
+                <option value="usdc">USD Coin (USDC)</option>
+              </select>
+            </div>
+            <div class="alert alert-info">
+              <small>After placing your order, you'll receive the wallet address and payment instructions.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms and Submit -->
+      <div class="mb-4">
+        <p class="text-muted small text-center mb-3">
+          By purchasing, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>
+        </p>
+
+        <button type="button" class="btn btn-primary btn-lg w-100 py-3 fs-5 fw-semibold" id="complete-purchase">
+          Complete Purchase
+        </button>
+
+        <p class="text-center text-muted small mt-3 mb-0">
+          {% uj_icon "lock", "me-1" %}
+          Your payment information is secure and encrypted
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column - Order Summary -->
+    <div class="col-lg-5">
+      <div class="order-summary-sticky">
+        <div class="card border-1 shadow-sm">
+          <div class="card-body p-4">
+            <h3 class="h5 fw-bold mb-4">Order Summary</h3>
+
+            <!-- Product Item -->
+            <div class="order-item mb-4">
+              <div class="d-flex align-items-center">
+                <div class="position-relative me-3">
+                  <div class="product-thumbnail bg-light rounded-3 d-flex align-items-center justify-content-center">
+                    <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }} Plan" class="img-fluid p-3">
+                  </div>
+                  <span class="position-absolute badge rounded-pill bg-primary" style="top: -0.375rem; right: -0.375rem;">
+                    1
+                    <span class="visually-hidden">quantity</span>
+                  </span>
+                </div>
+                <div class="flex-grow-1 text-start">
+                  <h6 class="mb-1" id="product-name">Loading...</h6>
+                  <p class="text-muted small mb-0" id="product-description">Loading product details...</p>
+                </div>
+                <div class="text-end d-none">
+                  <div class="fw-bold" id="product-price">$--</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Discount Code -->
+            <div class="mb-4">
+              <div class="input-group">
+                <input type="text" class="form-control rounded-start-3 border py-2 px-3 text-start" id="discount-code" placeholder="Discount code">
+                <button class="btn btn-adaptive rounded-end-3 border px-4" type="button" id="apply-discount">Apply</button>
+              </div>
+
+              <!-- Discount Messages -->
+              <div class="text-start">
+                <div id="discount-message-loading" class="mt-2 text-primary small d-none">
+                  {% uj_icon "clock", "me-1" %} Checking code...
+                </div>
+                <div id="discount-message-success" class="mt-2 text-success small d-none">
+                  {% uj_icon "check-circle", "me-1" %} <span id="success-text">Discount applied</span>
+                </div>
+                <div id="discount-message-error" class="mt-2 text-danger small d-none">
+                  {% uj_icon "times-circle", "me-1" %} <span id="error-text">Invalid discount code</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Subtotal</span>
+                <span id="subtotal">$--</span>
+              </div>
+
+              <div class="d-flex justify-content-between mb-2 text-success d-none" id="discount-row">
+                <span>Discount (<span id="discount-percent"></span>)</span>
+                <span>-$<span id="discount-amount"></span></span>
+              </div>
+
+              <div class="d-flex justify-content-between mb-3 text-success d-none" id="trial-discount-row">
+                <span>Free Trial Discount</span>
+                <span>-$<span id="trial-discount-amount"></span></span>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold fs-5">Total Due Today</span>
+                <span class="fw-bold fs-4" id="total-price">$--</span>
+              </div>
+
+              <hr class="my-3">
+
+              <div class="d-flex justify-content-between align-items-center text-muted">
+                <span>Recurring</span>
+                <span id="recurring-amount">$-- <span id="recurring-period">monthly</span></span>
+              </div>
+
+              <!-- Subscription Terms -->
+              <div id="subscription-terms" class="mt-3 rounded-3 small text-body-tertiary d-none text-start">
+                <span id="terms-text"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="text-center mt-2">
+          <div class="d-flex justify-content-center align-items-center gap-3 text-muted small opacity-75">
+            <span>{% uj_icon "shield-check", "me-1" %} Secure</span>
+            <span>{% uj_icon "lock", "me-1" %} Encrypted</span>
+            <span>{% uj_icon "award", "me-1" %} Guaranteed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ content | uj_content_format }}
