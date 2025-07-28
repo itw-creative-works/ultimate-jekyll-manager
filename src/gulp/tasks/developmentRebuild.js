@@ -69,7 +69,7 @@ async function developmentRebuild(complete) {
   // Compile
   // return src(input)
   //   .pipe(dest(output))
-  //   .on('end', () => {
+  //   .on('finish', () => {
   //     // Log
   //     logger.log('Finished!');
 

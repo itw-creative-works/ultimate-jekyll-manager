@@ -10,6 +10,7 @@ const cleanCSS = require('gulp-clean-css');
 const rename = require('gulp-rename');
 const filter = require('gulp-filter').default;
 const { template } = require('node-powertools');
+const yaml = require('js-yaml');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -20,12 +21,13 @@ const rootPathProject = Manager.getRootPath('project');
 
 // Const
 const PAGE_IMPORT = `
-  // Styles for { pagePath }
+  /* Main CSS for { pagePath } */
   html[data-page-path="{ pagePath }"] {
-    // Main page-specific scss
     { mainImport }
+  }
 
-    // Project page-specific scss
+  /* Project CSS for { pagePath } */
+  html[data-page-path="{ pagePath }"] {
     { projectImport }
   }
 `
@@ -75,7 +77,8 @@ function sass(complete) {
         // TODO: Add more load paths like node_modules for things like fontawesome
         // path.resolve(rootPathProject, 'node_modules'),
       ]
-    }).on('error', compiler.logError))
+    })
+    .on('error', complete))
     .pipe(cleanCSS({
       format: Manager.isBuildMode() ? 'compressed' : 'beautify',
     }))
@@ -88,7 +91,7 @@ function sass(complete) {
     }))
     .pipe(dest(output, { sourcemaps: '.' }))
     // .pipe(dest(output))
-    .on('end', () => {
+    .on('finish', () => {
       // Log
       logger.log('Finished!');
 
@@ -121,53 +124,93 @@ function sassWatcher(complete) {
   return complete();
 }
 
-function generatePageScss() {
-  // Get all JS files
-  const files = glob(input).map((f) => path.resolve(f));
+function parseFrontmatter(filePath) {
+  try {
+    const content = jetpack.read(filePath);
+    if (!content) return null;
 
-  // Create a map to store the pages
+    // Check if file has frontmatter
+    if (!content.startsWith('---')) return null;
+
+    // Find the end of frontmatter
+    const frontmatterEnd = content.indexOf('---', 3);
+    if (frontmatterEnd === -1) return null;
+
+    // Extract frontmatter content
+    const frontmatterContent = content.substring(3, frontmatterEnd).trim();
+
+    // Parse YAML frontmatter
+    const frontmatter = yaml.load(frontmatterContent);
+    return frontmatter || {};
+  } catch (error) {
+    logger.log(`Error parsing frontmatter for ${filePath}:`, error.message);
+    return null;
+  }
+}
+
+function getPagePermalink(pageFilePath) {
+  const frontmatter = parseFrontmatter(pageFilePath);
+
+  if (frontmatter && frontmatter.permalink) {
+    return frontmatter.permalink;
+  }
+
+  // Fallback to path-based permalink
+  const relativePath = pageFilePath.replace(/.*\/pages\//, '/').replace(/\.(md|html)$/, '');
+  return relativePath === '/index' ? '/' : relativePath;
+}
+
+function findPageFiles() {
+  const pagePatterns = [
+    // Main package pages
+    `${rootPathPackage}/dist/defaults/dist/pages/**/*.{md,html}`,
+
+    // Project package pages
+    `${rootPathProject}/src/pages/**/*.{md,html}`,
+  ];
+
+  const pageFiles = [];
+  pagePatterns.forEach(pattern => {
+    const files = glob(pattern);
+    pageFiles.push(...files.map(f => path.resolve(f)));
+  });
+
+  return pageFiles;
+}
+
+function generatePageScss() {
+  // Get all page files to extract permalinks
+  const pageFiles = findPageFiles();
+
+  // Create a map to store the pages based on their permalinks
   const pagesMap = {};
 
-  // Log files
-  // logger.log('Found files:', files);
+  // Process each page file to find its permalink and corresponding SCSS files
+  pageFiles.forEach((pageFile) => {
+    const permalink = getPagePermalink(pageFile);
 
-  files.forEach((file) => {
-    // Skip if it's not a page partial
-    if (!isPagePartial(file)) {
+    // Skip if we already processed this permalink
+    if (pagesMap[permalink]) {
       return;
-    };
-
-    // Extract the page slug from the file path
-    const dir = path.dirname(file);
-    const parts = dir.split(path.sep);
-    let pageSlug = path.basename(dir);
-
-    // Detect homepage: pages/index.scss
-    if (pageSlug === 'pages' && file.endsWith('pages/index.scss')) {
-      pageSlug = '/';
-    } else {
-      if (!pageSlug.startsWith('/')) {
-        pageSlug = `/${pageSlug}`;
-      }
     }
 
-    // Determine if the file is from the main or project package
-    const isMain = file.startsWith(rootPathPackage);
-    const isProject = file.startsWith(rootPathProject);
+    // Look for corresponding SCSS files based on the permalink
+    const scssBasePath = permalink === '/' ? '/index' : permalink;
 
-    // Normalize the file path
-    if (!pagesMap[pageSlug]) {
-      pagesMap[pageSlug] = { main: null, project: null };
-    }
+    // Construct potential SCSS file paths
+    const mainScssPath = path.resolve(rootPathPackage, `dist/assets/css/pages${scssBasePath}/index.scss`);
+    const projectScssPath = path.resolve(rootPathProject, `src/assets/css/pages${scssBasePath}/index.scss`);
 
-    // Add the file to the main path
-    if (isMain) {
-      pagesMap[pageSlug].main = file;
-    }
+    // Check if SCSS files exist
+    const mainExists = jetpack.exists(mainScssPath);
+    const projectExists = jetpack.exists(projectScssPath);
 
-    // Add the file to the project path
-    if (isProject) {
-      pagesMap[pageSlug].project = file;
+    // Only add to map if at least one SCSS file exists
+    if (mainExists || projectExists) {
+      pagesMap[permalink] = {
+        main: mainExists ? mainScssPath : null,
+        project: projectExists ? projectScssPath : null
+      };
     }
   });
 

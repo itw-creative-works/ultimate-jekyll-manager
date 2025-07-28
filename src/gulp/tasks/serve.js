@@ -294,7 +294,7 @@ function receiveRequestBody(req) {
     });
 
     // Listen for the end of the request
-    req.on('end', () => {
+    req.on('finish', () => {
       body = body.join('');
 
       // Attempt to parse the body as JSON

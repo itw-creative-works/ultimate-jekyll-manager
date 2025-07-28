@@ -108,7 +108,7 @@ function imagemin(complete) {
       })
     )
     .pipe(dest(output))
-    .on('end', () => {
+    .on('finish', () => {
       // Log
       logger.log('Finished!');
 

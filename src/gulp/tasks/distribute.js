@@ -41,7 +41,7 @@ function distribute() {
       .pipe(customTransform())
       .pipe(createTemplateTransform({site: config}))
       .pipe(dest(output))
-      .on('end', () => {
+      .on('finish', () => {
         // Log
         logger.log('Finished!');
 

@@ -111,7 +111,7 @@ function minifyHtmlTask(complete) {
       callback(null, file);
     }))
     .pipe(dest(output))
-    .on('end', () => {
+    .on('finish', () => {
       // Log
       logger.log('Finished HTML minification!');
 

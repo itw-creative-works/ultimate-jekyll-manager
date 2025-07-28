@@ -111,8 +111,8 @@ function jsonToHtml(complete) {
 
   // Wait for both streams to complete
   return Promise.all([
-    new Promise((resolve) => jsonCopy.on('end', resolve)),
-    new Promise((resolve) => htmlGeneration.on('end', resolve))
+    new Promise((resolve) => jsonCopy.on('finish', resolve)),
+    new Promise((resolve) => htmlGeneration.on('finish', resolve))
   ]).then(() => {
     // Log
     logger.log('Finished!');
