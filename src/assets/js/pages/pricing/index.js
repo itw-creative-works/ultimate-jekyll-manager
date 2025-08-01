@@ -6,7 +6,7 @@ export default (Manager, options) => {
   return new Promise(async function (resolve, reject) {
     // Shortcuts
     const { webManager } = Manager;
-    
+
     // Configuration
     const config = {
       selectors: {
@@ -17,13 +17,13 @@ export default (Manager, options) => {
         cardTitle: '.card-title'
       }
     };
-    
+
     // Setup billing toggle functionality
     function setupBillingToggle() {
       const billingRadios = document.querySelectorAll(config.selectors.billingRadios);
       const amountElements = document.querySelectorAll(config.selectors.amountElements);
       const billingInfoElements = document.querySelectorAll(config.selectors.billingInfoElements);
-      
+
       billingRadios.forEach(radio => {
         radio.addEventListener('change', function() {
           const billingType = this.dataset.billing;
@@ -31,16 +31,16 @@ export default (Manager, options) => {
         });
       });
     }
-    
+
     // Update pricing display based on billing type
     function updatePricing(billingType, amountElements, billingInfoElements) {
       // Update prices
       amountElements.forEach(amount => {
-        amount.textContent = billingType === 'monthly' 
-          ? amount.dataset.monthly 
+        amount.textContent = billingType === 'monthly'
+          ? amount.dataset.monthly
           : amount.dataset.yearly;
       });
-      
+
       // Update billing info
       billingInfoElements.forEach(info => {
         info.textContent = billingType === 'monthly'
@@ -48,26 +48,26 @@ export default (Manager, options) => {
           : info.dataset.yearly;
       });
     }
-    
+
     // Setup plan button click handlers
     function setupPlanButtons() {
       const planButtons = document.querySelectorAll(config.selectors.planButtons);
-      
+
       planButtons.forEach(button => {
         button.addEventListener('click', function(e) {
           handlePlanSelection(this);
         });
       });
     }
-    
+
     // Handle plan selection
     function handlePlanSelection(button) {
       const card = button.closest('.card');
       if (!card) return;
-      
+
       const planName = card.querySelector(config.selectors.cardTitle)?.textContent;
       const billingType = document.querySelector(`${config.selectors.billingRadios}:checked`)?.dataset.billing;
-      
+
       if (planName && button.textContent.includes('Get')) {
         // Track analytics
         if (webManager && webManager.analytics) {
@@ -76,16 +76,16 @@ export default (Manager, options) => {
             billing: billingType
           });
         }
-        
+
         // Log for debugging
         console.log(`Selected plan: ${planName} (${billingType} billing)`);
-        
+
         // Redirect to checkout or handle purchase
-        const checkoutUrl = `/order/checkout?plan=${encodeURIComponent(planName)}&billing=${billingType}`;
+        const checkoutUrl = `/payment/checkout?plan=${encodeURIComponent(planName)}&billing=${billingType}`;
         window.location.href = checkoutUrl;
       }
     }
-    
+
     // Initialize pricing functionality
     function init() {
       setupBillingToggle();

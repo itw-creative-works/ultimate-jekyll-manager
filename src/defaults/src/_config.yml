@@ -63,7 +63,7 @@ web_manager:
       policy: null
       redirects:
         authenticated: "/account"
-        unauthenticated: "/signin"
+        unauthenticated: "/signup"
   firebase:
     app:
       enabled: true

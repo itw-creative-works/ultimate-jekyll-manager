@@ -10,6 +10,9 @@ module.exports = (Manager, options) => {
     // Cache visited pages for offline use
     require('./core/service-worker.js')(Manager, options);
 
+    // Setup authentication listener
+    require('./core/auth.js')(Manager, options);
+
     // Import the theme from src/assets/themes/{ id }
     require('__theme__/_theme.js');
 

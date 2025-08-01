@@ -96,29 +96,4 @@ suggested_pages:
   </div>
 </div>
 
-<style>
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
-}
-
-#page-url {
-  word-break: break-all;
-}
-</style>
-
-<script>
-// Update the page URL display with the actual current URL
-document.addEventListener('DOMContentLoaded', function() {
-  const pageUrlElement = document.getElementById('page-url');
-  if (pageUrlElement) {
-    pageUrlElement.textContent = window.location.pathname;
-  }
-});
-</script>
-
 {{ content | uj_content_format }}

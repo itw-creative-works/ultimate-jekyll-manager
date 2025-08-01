@@ -28,6 +28,9 @@ function setupHandlers(webManager) {
 function setupHelpers(webManager) {
   // Add development helper functions
 
+  // Globalize the webManager
+  window.webManager = webManager;
+
   // Log opening tags of common HTML elements
   window.logOpeningTags = function (detail) {
     const tags = ['html', 'body', 'nav', 'main', 'footer'];

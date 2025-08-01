@@ -151,8 +151,14 @@ member:
 ```
 
 ### Special Class
-`uj-language-dropdown`
+`uj-signin-btn`: Automatically handles signin (just add `data-provider="google.com"` to the button)
+`uj-signup-btn`: Automatically handles signup (just add `data-provider="google.com"` to the button)
+
+`uj-language-dropdown`:
 `uj-language-dropdown-item`
+
+### Special Query Parameters
+* `authReturnUrl`: Redirects to this URL after authentication.
 
 ### Icons
 * Fontawesome

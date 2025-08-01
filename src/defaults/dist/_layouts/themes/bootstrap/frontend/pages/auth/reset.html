@@ -4,15 +4,15 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
 ---
 
 <div class="d-flex justify-content-center align-items-center flex-column">
-  <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+  <div class="col-12 col-md-8 col-lg-6 col-xl-5">
     <div class="card border-0 shadow-lg bg-body-tertiary">
       <div class="card-body p-5">
         <!-- Logo -->
         <div class="text-center mb-4">
-              <a href="{{ site.url }}">
-                <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
-              </a>
-            </div>
+          <a href="{{ site.url }}">
+            <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
+          </a>
+        </div>
 
         <!-- Icon -->
         {% comment %}
@@ -32,8 +32,10 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
         <!-- Reset Form -->
         <form>
           <div class="mb-4 text-start">
-            <label for="email" class="form-label fw-semibold">Email Address</label>
-            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email address" required>
+            <label for="email" class="form-label fw-semibold">
+              Email <span class="text-danger">*</span>
+            </label>
+            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email address" autofocus required>
           </div>
 
           <button type="submit" class="btn btn-success btn-lg w-100 mb-4">

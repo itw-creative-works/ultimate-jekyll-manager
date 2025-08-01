@@ -28,7 +28,7 @@ export default (Manager, options) => {
       // Redirect
       setTimeout(function () {
         window.location.href = url.toString();
-      }, 300);
+      }, 1);
     }
 
     // Report to Google Analytics
