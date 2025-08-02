@@ -8,7 +8,7 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
     <div class="card border-0 shadow-lg bg-body-tertiary">
       <div class="card-body p-5">
         <!-- Logo -->
-        <div class="text-center mb-4">
+        <div class="text-center mb-2">
           <a href="{{ site.url }}">
             <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
           </a>
@@ -30,12 +30,12 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
             </div>
 
         <!-- Reset Form -->
-        <form>
+        <form autocomplete="on">
           <div class="mb-4 text-start">
             <label for="email" class="form-label fw-semibold">
               Email <span class="text-danger">*</span>
             </label>
-            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email address" autofocus required>
+            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email address" autocomplete="email" autofocus required>
           </div>
 
           <button type="submit" class="btn btn-success btn-lg w-100 mb-4">

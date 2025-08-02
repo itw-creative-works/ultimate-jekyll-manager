@@ -1,5 +1,6 @@
 // Libraries
 let webManager = null;
+let formManager = null;
 
 // Import modules
 import { state } from './modules/state.js';
@@ -8,73 +9,72 @@ import { initializeRecaptcha } from './modules/recaptcha.js';
 import {
   updateAllUI,
   handleBillingCycleChange,
-  switchPaymentMethod,
   showError,
   hidePreloader
 } from './modules/ui.js';
 import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount.js';
-import { validateForm } from './modules/validation.js';
 import { paymentManager } from './processors/index.js';
-import { collectFormData, validateFormData } from './modules/form.js';
+import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 
+// Variables
 const recaptchaSiteKey = '6LdxsmAnAAAAACbft_UmKZXJV_KTEiuG-7tfgJJ5';
 
-// Update available payment methods UI
-function updateAvailablePaymentMethods() {
-  const availableMethods = paymentManager.getAvailablePaymentMethods();
-
-  // For now, let's allow all payment methods during development
-  // The error handling in completePurchase will deal with unavailable processors
-  console.log('Available payment methods:' );
-  availableMethods.forEach(method => {
-    console.log(`- ${method.name} (${method.processor})`);
+// Setup event listeners using FormManager
+function setupEventListeners() {
+  // Initialize FormManager
+  formManager = new FormManager('#checkout-form', {
+    autoDisable: true, // Enable automatic form disabling during submission
+    showSpinner: true,
+    allowMultipleSubmit: false, // Prevent multiple submissions
+    errorContainer: '.form-error-message', // Use class to support multiple containers
+    submitButtonLoadingText: 'Processing payment...'
   });
 
-  // Enable all payment method buttons for testing
-  document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
-    radio.disabled = false;
-    const methodLabel = document.querySelector(`label[for="${radio.id}"]`);
-    if (methodLabel) {
-      methodLabel.style.opacity = '1';
-      methodLabel.style.cursor = 'pointer';
+  // Listen for form field changes
+  formManager.addEventListener('change', (event) => {
+    const { fieldName, fieldValue } = event.detail;
+
+    // Handle billing cycle changes
+    if (fieldName === 'billing-cycle') {
+      handleBillingCycleChange(fieldValue);
     }
   });
-}
 
-// Setup event listeners
-function setupEventListeners() {
-  // Payment method selection
-  document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      if (!this.disabled) {
-        state.paymentMethod = this.value;
-        switchPaymentMethod(this.value);
-      }
-    });
-  });
+  // Handle non-submit button clicks
+  formManager.addEventListener('button', (event) => {
+    const { action } = event.detail;
 
-  // Billing cycle change
-  document.querySelectorAll('input[name="billing-cycle"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      handleBillingCycleChange(this.value);
-    });
-  });
-
-  // Discount code
-  document.getElementById('apply-discount').addEventListener('click', applyDiscountCode);
-  document.getElementById('discount-code').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
+    if (action === 'apply-discount') {
       applyDiscountCode();
     }
   });
 
-  // Note: Card form inputs removed since we use Stripe Checkout redirect
+  // Handle form submission
+  formManager.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-  // Complete purchase
-  document.getElementById('complete-purchase').addEventListener('click', completePurchase);
+    // Get the submit button that was clicked
+    const submitButton = event.detail.submitButton;
+    if (!submitButton) {
+      formManager.showError('Please choose a payment method.');
+      return;
+    }
 
-  // Switch account
+    // Check if a payment method was selected
+    const paymentMethod = submitButton.getAttribute('data-payment-method');
+    if (!paymentMethod) {
+      formManager.showError('Invalid payment method selected.');
+      return;
+    }
+
+    // Set payment method in state
+    state.paymentMethod = paymentMethod === 'stripe' ? 'card' : paymentMethod;
+
+    // Process the payment
+    await completePurchase();
+  });
+
+  // Switch account link (keep as is - not part of form)
   const switchAccountLink = document.getElementById('switch-account');
   if (switchAccountLink) {
     const currentUrl = encodeURIComponent(window.location.href);
@@ -84,28 +84,18 @@ function setupEventListeners() {
 
 // Complete purchase
 async function completePurchase() {
-  if (!validateForm(webManager)) {
-    return;
-  }
-
-  const btn = document.getElementById('complete-purchase');
-  const originalContent = btn.innerHTML;
-
-  // Show loading state
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-
   try {
-    // Collect all form data
-    const formData = collectFormData();
-    
-    // Validate form data
-    const validation = validateFormData(formData);
-    if (!validation.isValid) {
-      showError(validation.errors.join('<br>'));
-      btn.disabled = false;
-      btn.innerHTML = originalContent;
-      return;
+    // Get form data from FormManager
+    const formData = formManager.getData();
+
+    // Wait 1 second to simulate processing time
+    if (webManager.isDevelopment()) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // Add custom validation if needed
+    if (!state.paymentMethod) {
+      throw new Error('Please select a payment method');
     }
 
     // Log collected form data
@@ -158,17 +148,18 @@ async function completePurchase() {
 
   } catch (error) {
     console.error('Purchase error:', error);
-    btn.disabled = false;
-    btn.innerHTML = originalContent;
+
+    // FormManager will handle button state restoration
+    formManager.setFormState('ready');
 
     // Show user-friendly error message
     const errorMessage = error.message || 'There was an error processing your payment. Please try again.';
 
     // Check for specific error types
     if (error.message.includes('not configured') || error.message.includes('not available')) {
-      showError('This payment method is currently unavailable. Please try another payment method or contact support.');
+      formManager.showError('This payment method is currently unavailable. Please try another payment method or contact support.');
     } else {
-      showError(errorMessage);
+      formManager.showError(errorMessage);
     }
   }
 }
@@ -200,7 +191,7 @@ async function initializeCheckout() {
     const [productData, trialEligible, recaptchaInit] = await Promise.allSettled([
       fetchProductDetails(_test_appId, productId, webManager),
       fetchTrialEligibility(productId),
-      initializeRecaptcha(recaptchaSiteKey)
+      initializeRecaptcha(recaptchaSiteKey, webManager)
     ]);
 
     // Handle product fetch result
@@ -234,7 +225,14 @@ async function initializeCheckout() {
     if (state.apiKeys) {
       paymentManager.initialize(state.apiKeys, webManager);
     }
-    
+
+    // Log available payment methods
+    const availableMethods = paymentManager.getAvailablePaymentMethods();
+    console.log('Available payment methods:');
+    availableMethods.forEach(method => {
+      console.log(`- ${method.name} (${method.processor})`);
+    });
+
     // Log reCAPTCHA initialization result
     if (recaptchaInit.status === 'rejected') {
       console.warn('reCAPTCHA initialization failed:', recaptchaInit.reason);
@@ -245,21 +243,23 @@ async function initializeCheckout() {
     // Update UI with product details
     updateAllUI();
 
-    // Set up event listeners
+    // Set up event listeners and FormManager
     setupEventListeners();
+
+    // Set form to ready state
+    if (formManager) {
+      formManager.setFormState('ready');
+    }
 
     // Auto-apply welcome coupon
     autoApplyWelcomeCoupon();
-
-    // Hide/disable unavailable payment methods
-    updateAvailablePaymentMethods();
 
   } catch (error) {
     console.error('Checkout initialization failed:', error);
     showError(error.message || 'Failed to load checkout. Please refresh the page and try again.');
   } finally {
     // Hide preloader once everything is loaded (success or failure)
-    webManager.auth().listen({}, (state) => {
+    webManager.auth().listen({}, () => {
       hidePreloader();
     });
   }

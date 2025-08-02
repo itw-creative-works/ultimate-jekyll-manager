@@ -98,7 +98,7 @@ faqs:
               <p class="text-muted">Fill out the form below and we'll get back to you within 24 hours.</p>
             </div>
 
-            <form action="https://api.slapform.com/{{ site.brand.contact.slapform-form-id }}" class="slapform">
+            <form action="https://api.slapform.com/{{ site.brand.contact.slapform-form-id }}" class="slapform" autocomplete="on">
               <!-- Honeypot field -->
               <div class="form-group mb-3" style="display: none;">
                 <input type="email" class="form-control" id="slap_honey" name="slap_honey" placeholder="Enter email">
@@ -107,22 +107,22 @@ faqs:
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label for="first_name" class="form-label fw-semibold">First Name *</label>
-                  <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" required>
+                  <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" autocomplete="given-name" required>
                 </div>
                 <div class="col-md-6">
                   <label for="last_name" class="form-label fw-semibold">Last Name *</label>
-                  <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" required>
+                  <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" autocomplete="family-name" required>
                 </div>
               </div>
 
               <div class="mb-4">
                 <label for="slap_replyto" class="form-label fw-semibold">Email Address *</label>
-                <input type="email" class="form-control form-control-lg" id="slap_replyto" name="slap_replyto" required>
+                <input type="email" class="form-control form-control-lg" id="slap_replyto" name="slap_replyto" autocomplete="email" required>
               </div>
 
               <div class="mb-4">
                 <label for="company" class="form-label fw-semibold">Company</label>
-                <input type="text" class="form-control form-control-lg" id="company" name="company">
+                <input type="text" class="form-control form-control-lg" id="company" name="company" autocomplete="organization">
               </div>
 
               <div class="mb-4">

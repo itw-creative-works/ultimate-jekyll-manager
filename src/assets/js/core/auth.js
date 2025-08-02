@@ -3,6 +3,18 @@ module.exports = (Manager, options) => {
   // Shortcuts
   const { webManager } = Manager;
 
+  // Get auth policy
+  const config = webManager.config.auth.config;
+  const policy = config.policy;
+  const authenticated = config.redirects.authenticated;
+  const unauthenticated = config.redirects.unauthenticated;
+
+  // Log policy
+  console.log('Auth policy:', policy, {
+    authenticated,
+    unauthenticated
+  });
+
   // Setup Auth listener
   try {
     webManager.auth().listen({}, (state) => {
@@ -14,24 +26,12 @@ module.exports = (Manager, options) => {
       // Log
       console.log('Auth state changed:', state);
 
-      // Get auth policy
-      const config = webManager.config.auth.config;
-      const policy = config.policy;
-      const authenticated = config.redirects.authenticated;
-      const unauthenticated = config.redirects.unauthenticated;
-
       // If user is logged in and authReturnUrl is set, redirect to that URL
       // But skip if authSignout is present (user is being signed out)
       if (user && authReturnUrl && authSignout !== 'true') {
         console.log('Redirecting to authReturnUrl:', authReturnUrl);
         window.location.href = authReturnUrl;
       }
-
-      // Log manager page auth policy
-      console.log('Auth policy:', policy, {
-        authenticated,
-        unauthenticated
-      });
 
       // Update UI elements
       updateUIElements(state);

@@ -19,7 +19,7 @@ benefits:
     <div class="card border-0 shadow-lg bg-body-tertiary">
       <div class="card-body p-5">
         <!-- Logo -->
-        <div class="text-center mb-4">
+        <div class="text-center mb-2">
           <a href="{{ site.url }}">
             <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
           </a>
@@ -46,15 +46,15 @@ benefits:
         </div>
 
         <!-- Sign Up Form -->
-        <form>
+        <form autocomplete="on">
           <!-- <div class="row g-3 mb-3 text-start">
             <div class="col-md-6">
               <label for="firstName" class="form-label fw-semibold">First Name</label>
-              <input type="text" class="form-control form-control-md" id="firstName" placeholder="John" required>
+              <input type="text" class="form-control form-control-md" id="firstName" name="firstName" placeholder="John" autocomplete="given-name" required>
             </div>
             <div class="col-md-6">
               <label for="lastName" class="form-label fw-semibold">Last Name</label>
-              <input type="text" class="form-control form-control-md" id="lastName" placeholder="Doe" required>
+              <input type="text" class="form-control form-control-md" id="lastName" name="lastName" placeholder="Doe" autocomplete="family-name" required>
             </div>
           </div> -->
 
@@ -62,7 +62,7 @@ benefits:
             <label for="email" class="form-label fw-semibold">
               Email <span class="text-danger">*</span>
             </label>
-            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email" autofocus required>
+            <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email" autocomplete="email" autofocus required>
           </div>
 
           <div class="mb-3 text-start">
@@ -70,7 +70,7 @@ benefits:
               Password <span class="text-danger">*</span>
             </label>
             <div class="input-group">
-              <input type="password" class="form-control form-control-md" id="password" name="password" placeholder="Create a strong password" required>
+              <input type="password" class="form-control form-control-md" id="password" name="password" placeholder="Create a strong password" autocomplete="new-password" required>
               <button class="btn border uj-password-toggle" type="button" aria-label="Toggle password visibility">
                 <span class="uj-password-show">{% uj_icon "eye", "fa-fw" %}</span>
                 <span class="uj-password-hide d-none">{% uj_icon "eye-slash", "fa-fw" %}</span>

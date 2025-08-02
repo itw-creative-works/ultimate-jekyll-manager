@@ -13,8 +13,8 @@ export function updateAllUI() {
     document.getElementById('subscription-toggle').classList.remove('d-none');
 
     // Update prices in toggle buttons
-    document.getElementById('monthly-price-lg').textContent = `$${state.product.price_monthly}.00`;
-    document.getElementById('annually-price-lg').textContent = `$${state.product.price_annually}.00`;
+    document.getElementById('monthly-price-lg').textContent = `$${state.product.price_monthly.toFixed(2)}`;
+    document.getElementById('annually-price-lg').textContent = `$${state.product.price_annually.toFixed(2)}`;
 
     // Calculate and update savings percentage
     const monthlyAnnual = state.product.price_monthly * 12;
@@ -52,12 +52,34 @@ export function updateAllUI() {
     // Update trial badge based on current state
     updateTrialBadge();
 
-    // Update complete purchase button text based on trial
-    const purchaseBtn = document.getElementById('complete-purchase');
+    // Get payment button elements once
+    const $stripeBtn = document.getElementById('pay-with-stripe');
+    const $paypalBtn = document.getElementById('pay-with-paypal');
+    const $applePayBtn = document.getElementById('pay-with-apple-pay');
+    const $googlePayBtn = document.getElementById('pay-with-google-pay');
+    const $cryptoBtn = document.getElementById('pay-with-crypto');
+
+    // Get button text spans (PayPal uses logo, so no text span)
+    const $stripeBtnText = $stripeBtn?.querySelector('span.fw-semibold');
+    const $applePayBtnText = $applePayBtn?.querySelector('span.fw-semibold');
+    const $googlePayBtnText = $googlePayBtn?.querySelector('span.fw-semibold');
+    const $cryptoBtnText = $cryptoBtn?.querySelector('span.fw-semibold');
+
+    // Update payment button text based on trial
     if (state.hasFreeTrial) {
-      purchaseBtn.textContent = 'Start Free Trial';
+      // Update all payment buttons for free trial (keeping logic for future customization)
+      if ($stripeBtnText) $stripeBtnText.textContent = 'Credit/Debit Card';
+      // PayPal uses logo - no text to update
+      if ($applePayBtnText) $applePayBtnText.textContent = 'Apple Pay';
+      if ($googlePayBtnText) $googlePayBtnText.textContent = 'Google Pay';
+      if ($cryptoBtnText) $cryptoBtnText.textContent = 'Crypto';
     } else {
-      purchaseBtn.textContent = 'Complete Purchase';
+      // Reset to normal payment text
+      if ($stripeBtnText) $stripeBtnText.textContent = 'Credit/Debit Card';
+      // PayPal uses logo - no text to update
+      if ($applePayBtnText) $applePayBtnText.textContent = 'Apple Pay';
+      if ($googlePayBtnText) $googlePayBtnText.textContent = 'Google Pay';
+      if ($cryptoBtnText) $cryptoBtnText.textContent = 'Crypto';
     }
 
     // Update subscription terms
@@ -67,7 +89,7 @@ export function updateAllUI() {
     calculatePrices();
   } else {
     // One-time purchase
-    document.getElementById('product-price').textContent = `$${state.product.price}`;
+    document.getElementById('product-price').textContent = `$${state.product.price.toFixed(2)}`;
     calculatePrices();
   }
 }

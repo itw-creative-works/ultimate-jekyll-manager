@@ -62,7 +62,7 @@ test_product:
   </div>
 
   <!-- Main Checkout Form -->
-  <form id="checkout-form" novalidate>
+  <form id="checkout-form" autocomplete="on" novalidate>
     <!-- Content Row -->
     <div class="row">
       <!-- Left Column - Payment Form -->
@@ -70,7 +70,7 @@ test_product:
         <!-- Billing Cycle Selection -->
         <div class="card border-1 shadow-sm mb-4">
           <div class="card-body p-4">
-            <h3 class="h5 fw-bold mb-4">Billing Cycle</h3>
+            <h3 class="h5 fw-bold mb-3">Billing Cycle</h3>
 
             <!-- Subscription Toggle (hidden by default) -->
             <div id="subscription-toggle" class="d-none">
@@ -116,109 +116,93 @@ test_product:
         <!-- Customer Information Card -->
         <div class="card border-1 shadow-sm mb-4">
           <div class="card-body p-4">
-            <h3 class="h5 fw-bold mb-4">Customer Information</h3>
+            <h3 class="h5 fw-bold mb-3">Customer Information</h3>
 
-            <div class="text-start mb-3">
+            <div class="text-center">
               Managing order for <strong class="uj-auth-email"></strong>, <a href="#" id="switch-account">switch account</a>.
             </div>
 
             <!-- Customer form fields will go here when needed -->
             <div id="customer-fields" class="text-start">
               <!-- Future form fields like shipping address, VAT number, etc. -->
-              <!-- Example INPUT -->
-              <div class="mb-3">
+              <!-- <div class="mb-3">
                 <label for="customer-name" class="form-label fw-semibold">
                   Name <span class="text-danger">*</span>
                 </label>
-                <input type="text" class="form-control form-control-md" id="customer-name" name="customer_name" placeholder="Enter your full name" required>
-              </div>
+                <input type="text" class="form-control form-control-md" id="customer-name" name="customer_name" placeholder="Enter your full name" autocomplete="name" required>
+              </div> -->
             </div>
           </div>
         </div>
 
         <!-- Payment Method Card -->
-        <div class="card border-1 shadow-sm mb-4">
+        <div class="card border-1 shadow-sm mb-0">
           <div class="card-body p-4">
-            <h3 class="h5 fw-bold mb-4">Payment Method</h3>
+            <h3 class="h5 fw-bold mb-3">Payment Options</h3>
 
-            <!-- Payment Method Tabs -->
-            <div class="mb-4">
-              <div class="row g-2">
-                <div class="col-4">
-                  <input type="radio" class="btn-check" name="payment-method" id="method-card" value="card" checked>
-                  <label class="btn btn-outline-secondary w-100 py-2 border-2 fw-medium d-flex align-items-center justify-content-center" for="method-card">
-                    {% uj_icon "credit-card", "me-2" %}
-                    <span>Credit Card</span>
-                  </label>
-                </div>
-                <div class="col-4">
-                  <input type="radio" class="btn-check" name="payment-method" id="method-paypal" value="paypal">
-                  <label class="btn btn-outline-secondary w-100 py-2 border-2 fw-medium d-flex align-items-center justify-content-center" for="method-paypal">
-                    {% uj_icon "paypal", "me-2" %}
-                    <span>PayPal</span>
-                  </label>
-                </div>
-                <div class="col-4">
-                  <input type="radio" class="btn-check" name="payment-method" id="method-crypto" value="crypto">
-                  <label class="btn btn-outline-secondary w-100 py-2 border-2 fw-medium d-flex align-items-center justify-content-center" for="method-crypto">
-                    {% uj_icon "bitcoin", "me-2" %}
-                    <span>Crypto</span>
-                  </label>
-                </div>
-              </div>
-            </div>
+            <!-- Direct Payment Buttons -->
+            <div class="d-grid gap-3">
+              <!-- Stripe/Link Button -->
+              <button type="submit" class="btn btn-adaptive btn-lg py-3 d-flex align-items-center justify-content-center" id="pay-with-stripe" data-payment-method="stripe" data-action="pay-stripe">
+                {% uj_icon "cc-stripe", "me-2 fs-5" %}
+                <span class="fw-semibold">Credit/Debit</span>
+              </button>
 
-            <!-- Credit Card Form -->
-            <div id="payment-form-card" class="payment-form">
-              <div class="text-center py-4">
-                <div class="mb-3">
-                  {% uj_icon "credit-card", "fs-1 text-primary mb-3" %}
-                </div>
-                <h6 class="fw-semibold text-dark mb-2">Secure Stripe Checkout</h6>
-                <p class="text-muted mb-0">You will be redirected to Stripe's secure checkout page to enter your payment details safely.</p>
-              </div>
-            </div>
+              <!-- PayPal Button -->
+              <button type="submit" class="btn btn-paypal btn-lg py-3 d-flex align-items-center justify-content-center" id="pay-with-paypal" data-payment-method="paypal" data-action="pay-paypal">
+                <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-200px.png"
+                     alt="PayPal"
+                     height="28"
+                     style="max-height: 28px;">
+              </button>
 
-            <!-- PayPal Form -->
-            <div id="payment-form-paypal" class="payment-form d-none">
-              <div class="text-center py-5">
-                <img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_200x51.png" alt="PayPal" class="mb-3" height="50">
-                <p class="text-muted">You will be redirected to PayPal to complete your purchase securely.</p>
-              </div>
-            </div>
+              <!-- Apple Pay Button (shown conditionally) -->
+              <button type="submit" class="btn btn-dark btn-lg py-3 d-flex align-items-center justify-content-center d-none" id="pay-with-apple-pay" data-payment-method="apple-pay" data-action="pay-apple-pay">
+                {% uj_icon "apple", "me-2 fs-5" %}
+                <span class="fw-semibold">Apple Pay</span>
+              </button>
 
-            <!-- Crypto Form -->
-            <div id="payment-form-crypto" class="payment-form d-none">
-              <div class="mb-3">
-                <label class="form-label">Select Cryptocurrency</label>
-                <select class="form-select" id="cryptoSelect">
-                  <option value="btc">Bitcoin (BTC)</option>
-                  <option value="eth">Ethereum (ETH)</option>
-                  <option value="usdt">Tether (USDT)</option>
-                  <option value="usdc">USD Coin (USDC)</option>
-                </select>
+              <!-- Google Pay Button (shown conditionally) -->
+              <button type="submit" class="btn btn-outline-dark btn-lg py-3 d-flex align-items-center justify-content-center d-none" id="pay-with-google-pay" data-payment-method="google-pay" data-action="pay-google-pay">
+                <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg"
+                     alt="Google Pay"
+                     height="24"
+                     class="me-2">
+                <span class="fw-semibold">Google Pay</span>
+              </button>
+
+              <!-- Crypto Button -->
+              <button type="submit" class="btn btn-outline-adaptive btn-lg py-3 d-flex align-items-center justify-content-center" id="pay-with-crypto" data-payment-method="crypto" data-action="pay-crypto">
+                {% uj_icon "bitcoin", "me-2 fs-5" %}
+                <span class="fw-semibold">Crypto</span>
+              </button>
+
+              <!-- Divider -->
+              <!-- <div class="d-flex align-items-center my-2">
+                <hr class="flex-grow-1">
+                <span class="text-muted small px-3">or pay with cryptocurrency</span>
+                <hr class="flex-grow-1">
+              </div> -->
+
+              <!-- Form Error Message -->
+              <div class="form-error-message alert alert-danger mb-0 d-none" role="alert">
+                <!-- Error message will be inserted here -->
               </div>
-              <div class="alert alert-info">
-                <small>After placing your order, you'll receive the wallet address and payment instructions.</small>
-              </div>
+
+              <p class="text-muted small text-center mb-0">
+                By purchasing, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>
+              </p>
             </div>
           </div>
         </div>
 
-        <!-- Terms and Submit -->
-        <div class="mb-4">
-          <p class="text-muted small text-center mb-3">
-            By purchasing, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>
-          </p>
-
-          <button type="button" class="btn btn-primary btn-lg w-100 py-3 fs-5 fw-semibold" id="complete-purchase">
-            Complete Purchase
-          </button>
-
-          <p class="text-center text-muted small mt-3 mb-0">
-            {% uj_icon "lock", "me-1" %}
-            Your payment information is secure and encrypted
-          </p>
+        <!-- Security badges -->
+        <div class="text-center mt-2">
+          <div class="d-flex justify-content-center align-items-center gap-3 small text-muted">
+            <span>{% uj_icon "shield-check", "text-success" %} Secure Checkout</span>
+            <span>{% uj_icon "lock", "text-success" %} SSL Encrypted</span>
+            <span>{% uj_icon "check-circle", "text-success" %} Money-back guarantee</span>
+          </div>
         </div>
       </div>
 
@@ -227,7 +211,7 @@ test_product:
         <div class="order-summary-sticky">
           <div class="card border-1 shadow-sm">
             <div class="card-body p-4">
-              <h3 class="h5 fw-bold mb-4">Order Summary</h3>
+              <h3 class="h5 fw-bold mb-3">Order Summary</h3>
 
               <!-- Product Item -->
               <div class="order-item mb-4">
@@ -254,8 +238,8 @@ test_product:
               <!-- Discount Code -->
               <div class="mb-4">
                 <div class="input-group">
-                  <input type="text" class="form-control rounded-start-3 border py-2 px-3 text-start" id="discount-code" placeholder="Discount code">
-                  <button class="btn btn-adaptive rounded-end-3 border px-4" type="button" id="apply-discount">Apply</button>
+                  <input type="text" class="form-control rounded-start-3 border py-2 px-3 text-start" id="discount-code" name="discount-code" placeholder="Discount code" autocomplete="off">
+                  <button class="btn btn-adaptive rounded-end-3 border px-4" type="button" id="apply-discount" data-action="apply-discount">Apply</button>
                 </div>
 
                 <!-- Discount Messages -->
@@ -311,10 +295,10 @@ test_product:
 
           <!-- Trust Badges -->
           <div class="text-center mt-2">
-            <div class="d-flex justify-content-center align-items-center gap-3 text-muted small opacity-75">
-              <span>{% uj_icon "shield-check", "me-1" %} Secure</span>
-              <span>{% uj_icon "lock", "me-1" %} Encrypted</span>
-              <span>{% uj_icon "award", "me-1" %} Guaranteed</span>
+            <div class="d-flex justify-content-center align-items-center gap-3 text-muted">
+              <a href="javascript:;" class="text-decoration-none btn-link">
+                {% uj_icon "messages-question", "text-primary" %} Need help? Contact us!
+              </a>
             </div>
           </div>
         </div>

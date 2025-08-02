@@ -3,7 +3,7 @@ let recaptchaReady = false;
 let recaptchaSiteKey = null;
 
 // Initialize reCAPTCHA
-export async function initializeRecaptcha(siteKey) {
+export async function initializeRecaptcha(siteKey, webManager) {
   if (!siteKey) {
     console.warn('No reCAPTCHA site key provided');
     return false;
@@ -17,29 +17,41 @@ export async function initializeRecaptcha(siteKey) {
     return true;
   }
 
-  // Load reCAPTCHA script
-  return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => {
-      // Wait for grecaptcha to be ready
-      grecaptcha.ready(() => {
-        recaptchaReady = true;
-        console.log('🔐 reCAPTCHA initialized successfully');
-        resolve(true);
-      });
-    };
-    
-    script.onerror = () => {
-      console.error('Failed to load reCAPTCHA');
-      resolve(false);
-    };
-    
-    document.head.appendChild(script);
-  });
+  try {
+    // Use webManager.dom().loadScript()
+    const scriptUrl = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+
+    await webManager.dom().loadScript({
+      src: scriptUrl,
+      async: true,
+      defer: true,
+      timeout: 30000, // 30 second timeout
+      retries: 2 // Retry twice on failure
+    });
+
+    // Wait for grecaptcha to be ready
+    await new Promise((resolve) => {
+      if (window.grecaptcha && window.grecaptcha.ready) {
+        window.grecaptcha.ready(() => {
+          recaptchaReady = true;
+          console.log('🔐 reCAPTCHA initialized successfully');
+          resolve();
+        });
+      } else {
+        // Fallback timeout if grecaptcha.ready is not available
+        console.warn('grecaptcha.ready not available, using timeout fallback');
+        setTimeout(() => {
+          recaptchaReady = true;
+          resolve();
+        }, 1000);
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to load reCAPTCHA:', error);
+    return false;
+  }
 }
 
 // Get reCAPTCHA token

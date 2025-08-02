@@ -66,7 +66,7 @@ Manager.prototype.initialize = function () {
             modules[0] = { tag: 'main', default: mod && mod.default };
           })
           .catch((e) => {
-            if (e.message && e.message.includes('Cannot find module')) {
+            if (isNotFound(e, pageModulePath)) {
               console.warn(`Page module #main not found (${pageModulePathFull})`);
             } else {
               console.error(`Page module #main error (${pageModulePathFull})`, e);
@@ -79,7 +79,7 @@ Manager.prototype.initialize = function () {
             modules[1] = { tag: 'project', default: mod && mod.default };
           })
           .catch((e) => {
-            if (e.message && e.message.includes('Cannot find module')) {
+            if (isNotFound(e, pageModulePath)) {
               console.warn(`Project module #project not found (${pageModulePathFull})`);
             } else {
               console.error(`Project module #project error (${pageModulePathFull})`, e);
@@ -115,6 +115,10 @@ Manager.prototype.initialize = function () {
     });
   });
 };
+
+function isNotFound(e, filename) {
+  return e.code === 'MODULE_NOT_FOUND' && e.message.includes(filename);
+}
 
 // Export
 module.exports = Manager;

@@ -11,6 +11,9 @@ module.exports = (Manager, options) => {
     // Check for authSignout parameter first
     await handleAuthSignout(webManager);
 
+    // Check for redirect result from OAuth providers
+    await handleRedirectResult();
+
     // Update auth return URL in all auth-related links
     updateAuthReturnUrl();
 
@@ -23,6 +26,37 @@ module.exports = (Manager, options) => {
     // Setup password visibility toggle
     setupPasswordToggle();
   });
+}
+
+async function handleRedirectResult() {
+  try {
+    // Import Firebase auth functions
+    const { getAuth, getRedirectResult } = await import('web-manager/node_modules/firebase/auth');
+    const auth = getAuth();
+
+    // Check for redirect result
+    const result = await getRedirectResult(auth);
+
+    if (result && result.user) {
+      console.log('Successfully authenticated via redirect:', result.user.email);
+
+      // Handle successful authentication
+      await handleAuthSuccess(result.user);
+    }
+  } catch (error) {
+    console.error('Error handling redirect result:', error);
+
+    // Handle specific OAuth errors
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      showError('An account already exists with the same email address but different sign-in credentials. Try signing in with a different provider.');
+    } else if (error.code === 'auth/popup-blocked') {
+      showError('Popup was blocked. Please allow popups for this site and try again.');
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      // User cancelled, no need to show error
+    } else if (error.code) {
+      showError(`Authentication error: ${error.message}`);
+    }
+  }
 }
 
 async function handleAuthSignout(webManager) {
@@ -224,7 +258,7 @@ async function handleEmailSignup() {
       // Try to sign in with the same credentials
       try {
         const userCredential = await attemptEmailSignIn(email, password);
-        
+
         // If sign in succeeds, handle it as a successful auth
         await handleAuthSuccess(userCredential.user);
         return; // Exit early to prevent throwing the error
@@ -426,24 +460,24 @@ function showLoading(show) {
 
 function setupPasswordToggle() {
   const $toggleButtons = document.querySelectorAll('.uj-password-toggle');
-  
+
   $toggleButtons.forEach($button => {
     $button.addEventListener('click', () => {
       // Find the password input in the same input group
       const $inputGroup = $button.closest('.input-group');
       const $passwordInput = $inputGroup.querySelector('input');
-      
+
       if (!$passwordInput) return;
-      
+
       // Toggle the input type
       const currentType = $passwordInput.type;
       const newType = currentType === 'password' ? 'text' : 'password';
       $passwordInput.type = newType;
-      
+
       // Toggle icon visibility
       const $showIcon = $button.querySelector('.uj-password-show');
       const $hideIcon = $button.querySelector('.uj-password-hide');
-      
+
       if ($showIcon && $hideIcon) {
         if (newType === 'text') {
           $showIcon.classList.add('d-none');

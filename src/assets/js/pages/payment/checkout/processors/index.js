@@ -56,11 +56,13 @@ export class PaymentProcessorManager {
       if (forcedProcessor && this.processors[forcedProcessor]) {
         processorName = forcedProcessor;
       } else {
-        // If Chargebee is available, use it for card payments
-        if (this.apiKeys?.chargebee?.siteKey && this.processors.chargebee) {
+        // Prefer Stripe if available, otherwise fall back to Chargebee
+        if (this.apiKeys?.stripe?.publishableKey && this.processors.stripe) {
+          processorName = 'stripe';
+        } else if (this.apiKeys?.chargebee?.siteKey && this.processors.chargebee) {
           processorName = 'chargebee';
         } else {
-          processorName = 'stripe';
+          processorName = 'stripe'; // Default fallback
         }
       }
     } else {
@@ -111,7 +113,13 @@ export class PaymentProcessorManager {
         return forcedProcessor;
       }
 
-      return this.apiKeys?.chargebee?.siteKey && this.processors.chargebee ? 'chargebee' : 'stripe';
+      // Prefer Stripe if available
+      if (this.apiKeys?.stripe?.publishableKey && this.processors.stripe) {
+        return 'stripe';
+      } else if (this.apiKeys?.chargebee?.siteKey && this.processors.chargebee) {
+        return 'chargebee';
+      }
+      return 'stripe'; // Default fallback
     }
 
     const processorMap = {
@@ -146,9 +154,14 @@ export class PaymentProcessorManager {
       if (forcedProcessor && this.processors[forcedProcessor]) {
         cardProcessor = forcedProcessor;
       } else {
-        cardProcessor = this.apiKeys?.chargebee?.siteKey && this.processors.chargebee
-          ? 'chargebee'
-          : 'stripe';
+        // Prefer Stripe if available
+        if (this.apiKeys?.stripe?.publishableKey && this.processors.stripe) {
+          cardProcessor = 'stripe';
+        } else if (this.apiKeys?.chargebee?.siteKey && this.processors.chargebee) {
+          cardProcessor = 'chargebee';
+        } else {
+          cardProcessor = 'stripe'; // Default fallback
+        }
       }
 
       methods.push({ id: 'card', name: 'Credit Card', processor: cardProcessor });
