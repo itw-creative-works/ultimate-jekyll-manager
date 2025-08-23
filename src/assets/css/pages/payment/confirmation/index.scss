@@ -50,31 +50,3 @@
   }
 }
 
-// Confetti animation fallback message
-.confetti-fallback {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 9999;
-
-  &.celebrate {
-    animation: celebrate 1s ease-out;
-  }
-}
-
-@keyframes celebrate {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}

@@ -111,11 +111,11 @@ web_manager:
     config:
       timeout: 1000 * 60 * 60 * 4
       handler: null
-      title: "Want 50% off your gift?"
-      message: "There are some gifts on sale today for as much as 50% off. Click the button below to claim your discount!"
+      title: "Want 15% off?"
+      message: "Get 15% off your purchase of our Premium plans."
       okButton:
-        text: "Claim 50% Discount"
-        link: "https://giftly.app"
+        text: "Claim 15% Discount"
+        link: "/pricing"
   pushNotifications:
     enabled: true
     config:
@@ -215,7 +215,7 @@ icons:
 permalink: /blog/:title
 pagination:
   enabled: true
-  per_pages: 6
+  per_page: 6
   offset: 0
   limit: 0
   permalink: /page/:num.html

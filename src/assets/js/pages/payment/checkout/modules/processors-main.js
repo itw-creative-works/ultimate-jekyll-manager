@@ -1,8 +1,9 @@
 // Payment processor factory/manager
-import { StripeProcessor } from './stripe/index.js';
-import { PayPalProcessor } from './paypal/index.js';
-import { ChargebeeProcessor } from './chargebee/index.js';
-import { state } from '../modules/state.js';
+import { StripeProcessor } from './processors/stripe.js';
+import { PayPalProcessor } from './processors/paypal.js';
+import { ChargebeeProcessor } from './processors/chargebee.js';
+import { CoinbaseProcessor } from './processors/coinbase.js';
+import { state } from './state.js';
 
 export class PaymentProcessorManager {
   constructor() {
@@ -29,21 +30,12 @@ export class PaymentProcessorManager {
       );
     }
 
-    // Crypto/Coinbase - assume available if crypto payment is configured
-    // Since Coinbase doesn't use public keys, we check for a flag or assume it's enabled
-    if (apiKeys?.crypto?.enabled === true) {
-      // Enable crypto by default or if explicitly enabled
-      this.processors.crypto = {
-        // Placeholder processor for crypto
-        processPayment: async () => {
-          // This will be handled differently - likely redirect to Coinbase Commerce
-          throw new Error('Crypto payment processing not yet implemented');
-        }
-      };
+    if (apiKeys?.coinbase?.enabled === true) {
+      this.processors.coinbase = new CoinbaseProcessor(webManager);
     }
   }
 
-  // Get processor by payment method
+  // Get processor by payment method - returns { processor, name }
   getProcessor(paymentMethod) {
     let processorName;
 
@@ -69,7 +61,7 @@ export class PaymentProcessorManager {
       // Map other payment methods to processors
       const processorMap = {
         'paypal': 'paypal',
-        'crypto': 'crypto' // To be implemented
+        'crypto': 'coinbase' // Crypto payments processed by Coinbase Commerce
       };
       processorName = processorMap[paymentMethod];
     }
@@ -80,14 +72,13 @@ export class PaymentProcessorManager {
       throw new Error(`Payment processor "${processorName}" not available or not configured`);
     }
 
-    return processor;
+    return { processor, name: processorName };
   }
 
   // Process payment with selected method
   async processPayment(paymentMethod) {
     try {
-      const processor = this.getProcessor(paymentMethod);
-      const processorName = this.getProcessorName(paymentMethod);
+      const { processor, name: processorName } = this.getProcessor(paymentMethod);
 
       console.log('🔄 Processing payment:', {
         paymentMethod,
@@ -103,38 +94,11 @@ export class PaymentProcessorManager {
     }
   }
 
-  // Helper to get processor name for logging
-  getProcessorName(paymentMethod) {
-    if (paymentMethod === 'card') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const forcedProcessor = urlParams.get('_test_cardProcessor');
-
-      if (forcedProcessor && this.processors[forcedProcessor]) {
-        return forcedProcessor;
-      }
-
-      // Prefer Stripe if available
-      if (this.apiKeys?.stripe?.publishableKey && this.processors.stripe) {
-        return 'stripe';
-      } else if (this.apiKeys?.chargebee?.siteKey && this.processors.chargebee) {
-        return 'chargebee';
-      }
-      return 'stripe'; // Default fallback
-    }
-
-    const processorMap = {
-      'paypal': 'paypal',
-      'crypto': 'crypto'
-    };
-
-    return processorMap[paymentMethod] || 'unknown';
-  }
-
   // Check if a payment method is available
   isPaymentMethodAvailable(paymentMethod) {
     try {
-      this.getProcessor(paymentMethod);
-      return true;
+      const { processor } = this.getProcessor(paymentMethod);
+      return !!processor;
     } catch {
       return false;
     }
@@ -146,34 +110,21 @@ export class PaymentProcessorManager {
 
     // Card payment - check which processor will be used
     if (this.processors.chargebee || this.processors.stripe) {
-      // Check for _test_cardProcessor override
-      const urlParams = new URLSearchParams(window.location.search);
-      const forcedProcessor = urlParams.get('_test_cardProcessor');
-
-      let cardProcessor;
-      if (forcedProcessor && this.processors[forcedProcessor]) {
-        cardProcessor = forcedProcessor;
-      } else {
-        // Prefer Stripe if available
-        if (this.apiKeys?.stripe?.publishableKey && this.processors.stripe) {
-          cardProcessor = 'stripe';
-        } else if (this.apiKeys?.chargebee?.siteKey && this.processors.chargebee) {
-          cardProcessor = 'chargebee';
-        } else {
-          cardProcessor = 'stripe'; // Default fallback
-        }
+      try {
+        const { name: cardProcessor } = this.getProcessor('card');
+        methods.push({ id: 'card', name: 'Credit Card', processor: cardProcessor });
+      } catch {
+        // Card processor not available
       }
-
-      methods.push({ id: 'card', name: 'Credit Card', processor: cardProcessor });
     }
 
     if (this.processors.paypal) {
       methods.push({ id: 'paypal', name: 'PayPal', processor: 'paypal' });
     }
 
-    // Crypto can be added later
-    if (this.processors.crypto) {
-      methods.push({ id: 'crypto', name: 'Crypto', processor: 'crypto' });
+    // Coinbase Commerce for crypto payments
+    if (this.processors.coinbase) {
+      methods.push({ id: 'crypto', name: 'Crypto', processor: 'coinbase' });
     }
 
     return methods;

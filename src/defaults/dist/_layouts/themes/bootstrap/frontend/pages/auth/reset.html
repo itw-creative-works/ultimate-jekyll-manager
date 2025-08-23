@@ -29,8 +29,14 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
               <p class="text-muted">Enter your email address and we'll send you a link to reset your password.</p>
             </div>
 
+        <!-- Error Container -->
+        <div class="alert alert-danger auth-error-alert mb-3 d-none" role="alert"></div>
+
+        <!-- Success Container -->
+        <div class="alert alert-success auth-success-alert mb-3 d-none" role="alert"></div>
+
         <!-- Reset Form -->
-        <form autocomplete="on">
+        <form id="reset-form" autocomplete="on" novalidate>
           <div class="mb-4 text-start">
             <label for="email" class="form-label fw-semibold">
               Email <span class="text-danger">*</span>
@@ -38,9 +44,9 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
             <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email address" autocomplete="email" autofocus required>
           </div>
 
-          <button type="submit" class="btn btn-success btn-lg w-100 mb-4">
+          <button type="submit" class="btn btn-success btn-lg w-100 mb-4" data-provider="email" disabled>
             {% uj_icon "paper-plane", "me-2" %}
-            Send Reset Link
+            <span class="button-text">Send Reset Link</span>
           </button>
         </form>
 

@@ -3,63 +3,94 @@
 layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### PRICING PAGE ###
+# Top-level configuration for price per unit calculation
+price_per_unit:
+  enabled: true
+  feature_id: "credits"  # Which feature to calculate price per unit for
+  label: "credit"  # What to call the unit (e.g., "credit", "user", "GB")
+
 plans:
-  - name: Plus
-    tagline: "best for stock video"
-    price: 28
-    price_per_credit: 2.8
-    billed_yearly: 336
-    credits: 10
+  - id: "basic"
+    name: Basic
+    tagline: "best for getting started"
+    url: "/download"  # URL for free plan signup
+    pricing:
+      monthly: 0
+      annually: 0
     features:
-      - text: "10 Credits"
+      - id: "credits"
+        name: "Credits"
+        value: 1
         icon: "sparkles"
-      - text: "Unlimited exports"
+      - id: "exports"
+        name: "Exports"
+        value: "Watermarked"
         icon: "download"
 
-  - name: Max
-    tagline: "best for stock video"
-    price: 50
-    price_per_credit: 1.3
-    billed_yearly: 600
-    credits: 40
+  - id: "starter"
+    name: Starter
+    tagline: "best for individuals"
+    pricing:
+      monthly: 28
+      annually: 276  # Total annual price (~20% off monthly)
     features:
-      - text: "40 Credits"
+      - id: "credits"
+        name: "Credits"
+        value: 10
         icon: "sparkles"
-      - text: "Unlimited exports"
+      - id: "exports"
+        name: "Exports"
+        value: "Unlimited"
         icon: "download"
+      - id: "api_access"
+        name: "API Access"
+        value: "Full"
+        icon: "code"
+      - id: "priority_support"
+        name: "Priority Support"
+        value: "24/7"
+        icon: "headset"
 
-  - name: Generative
-    tagline: "best for ads and films"
-    price: 100
-    price_per_credit: 1
-    billed_yearly: 1200
-    credits: 100
+  - id: "pro"
+    name: Pro
+    tagline: "best for small businesses"
     popular: true
+    pricing:
+      monthly: 50
+      annually: 504  # Total annual price (~16% off monthly)
     features:
-      - text: "100 Credits"
+      - id: "credits"
+        name: "Credits"
+        value: 40
         icon: "sparkles"
-      - text: "Unlimited exports"
+      - id: "exports"
+        name: "Exports"
+        value: "Unlimited"
         icon: "download"
 
-  - name: Team
-    tagline: "best for teams"
-    price: 899
-    price_per_credit: 0.9
-    billed_yearly: 10788
-    credits: 1000
+  - id: "max"
+    name: Max
+    tagline: "best for growing businesses"
+    pricing:
+      monthly: 100
+      annually: 960  # Total annual price (20% off monthly)
     features:
-      - text: "1000 Credits"
+      - id: "credits"
+        name: "Credits"
+        value: 100
         icon: "sparkles"
-      - text: "Unlimited exports"
+      - id: "exports"
+        name: "Exports"
+        value: "Unlimited"
         icon: "download"
-      - text: "1000 Credits"
-        icon: "sparkles"
-      - text: "Unlimited exports"
-        icon: "download"
-      - text: "1000 Credits"
-        icon: "sparkles"
-      - text: "Unlimited exports"
-        icon: "download"
+      - id: "team_collaboration"
+        name: "Team Collaboration"
+        value: "Included"
+        icon: "users"
+      - id: "custom_branding"
+        name: "Custom Branding"
+        value: "Available"
+        icon: "palette"
 
 testimonials:
   - initial: "j"
@@ -101,99 +132,205 @@ faqs:
     <div class="row justify-content-center">
       <div class="col-12">
         <div class="text-center mb-5">
-          <h1 class="display-4 fw-bold mb-5">
+          <h1 class="display-3 fw-bold mb-5">
             The right plans, <span class="gradient-text">for the right price</span>
           </h1>
 
           <div class="btn-group" role="group" aria-label="Billing toggle">
-            <input type="radio" class="btn-check" name="billing" id="monthly" autocomplete="off" checked data-billing="monthly">
+            <input type="radio" class="btn-check" name="billing" id="monthly" autocomplete="off" data-billing="monthly">
             <label class="btn btn-outline-adaptive rounded-start-pill" for="monthly">Monthly</label>
 
-            <input type="radio" class="btn-check" name="billing" id="yearly" autocomplete="off" data-billing="yearly">
-            <label class="btn btn-outline-adaptive rounded-end-pill position-relative" for="yearly">
-              Yearly
+            <input type="radio" class="btn-check" name="billing" id="annually" autocomplete="off" checked data-billing="annually">
+            <label class="btn btn-outline-adaptive rounded-end-pill position-relative" for="annually">
+              Annually
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                upto 20% off
+                up to 20% off
                 <span class="visually-hidden">discount</span>
               </span>
             </label>
           </div>
         </div>
 
-        <div class="row row-cols-1 {% if layout.plans.size == 4 %}row-cols-lg-2 row-cols-xl-4{% else %}row-cols-lg-{{ layout.plans.size }}{% endif %} g-4 mb-5">
-          {% for plan in layout.plans %}
-          <div class="col">
-            <div class="card h-100 {% if plan.popular %}border-primary border-3{% else %}border{% endif %} position-relative">
-              {% if plan.popular %}
-              <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2">
-                Most Popular
-              </span>
-              {% endif %}
+        {% assign plan_count = page.resolved.plans | size %}
 
-              <div class="card-body p-0">
-                <div class="row g-0 h-100">
-                  <div class="col-12 col-sm-6 col-lg-12 p-4">
-                    <div class="mb-4">
-                      <h3 class="card-title h2 fw-bold mb-1">{{ plan.name }}</h3>
-                      <p class="text-muted small mb-0">{{ plan.tagline }}</p>
+        <!-- Determine column classes based on number of plans -->
+        {% if plan_count == 1 %}
+          {% assign col_classes = "col-12 col-md-8 col-lg-6 col-xl-5" %}
+        {% elsif plan_count == 2 %}
+          {% assign col_classes = "col-12 col-md-6 col-lg-5 col-xl-5" %}
+        {% elsif plan_count == 3 %}
+          {% assign col_classes = "col-12 col-md-6 col-lg-6 col-xl-4" %}
+        {% elsif plan_count == 4 %}
+          {% assign col_classes = "col-12 col-md-6 col-lg-6 col-xl-3" %}
+        {% elsif plan_count == 5 %}
+          {% assign col_classes = "col-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2" %}
+        {% else %}
+          <!-- Fallback for 6+ plans -->
+          {% assign col_classes = "col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2" %}
+        {% endif %}
+
+        <div class="row g-4 mb-5 justify-content-center">
+          {% for plan in page.resolved.plans %}
+            <div class="{{ col_classes }}">
+              <div class="card h-100 {% if plan.popular %}border-primary border-3{% else %}border{% endif %} position-relative">
+                {% if plan.popular %}
+                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2">
+                  Most Popular
+                </span>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                  <div>
+                    <!-- Header -->
+                    <h3 class="card-title h2 fw-bold mb-1">{{ plan.name }}</h3>
+                    <p class="text-muted small mb-3">{{ plan.tagline }}</p>
+
+                    <!-- Price -->
+                    {% if plan.pricing.monthly == 0 %}
+                      <p class="display-5 fw-bold mb-0">Free</p>
+                    {% else %}
+                      <p class="mb-0">
+                        <span class="display-5 fw-bold">
+                          <span class="fs-3">$</span><span class="amount" data-monthly="{{ plan.pricing.monthly }}" data-annually="{{ plan.pricing.annually | divided_by: 12 | round }}">{{ plan.pricing.annually | divided_by: 12 | round }}</span>
+                        </span>
+                        <small class="text-muted">/month</small>
+                      </p>
+                    {% endif %}
+
+                    <!-- Price per unit or placeholder text -->
+                    {% if page.resolved.price_per_unit.enabled %}
+                      {% if plan.pricing.monthly > 0 %}
+                        {% for feature in plan.features %}
+                          {% if feature.id == page.resolved.price_per_unit.feature_id %}
+                            {% assign monthly_price_per_unit = plan.pricing.monthly | times: 1.0 | divided_by: feature.value | round: 2 %}
+                            {% assign annual_monthly_price = plan.pricing.annually | divided_by: 12.0 %}
+                            {% assign annual_price_per_unit = annual_monthly_price | divided_by: feature.value | round: 2 %}
+                            <p class="text-muted small mb-4">
+                              <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.price_per_unit.label }}
+                            </p>
+                          {% endif %}
+                        {% endfor %}
+                      {% else %}
+                        <!-- Placeholder text for free plan to maintain consistent height -->
+                        <p class="text-muted small mb-4">Perfect for trying out</p>
+                      {% endif %}
+                    {% endif %}
+
+                    <!-- Button -->
+                    <div class="d-grid mb-3">
+                      {% if plan.id == "basic" %}
+                        <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-lg fw-semibold">
+                          Get Started Free
+                        </a>
+                      {% else %}
+                        <button class="btn btn-primary btn-lg fw-semibold" data-plan-id="{{ plan.id }}">
+                          Try {{ plan.name }} for 14 days
+                        </button>
+                      {% endif %}
                     </div>
 
-                    <div class="mb-2">
-                      <span class="display-4 fw-bold">
-                        <span class="fs-3">$</span><span class="amount" data-monthly="{{ plan.price }}" data-yearly="{{ plan.billed_yearly | divided_by: 12 | round }}">{{ plan.price }}</span>
-                      </span>
-                      <span class="text-muted">/month</span>
-                    </div>
-                    <p class="text-muted small mb-4">${{ plan.price_per_credit }} per credit</p>
-
-                    <button class="btn btn-primary btn-lg fw-semibold mb-3 w-100">
-                      Get {{ plan.name }}
-                    </button>
-
-                    <p class="text-center text-muted small mb-4 mb-sm-0">
-                      <span class="billing-info" data-monthly="Billed ${{ plan.price }} monthly" data-yearly="Billed ${{ plan.billed_yearly }} yearly">
-                        Billed ${{ plan.price }} monthly
-                      </span>
+                    <!-- Billing info -->
+                    <p class="text-center text-muted small mb-3">
+                      {% if plan.pricing.monthly == 0 %}
+                        <span>No credit card required</span>
+                      {% else %}
+                        <span class="billing-info" data-monthly="Billed ${{ plan.pricing.monthly }} monthly" data-annually="Billed ${{ plan.pricing.annually }} annually">
+                          Billed ${{ plan.pricing.annually }} annually
+                        </span>
+                      {% endif %}
                     </p>
-                  </div>
 
-                  <div class="col-12 col-sm-6 col-lg-12 bg-body-tertiary p-4">
-                    <ul class="list-unstyled mb-0">
-                      {% for feature in plan.features %}
-                      <li class="d-flex align-items-center mb-3">
-                        {% uj_icon feature.icon, "fa-md me-3" %}
-                        <span>{{ feature.text }}</span>
-                      </li>
-                      {% endfor %}
-                    </ul>
+                    <hr>
+
+                    <!-- Features -->
+                    <div>
+                      <!-- Common features that vary by plan -->
+                      <ul class="list-unstyled mb-3">
+                        {% assign common_features = "credits,exports,video_mins" | split: "," %}
+                        {% for feature in plan.features %}
+                          {% if common_features contains feature.id %}
+                            <li class="d-flex align-items-start mb-2">
+                              <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
+                              <span>
+                                {% if feature.value == "Unlimited" %}
+                                  Unlimited {{ feature.name }}
+                                {% else %}
+                                  {{ feature.value }} {{ feature.name }}
+                                {% endif %}
+                              </span>
+                            </li>
+                          {% endif %}
+                        {% endfor %}
+                      </ul>
+
+                      <!-- Show "Everything in previous plan" for non-Basic plans -->
+                      {% if forloop.index > 1 %}
+                        <!-- Check if there are additional features -->
+                        {% assign has_additional = false %}
+                        {% for feature in plan.features %}
+                          {% unless common_features contains feature.id %}
+                            {% assign has_additional = true %}
+                            {% break %}
+                          {% endunless %}
+                        {% endfor %}
+
+                        <div class="text-muted small mb-2">
+                          <em>Everything in</em>
+                          <em>
+                            <strong>
+                              {%- if forloop.index == 1 -%}Free{%- endif -%}
+                              {%- if forloop.index == 2 -%}Basic{%- endif -%}
+                              {%- if forloop.index == 3 -%}Starter{%- endif -%}
+                              {%- if forloop.index == 4 -%}Pro{%- endif -%}
+                              {%- if forloop.index == 5 -%}Max{% endif -%}
+                            </strong>
+                            {%- if has_additional -%}, plus:{%- endif -%}
+                          </em>
+                        </div>
+
+                        <!-- Additional/unique features if they exist -->
+                        {% if has_additional %}
+                          <ul class="list-unstyled mb-0">
+                            {% for feature in plan.features %}
+                              {% unless common_features contains feature.id %}
+                                <li class="d-flex align-items-start mb-2 {% if forloop.last %}mb-0{% endif %}">
+                                  <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
+                                  <span>
+                                    {% if feature.value == "24/7" %}
+                                      {{ feature.value }} {{ feature.name }}
+                                    {% elsif feature.value == "Included" or feature.value == "Available" or feature.value == "Full" %}
+                                      {{ feature.name }}
+                                    {% else %}
+                                      {{ feature.value }} {{ feature.name }}
+                                    {% endif %}
+                                  </span>
+                                </li>
+                              {% endunless %}
+                            {% endfor %}
+                          </ul>
+                        {% endif %}
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
           {% endfor %}
         </div>
 
-        <div class="row g-4 mt-3">
-          <div class="col-md-6">
-            <div class="card bg-body-tertiary border-0 h-100">
-              <div class="card-body p-4">
-                <h2 class="h3 fw-bold mb-3">Free</h2>
-                <p class="display-6 fw-bold mb-3">$0</p>
-                <p class="mb-3">10 Video mins and 1 AI credit per week, 1 Express avatar, 4 Exports per week with invideo watermark.</p>
-                <p class="text-muted mb-4">No access to generative features.</p>
-                <button class="btn btn-adaptive btn-lg">Try for free</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="card bg-body-tertiary border-0 h-100">
-              <div class="card-body p-4">
-                <h2 class="h3 fw-bold mb-3">Enterprise</h2>
-                <p class="display-6 fw-bold mb-3">Custom</p>
+        <div class="row g-4 mt-3 justify-content-center">
+          <div class="col-12 col-md-8 col-lg-6">
+            <div class="card bg-body-tertiary border-0">
+              <div class="card-body p-4 text-center">
+                <h3 class="h2 fw-bold mb-3">Enterprise</h3>
+                <h4 class="text-muted mb-4">Custom pricing</h4>
                 <p class="mb-4">Custom solutions for large organizations. Advanced security and flexible pricing based on your needs.</p>
-                <button class="btn btn-primary btn-lg">Contact us</button>
+                <button class="btn btn-primary btn-lg" data-plan-id="enterprise">
+                  {% uj_icon "envelope", "fa-lg me-2" %}
+                  <span class="button-text">
+                    Contact us
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -296,16 +433,16 @@ faqs:
       <h2 class="display-5 fw-bold mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
     </div>
 
-    {% if layout.testimonials %}
+    {% if page.resolved.testimonials %}
     <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-indicators">
-        {% for testimonial in layout.testimonials %}
+        {% for testimonial in page.resolved.testimonials %}
         <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
         {% endfor %}
       </div>
 
       <div class="carousel-inner">
-        {% for testimonial in layout.testimonials %}
+        {% for testimonial in page.resolved.testimonials %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
           <div class="row justify-content-center">
             <div class="col-md-8">
@@ -353,9 +490,9 @@ faqs:
           </h2>
         </div>
 
-        {% if layout.faqs %}
+        {% if page.resolved.faqs %}
         <div class="accordion" id="faqAccordion">
-          {% for faq in layout.faqs %}
+          {% for faq in page.resolved.faqs %}
           <div class="accordion-item border-0 mb-3">
             <h2 class="accordion-header">
               <button class="accordion-button bg-body-tertiary collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">

@@ -8,6 +8,7 @@ meta:
   description: "This privacy policy has been compiled to better serve those who are concerned with how their personal information is being used online."
   breadcrumb: "Privacy Policy"
 
+### WEB MANAGER CONFIG ###
 web_manager:
   exitPopup:
     enabled: false
@@ -69,7 +70,7 @@ In the event of a change of control, if we sell or otherwise transfer part or th
 
 ### Your Choices About Your Information:
 Your account information and profile privacy settings can be updated or changed by visiting your account profile at [{{ site.url }}/account]({{ site.url }}/account) or by contacting {{ brand }} directly at [{{ site.url }}/contact]({{ site.url }}/contact).
-- You may request to have your account deleted by visiting your account profile at [{{ site.url }}/account]({{ site.url }}/account#deleteAccount).
+- You may request to have your account deleted by visiting your account profile at [{{ site.url }}/account]({{ site.url }}/account#delete).
 - You may request to unsubscribe from emails by clicking the "unsubscribe" link inside the email.
 
 ## Children’s Privacy:
@@ -79,7 +80,7 @@ When it comes to the collection of personal information from children under 13, 
 By opting in to receive SMS communications from {{ brand }}, you agree to receive marketing text messages, such as promotions and cart reminders, from us. Consent to receive marketing text messages is not a condition of any purchase. Message and data rates may apply, and the frequency of messages may vary. You may unsubscribe from receiving SMS messages at any time by replying “STOP” to any message or by clicking the unsubscribe link provided in our communications. For more information about our privacy practices, please refer to this Privacy Policy or our [Terms of Service]({{ site.url }}/terms/).
 
 ## Request Your Data to Be Removed or Deleted
-If you would like your personally identifiable information to be deleted from our database, you can request deletion here: [{{ site.url }}/account]({{ site.url }}/account#deleteAccount).
+If you would like your personally identifiable information to be deleted from our database, you can request deletion here: [{{ site.url }}/account]({{ site.url }}/account#delete).
 
 ## Acceptance of This Policy
 Use of our site signifies your acceptance of this policy. If you do not accept the policy then please do not use this site. When registering, we will further request your explicit acceptance of the privacy policy.

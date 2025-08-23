@@ -31,22 +31,24 @@ benefits:
           <p class="text-muted">Get started with {{ site.brand.name }} in seconds</p>
         </div>
 
-        <!-- Social Signup (Optional) -->
-        <div class="mb-4">
-          <button class="btn btn-adaptive w-100 mb-3 d-flex align-items-center justify-content-center uj-signup-btn" data-provider="google.com">
-            {% uj_icon "google", "fa-lg me-2" %}
-            Sign up with Google
-          </button>
-        </div>
-
-        <!-- Divider -->
-        <div class="position-relative mb-4">
-          <hr class="text-muted">
-          <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small bg-body-tertiary">OR</span>
-        </div>
+        <!-- Error Container -->
+        <div class="alert alert-danger auth-error-alert mb-3 d-none" role="alert"></div>
 
         <!-- Sign Up Form -->
-        <form autocomplete="on">
+        <form id="signup-form" autocomplete="on" novalidate>
+          <!-- Social Signup (Optional) -->
+          <div class="mb-4">
+            <button type="submit" class="btn btn-adaptive w-100 mb-3 d-flex align-items-center justify-content-center" data-provider="google.com" disabled>
+              {% uj_icon "google", "fa-lg me-2" %}
+              <span class="button-text">Sign up with Google</span>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="position-relative mb-4">
+            <hr class="text-muted">
+            <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small bg-body-tertiary">OR</span>
+          </div>
           <!-- <div class="row g-3 mb-3 text-start">
             <div class="col-md-6">
               <label for="firstName" class="form-label fw-semibold">First Name</label>
@@ -85,9 +87,9 @@ benefits:
             </p>
           </div>
 
-          <button type="submit" class="btn btn-success btn-lg w-100 mb-3 uj-signup-btn" data-provider="email">
+          <button type="submit" class="btn btn-success btn-lg w-100 mb-3" data-provider="email" disabled>
             {% uj_icon "user-plus", "me-2" %}
-            Create Account
+            <span class="button-text">Create Account</span>
           </button>
         </form>
 

@@ -18,7 +18,7 @@ theme:
 {% endunless %}
 
 <!-- Main Content -->
-<main class="container flex-fill {{ page.resolved.theme.main.class }} py-5">
+<main class="container flex-fill {{ page.resolved.theme.main.class | liquify }} py-5">
   {{ content | uj_content_format }}
 </main>
 

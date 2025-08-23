@@ -8,6 +8,7 @@ meta:
   description: "By accessing and using our products and services, you agree to comply with the Terms of Use listed here."
   breadcrumb: "Terms of Service"
 
+### WEB MANAGER CONFIG ###
 web_manager:
   exitPopup:
     enabled: false
@@ -69,9 +70,9 @@ It is understood that:
 8. You may not use {{ brand }} for commercial purposes or for the purpose of resale or redistribution, whether or not you charge a fee, unless you have written permission from {{ brand }}.
 9. In using the {{ brand }} application or the {{ brand }} website, you understand that you may be required to view advertisements, view sponsored content, and/or interact, either manually or automatically, with online content including but not limited to other {{ brand }} users and/or their promoted content.
 10. You agree to use {{ brand }} at your own risk and understand that anything that happens to your account(s) you may have with third-party sites and services, including but not limited to the termination, suspension, or limiting of the account before, during, or after your use of {{ brand }}, is not the responsibility of {{ brand }}.
-11. You agree to read and accept the terms of our [Privacy Policy]({{ site.url }}/privacy/).
+11. You agree to read and accept the terms of our [Privacy Policy]({{ site.url }}/privacy).
 12. In compliance with the GDPR, you agree and understand that we only collect data that we deem necessary to offer our services and that you have full right to deletion of the data if requested. You agree that any information you provide is freely given and that you are informed of your choice about providing this data. You agree to provide an unambiguous indication signifying the agreement to the collection and processing of personal data related to you.
-13. You agree that {{ brand }} may collect, use, and disclose your personal data which you have provided in this form, for providing marketing material that you have agreed to receive, in accordance with our [Privacy Policy]({{ site.url }}/privacy/).
+13. You agree that {{ brand }} may collect, use, and disclose your personal data which you have provided in this form, for providing marketing material that you have agreed to receive, in accordance with our [Privacy Policy]({{ site.url }}/privacy).
 14. By using {{ brand }}, you agree to opt in to the tracking of usage data both on the website and in the application for the safety and betterment of our service.
 15. You agree that after {{ brand }} is installed on your computer, it may automatically update itself by installing new and/or revised files relevant to the application.
 16. The sharing of {{ brand }} accounts is strictly prohibited. {{ brand }} accounts with multiple simultaneous logins will be suspended or banned at our discretion.

@@ -1,56 +1,72 @@
 // Libraries
 // ...
 
+/* Test URL
+  https://localhost:3000/payment/confirmation?order_id=ORD-TRIAL-123&product_id=pro&product_name=Pro%20Plan&amount=0&currency=USD&frequency=annually&payment_method=stripe&trial=true&track=true
+*/
+
 // Module
 export default (Manager, options) => {
   return new Promise(async function (resolve, reject) {
     // Shortcuts
     const { webManager } = Manager;
 
-    // Load order data from sessionStorage
+    // Load order data from URL parameters
     function loadOrderData() {
-      const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // Parse order data from URL
+      const orderData = {
+        orderId: urlParams.get('order_id') || urlParams.get('transaction_id'),
+        productId: urlParams.get('product_id') || urlParams.get('product'),
+        productName: urlParams.get('product_name'),
+        total: parseFloat(urlParams.get('amount') || urlParams.get('total') || 0),
+        currency: urlParams.get('currency') || 'USD',
+        billingCycle: urlParams.get('frequency') || urlParams.get('billing_cycle'),
+        paymentMethod: urlParams.get('payment_method'),
+        hasFreeTrial: urlParams.get('trial') === 'true',
+        email: urlParams.get('email')
+      };
 
       // DOM elements
-      const orderNumber = document.getElementById('order-number');
-      const productName = document.getElementById('product-name');
-      const totalPaid = document.getElementById('total-paid');
-      const subscriptionInfo = document.getElementById('subscription-info');
-      const billingInfo = document.getElementById('billing-info');
+      const $orderNumber = document.getElementById('order-number');
+      const $productName = document.getElementById('product-name');
+      const $totalPaid = document.getElementById('total-paid');
+      const $subscriptionInfo = document.getElementById('subscription-info');
+      const $billingInfo = document.getElementById('billing-info');
 
       if (orderData.orderId) {
         // Populate order details
-        orderNumber.textContent = orderData.orderId;
-        productName.textContent = orderData.product || 'Product';
-        totalPaid.textContent = `$${(orderData.total || 0).toFixed(2)}`;
+        if ($orderNumber) $orderNumber.textContent = orderData.orderId;
+        if ($productName) $productName.textContent = orderData.productName || orderData.productId || 'Product';
+        if ($totalPaid) $totalPaid.textContent = `$${orderData.total.toFixed(2)}`;
 
         // Handle subscription information
-        if (orderData.billingCycle) {
-          subscriptionInfo.classList.remove('d-none');
+        if (orderData.billingCycle && $subscriptionInfo) {
+          $subscriptionInfo.classList.remove('d-none');
 
-          if (orderData.hasFreeTrial) {
-            billingInfo.innerHTML = `
-              <strong>Free Trial Active!</strong> Your trial period has begun.
-              You'll be charged ${orderData.billingCycle === 'monthly' ? 'monthly' : 'yearly'} after the trial ends.
-            `;
-          } else {
-            billingInfo.innerHTML = `
-              Your ${orderData.billingCycle} subscription is now active.
-              You'll be charged automatically each ${orderData.billingCycle === 'monthly' ? 'month' : 'year'}.
-            `;
+          if ($billingInfo) {
+            if (orderData.hasFreeTrial) {
+              $billingInfo.innerHTML = `
+                <strong>Free Trial Active!</strong> Your trial period has begun.
+                You'll be charged ${orderData.billingCycle === 'monthly' ? 'monthly' : 'annually'} after the trial ends.
+              `;
+            } else {
+              $billingInfo.innerHTML = `
+                Your ${orderData.billingCycle} subscription is now active.
+                You'll be charged automatically each ${orderData.billingCycle === 'monthly' ? 'month' : 'year'}.
+              `;
+            }
           }
         }
 
-        // Track analytics
-        trackPurchaseSuccess(orderData);
-
-        // Clear order data after displaying
-        sessionStorage.removeItem('orderData');
+        // Track analytics only if not already tracked
+        trackPurchaseIfNotTracked(orderData);
       } else {
-        // Fallback for direct page access
-        orderNumber.textContent = generateOrderNumber();
-        productName.textContent = 'Your Purchase';
-        totalPaid.textContent = '$0.00';
+        // Fallback for direct page access without params
+        if ($orderNumber) $orderNumber.textContent = generateOrderNumber();
+        if ($productName) $productName.textContent = 'Your Purchase';
+        if ($totalPaid) $totalPaid.textContent = '$0.00';
       }
     }
 
@@ -62,83 +78,131 @@ export default (Manager, options) => {
     }
 
     // Trigger celebration animation
-    function triggerCelebration() {
-      // Check if confetti library is available
-      if (typeof window.confetti !== 'undefined') {
+    async function triggerCelebration() {
+      try {
+        // Load confetti library using webManager
+        await webManager.dom().loadScript({
+          src: 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js'
+        });
+
+        // Fire confetti
         window.confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
           colors: ['#5b6fff', '#8b5cf6', '#22d3ee', '#34d399', '#fb923c']
         });
-      } else {
-        // Fallback celebration
-        showFallbackCelebration();
+
+        // Optional: Fire from multiple angles for more celebration
+        setTimeout(() => {
+          window.confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#5b6fff', '#8b5cf6', '#22d3ee']
+          });
+        }, 250);
+
+        setTimeout(() => {
+          window.confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#34d399', '#fb923c', '#5b6fff']
+          });
+        }, 400);
+
+      } catch (error) {
+        console.log('Confetti library failed to load:', error);
       }
     }
 
-    // Fallback celebration if confetti is not available
-    function showFallbackCelebration() {
-      const celebration = document.createElement('div');
-      celebration.className = 'confetti-fallback';
-      celebration.innerHTML = '🎉';
-      celebration.style.fontSize = '5rem';
-      celebration.style.position = 'fixed';
-      celebration.style.top = '50%';
-      celebration.style.left = '50%';
-      celebration.style.transform = 'translate(-50%, -50%)';
-      celebration.style.pointerEvents = 'none';
-      celebration.style.zIndex = '9999';
+    // Track purchase only if not already tracked for this order
+    function trackPurchaseIfNotTracked(orderData) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const shouldTrack = urlParams.get('track') === 'true';
 
-      document.body.appendChild(celebration);
+      // Only track if the track parameter is present and true
+      if (!shouldTrack) {
+        console.log('Tracking parameter not present or false, skipping tracking');
+        return;
+      }
 
-      // Trigger animation
-      setTimeout(() => {
-        celebration.classList.add('celebrate');
-      }, 10);
+      // Track the purchase
+      trackPurchase(orderData);
 
-      // Remove after animation
-      setTimeout(() => {
-        celebration.remove();
-      }, 1000);
+      // Remove only the 'track' parameter from URL to prevent re-tracking on refresh
+      urlParams.delete('track');
+      const newUrl = urlParams.toString()
+        ? `${window.location.pathname}?${urlParams.toString()}`
+        : window.location.pathname;
+
+      window.history.replaceState({}, document.title, newUrl);
+      console.log('Removed track parameter from URL to prevent duplicate tracking');
+
+      // Also store in localStorage as backup (in case user navigates back with track=true)
+      const trackedOrders = JSON.parse(localStorage.getItem('trackedPurchases') || '[]');
+      if (!trackedOrders.includes(orderData.orderId)) {
+        trackedOrders.push(orderData.orderId);
+
+        // Keep only last 50 orders
+        if (trackedOrders.length > 50) {
+          trackedOrders.shift();
+        }
+
+        localStorage.setItem('trackedPurchases', JSON.stringify(trackedOrders));
+      }
     }
 
-    // Track purchase success
-    function trackPurchaseSuccess(orderData) {
+    // Track purchase event to all analytics providers
+    function trackPurchase(orderData) {
+      // Prepare items array for consistent tracking
+      const items = [{
+        item_id: orderData.productId,
+        item_name: orderData.productName || orderData.productId,
+        item_category: orderData.billingCycle ? 'subscription' : 'one-time',
+        item_variant: orderData.billingCycle,
+        price: orderData.total,
+        quantity: 1
+      }];
+
       // Google Analytics 4
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'purchase', {
-          transaction_id: orderData.orderId,
-          value: orderData.total,
-          currency: 'USD',
-          items: [{
-            item_name: orderData.product,
-            price: orderData.total,
-            quantity: 1
-          }]
-        });
-      }
+      gtag('event', 'purchase', {
+        transaction_id: orderData.orderId,
+        value: orderData.total,
+        currency: orderData.currency,
+        items: items
+      });
 
       // Facebook Pixel
-      if (typeof fbq !== 'undefined') {
-        fbq('track', 'Purchase', {
-          value: orderData.total,
-          currency: 'USD',
-          content_ids: [orderData.orderId],
-          content_type: 'product'
-        });
-      }
+      fbq('track', 'Purchase', {
+        content_ids: [orderData.productId],
+        content_name: orderData.productName || orderData.productId,
+        content_type: 'product',
+        currency: orderData.currency,
+        value: orderData.total,
+        num_items: 1
+      });
 
-      // WebManager analytics
-      if (webManager && webManager.analytics) {
-        webManager.analytics.track('Order Confirmed', {
-          orderId: orderData.orderId,
-          product: orderData.product,
-          total: orderData.total,
-          billing_cycle: orderData.billingCycle,
-          payment_method: orderData.paymentMethod
-        });
-      }
+      // TikTok Pixel
+      ttq.track('CompletePayment', {
+        content_id: orderData.productId,
+        content_type: 'product',
+        content_name: orderData.productName || orderData.productId,
+        price: orderData.total,
+        quantity: 1,
+        currency: orderData.currency,
+        value: orderData.total
+      });
+
+      console.log('Tracked purchase event:', {
+        orderId: orderData.orderId,
+        productId: orderData.productId,
+        total: orderData.total,
+        currency: orderData.currency
+      });
     }
 
     // Initialize confirmation page

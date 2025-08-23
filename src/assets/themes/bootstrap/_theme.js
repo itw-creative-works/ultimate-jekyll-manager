@@ -1,5 +1,9 @@
 // Import the theme entry point
-import './js/index.umd.js';
+import bootstrap from './js/index.umd.js';
+
+// Make Bootstrap available globally
+window.bootstrap = bootstrap;
 
 // Add any custom code here
 // ...
+

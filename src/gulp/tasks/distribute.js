@@ -37,10 +37,16 @@ function distribute() {
     logger.log('Starting...');
 
     // Complete
-    return src(input, { base: 'src', dot: true })
+    return src(input, {
+      base: 'src',
+      dot: true,
+      encoding: false,
+      // ignore: ['**/assets/images/**/*.{jpg,jpeg,png,gif,svg,webp}'] // Images handled by imagemin
+      ignore: ['**/assets/images/**/*.{jpg,jpeg,png}'] // Images handled by imagemin
+    })
       .pipe(customTransform())
       .pipe(createTemplateTransform({site: config}))
-      .pipe(dest(output))
+      .pipe(dest(output, { encoding: false }))
       .on('finish', () => {
         // Log
         logger.log('Finished!');
@@ -65,17 +71,17 @@ function customTransform() {
     logger.log(`Processing file: ${relativePath}`);
 
     // Change path if it starts with 'pages/'
-    if (relativePath.startsWith('pages/')) {
-      // Remove 'pages/' prefix
-      const newRelativePath = relativePath.replace(/^pages\//, '');
+    // if (relativePath.startsWith('pages/')) {
+    //   // Remove 'pages/' prefix
+    //   const newRelativePath = relativePath.replace(/^pages\//, '');
 
-      // Update file path to remove pages directory
-      // This will make src/pages/index.html -> dist/index.html
-      file.path = path.join(file.base, newRelativePath);
+    //   // Update file path to remove pages directory
+    //   // This will make src/pages/index.html -> dist/index.html
+    //   file.path = path.join(file.base, newRelativePath);
 
-      // Log
-      logger.log(`  -> Moving from pages/ to root: ${newRelativePath}`);
-    }
+    //   // Log
+    //   logger.log(`  -> Moving from pages/ to root: ${newRelativePath}`);
+    // }
 
     // Push the file
     this.push(file);

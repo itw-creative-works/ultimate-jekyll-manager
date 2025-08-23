@@ -1,26 +1,31 @@
 // API calls for checkout
 import { config, state } from './state.js';
+import { getApiBaseUrl } from './constants.js';
+import fetch from 'wonderful-fetch';
 
 // Fetch product details
-export async function fetchProductDetails(_test_appId, productId, webManager) {
+export async function fetchProductDetails(appId, productId, webManager) {
   try {
-    // Fetch from actual API endpoint
-    const response = await fetch(`https://api.itwcreativeworks.com/get-app?id=${_test_appId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch site configuration');
-    }
+    // Get API base URL (uses dev server in development)
+    const apiBaseUrl = getApiBaseUrl(webManager, 'production');
 
-    const data = await response.json();
+    // Fetch from actual API endpoint
+    const response = await fetch(`${apiBaseUrl}/get-app`, {
+      response: 'json',
+      query: {
+        id: appId,
+      }
+    });
 
     // Log
-    console.log('Fetched site configuration:', data);
+    console.log('Fetched site configuration:', response);
 
     // Store site config and API keys
-    config.siteConfig = data;
-    state.apiKeys = data.apiKeys;
+    config.siteConfig = response;
+    state.apiKeys = response.apiKeys;
 
     // Extract product from the products object
-    const product = data.products[productId];
+    const product = response.products[productId];
     if (!product) {
       throw new Error(`Product ${productId} not found`);
     }
@@ -38,32 +43,54 @@ export async function fetchProductDetails(_test_appId, productId, webManager) {
       // Store the full product data for later use
       _raw: product
     };
-  } catch (error) {
-    console.error('Error fetching product details:', error);
-    throw error;
+  } catch (e) {
+    console.error('Error fetching product details:', e);
+    throw e;
   }
 }
 
 // Fetch trial eligibility from server
-export async function fetchTrialEligibility(productId) {
+export async function fetchTrialEligibility(appId, productId, webManager) {
   try {
-    // Simulate API call to check trial eligibility
-    // Replace with actual API endpoint
-    const response = await fetch(`/api/trial-eligibility?product=${productId}`, {
+    // Get API base URL (uses dev server in development)
+    const apiBaseUrl = getApiBaseUrl(webManager, 'development');
+
+    // API call to check trial eligibility
+    const response = await fetch(`${apiBaseUrl}/payment/trial-eligibility`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+      response: 'json',
+      query: {
+        app: appId,
+        product: productId
       }
     });
 
-    if (!response.ok) {
-      throw new Error('Trial eligibility check failed');
-    }
-
-    const data = await response.json();
-    return data.eligible || false;
-  } catch (error) {
-    console.warn('Trial eligibility check failed, assuming not eligible:', error);
+    return response.eligible || false;
+  } catch (e) {
+    console.warn('Trial eligibility check failed, assuming not eligible:', e);
     return false; // Default to not eligible if API fails
+  }
+}
+
+// Warmup server by making a lightweight request to payment intent API
+export async function warmupServer(webManager) {
+  try {
+    // Get payment intent endpoint
+    const apiBaseUrl = getApiBaseUrl(webManager, 'development');
+
+    // Fire and forget - no await needed
+    fetch(`${apiBaseUrl}/payment/intent`, {
+      method: 'GET',
+      query: {
+        wakeup: 'true'
+      }
+    }).catch(e => {
+      console.debug('Server warmup failed (non-critical):', e);
+    });
+
+    console.debug('Server warmup initiated');
+  } catch (e) {
+    // Fail silently - this is non-critical
+    console.debug('Server warmup error (non-critical):', e);
   }
 }

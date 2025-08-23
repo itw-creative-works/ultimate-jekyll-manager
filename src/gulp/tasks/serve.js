@@ -123,9 +123,9 @@ module.exports = async function serve(complete) {
           req.url = newURL;
         }
 
-        // Special case: Rewrite /blog/ to blog.html since Jekyll fucks it up locally
-        if (pathname === '/blog/') {
-          req.url = '/blog.html';
+        // Special case: Rewrite /blog to blog.html since Jekyll fucks it up locally (probably due to pagination)
+        if (pathname === '/blog') {
+          req.url = '/blog/index.html';
         }
 
         // Strip query parameters and hash fragments from the URL for file path lookup

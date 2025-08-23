@@ -1,7 +1,6 @@
-// Module
-export default (Manager, options) => {
-  // Shortcuts
-  const { webManager } = Manager;
+import authPages from '__main_assets__/js/libs/auth/pages.js';
 
-  require('__main_assets__/js/libs/auth/pages.js')(Manager, options);
+// Module
+export default (Manager) => {
+  authPages(Manager);
 }

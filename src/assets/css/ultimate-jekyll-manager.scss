@@ -2,7 +2,15 @@
 @use 'theme' as *;
 
 // Vendor styles
-@use 'vendor/cookieconsent' as *;
+// @use 'vendor/cookieconsent' as *;
+
+// Import libraries
+// Important to do these BEFORE defaults so the animations, etc can be overridden
+// @use 'core/chatsy' as *;
+@use 'core/cookieconsent' as *;
+@use 'core/lazy-loading' as *;
+@use 'core/social-sharing' as *;
+@use 'core/custom-font-awesome' as *;
 
 // Import default Ultimate Jekyll Manager styles
 @use 'core/initialize' as *;
@@ -10,10 +18,6 @@
 @use 'core/animations' as *;
 @use 'core/buttons' as *;
 @use 'core/alert' as *;
-@use 'core/chatsy' as *;
-
-// Import custom styles
-@use 'core/custom-font-awesome' as *;
 
 // @TODO: Remove this when done with custom theme
 @use 'core/temp-custom' as *;

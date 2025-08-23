@@ -71,6 +71,11 @@ const FILE_MAP = {
     },
   },
 
+  // Always overwrite team images
+  'src/assets/images/team/**/*': {
+    overwrite: true,
+  },
+
   // Files to skip
   '**/.DS_Store': {
     skip: true,
@@ -105,8 +110,7 @@ function defaults(complete) {
 
   // Complete
   // return src(input, { base: 'src' })
-  // src(input, { base: `${rootPathPackage}/dist/defaults` })
-  return src(input, { dot: true, })
+  return src(input, { base: `${rootPathPackage}/dist/defaults`, dot: true, encoding: false })  // Add base to preserve directory structure
     // .pipe(through2.obj(function (file, _, callback) {
     //   // Log each file being processed
     //   logger.log(`  - ${file.path}`);
@@ -114,7 +118,7 @@ function defaults(complete) {
     // }))
     .pipe(customTransform())
     .pipe(createTemplateTransform({site: config}))
-    .pipe(dest(output))
+    .pipe(dest(output, { encoding: false }))
     .on('finish', () => {
       // Log
       logger.log('Finished!');
@@ -139,6 +143,9 @@ function customTransform() {
 
     // Get relative path
     const relativePath = path.relative(file.base, file.path).replace(/\\/g, '/');
+    
+    // Check if this is a binary file BEFORE any processing
+    const isBinaryFile = /\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|otf|eot|pdf|zip|tar|gz|mp3|mp4|avi|mov)$/i.test(file.path);
 
     // Build item
     const item = {
@@ -148,7 +155,6 @@ function customTransform() {
     };
 
     const options = getFileOptions(relativePath);
-    const ogName = item.name;
 
     // Handle dynamic rename
     if (typeof options.name === 'function') {
@@ -193,8 +199,8 @@ function customTransform() {
     // logger.log(`  _TEST_TEMP: ${minimatch(relativePath, 'dist/__temp/**/*')}`);
     // logger.log(`  _TEST_DS: ${minimatch(relativePath, '.DS_Store')}`);
 
-    // Run template if required
-    if (options.template) {
+    // Run template if required (skip for binary files)
+    if (options.template && !isBinaryFile) {
       const contents = file.contents.toString();
       const templated = template(contents, options.template);
 

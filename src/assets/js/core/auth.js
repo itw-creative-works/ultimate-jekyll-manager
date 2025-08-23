@@ -1,3 +1,5 @@
+const fetch = require('wonderful-fetch');
+
 // Module
 module.exports = (Manager, options) => {
   // Shortcuts
@@ -15,9 +17,12 @@ module.exports = (Manager, options) => {
     unauthenticated
   });
 
+  // Track if we just signed out to avoid redirect loops
+  let justSignedOut = false;
+
   // Setup Auth listener
   try {
-    webManager.auth().listen({}, (state) => {
+    webManager.auth().listen({}, async (state) => {
       const user = state.user;
       const url = new URL(window.location.href);
       const authReturnUrl = url.searchParams.get('authReturnUrl');
@@ -26,31 +31,57 @@ module.exports = (Manager, options) => {
       // Log
       console.log('Auth state changed:', state);
 
-      // If user is logged in and authReturnUrl is set, redirect to that URL
-      // But skip if authSignout is present (user is being signed out)
-      if (user && authReturnUrl && authSignout !== 'true') {
-        console.log('Redirecting to authReturnUrl:', authReturnUrl);
-        window.location.href = authReturnUrl;
+      // Set user ID for analytics tracking
+      setAnalyticsUserId(user);
+
+      // Check if we're in the process of signing out
+      if (authSignout === 'true' && user) {
+        // Mark that we're about to sign out
+        justSignedOut = true;
+        return; // Let pages.js handle the signout
       }
 
-      // Update UI elements
-      updateUIElements(state);
+      // Handle authentication state changes and page policies
+      if (user) {
+        // User is authenticated
 
-      // Quit if policy is not set
-      if (!policy) {
-        return;
-      }
-
-      // If policy is authenticated, check if user is authenticated
-      if (policy === 'authenticated') {
-        if (!user) {
-          // User is not authenticated, redirect to login
-          redirect(unauthenticated);
+        // Check if this is a new user account (created in last 5 minutes) and send metadata
+        const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
+        const fiveMinutes = 5 * 60 * 1000;
+        /* @dev-only:start */
+        {
+          // Log account age for debugging
+          const ageInMinutes = Math.floor(accountAge / 1000 / 60);
+          console.log('Account age:', ageInMinutes, 'minutes');
         }
-      } else if (policy === 'unauthenticated') {
-        if (user) {
-          // User is authenticated, redirect to home
+        /* @dev-only:end */
+        if (accountAge < fiveMinutes) {
+          await sendUserSignupMetadata(user, webManager);
+        }
+
+        // Check if page requires user to be unauthenticated (e.g., signin page)
+        if (policy === 'unauthenticated') {
+          // Check for authReturnUrl first (takes precedence)
+          if (authReturnUrl) {
+            redirect(authReturnUrl);
+            return;
+          }
+
+          // Otherwise redirect to default authenticated destination
           redirect(authenticated);
+        }
+      } else {
+        // User is not authenticated
+
+        // If we just signed out and have authReturnUrl, stay on the page
+        if (justSignedOut && authReturnUrl) {
+          justSignedOut = false; // Reset flag
+          return; // Stay on current page to allow re-authentication
+        }
+
+        // Check if page requires authentication (e.g., account page)
+        if (policy === 'authenticated') {
+          redirect(unauthenticated, window.location.href);
         }
       }
     });
@@ -62,24 +93,115 @@ module.exports = (Manager, options) => {
 }
 
 // Redirect function
-function redirect(url) {
+function redirect(url, returnUrl) {
   if (!url) {
     return;
   }
 
   // Set the authReturnUrl to the current URL
   const newURL = new URL(url, window.location.origin);
-  newURL.searchParams.set('authReturnUrl', window.location.href);
+
+  // Attach return URL
+  if (returnUrl) {
+    newURL.searchParams.set('authReturnUrl', returnUrl);
+  }
+
+  // Log
+  console.log('Redirecting to:', newURL.href);
+
+  // Quit on testing
+  // return;
+
+  // Redirect to the new URL
   window.location.href = newURL;
 }
 
-function updateUIElements(state) {
-    const user = state.user;
+function setAnalyticsUserId(user) {
+  const userId = user?.uid;
+  const email = user?.email;
 
-    // Update email elements
-    const emailElements = document.querySelectorAll('.uj-auth-email');
-    emailElements.forEach(element => {
-        element.textContent = user?.email || '';
+  // Short-circuit if no user
+  if (!userId) {
+    // Clear user ID when logged out
+    gtag('set', { user_id: null });
+
+    // Facebook Pixel - Clear advanced matching
+    fbq('init', fbq.pixelId, {});
+
+    // TikTok Pixel - Clear user data
+    ttq.identify({});
+
+    // Return early
+    return;
+  }
+
+  // Google Analytics 4 - Set user ID and user properties
+  gtag('set', {
+    user_id: userId,
+    user_properties: {
+      email_domain: email ? email.split('@')[1] : undefined
+    }
+  });
+
+  // Facebook Pixel - Set advanced matching with user data
+  fbq('init', fbq.pixelId, {
+    external_id: userId,
+    em: email ? btoa(email.toLowerCase().trim()) : undefined
+  });
+
+  // TikTok Pixel - Identify user
+  ttq.identify({
+    external_id: userId,
+    email: email ? btoa(email.toLowerCase().trim()) : undefined
+  });
+}
+
+// Send user metadata to server (affiliate, UTM params, etc.)
+async function sendUserSignupMetadata(user, webManager) {
+  try {
+    // Get the auth token
+    const token = await webManager.auth().getIdToken();
+
+    // Get affiliate data from storage
+    const affiliateData = webManager.storage().get('marketing.affiliate', null);
+    const utmData = webManager.storage().get('marketing.utm', null);
+    const signupSent = webManager.storage().get('marketing.signupSent', false);
+
+    // Only proceed if we have some marketing data to send
+    if (signupSent) {
+      return;
+    }
+
+    // Build the payload
+    const payload = {
+      // @TODO: REMOVE ONCE LEGACY SERVER CODE IS GONE
+      affiliateCode: affiliateData?.code || '',
+
+      // New structure
+      affiliateData: affiliateData || {},
+      utmData: utmData || {},
+    };
+
+    // Get server API URL
+    const serverApiURL = webManager.getApiUrl() + '/backend-manager';
+
+    // Make API call to reset API key
+    const response = await fetch(serverApiURL, {
+      method: 'POST',
+      body: {
+        authenticationToken: token,
+        command: 'user:sign-up',
+        payload: payload
+      }
     });
 
+    // Log
+    console.log('User metadata sent successfully:', response);
+
+    // Mark signup as sent (keep the marketing data for reference)
+    webManager.storage().set('marketing.signupSent', true);
+  } catch (error) {
+    console.error('Error sending user metadata:', error);
+    // Don't throw - we don't want to block the signup flow
+  }
 }

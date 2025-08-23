@@ -12,6 +12,7 @@ meta:
   description: "This is a test Translation page for the Ultimate Jekyll Manager."
   breadcrumb: "Test Translation Page"
 
+### WEB MANAGER CONFIG ###
 web_manager:
   exitPopup:
     enabled: false

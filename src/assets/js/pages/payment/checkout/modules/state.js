@@ -17,7 +17,9 @@ export const state = {
   isSubscription: false,
   hasFreeTrial: false,
   paymentMethod: 'card',
-  apiKeys: null // Will store API keys from site config
+  apiKeys: null, // Will store API keys from site config
+  checkoutId: null, // Unique checkout session ID
+  formData: null // Form data collected from checkout form
 };
 
 // Get payment provider IDs for current billing cycle

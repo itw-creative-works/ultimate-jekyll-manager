@@ -55,7 +55,7 @@ testimonials:
           </p>
 
           <ul class="list-unstyled mb-4">
-            {% for feature in layout.features limit: 3 %}
+            {% for feature in page.resolved.features limit: 3 %}
             <li class="d-flex align-items-center mb-3">
               {% uj_icon "check-circle", "text-success fs-5 me-3" %}
               <span class="fs-6">{{ feature.title }}</span>
@@ -114,7 +114,7 @@ testimonials:
           </div>
 
           <!-- Floating Achievement Badge -->
-          <div class="position-absolute top-0 end-0 bg-white rounded-4 p-3 shadow-lg" style="transform: translate(20px, -20px);">
+          <div class="position-absolute top-0 end-0 bg-body-tertiary rounded-4 p-3 shadow-lg" style="transform: translate(20px, -20px);">
             <div class="d-flex align-items-center">
               {% uj_icon "trophy", "text-warning fs-4 me-2" %}
               <div>
@@ -140,9 +140,9 @@ testimonials:
     </div>
 
     <div class="row g-4">
-      {% for feature in layout.features %}
+      {% for feature in page.resolved.features %}
       <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0 shadow-sm text-center">
+        <div class="card h-100 border-0 shadow-sm text-center rounded-3">
           <div class="card-body p-4">
             <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
               {% uj_icon feature.icon, "text-white fs-2" %}
@@ -210,20 +210,20 @@ testimonials:
       </h2>
     </div>
 
-    {% if layout.testimonials %}
+    {% if page.resolved.testimonials %}
     <div id="homeTestimonialCarousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-indicators">
-        {% for testimonial in layout.testimonials %}
+        {% for testimonial in page.resolved.testimonials %}
         <button type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
         {% endfor %}
       </div>
 
       <div class="carousel-inner">
-        {% for testimonial in layout.testimonials %}
+        {% for testimonial in page.resolved.testimonials %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
           <div class="row justify-content-center">
             <div class="col-lg-8">
-              <div class="card border-0 shadow-lg">
+              <div class="card border-0 shadow-lg rounded-3">
                 <div class="card-body p-5 text-center">
                   <div class="d-flex justify-content-center mb-4">
                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">

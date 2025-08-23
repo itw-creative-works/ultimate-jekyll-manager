@@ -1,0 +1,82 @@
+// Lazy Loading Core Styles
+
+// Prevent layout shift for lazy images
+img[data-lazy] {
+  display: block; // Prevents inline gap
+  width: 100%; // Maintain width
+  height: auto; // Maintain aspect ratio
+}
+
+// Loading state with shimmer animation using CSS variables
+.lazy-loading {
+  --lazy-color-1: rgba(0, 0, 0, 0.03);
+  --lazy-color-2: rgba(0, 0, 0, 0.06);
+  --lazy-color-3: rgba(0, 0, 0, 0.03);
+
+  background: linear-gradient(
+    90deg,
+    var(--lazy-color-1) 25%,
+    var(--lazy-color-2) 50%,
+    var(--lazy-color-3) 75%
+  );
+  background-size: 200% 100%;
+  animation: lazy-shimmer 1.5s infinite;
+  min-height: 100px; // Default minimum height for loading state
+}
+
+// Dark theme overrides
+[data-bs-theme="dark"] .lazy-loading {
+  --lazy-color-1: rgba(255, 255, 255, 0.03);
+  --lazy-color-2: rgba(255, 255, 255, 0.08);
+  --lazy-color-3: rgba(255, 255, 255, 0.03);
+}
+
+// Shimmer animation
+@keyframes lazy-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// // Alternative loading state - Skeleton loading animation
+// .lazy-loading {
+//   --lazy-loading-from: rgba(0, 0, 0, 0.04);
+//   --lazy-loading-to: rgba(0, 0, 0, 0.08);
+
+//   animation: lazy-skeleton 1s linear infinite alternate;
+//   min-height: 100px; // Default minimum height for loading state
+// }
+
+// // Dark theme overrides for skeleton
+// [data-bs-theme="dark"] .lazy-loading {
+//   --lazy-loading-from: rgba(255, 255, 255, 0.04);
+//   --lazy-loading-to: rgba(255, 255, 255, 0.08);
+// }
+
+// // Skeleton animation
+// @keyframes lazy-skeleton {
+//   0% {
+//     background-color: var(--lazy-loading-from);
+//   }
+//   100% {
+//     background-color: var(--lazy-loading-to);
+//   }
+// }
+
+// Loaded state with fade in
+.lazy-loaded {
+  animation: lazy-fadein 0.25s ease-in;
+}
+
+// Fade in animation
+@keyframes lazy-fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

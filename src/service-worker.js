@@ -100,7 +100,7 @@ Manager.prototype.setupListeners = function () {
 
   // Force service worker to use the latest version
   serviceWorker.addEventListener('install', (event) => {
-    event.waitUntil(serviceWorker.skipWaiting());
+    serviceWorker.skipWaiting();
   });
 
   serviceWorker.addEventListener('activate', (event) => {

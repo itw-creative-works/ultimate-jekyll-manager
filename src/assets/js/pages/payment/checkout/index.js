@@ -4,20 +4,104 @@ let formManager = null;
 
 // Import modules
 import { state } from './modules/state.js';
-import { fetchProductDetails, fetchTrialEligibility } from './modules/api.js';
+import { fetchProductDetails, fetchTrialEligibility, warmupServer } from './modules/api.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
 import {
   updateAllUI,
   handleBillingCycleChange,
   showError,
-  hidePreloader
+  hidePreloader,
+  updatePaymentButtonVisibility
 } from './modules/ui.js';
 import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount.js';
-import { paymentManager } from './processors/index.js';
+import { paymentManager } from './modules/processors-main.js';
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import {
+  generateCheckoutId,
+  buildPaymentIntentData,
+} from './modules/session.js';
 
 // Variables
 const recaptchaSiteKey = '6LdxsmAnAAAAACbft_UmKZXJV_KTEiuG-7tfgJJ5';
+
+// Analytics tracking functions
+function trackBeginCheckout(product, price, billingCycle) {
+  const items = [{
+    item_id: product.id,
+    item_name: product.name,
+    item_category: product.is_subscription ? 'subscription' : 'one-time',
+    item_variant: billingCycle,
+    price: price,
+    quantity: 1
+  }];
+
+  // Google Analytics 4
+  gtag('event', 'begin_checkout', {
+    currency: 'USD',
+    value: price,
+    items: items
+  });
+
+  // Facebook Pixel
+  fbq('track', 'InitiateCheckout', {
+    content_ids: [product.id],
+    content_name: product.name,
+    content_type: 'product',
+    currency: 'USD',
+    value: price,
+    num_items: 1
+  });
+
+  // TikTok Pixel
+  ttq.track('InitiateCheckout', {
+    content_id: product.id,
+    content_type: 'product',
+    content_name: product.name,
+    price: price,
+    quantity: 1,
+    currency: 'USD',
+    value: price
+  });
+}
+
+function trackAddPaymentInfo(product, price, billingCycle, paymentMethod) {
+  const items = [{
+    item_id: product.id,
+    item_name: product.name,
+    item_category: product.is_subscription ? 'subscription' : 'one-time',
+    item_variant: billingCycle,
+    price: price,
+    quantity: 1
+  }];
+
+  // Google Analytics 4
+  gtag('event', 'add_payment_info', {
+    currency: 'USD',
+    value: price,
+    payment_type: paymentMethod,
+    items: items
+  });
+
+  // Facebook Pixel
+  fbq('track', 'AddPaymentInfo', {
+    content_ids: [product.id],
+    content_name: product.name,
+    content_type: 'product',
+    currency: 'USD',
+    value: price
+  });
+
+  // TikTok Pixel
+  ttq.track('AddPaymentInfo', {
+    content_id: product.id,
+    content_type: 'product',
+    content_name: product.name,
+    price: price,
+    quantity: 1,
+    currency: 'USD',
+    value: price
+  });
+}
 
 // Setup event listeners using FormManager
 function setupEventListeners() {
@@ -27,12 +111,12 @@ function setupEventListeners() {
     showSpinner: true,
     allowMultipleSubmit: false, // Prevent multiple submissions
     errorContainer: '.form-error-message', // Use class to support multiple containers
-    submitButtonLoadingText: 'Processing payment...'
+    submitButtonLoadingText: 'Processing...'
   });
 
   // Listen for form field changes
   formManager.addEventListener('change', (event) => {
-    const { fieldName, fieldValue } = event.detail;
+    const { fieldName, fieldValue, data } = event.detail;
 
     // Handle billing cycle changes
     if (fieldName === 'billing-cycle') {
@@ -68,7 +152,15 @@ function setupEventListeners() {
     }
 
     // Set payment method in state
-    state.paymentMethod = paymentMethod === 'stripe' ? 'card' : paymentMethod;
+    state.paymentMethod = paymentMethod;
+
+    // Track add_payment_info event when payment method is selected
+    const basePrice = state.isSubscription
+      ? (state.billingCycle === 'monthly' ? state.product.price_monthly : state.product.price_annually)
+      : state.product.price;
+    
+    trackAddPaymentInfo(state.product, state.total || basePrice, state.billingCycle, paymentMethod);
+    console.log('Tracked add_payment_info event:', paymentMethod);
 
     // Process the payment
     await completePurchase();
@@ -88,6 +180,9 @@ async function completePurchase() {
     // Get form data from FormManager
     const formData = formManager.getData();
 
+    // Store form data in state
+    state.formData = formData;
+
     // Wait 1 second to simulate processing time
     if (webManager.isDevelopment()) {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -98,12 +193,15 @@ async function completePurchase() {
       throw new Error('Please select a payment method');
     }
 
-    // Log collected form data
-    console.log('🟢 Collected form data:', formData);
+    // Build payment intent data according to API schema
+    const paymentIntentData = buildPaymentIntentData(webManager);
+
+    // Log the structured payment data
+    console.log('🟢 Payment intent data:', paymentIntentData);
 
     // Store pre-payment analytics data
     const analyticsData = {
-      transaction_id: 'ORD-' + Date.now(),
+      transaction_id: state.checkoutId,
       value: state.total,
       currency: 'USD',
       items: [{
@@ -118,9 +216,9 @@ async function completePurchase() {
       gtag('event', 'begin_checkout', analyticsData);
     }
 
-    // Store order data for confirmation page
+    // Store order data for confirmation page (legacy format for now)
     const orderData = {
-      orderId: analyticsData.transaction_id + '-' + Math.random().toString(36).substring(2, 9),
+      orderId: state.checkoutId,
       product: state.product.name,
       productId: state.product.id,
       total: state.total,
@@ -131,13 +229,13 @@ async function completePurchase() {
       paymentMethod: state.paymentMethod,
       email: webManager.auth().getUser().email,
       timestamp: new Date().toISOString(),
-      formData: formData // Include form data
+      formData: formData
     };
 
     sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-    // Store form data in state for processors to access
-    state.formData = formData;
+    // Store the payment intent data in state for processors to use
+    state.paymentIntentData = paymentIntentData;
 
     // Process payment with selected processor (will redirect)
     await paymentManager.processPayment(state.paymentMethod);
@@ -155,29 +253,23 @@ async function completePurchase() {
     // Show user-friendly error message
     const errorMessage = error.message || 'There was an error processing your payment. Please try again.';
 
-    // Check for specific error types
-    if (error.message.includes('not configured') || error.message.includes('not available')) {
-      formManager.showError('This payment method is currently unavailable. Please try another payment method or contact support.');
-    } else {
-      formManager.showError(errorMessage);
-    }
+    formManager.showError(errorMessage);
   }
 }
 
 // Initialize checkout with parallel API calls
 async function initializeCheckout() {
   try {
-    // Update main tag alignment for checkout page
-    const mainTag = document.querySelector('main');
-    if (mainTag) {
-      mainTag.classList.remove('align-items-center');
-      mainTag.classList.add('align-items-start');
-    }
+    // Generate or retrieve checkout session ID
+    state.checkoutId = generateCheckoutId();
+    console.log('Checkout session ID:', state.checkoutId);
 
     // Get product ID from URL params
     const urlParams = new URLSearchParams(window.location.search);
-    const _test_appId = urlParams.get('_test_appId') || webManager.config.brand.id;
-    const productId = urlParams.get('productId');
+    const productId = urlParams.get('product');
+    const frequency = urlParams.get('frequency') || 'annually';
+    const _test_appId = urlParams.get('_test_appId');
+    const _test_trialEligible = urlParams.get('_test_trialEligible');
 
     // Product ID is required
     if (!productId) {
@@ -185,12 +277,15 @@ async function initializeCheckout() {
     }
 
     // Check for testing parameters
-    const _test_trialEligible = urlParams.get('_test_trialEligible');
+    const appId = _test_appId || webManager.config.brand.id;
+
+    // Warmup server (fire and forget)
+    warmupServer(webManager);
 
     // Fetch product details, trial eligibility, and initialize reCAPTCHA in parallel
     const [productData, trialEligible, recaptchaInit] = await Promise.allSettled([
-      fetchProductDetails(_test_appId, productId, webManager),
-      fetchTrialEligibility(productId),
+      fetchProductDetails(appId, productId, webManager),
+      fetchTrialEligibility(appId, productId, webManager),
       initializeRecaptcha(recaptchaSiteKey, webManager)
     ]);
 
@@ -226,18 +321,33 @@ async function initializeCheckout() {
       paymentManager.initialize(state.apiKeys, webManager);
     }
 
+    // Update payment button visibility based on available processors
+    updatePaymentButtonVisibility(paymentManager);
+
     // Log available payment methods
     const availableMethods = paymentManager.getAvailablePaymentMethods();
     console.log('Available payment methods:');
     availableMethods.forEach(method => {
       console.log(`- ${method.name} (${method.processor})`);
     });
+    
+    if (availableMethods.length === 0) {
+      console.error('No payment methods available! Check API keys configuration.');
+      showError('No payment methods are currently available. Please contact support for assistance.');
+      return; // Stop initialization since we can't proceed without payment methods
+    }
 
     // Log reCAPTCHA initialization result
     if (recaptchaInit.status === 'rejected') {
       console.warn('reCAPTCHA initialization failed:', recaptchaInit.reason);
     } else if (!recaptchaInit.value) {
       console.warn('reCAPTCHA was not initialized (no site key or initialization failed)');
+    }
+
+    // Set billing cycle from URL parameter (before UI updates)
+    if (frequency === 'monthly' || frequency === 'annually') {
+      state.billingCycle = frequency;
+      console.log('Setting billing cycle from URL:', frequency);
     }
 
     // Update UI with product details
@@ -247,9 +357,15 @@ async function initializeCheckout() {
     setupEventListeners();
 
     // Set form to ready state
-    if (formManager) {
-      formManager.setFormState('ready');
-    }
+    formManager.setFormState('ready');
+
+    // Track begin_checkout event on page load
+    const basePrice = state.isSubscription
+      ? (state.billingCycle === 'monthly' ? state.product.price_monthly : state.product.price_annually)
+      : state.product.price;
+    
+    trackBeginCheckout(state.product, basePrice, state.billingCycle);
+    console.log('Tracked begin_checkout event for:', state.product.id);
 
     // Auto-apply welcome coupon
     autoApplyWelcomeCoupon();

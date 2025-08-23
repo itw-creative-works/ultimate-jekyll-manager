@@ -31,22 +31,25 @@ features:
           <p class="text-muted">Sign in to your {{ site.brand.name }} account</p>
         </div>
 
-        <!-- Social Login (Optional) -->
-        <div class="mb-4">
-          <button class="btn btn-adaptive w-100 mb-3 d-flex align-items-center justify-content-center uj-signin-btn" data-provider="google.com">
-            {% uj_icon "google", "fa-lg me-2" %}
-            Continue with Google
-          </button>
-        </div>
-
-        <!-- Divider -->
-        <div class="position-relative mb-4">
-          <hr class="text-muted">
-          <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small bg-body-tertiary">OR</span>
-        </div>
+        <!-- Error Container -->
+        <div class="alert alert-danger auth-error-alert mb-3 d-none" role="alert"></div>
 
         <!-- Sign In Form -->
-        <form autocomplete="on">
+        <form id="signin-form" autocomplete="on" novalidate>
+          <!-- Social Login (Optional) -->
+          <div class="mb-4">
+            <button type="submit" class="btn btn-adaptive w-100 mb-3 d-flex align-items-center justify-content-center" data-provider="google.com" disabled>
+              {% uj_icon "google", "fa-lg me-2" %}
+              <span class="button-text">Continue with Google</span>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="position-relative mb-4">
+            <hr class="text-muted">
+            <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small bg-body-tertiary">OR</span>
+          </div>
+
           <div class="mb-3 text-start">
             <label for="email" class="form-label fw-semibold">
               Email <span class="text-danger">*</span>
@@ -67,9 +70,9 @@ features:
             </div>
           </div>
 
-          <button type="submit" class="btn btn-success btn-lg w-100 mb-3 uj-signin-btn" data-provider="email">
+          <button type="submit" class="btn btn-success btn-lg w-100 mb-3" data-provider="email" disabled>
             {% uj_icon "arrow-right-to-bracket", "me-2" %}
-            Sign In
+            <span class="button-text">Sign In</span>
           </button>
         </form>
 

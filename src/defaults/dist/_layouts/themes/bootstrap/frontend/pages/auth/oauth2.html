@@ -1,0 +1,62 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/cover
+---
+
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+    <div class="card border-0 shadow-lg bg-body-tertiary">
+      <div class="card-body p-5">
+        <!-- Logo -->
+        <div class="text-center mb-4">
+          <a href="{{ site.url }}">
+            <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 4rem;">
+          </a>
+        </div>
+
+        <!-- Loading State -->
+        <div id="oauth2-loading" class="text-center">
+          <div class="spinner-border text-primary mb-4" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h1 class="h3 fw-bold mb-2">Authorizing <span id="oauth2-provider">Provider</span>...</h1>
+          <p class="text-muted">Please wait while we complete the connection.</p>
+        </div>
+
+        <!-- Result State -->
+        <div id="oauth2-result" class="d-none">
+          <!-- Success -->
+          <div id="result-success" class="d-none text-center">
+            <h1 class="h3 fw-bold mb-2">Success!</h1>
+            <p class="text-muted mb-4">Your account has been connected. Redirecting you now...</p>
+          </div>
+
+          <!-- Error -->
+          <div id="result-error" class="d-none">
+            <div class="text-center mb-4">
+              <h1 class="h3 fw-bold mb-2">Connection Failed</h1>
+            </div>
+            <div class="alert alert-danger" role="alert">
+              <p id="error-message" class="mb-0">An error occurred while connecting your account.</p>
+            </div>
+            <div class="text-center mt-4">
+              <a id="return-button" href="/account#connections" class="btn btn-primary">
+                {% uj_icon "arrow-left", "me-2" %}<span class="button-text">Return to Account</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Links -->
+        <div class="mt-5 pt-4 border-top text-center">
+          <p class="text-muted small mb-2">Need help?</p>
+          <a href="/contact" class="btn btn-outline-adaptive btn-sm">
+            {% uj_icon "headset", "me-1" %}<span class="button-text">Contact Support</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ content | uj_content_format }}

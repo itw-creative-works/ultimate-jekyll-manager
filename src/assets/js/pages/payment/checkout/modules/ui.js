@@ -4,17 +4,39 @@ import { calculatePrices } from './pricing.js';
 
 // Unified UI update function - handles all state changes
 export function updateAllUI() {
+  console.log('updateAllUI called, product:', state.product);
+  
   // Update product info
   document.getElementById('product-name').textContent = state.product.name;
   document.getElementById('product-description').textContent = state.product.description;
+  
+  // Update selected plan name in billing cycle section
+  const selectedPlanName = document.getElementById('selected-plan-name');
+  if (selectedPlanName) {
+    console.log('Updating selected-plan-name to:', state.product.name);
+    selectedPlanName.textContent = state.product.name;
+  } else {
+    console.log('selected-plan-name element not found');
+  }
 
   if (state.isSubscription) {
     // Show subscription toggle
     document.getElementById('subscription-toggle').classList.remove('d-none');
 
-    // Update prices in toggle buttons
+    // Update prices in toggle buttons - annual shows monthly rate
+    const annualMonthlyRate = (state.product.price_annually / 12).toFixed(2);
     document.getElementById('monthly-price-lg').textContent = `$${state.product.price_monthly.toFixed(2)}`;
-    document.getElementById('annually-price-lg').textContent = `$${state.product.price_annually.toFixed(2)}`;
+    document.getElementById('annually-price-lg').textContent = `$${annualMonthlyRate}`;
+    
+    // Update payment text based on selected billing cycle
+    const paymentText = document.getElementById('billing-cycle-payment-text');
+    if (paymentText) {
+      if (state.billingCycle === 'monthly') {
+        paymentText.textContent = `Pay $${state.product.price_monthly.toFixed(2)} monthly`;
+      } else {
+        paymentText.textContent = `Pay $${state.product.price_annually.toFixed(2)} annually`;
+      }
+    }
 
     // Calculate and update savings percentage
     const monthlyAnnual = state.product.price_monthly * 12;
@@ -37,7 +59,7 @@ export function updateAllUI() {
     const discountedPrice = basePrice - discountAmount;
 
     const period = state.billingCycle === 'monthly' ? '/mo' : '/yr';
-    const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annual';
+    const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annually';
 
     // Update product price display (show discounted price)
     document.getElementById('product-price').textContent = `$${discountedPrice.toFixed(2)}${period}`;
@@ -53,14 +75,14 @@ export function updateAllUI() {
     updateTrialBadge();
 
     // Get payment button elements once
-    const $stripeBtn = document.getElementById('pay-with-stripe');
+    const $cardBtn = document.getElementById('pay-with-card');
     const $paypalBtn = document.getElementById('pay-with-paypal');
     const $applePayBtn = document.getElementById('pay-with-apple-pay');
     const $googlePayBtn = document.getElementById('pay-with-google-pay');
     const $cryptoBtn = document.getElementById('pay-with-crypto');
 
     // Get button text spans (PayPal uses logo, so no text span)
-    const $stripeBtnText = $stripeBtn?.querySelector('span.fw-semibold');
+    const $cardBtnText = $cardBtn?.querySelector('span.fw-semibold');
     const $applePayBtnText = $applePayBtn?.querySelector('span.fw-semibold');
     const $googlePayBtnText = $googlePayBtn?.querySelector('span.fw-semibold');
     const $cryptoBtnText = $cryptoBtn?.querySelector('span.fw-semibold');
@@ -68,14 +90,14 @@ export function updateAllUI() {
     // Update payment button text based on trial
     if (state.hasFreeTrial) {
       // Update all payment buttons for free trial (keeping logic for future customization)
-      if ($stripeBtnText) $stripeBtnText.textContent = 'Credit/Debit Card';
+      if ($cardBtnText) $cardBtnText.textContent = 'Credit/Debit Card';
       // PayPal uses logo - no text to update
       if ($applePayBtnText) $applePayBtnText.textContent = 'Apple Pay';
       if ($googlePayBtnText) $googlePayBtnText.textContent = 'Google Pay';
       if ($cryptoBtnText) $cryptoBtnText.textContent = 'Crypto';
     } else {
       // Reset to normal payment text
-      if ($stripeBtnText) $stripeBtnText.textContent = 'Credit/Debit Card';
+      if ($cardBtnText) $cardBtnText.textContent = 'Credit/Debit Card';
       // PayPal uses logo - no text to update
       if ($applePayBtnText) $applePayBtnText.textContent = 'Apple Pay';
       if ($googlePayBtnText) $googlePayBtnText.textContent = 'Google Pay';
@@ -164,13 +186,13 @@ export function updateSubscriptionTerms() {
     const discountAmount = (basePrice * state.discountPercent) / 100;
     const discountedPrice = basePrice - discountAmount;
 
-    const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annual';
+    const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annually';
 
     termsText.textContent = `You won't be charged for your free trial. On ${formattedDate}, your ${periodText} subscription will start and you'll be charged $${discountedPrice.toFixed(2)} plus applicable tax. Cancel anytime before then.`;
     termsDiv.classList.remove('d-none');
   } else {
     // No trial - show regular subscription terms with renewal date
-    const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annual';
+    const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annually';
     const basePrice = state.billingCycle === 'monthly'
       ? state.product.price_monthly
       : state.product.price_annually;
@@ -193,17 +215,6 @@ export function updateSubscriptionTerms() {
     termsText.textContent = `Your ${periodText} subscription will start today and renew on ${formattedRenewalDate} for $${discountedPrice.toFixed(2)} plus applicable tax. Cancel anytime.`;
     termsDiv.classList.remove('d-none');
   }
-}
-
-// Switch payment method
-export function switchPaymentMethod(method) {
-  // Hide all payment forms
-  document.querySelectorAll('.payment-form').forEach(form => {
-    form.classList.add('d-none');
-  });
-
-  // Show selected payment form
-  document.getElementById(`payment-form-${method}`).classList.remove('d-none');
 }
 
 // Centralized billing cycle change handler
@@ -240,4 +251,36 @@ export function hidePreloader() {
       preloader.remove();
     }, 300);
   }
+}
+
+// Update payment button visibility based on processor availability
+export function updatePaymentButtonVisibility(paymentManager) {
+  // Define button mappings - all IDs use payment methods, not processors
+  const buttonMappings = [
+    { paymentMethod: 'card', buttonId: 'pay-with-card' },
+    { paymentMethod: 'paypal', buttonId: 'pay-with-paypal' },
+    { paymentMethod: 'crypto', buttonId: 'pay-with-crypto' },
+    { paymentMethod: 'apple-pay', buttonId: 'pay-with-apple-pay' },
+    { paymentMethod: 'google-pay', buttonId: 'pay-with-google-pay' }
+  ];
+
+  // Check each payment method and update button visibility
+  buttonMappings.forEach(({ paymentMethod, buttonId }) => {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      const isAvailable = paymentManager.isPaymentMethodAvailable(paymentMethod);
+      
+      if (isAvailable) {
+        // Show the button
+        button.classList.remove('d-none');
+      } else {
+        // Hide the button
+        button.classList.add('d-none');
+      }
+    }
+  });
+
+  // Log which payment methods are available
+  const availableMethods = paymentManager.getAvailablePaymentMethods();
+  console.log('Payment buttons updated. Available methods:', availableMethods.map(m => m.id));
 }

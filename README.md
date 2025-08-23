@@ -79,6 +79,25 @@ GITHUB_REPOSITORY=XXX \
 UJ_TRANSLATION_CACHE=true \
 npx uj translation
 ```
+
+### Run the `imagemin` task:
+Test image optimization with GitHub cache in development mode:
+```bash
+# Test with GitHub cache (requires GH_TOKEN and GITHUB_REPOSITORY)
+GH_TOKEN=XXX \
+GITHUB_REPOSITORY=owner/repo \
+UJ_IMAGEMIN_FORCE=true \
+npx uj imagemin
+
+# Or run locally without cache
+npx uj imagemin
+```
+The imagemin task will:
+- Process images from `src/assets/images/**/*.{jpg,jpeg,png}`
+- Generate multiple sizes (1024px, 425px) and WebP formats
+- Cache processed images in `uj-imagemin` branch (when using GitHub cache)
+- Skip already processed images on subsequent runs
+
 <!-- Developing -->
 ## 🛠 Developing
 1. Clone the repo to your local machine.
@@ -145,8 +164,8 @@ post:
 ---
 # Team Member pages
 member:
-  id: "member-id" # ID of the member from _data/members.yml
-  name: "Member Name" # Name of the member
+  id: "member-id" # ID of the team member from _data/team.yml
+  name: "Member Name" # Name of the team member
 ---
 ```
 
@@ -158,7 +177,24 @@ member:
 `uj-language-dropdown-item`
 
 ### Special Query Parameters
+
+#### Authentication
 * `authReturnUrl`: Redirects to this URL after authentication.
+
+#### Testing Parameters
+
+##### Account Page (`/account`)
+* `_test_subscription`: Override subscription data for testing (e.g., `_test_subscription=premium`)
+* `_test_prefill=true`: Adds fake test data for development:
+  - Inserts fake referral data in the Referrals section
+  - Inserts fake session data in the Security section (active sessions)
+
+##### Checkout Page (`/payment/checkout`)
+* `_test_appId`: Override the application ID for testing (e.g., `_test_appId=test-app`)
+* `_test_trialEligible`: Force trial eligibility status:
+  - `_test_trialEligible=true`: User is eligible for trial
+  - `_test_trialEligible=false`: User is not eligible for trial
+* `_test_cardProcessor`: Force a specific payment processor for testing (e.g., `_test_cardProcessor=stripe` or `_test_cardProcessor=paypal`)
 
 ### Icons
 * Fontawesome
@@ -168,6 +204,17 @@ member:
 * More
   * Language
     * https://www.freepik.com/icon/language_484531#fromView=family&page=1&position=0&uuid=651a2f0f-9023-4063-a495-af9a4ef72304
+
+### Webpack
+## Dev Flags
+Add this to any js file to ONLY run in development mode (it will be excluded in production builds):
+```
+  /* @dev-only:start */
+  {
+    // Your development-only code goes here
+  }
+  /* @dev-only:end */
+```
 
 > This project is "ultimate-jekyll", an NPM module that helps   │
 │   streamline development of Jekyll websites. A "consuming       │

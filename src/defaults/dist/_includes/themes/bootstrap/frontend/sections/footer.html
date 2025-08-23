@@ -12,7 +12,7 @@
         <h5 class="mb-3">
           <a class="d-flex align-items-center text-decoration-none text-body" href="{{ logo_href }}">
             {% if logo_src and logo_src != '' and logo_src != 'null' %}
-              <img src="{{ logo_src }}" alt="{{ logo_text }}" height="40" class="me-2">
+              <img data-lazy="@src {{ logo_src }}" alt="{{ logo_text }}" height="40" class="me-2">
             {% endif %}
             {% if logo_text and logo_text != '' and logo_text != 'null' %}
               <span>{{ logo_text }}</span>

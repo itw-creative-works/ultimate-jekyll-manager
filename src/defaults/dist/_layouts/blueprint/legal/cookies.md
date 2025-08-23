@@ -8,6 +8,7 @@ meta:
   description: "This cookie policy has been compiled to better serve those who are concerned with how their personal information is being used online."
   breadcrumb: "Cookie Policy"
 
+### WEB MANAGER CONFIG ###
 web_manager:
   exitPopup:
     enabled: false

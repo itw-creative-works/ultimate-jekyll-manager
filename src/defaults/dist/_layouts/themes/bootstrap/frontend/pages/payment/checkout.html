@@ -3,9 +3,9 @@
 layout: themes/[ site.theme.id ]/frontend/core/cover
 
 ### THEME CONFIG ###
-# theme:
-#   main:
-#     class: "d-flex align-items-center justify-content-center"
+theme:
+  main:
+    align: "start"
 
 ### WEB MANAGER CONFIG ###
 web_manager:
@@ -14,15 +14,6 @@ web_manager:
       policy: "authenticated"
 
 ### CHECKOUT PAGE ###
-test_product:
-  id: "pro-plan"
-  name: "Pro Plan"
-  description: "Advanced features for power users"
-  price_monthly: 29
-  price_annually: 290
-  is_subscription: true
-  has_free_trial: true
-  free_trial_days: 14
 ---
 
 <!-- Fullscreen Preloader -->
@@ -71,6 +62,15 @@ test_product:
         <div class="card border-1 shadow-sm mb-4">
           <div class="card-body p-4">
             <h3 class="h5 fw-bold mb-3">Billing Cycle</h3>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold mb-0">
+                <span id="selected-plan-name">Loading...</span> Plan
+              </h6>
+              <a href="/pricing" class="small text-decoration-none">
+                {% uj_icon "arrow-left", "me-1" %}
+                Change plan
+              </a>
+            </div>
 
             <!-- Subscription Toggle (hidden by default) -->
             <div id="subscription-toggle" class="d-none">
@@ -84,8 +84,11 @@ test_product:
                         {% uj_icon "check", "small" %}
                       </span>
                     </div>
-                    <div class="fw-bold fs-4 mb-1" id="annually-price-lg">$--</div>
-                    <div class="text-muted small">Pay Annually</div>
+                    <div class="fw-bold fs-4 mb-1">
+                      <span id="annually-price-lg">$--</span>
+                      <span class="text-muted fs-6 fw-normal">/mo</span>
+                    </div>
+                    <div class="text-muted small">Annual Plan</div>
                   </label>
                 </div>
                 <div class="col-6">
@@ -96,10 +99,18 @@ test_product:
                         {% uj_icon "check", "small" %}
                       </span>
                     </div>
-                    <div class="fw-bold fs-4 mb-1" id="monthly-price-lg">$--</div>
-                    <div class="text-muted small">Pay Monthly</div>
+                    <div class="fw-bold fs-4 mb-1">
+                      <span id="monthly-price-lg">$--</span>
+                      <span class="text-muted fs-6 fw-normal">/mo</span>
+                    </div>
+                    <div class="text-muted small">Monthly Plan</div>
                   </label>
                 </div>
+              </div>
+
+              <!-- Payment text under the boxes -->
+              <div class="text-center mt-2">
+                <p class="text-muted small mb-0" id="billing-cycle-payment-text">Pay $-- monthly</p>
               </div>
 
               <!-- Free Trial Badge -->
@@ -119,7 +130,7 @@ test_product:
             <h3 class="h5 fw-bold mb-3">Customer Information</h3>
 
             <div class="text-center">
-              Managing order for <strong class="uj-auth-email"></strong>, <a href="#" id="switch-account">switch account</a>.
+              Managing order for <strong data-wm-bind="@text user.email"></strong>, <a href="#" id="switch-account">switch account</a>.
             </div>
 
             <!-- Customer form fields will go here when needed -->
@@ -138,13 +149,13 @@ test_product:
         <!-- Payment Method Card -->
         <div class="card border-1 shadow-sm mb-0">
           <div class="card-body p-4">
-            <h3 class="h5 fw-bold mb-3">Payment Options</h3>
+            <h3 class="h5 fw-bold mb-3">Payment Method</h3>
 
             <!-- Direct Payment Buttons -->
             <div class="d-grid gap-3">
-              <!-- Stripe/Link Button -->
-              <button type="submit" class="btn btn-adaptive btn-lg py-3 d-flex align-items-center justify-content-center" id="pay-with-stripe" data-payment-method="stripe" data-action="pay-stripe">
-                {% uj_icon "cc-stripe", "me-2 fs-5" %}
+              <!-- Credit/Debit Card Button -->
+              <button type="submit" class="btn btn-adaptive btn-lg py-3 d-flex align-items-center justify-content-center" id="pay-with-card" data-payment-method="card" data-action="pay-card">
+                {% uj_icon "credit-card", "me-2 fa-3xl" %}
                 <span class="fw-semibold">Credit/Debit</span>
               </button>
 
@@ -158,7 +169,7 @@ test_product:
 
               <!-- Apple Pay Button (shown conditionally) -->
               <button type="submit" class="btn btn-dark btn-lg py-3 d-flex align-items-center justify-content-center d-none" id="pay-with-apple-pay" data-payment-method="apple-pay" data-action="pay-apple-pay">
-                {% uj_icon "apple", "me-2 fs-5" %}
+                {% uj_icon "apple", "me-2 fa-3xl" %}
                 <span class="fw-semibold">Apple Pay</span>
               </button>
 
@@ -173,7 +184,7 @@ test_product:
 
               <!-- Crypto Button -->
               <button type="submit" class="btn btn-outline-adaptive btn-lg py-3 d-flex align-items-center justify-content-center" id="pay-with-crypto" data-payment-method="crypto" data-action="pay-crypto">
-                {% uj_icon "bitcoin", "me-2 fs-5" %}
+                {% uj_icon "bitcoin", "me-2 fa-3xl" %}
                 <span class="fw-semibold">Crypto</span>
               </button>
 
@@ -190,7 +201,7 @@ test_product:
               </div>
 
               <p class="text-muted small text-center mb-0">
-                By purchasing, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>
+                By purchasing, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.
               </p>
             </div>
           </div>
@@ -226,7 +237,7 @@ test_product:
                     </span>
                   </div>
                   <div class="flex-grow-1 text-start">
-                    <h6 class="mb-1" id="product-name">Loading...</h6>
+                    <h6 class="fw-bold mb-1" id="product-name">Loading...</h6>
                     <p class="text-muted small mb-0" id="product-description">Loading product details...</p>
                   </div>
                   <div class="text-end d-none">

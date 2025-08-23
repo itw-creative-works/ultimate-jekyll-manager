@@ -71,8 +71,3 @@ export async function getRecaptchaToken(action = 'checkout') {
     return null;
   }
 }
-
-// Check if reCAPTCHA is ready
-export function isRecaptchaReady() {
-  return recaptchaReady;
-}

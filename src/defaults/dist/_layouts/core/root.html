@@ -6,12 +6,14 @@ layout: null
 <html
   lang="{{ site.translation.default |  default: 'en' }}"
   dir="ltr"
+
   class="{{ page.resolved.theme.html.class }}" {{ page.resolved.theme.html.attributes }}
 
   data-theme-id="{{ page.resolved.theme.id }}"
   data-theme-target="{{ page.resolved.theme.target }}"
   data-theme-appearance="{{ page.resolved.theme.appearance }}"
   data-page-path="{{ page.canonical.path }}"
+  data-page-loading="true"
 
   data-bs-theme="{{ page.resolved.theme.appearance }}"
   >
