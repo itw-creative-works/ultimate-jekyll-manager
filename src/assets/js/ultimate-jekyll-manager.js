@@ -1,43 +1,60 @@
-// Module
-module.exports = (Manager, options) => {
-  return new Promise(function(resolve, reject) {
-    // Shortcuts
-    const { webManager } = Manager;
+// Ultimate Jekyll Manager Module
+export default async function(Manager, options) {
+  // Shortcuts
+  const { webManager } = Manager;
 
-    // Log
-    console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
+  // Log
+  console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
 
-    // Setup page loader (removes loading state)
-    require('./core/page-loader.js')(Manager, options);
+  // Core modules to always load
+  const fixedModules = [
+    'page-loader.js',
+    'auth.js',
+    'lazy-loading.js',
+    'query-strings.js',
+    'service-worker.js'
+  ];
 
-    // Setup authentication listener
-    require('./core/auth.js')(Manager, options);
+  // Conditionally loaded modules based on config
+  const conditionalModules = [
+    { path: 'chatsy.js', configKey: 'chatsy' },
+    { path: 'cookieconsent.js', configKey: 'cookieConsent' },
+    { path: 'exit-popup.js', configKey: 'exitPopup' },
+    { path: 'social-sharing.js', configKey: 'socialSharing' }
+  ];
 
-    // Setup chatsy button
-    require('./core/chatsy.js')(Manager, options);
+  // Load all modules in parallel
+  const modulePromises = [];
 
-    // Setup cookie consent
-    require('./core/cookieconsent.js')(Manager, options);
+  // Add fixed modules
+  for (const modulePath of fixedModules) {
+    modulePromises.push(
+      import(`__main_assets__/js/core/${modulePath}`)
+        .then(({ default: moduleFunc }) => moduleFunc(Manager, options))
+        .catch(error => console.error(`Failed to load ${modulePath}:`, error))
+    );
+  }
 
-    // Setup exit popup
-    require('./core/exit-popup.js')(Manager, options);
+  // Add conditional modules if enabled
+  for (const module of conditionalModules) {
+    const moduleConfig = webManager.config[module.configKey];
+    if (moduleConfig?.enabled) {
+      modulePromises.push(
+        import(`__main_assets__/js/core/${module.path}`)
+          .then(({ default: moduleFunc }) => moduleFunc(Manager, options))
+          .catch(error => console.error(`Failed to load ${module.path}:`, error))
+      );
+    } else {
+      console.log(`Skipping ${module.path} (disabled in config)`);
+    }
+  }
 
-    // Setup lazy loading
-    require('./core/lazy-loading.js')(Manager, options);
+  // Add theme loading
+  modulePromises.push(
+    import('__theme__/_theme.js')
+      .catch(error => console.error('Failed to load theme:', error))
+  );
 
-    // Query string handler
-    require('./core/query-strings.js')(Manager, options);
-
-    // Setup social sharing
-    require('./core/social-sharing.js')(Manager, options);
-
-    // Cache visited pages for offline use
-    require('./core/service-worker.js')(Manager, options);
-
-    // Import the theme from src/assets/themes/{ id }
-    require('__theme__/_theme.js');
-
-    // Resolve
-    return resolve();
-  });
+  // Wait for all modules to load
+  await Promise.all(modulePromises);
 }

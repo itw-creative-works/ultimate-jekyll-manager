@@ -1,22 +1,15 @@
 // Social Sharing Module
-module.exports = (Manager, options) => {
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
   // Get social sharing config
   const socialSharing = webManager.config.socialSharing || {};
 
-  console.log('---socialSharing', socialSharing);
-
-  // Check if social sharing is enabled
-  if (!socialSharing.enabled) {
-    return; // Social sharing is disabled
-  }
-
   // Configuration with defaults merged with supplied config
   const config = {
     selector: '[data-social-share]',
-    defaultPlatforms: ['facebook', 'twitter', 'linkedin', 'pinterest', 'reddit','email', 'copy'],
+    defaultPlatforms: ['facebook', 'twitter', 'linkedin', 'pinterest', 'reddit', 'email', 'copy'],
     buttonClass: 'btn',
     showLabels: false,
     openInNewWindow: true,
@@ -26,7 +19,7 @@ module.exports = (Manager, options) => {
   };
 
   // CDN base URL for Font Awesome SVG icons
-  const iconBaseUrl = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/svgs';
+  const ICON_BASE_URL = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/svgs';
 
   // Platform configurations
   const platforms = {
@@ -185,7 +178,7 @@ module.exports = (Manager, options) => {
     $iconWrapper.classList.add('fa', 'fa-md');
 
     const $iconImg = document.createElement('img');
-    $iconImg.setAttribute('data-lazy', `@src ${iconBaseUrl}/${platform.icon}.svg`);
+    $iconImg.setAttribute('data-lazy', `@src ${ICON_BASE_URL}/${platform.icon}.svg`);
     $iconImg.alt = '';
     $iconImg.classList.add('filter-white');
     $iconImg.setAttribute('data-icon-type', 'share');
@@ -278,7 +271,7 @@ module.exports = (Manager, options) => {
 
       // Change to success state
       if ($iconImg) {
-        $iconImg.src = `${iconBaseUrl}/solid/check.svg`;
+        $iconImg.src = `${ICON_BASE_URL}/solid/check.svg`;
       }
       if ($label) {
         $label.textContent = 'Copied!';

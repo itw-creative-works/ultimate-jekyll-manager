@@ -1,16 +1,10 @@
-// Module
-module.exports = (Manager, options) => {
+// Chatsy Module
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
-  // Get auth policy
-  const chatsy = webManager.config.chatsy;
-
-  // Quit if chatsy is not enabled
-  if (!chatsy?.enabled) {
-    console.warn('Chatsy is not enabled in the configuration.');
-    return;
-  }
+  // Get chatsy config
+  const chatsy = webManager.config.chatsy || {};
 
   // Listen for dom ready
   webManager.dom().ready()

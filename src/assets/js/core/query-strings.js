@@ -1,5 +1,5 @@
-// Module
-module.exports = (Manager, options) => {
+// Query Strings Module
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 

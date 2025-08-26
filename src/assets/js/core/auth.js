@@ -1,7 +1,7 @@
-const fetch = require('wonderful-fetch');
+import fetch from 'wonderful-fetch';
 
-// Module
-module.exports = (Manager, options) => {
+// Auth Module
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 

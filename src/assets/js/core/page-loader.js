@@ -1,5 +1,5 @@
 // Page Loader Module - Handles page loading state indicator
-module.exports = (Manager, options) => {
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -16,4 +16,4 @@ module.exports = (Manager, options) => {
     // Wait for window load event
     window.addEventListener('load', removeLoadingState, { once: true });
   }
-};
+}

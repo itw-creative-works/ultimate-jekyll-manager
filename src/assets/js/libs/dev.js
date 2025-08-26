@@ -2,7 +2,7 @@
  * Development-only utilities and features
  * This file contains code that should only run in development mode
  */
-module.exports = function (Manager, options) {
+export default function (Manager, options) {
   const { webManager } = Manager;
 
   // Main log

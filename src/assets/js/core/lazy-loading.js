@@ -1,5 +1,5 @@
 // Lazy Loading Module
-module.exports = (Manager, options) => {
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -108,7 +108,7 @@ module.exports = (Manager, options) => {
     // Log
     /* @dev-only:start */
     {
-      console.log('Lazy-loading:', value, 'for element:', element);
+      // console.log('Lazy-loading:', value, 'for element:', element);
     }
     /* @dev-only:end */
 

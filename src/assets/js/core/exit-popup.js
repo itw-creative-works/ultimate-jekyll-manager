@@ -1,16 +1,10 @@
 // Exit Popup Module
-module.exports = (Manager, options) => {
+export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
   // Get exit popup config
   const exitPopup = webManager.config.exitPopup || {};
-
-  // Check if exit popup is enabled
-  if (!exitPopup.enabled) {
-    console.log('Exit popup is disabled');
-    return;
-  }
 
   // Get config
   const config = exitPopup.config;

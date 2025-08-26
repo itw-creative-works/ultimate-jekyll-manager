@@ -1,5 +1,6 @@
 // Service Worker Core Library
-module.exports = (Manager, options) => {
+export default function(Manager, options) {
+  // Shortcuts
   const { webManager } = Manager;
 
   // Cache visited pages
