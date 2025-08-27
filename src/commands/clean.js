@@ -16,12 +16,22 @@ const dirs = [
 ]
 
 module.exports = async function (options) {
+  options = options || {};
+
+  // Build list of directories to clean
+  const dirsToClean = [...dirs];
+
+  // Add .cache if requested
+  if (options.cache !== false) {
+    dirsToClean.push('.cache');
+  }
+
   // Log
-  logger.log(`Cleaning up .temp, dist, and _site directories (including .jekyll-cache and .jekyll-metadata)`);
+  logger.log(`Cleaning up [${dirsToClean.join(', ')}] directories (including .jekyll-cache and .jekyll-metadata)`);
 
   try {
     // Loop through dirs
-    dirs.forEach((dir) => {
+    dirsToClean.forEach((dir) => {
       // Remove
       jetpack.remove(dir);
 

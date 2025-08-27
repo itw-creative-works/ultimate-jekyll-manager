@@ -3,14 +3,11 @@ export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
-  // Get cookie consent config
-  const cookieConsent = webManager.config.cookieConsent || {};
-
   // Check if user has already consented
   const hasConsented = webManager.storage().get('cookies.consent.accepted') === true;
 
   // Get configuration (already normalized with defaults)
-  const config = cookieConsent.config;
+  const config = webManager.config.cookieConsent.config;
 
   // Wait for DOM to be ready
   webManager.dom().ready().then(() => {
@@ -116,11 +113,11 @@ export default function(Manager, options) {
       if (event.type === 'click' && banner.contains(event.target)) {
         return; // Ignore clicks on the banner itself
       }
-      
+
       // Remove listeners immediately to prevent multiple calls
       window.removeEventListener('scroll', autoAcceptHandler);
       window.removeEventListener('click', autoAcceptHandler);
-      
+
       // Accept cookies after a small delay to ensure the action feels natural
       setTimeout(() => {
         acceptCookies(banner);
@@ -262,11 +259,6 @@ export default function(Manager, options) {
       version: config.version || '1.0'
     });
 
-    // Emit event
-    window.dispatchEvent(new CustomEvent('cookieconsent:accept', {
-      detail: { timestamp: timestamp }
-    }));
-
     // Animate out and replace with minimized button
     banner.classList.remove('cookie-consent-show');
     banner.classList.add('cookie-consent-hide');
@@ -287,11 +279,6 @@ export default function(Manager, options) {
       timestamp: timestamp,
       version: config.version || '1.0'
     });
-
-    // Emit event
-    window.dispatchEvent(new CustomEvent('cookieconsent:deny', {
-      detail: { timestamp: timestamp }
-    }));
 
     // Animate out and replace with minimized button
     banner.classList.remove('cookie-consent-show');

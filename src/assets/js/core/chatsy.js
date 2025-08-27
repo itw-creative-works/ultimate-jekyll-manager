@@ -4,7 +4,7 @@ export default function(Manager, options) {
   const { webManager } = Manager;
 
   // Get chatsy config
-  const chatsy = webManager.config.chatsy || {};
+  const config = webManager.config.chatsy.config;
 
   // Listen for dom ready
   webManager.dom().ready()
@@ -19,9 +19,9 @@ export default function(Manager, options) {
       retries: 2,
       crossorigin: 'anonymous',
       attributes: [
-        { name: 'data-account-id', value: chatsy.config.accountId },
-        { name: 'data-chat-id', value: chatsy.config.chatId },
-        { name: 'data-settings', value: JSON.stringify(chatsy.config.settings) },
+        { name: 'data-account-id', value: config.accountId },
+        { name: 'data-chat-id', value: config.chatId },
+        { name: 'data-settings', value: JSON.stringify(config.settings) },
       ]
     });
   })

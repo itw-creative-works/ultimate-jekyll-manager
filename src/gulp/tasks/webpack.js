@@ -98,11 +98,18 @@ const settings = {
       // For importing the theme
       '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
     },
-    // modules: [
-    //   path.resolve(process.cwd(), 'node_modules'),
-    //   path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules'),
-    //   'node_modules',
-    // ],
+    // Fallbacks for Node.js modules that don't work in the browser
+    fallback: {
+      fs: false,
+      path: false,
+      crypto: false,
+      os: false,
+      util: false,
+      assert: false,
+      stream: false,
+      buffer: false,
+      process: false
+    }
   },
   output: {
     // Set the path to the dist folder
@@ -236,10 +243,41 @@ function webpack(complete) {
         ...settings.output,
         // Set global object for service worker
         globalObject: 'self',
-        // Disable chunk loading since we're using dynamic imports
-        chunkFormat: 'module',
+        // Service worker output format - use umd to avoid module issues
+        libraryTarget: 'umd',
       },
       target: 'webworker',
+      resolve: {
+        ...settings.resolve,
+        // Ensure webpack can find ultimate-jekyll-manager modules
+        modules: [
+          path.resolve(process.cwd(), 'node_modules'),
+          path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules'),
+          'node_modules',
+        ],
+      },
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: {
+              loader: 'babel-loader',
+              options: {
+                sourceMaps: true,
+                presets: [
+                  [require.resolve('@babel/preset-env', {
+                    paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
+                  }), {
+                    modules: 'commonjs'  // Transform ES6 imports to CommonJS for service worker
+                  }]
+                ],
+                compact: Manager.isBuildMode(),
+              }
+            }
+          }
+        ]
+      },
       optimization: {
         ...settings.optimization,
         // Disable runtime chunk for service worker
@@ -393,4 +431,9 @@ function getTemplateReplaceOptions() {
 }
 
 // Default Task
-module.exports = series(webpack, webpackWatcher);
+// Export
+module.exports = series(
+  // Manager.wrapTask('webpack', webpack),
+  webpack,
+  webpackWatcher
+);

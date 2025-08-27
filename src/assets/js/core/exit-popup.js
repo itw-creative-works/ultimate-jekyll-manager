@@ -3,11 +3,8 @@ export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
-  // Get exit popup config
-  const exitPopup = webManager.config.exitPopup || {};
-
   // Get config
-  const config = exitPopup.config;
+  const config = webManager.config.exitPopup.config;
 
   // Storage key for tracking last shown time
   const STORAGE_KEY = 'exitPopup.lastShown';
@@ -22,32 +19,9 @@ export default function(Manager, options) {
 
   // Wait for DOM to be ready
   webManager.dom().ready().then(() => {
-    setupExitPopup();
+    // Setup mouse leave detection without needing the element yet
+    setupMouseLeaveDetection();
   });
-
-  function setupExitPopup() {
-    // Find the modal element
-    const $modalElement = document.getElementById('modal-exit-popup');
-    if (!$modalElement) {
-      console.warn('Exit popup modal element not found');
-      return;
-    }
-
-    // Check if Bootstrap is available
-    if (!window.bootstrap || !window.bootstrap.Modal) {
-      console.warn('Bootstrap Modal not available, exit popup disabled');
-      return;
-    }
-
-    // Initialize Bootstrap modal instance
-    const modal = new window.bootstrap.Modal($modalElement);
-
-    // Update modal content with config
-    updateModalContent($modalElement);
-
-    // Always setup mouse leave detection
-    setupMouseLeaveDetection(modal);
-  }
 
   function updateModalContent($modal) {
     // Update title
@@ -82,7 +56,7 @@ export default function(Manager, options) {
     $modal.removeAttribute('hidden');
   }
 
-  function setupMouseLeaveDetection(modal) {
+  function setupMouseLeaveDetection() {
     // Detect when mouse leaves document
     document.addEventListener('mouseleave', (e) => {
       /* @dev-only:start */
@@ -95,12 +69,12 @@ export default function(Manager, options) {
       // 1. We should show the popup (based on timing/session)
       // 2. Mouse is leaving from the top (Y <= 0 means exiting from top)
       if (shouldShow && e.clientY <= 0) {
-        showExitPopup(modal);
+        showExitPopup();
       }
     });
   }
 
-  function showExitPopup(modal) {
+  function showExitPopup() {
     /* @dev-only:start */
     {
       console.log('Showing exit popup:', config.title, 'after', timeSinceLastShown, 'ms since last shown');
@@ -113,13 +87,29 @@ export default function(Manager, options) {
     // Store timestamp in storage
     webManager.storage().set(STORAGE_KEY, Date.now());
 
-    // If there's a custom handler, call it
-    if (config.handler && typeof config.handler === 'function') {
-      const result = config.handler();
-      // If handler returns false, don't show the modal
-      if (result === false) {
-        return;
-      }
+    // Find the modal element only when needed
+    const $modalElement = document.getElementById('modal-exit-popup');
+    if (!$modalElement) {
+      console.warn('Exit popup modal element not found');
+      return;
+    }
+
+    // Update modal content with config
+    updateModalContent($modalElement);
+
+    // Check if Bootstrap is available
+    if (!window.bootstrap || !window.bootstrap.Modal) {
+      console.warn('Bootstrap Modal not available when trying to show exit popup');
+      return;
+    }
+
+    // Initialize Bootstrap modal instance only when needed
+    let modal;
+    try {
+      modal = new window.bootstrap.Modal($modalElement);
+    } catch (error) {
+      console.error('Error initializing Bootstrap modal:', error);
+      return;
     }
 
     // Show the modal using Bootstrap

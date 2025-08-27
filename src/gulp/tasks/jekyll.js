@@ -34,10 +34,19 @@ const input = [
   '!dist/.jekyll-metadata',
 ];
 const output = '';
-const delay = 500;
+const delay = 1500; // Increased from 500ms to allow distribute task to complete
+// const delay = 500; // Increased from 500ms to allow distribute task to complete
 
 // Task
 async function jekyll(complete) {
+  // Wait for any active tasks (distribute, webpack, etc.) to complete
+  // await new Promise(resolve => {
+  //   Manager.waitForTasks(() => {
+  //     logger.log('All prerequisite tasks complete, proceeding with Jekyll build');
+  //     resolve();
+  //   });
+  // });
+
   // Log
   logger.log('Starting...');
 

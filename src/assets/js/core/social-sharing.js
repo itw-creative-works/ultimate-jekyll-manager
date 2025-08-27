@@ -3,20 +3,8 @@ export default function(Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
-  // Get social sharing config
-  const socialSharing = webManager.config.socialSharing || {};
-
   // Configuration with defaults merged with supplied config
-  const config = {
-    selector: '[data-social-share]',
-    defaultPlatforms: ['facebook', 'twitter', 'linkedin', 'pinterest', 'reddit', 'email', 'copy'],
-    buttonClass: 'btn',
-    showLabels: false,
-    openInNewWindow: true,
-    windowWidth: 600,
-    windowHeight: 400,
-    ...(socialSharing.config || {})
-  };
+  const config = webManager.config.socialSharing.config;
 
   // CDN base URL for Font Awesome SVG icons
   const ICON_BASE_URL = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/svgs';

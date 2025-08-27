@@ -14,18 +14,14 @@ const rootPathProject = Manager.getRootPath('project');
 // Settings
 const CACHE_DIR = '.temp/imagemin';
 const CACHE_BRANCH = 'uj-imagemin';
-const RECHECK_DAYS = 0; // Set to 0 to always check hash
 
 // Variables
 let githubCache;
 
-// Track processed files during development session (file path -> process time)
-const processedFiles = new Map();
-
 // Glob
 const input = [
   // Files to include
-  'src/assets/images/**/*.{jpg,jpeg,png}',
+  'src/assets/images/**/*.{jpg,jpeg,png,gif,svg,webp}',
 
   // Files to exclude
   // '!dist/**',
@@ -33,262 +29,107 @@ const input = [
 const output = 'dist/assets/images';
 const delay = 250;
 
+// Set index
+let index = -1;
+
+// Picture sizes configuration
+const PICTURE_SIZES = [
+  { width: 1024, suffix: '-1024px', formats: ['original', 'webp'] },
+  { width: 640, suffix: '-640px', formats: ['original', 'webp'] },
+  { width: 320, suffix: '-320px', formats: ['original', 'webp'] },
+  { width: null, suffix: '', formats: ['original', 'webp'] }, // Original size
+];
+
+// Get responsive configs once
+const responsiveConfigs = getResponsiveConfigs();
+
 // Main task
 async function imagemin(complete) {
+  // Increment index
+  index++;
+
   // Log
   logger.log('Starting...');
 
-  // Use glob to get file count for matching files
-  let files = glob(input);
+  // Initialize cache on first run
+  if (index === 0) {
+    // Log responsive configurations
+    logger.log('📏 Responsive configurations:', responsiveConfigs);
 
-  // If there's no files, complete
+    // Initialize cache
+    githubCache = await initializeCache();
+  }
+
+  // Get all images
+  const files = glob(input);
   if (files.length === 0) {
-    // Log
     logger.log('Found 0 images to process');
-
-    // Complete
     return complete();
   }
 
-  // Log
   logger.log(`Found ${files.length} images to process`);
 
-  // In development mode, filter out already processed images using our Set
-  let filteredFiles = files;
-  if (!Manager.isBuildMode()) {
-    filteredFiles = files.filter(file => {
-      // Check if we've already processed this file in this session
-      if (processedFiles.has(file)) {
-        // Check if the file has been modified since we processed it
-        const srcStat = jetpack.inspect(file, { times: true });
-        const processedTime = processedFiles.get(file);
-
-        // If file hasn't changed since we processed it, skip
-        if (srcStat && processedTime && srcStat.modifyTime <= processedTime) {
-          return false;
-        }
-      }
-
-      // File needs processing
-      return true;
-    });
-
-    if (filteredFiles.length === 0) {
-      logger.log('✅ All images already processed in this session. Skipping.');
-      return complete();
-    }
-
-    if (filteredFiles.length < files.length) {
-      logger.log(`⏭️ Skipping ${files.length - filteredFiles.length} already processed images`);
-      logger.log(`🔄 Processing ${filteredFiles.length} new/unprocessed images`);
-    }
-
-    // Update files to use filtered list
-    files = filteredFiles;
-  }
-
-  // Check if we should use cache (build mode OR force flag)
-  const forceCache = process.env.UJ_IMAGEMIN_FORCE === 'true';
-  const useCache = Manager.isBuildMode() || forceCache;
-
-  if (forceCache) {
-    logger.log('🚀 Force cache mode enabled (UJ_IMAGEMIN_FORCE=true)');
-  }
-
-  if (useCache) {
-    githubCache = new GitHubCache({
-      branchName: CACHE_BRANCH,
-      cacheDir: CACHE_DIR,
-      logger: logger
-    });
-
-    if (githubCache.hasCredentials()) {
-      // Pull cached images from branch
-      await githubCache.fetchBranch();
-    } else {
-      logger.warn('⚠️ GitHub credentials not available, running without cache');
-    }
-  }
-
-  // Load or create meta cache
+  // Load metadata
   const metaPath = path.join(CACHE_DIR, 'meta.json');
   let meta = githubCache ? githubCache.loadMetadata(metaPath) : {};
 
-  // Track which files need processing
-  const filesToProcess = [];
-  const cachedFiles = [];
-  const updatedFiles = new Set();
-
-  for (const file of files) {
-    const relativePath = path.relative(rootPathProject, file);
-    const hash = githubCache ? githubCache.calculateHash(file) : null;
-
-    // Check if file needs processing
-    const entry = meta[relativePath];
-    const age = entry?.timestamp
-      ? (Date.now() - new Date(entry.timestamp).getTime()) / (1000 * 60 * 60 * 24)
-      : Infinity;
-
-    const useCached = entry
-      && entry.hash === hash
-      && (RECHECK_DAYS === 0 || age < RECHECK_DAYS);
-
-    if (useCached) {
-      // Check if cached versions exist
-      const baseNameWithoutExt = path.basename(file, path.extname(file));
-      const dirName = path.dirname(relativePath);
-
-      const expectedOutputs = [
-        `${baseNameWithoutExt}-1024px.jpg`,
-        `${baseNameWithoutExt}-1024px.webp`,
-        `${baseNameWithoutExt}-640px.jpg`,
-        `${baseNameWithoutExt}-640px.webp`,
-        `${baseNameWithoutExt}-320px.jpg`,
-        `${baseNameWithoutExt}-320px.webp`,
-        `${baseNameWithoutExt}.webp`,
-        path.basename(file), // Original
-      ];
-
-      let allCachedExist = true;
-      for (const outputFile of expectedOutputs) {
-        const cachePath = path.join(CACHE_DIR, 'images', dirName, outputFile);
-        const destPath = path.join(output, dirName, outputFile);
-
-        if (jetpack.exists(cachePath)) {
-          // Copy from cache to destination
-          jetpack.copy(cachePath, destPath, { overwrite: true });
-        } else {
-          allCachedExist = false;
-          break;
-        }
-      }
-
-      if (allCachedExist) {
-        cachedFiles.push(relativePath);
-        logger.log(`📦 Using cache: ${relativePath}`);
-        continue;
-      }
-    }
-
-    // File needs processing
-    filesToProcess.push(file);
-
-    // Update meta entry
-    meta[relativePath] = {
-      timestamp: new Date().toISOString(),
-      hash,
-    };
-
-    updatedFiles.add(metaPath);
+  // Clean metadata of deleted files
+  if (githubCache) {
+    githubCache.cleanDeletedFromMetadata(meta, files, rootPathProject);
   }
 
-  // Log cache summary
-  if (cachedFiles.length > 0) {
-    logger.log(`📦 Used cache for ${cachedFiles.length} images`);
-  }
+  // Determine what needs processing
+  const { filesToProcess, validCachePaths } = await determineFilesToProcess(files, meta, githubCache);
 
-  // If there's no files to process, complete
+  // Handle case where all files are from cache
   if (filesToProcess.length === 0) {
-    logger.log('✅ All images already processed (from cache)');
+    logger.log('✅ All images from cache');
+    await handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePaths, files.length);
     return complete();
   }
 
-  // Log
-  logger.log(`🔄 Processing ${filesToProcess.length} new/changed images`);
+  logger.log(`🔄 Processing ${filesToProcess.length} images`);
 
-  // Process images: resize and convert to webp
-  // Use base option to preserve directory structure
+  // Process images
   return src(filesToProcess, { base: 'src/assets/images' })
-    .pipe(
-      responsive({
-        '**/*.{jpg,jpeg,png}': [
-          // 1024 resized version in original format
-          {
-            width: 1024,
-            rename: { suffix: '-1024px' }
-          },
-          // 1024 resized webp version
-          {
-            width: 1024,
-            format: 'webp',
-            rename: { suffix: '-1024px' }
-          },
-          // Tablet resized version (640px wide) in original format
-          {
-            width: 640,
-            rename: { suffix: '-640px' }
-          },
-          // Tablet resized webp version
-          {
-            width: 640,
-            format: 'webp',
-            rename: { suffix: '-640px' }
-          },
-          // Mobile resized version (320px wide) in original format
-          {
-            width: 320,
-            rename: { suffix: '-320px' }
-          },
-          // Mobile resized webp version
-          {
-            width: 320,
-            format: 'webp',
-            rename: { suffix: '-320px' }
-          },
-          // Original size webp version
-          {
-            format: 'webp',
-            rename: { suffix: '' }
-          },
-          // Original size in original format
-          {
-            rename: { suffix: '' }
-          }
-        ]
-      }, {
-        quality: 80,
-        progressive: true,
-        withMetadata: false,
-        withoutEnlargement: false,
-        skipOnEnlargement: false,
-      })
-    )
+    .pipe(responsive({
+      '**/*.{jpg,jpeg,png}': responsiveConfigs
+    }, {
+      quality: 80,
+      progressive: true,
+      withMetadata: false,
+      withoutEnlargement: false,
+      skipOnEnlargement: false,
+    }))
     .pipe(dest(output))
     .on('data', (file) => {
-      // Also save to cache
+      // Save to cache
       const relativePath = path.relative(path.join(rootPathProject, output), file.path);
       const cachePath = path.join(CACHE_DIR, 'images', relativePath);
-
       jetpack.copy(file.path, cachePath, { overwrite: true });
-      updatedFiles.add(cachePath);
     })
     .on('finish', async () => {
-      // Add processed files to our Set for development mode
-      if (!Manager.isBuildMode()) {
-        const now = Date.now();
-        filesToProcess.forEach(file => {
-          processedFiles.set(file, now);
-        });
-        logger.log(`📝 Tracked ${filesToProcess.length} processed files in session`);
-      }
-
-      // Save meta file
-      if (githubCache) {
+      // Save metadata and push cache
+      if (githubCache && githubCache.hasCredentials()) {
         githubCache.saveMetadata(metaPath, meta);
-      }
 
-      // Push to cache branch if in build mode
-      if (useCache && githubCache && githubCache.hasCredentials()) {
-        await githubCache.pushBranch(updatedFiles, {
-          branchReadme: 'This branch stores processed image cache for faster builds\n'
+        // Collect all cache files to push (metadata will be auto-included)
+        const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
+
+        // Push to GitHub with atomic replacement
+        await githubCache.pushBranch(allCacheFiles, {
+          validFiles: validCachePaths,
+          stats: {
+            timestamp: new Date().toISOString(),
+            sourceCount: files.length,
+            cachedCount: allCacheFiles.length - 1,
+            processedNow: filesToProcess.length,
+            fromCache: files.length - filesToProcess.length
+          }
         });
       }
 
-      // Log
       logger.log('✅ Finished!');
-      logger.log(`📊 Summary: ${filesToProcess.length} processed, ${cachedFiles.length} from cache`);
-
-      // Complete
       return complete();
     });
 }
@@ -315,4 +156,146 @@ function imageminWatcher(complete) {
 }
 
 // Default Task
-module.exports = series(imagemin, imageminWatcher);
+module.exports = series(
+  imagemin,
+  imageminWatcher
+);
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// Build responsive configurations from PICTURE_SIZES
+function getResponsiveConfigs() {
+  const configs = [];
+  PICTURE_SIZES.forEach(size => {
+    size.formats.forEach(format => {
+      const config = {};
+
+      if (size.width) {
+        config.width = size.width;
+      }
+
+      config.rename = { suffix: size.suffix };
+
+      if (format === 'webp') {
+        config.format = 'webp';
+      }
+
+      configs.push(config);
+    });
+  });
+  return configs;
+}
+
+// Initialize or get cache
+async function initializeCache() {
+  const useCache = process.env.UJ_IMAGEMIN_CACHE !== 'false';
+  if (!useCache) {
+    return null;
+  }
+
+  const cache = new GitHubCache({
+    branchName: CACHE_BRANCH,
+    cacheDir: CACHE_DIR,
+    logger: logger,
+    cacheType: 'Image',
+    description: 'processed image cache for faster builds'
+  });
+
+  // Fetch cache from GitHub if credentials available
+  if (cache.hasCredentials()) {
+    await cache.fetchBranch();
+    logger.log(`📦 Cache initialized with ${glob(path.join(CACHE_DIR, '**/*'), { nodir: true }).length} files`);
+  } else {
+    logger.log('📦 Cache enabled (local only - no GitHub credentials)');
+  }
+
+  return cache;
+}
+
+// Determine which files need processing
+async function determineFilesToProcess(files, meta, githubCache) {
+  const filesToProcess = [];
+  const validCachePaths = new Set();
+
+  for (const file of files) {
+    const relativePath = path.relative(rootPathProject, file);
+    const hash = githubCache ? githubCache.calculateHash(file) : null;
+
+    // Track expected outputs for this file
+    const baseName = path.basename(file, path.extname(file));
+    const dirName = path.dirname(relativePath).replace(/^src\/assets\/images\/?/, '');
+    const originalExt = path.extname(file).slice(1); // Remove the dot
+
+    const outputs = [];
+    PICTURE_SIZES.forEach(size => {
+      size.formats.forEach(format => {
+        if (format === 'original') {
+          outputs.push(`${baseName}${size.suffix}.${originalExt}`);
+        } else if (format === 'webp') {
+          outputs.push(`${baseName}${size.suffix}.webp`);
+        }
+      });
+    });
+
+    // Track as valid cache files
+    outputs.forEach(name => validCachePaths.add(path.join('images', dirName, name)));
+
+    // Check if cached and all outputs exist
+    const useCached = meta[relativePath]?.hash === hash;
+    if (useCached) {
+      const allExist = outputs.every(name =>
+        jetpack.exists(path.join(CACHE_DIR, 'images', dirName, name))
+      );
+
+      if (allExist) {
+        // Copy from cache to output
+        outputs.forEach(name => {
+          const src = path.join(CACHE_DIR, 'images', dirName, name);
+          const dst = path.join(output, dirName, name);
+          jetpack.copy(src, dst, { overwrite: true });
+        });
+        logger.log(`📦 Using cache: ${relativePath}`);
+        continue;
+      }
+    }
+
+    // Needs processing
+    filesToProcess.push(file);
+    meta[relativePath] = { hash, timestamp: new Date().toISOString() };
+  }
+
+  return { filesToProcess, validCachePaths };
+}
+
+// Handle cache-only update (when no files need processing)
+async function handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePaths, fileCount) {
+  if (!githubCache || !githubCache.hasCredentials()) {
+    return;
+  }
+
+  // Save metadata
+  githubCache.saveMetadata(metaPath, meta);
+
+  // Check for orphans locally to decide if we need to push
+  const orphanCheck = await githubCache.checkForOrphans(validCachePaths);
+  if (orphanCheck.hasOrphans) {
+    logger.log(`🗑️ Found ${orphanCheck.orphanedCount} orphaned files - updating cache`);
+
+    // Collect all valid cache files
+    const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
+
+    // Push to GitHub (pushBranch will handle orphan detection internally)
+    await githubCache.pushBranch(allCacheFiles, {
+      validFiles: validCachePaths,
+      stats: {
+        timestamp: new Date().toISOString(),
+        sourceCount: fileCount,
+        cachedCount: allCacheFiles.length - 1, // Subtract meta.json
+        processedNow: 0,
+        fromCache: fileCount
+      }
+    });
+  }
+}

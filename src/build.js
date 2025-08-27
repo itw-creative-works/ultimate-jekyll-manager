@@ -8,6 +8,10 @@ const { force } = require('node-powertools');
 const yaml = require('js-yaml');
 const version = require('wonderful-version');
 
+// Global task tracking (shared across all Manager instances)
+global._ultimateJekyllActiveTasks = global._ultimateJekyllActiveTasks || new Map();
+global._ultimateJekyllTaskListeners = global._ultimateJekyllTaskListeners || new Set();
+
 // Class
 function Manager() {
   const self = this;
@@ -26,13 +30,22 @@ Manager.prototype.initialize = function () {
 
 // Logger
 Manager.prototype.logger = function (name) {
-  // Create logger
+  // Check if called as static method (this is not a Manager instance)
+  if (!(this instanceof Manager)) {
+    // For static calls, just return a new logger without caching
+    return new (require('./lib/logger'))(name);
+  }
+
+  // For instance calls, cache the logger
   if (!this._logger) {
     this._logger = new (require('./lib/logger'))(name);
   }
 
   return this._logger;
 };
+
+// Add static method that delegates to prototype
+Manager.logger = Manager.prototype.logger;
 
 // argv
 Manager.getArguments = function () {
@@ -111,7 +124,7 @@ Manager.prototype.getWorkingUrl = Manager.getWorkingUrl;
 // Create dummy file in project dist to force jekyll to build
 Manager.triggerRebuild = function (files, logger) {
   // Ensure logger is defined
-  logger = logger || console;
+  logger = this?._logger || logger || console;
 
   // Normalize files into an array of file names
   if (typeof files === 'string') {
@@ -121,7 +134,7 @@ Manager.triggerRebuild = function (files, logger) {
   } else if (typeof files === 'object' && files !== null) {
     files = Object.keys(files); // Extract keys from object
   } else {
-    logger.error('[sass] Invalid files argument');
+    logger.error('Invalid files for triggerRebuild()');
     return;
   }
 
@@ -145,6 +158,90 @@ Manager.require = function (path) {
   return require(path);
 };
 Manager.prototype.require = Manager.require;
+
+// // Task Tracking System (uses global tracking)
+// Manager.prototype.taskStart = function (taskName) {
+//   const logger = this.logger('task-tracker');
+//   logger.log(`Task started 222: ${taskName}`);
+//   global._ultimateJekyllActiveTasks.set(taskName, {
+//     startTime: Date.now(),
+//     status: 'running'
+//   });
+// };
+
+// Manager.prototype.taskEnd = function (taskName) {
+//   const logger = this.logger('task-tracker');
+//   const task = global._ultimateJekyllActiveTasks.get(taskName);
+//   if (task) {
+//     const duration = Date.now() - task.startTime;
+//     logger.log(`Task completed 222: ${taskName} (${duration}ms)`);
+//     global._ultimateJekyllActiveTasks.delete(taskName);
+
+//     // Notify listeners if all tasks are complete
+//     if (global._ultimateJekyllActiveTasks.size === 0) {
+//       this._notifyTaskListeners();
+//     }
+//   }
+// };
+
+// Manager.prototype.waitForTasks = function (callback) {
+//   const logger = this.logger('task-tracker');
+
+//   if (global._ultimateJekyllActiveTasks.size === 0) {
+//     // No active tasks, proceed immediately
+//     logger.log('No active tasks, proceeding immediately');
+//     callback();
+//   } else {
+//     // Wait for active tasks to complete
+//     const taskNames = Array.from(global._ultimateJekyllActiveTasks.keys());
+//     logger.log(`Waiting for ${taskNames.length} tasks to complete: ${taskNames.join(', ')}`);
+//     global._ultimateJekyllTaskListeners.add(callback);
+//   }
+// };
+
+// Manager.prototype._notifyTaskListeners = function () {
+//   const logger = this.logger('task-tracker');
+//   if (global._ultimateJekyllTaskListeners.size > 0) {
+//     logger.log(`Notifying ${global._ultimateJekyllTaskListeners.size} listeners that all tasks are complete`);
+//     global._ultimateJekyllTaskListeners.forEach(callback => {
+//       callback();
+//     });
+//     global._ultimateJekyllTaskListeners.clear();
+//   }
+// };
+
+// // Wrapper to auto-track gulp tasks
+// Manager.prototype.wrapTask = function (taskName, taskFn) {
+//   const self = this;
+//   return function wrappedTask(done) {
+//     self.taskStart(taskName);
+
+//     // Wrap the done callback to auto-end the task
+//     const wrappedDone = (err) => {
+//       self.taskEnd(taskName);
+//       done(err);
+//     };
+
+//     // Call the original task with wrapped callback
+//     const result = taskFn(wrappedDone);
+
+//     // Handle promises
+//     if (result && typeof result.then === 'function') {
+//       return result.then(
+//         () => {
+//           self.taskEnd(taskName);
+//           done();
+//         },
+//         (err) => {
+//           self.taskEnd(taskName);
+//           done(err);
+//         }
+//       );
+//     }
+
+//     return result;
+//   };
+// };
 
 // Export
 module.exports = Manager;

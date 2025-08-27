@@ -76,7 +76,11 @@ function sass(complete) {
 
         // TODO: Add more load paths like node_modules for things like fontawesome
         // path.resolve(rootPathProject, 'node_modules'),
-      ]
+      ],
+      // Suppress deprecation warnings from Bootstrap
+      quietDeps: true,
+      // Only show warnings once
+      verbose: false
     })
     .on('error', complete))
     .pipe(cleanCSS({
@@ -96,7 +100,7 @@ function sass(complete) {
       logger.log('Finished!');
 
       // Trigger rebuild
-      Manager.triggerRebuild(compiled, logger);
+      Manager.triggerRebuild(compiled);
 
       // Complete
       return complete();
@@ -249,7 +253,7 @@ function generatePageScss() {
   jetpack.write(outputPath, content);
 
   // Trigger a rebuild
-  Manager.triggerRebuild();
+  Manager.triggerRebuild(outputPath);
 }
 
 function isPagePartial(file) {
@@ -267,4 +271,9 @@ function indent(str, spaces) {
 }
 
 // Default Task
-module.exports = series(sass, sassWatcher);
+// Export
+module.exports = series(
+  // Manager.wrapTask('sass', sass),
+  sass,
+  sassWatcher
+);

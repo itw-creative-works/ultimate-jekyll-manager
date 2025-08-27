@@ -85,8 +85,8 @@ Test image optimization with GitHub cache in development mode:
 ```bash
 # Test with GitHub cache (requires GH_TOKEN and GITHUB_REPOSITORY)
 GH_TOKEN=XXX \
-GITHUB_REPOSITORY=owner/repo \
-UJ_IMAGEMIN_FORCE=true \
+GITHUB_REPOSITORY=XXX \
+UJ_IMAGEMIN_CACHE=true \
 npx uj imagemin
 
 # Or run locally without cache

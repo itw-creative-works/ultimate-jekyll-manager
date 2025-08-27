@@ -32,7 +32,7 @@ tasks.forEach((file) => {
   // Log
   logger.log('Loading task:', name);
 
-  // Export task
+  // Load the task (tasks wrap themselves internally if needed)
   exports[name] = require(path.join(__dirname, 'tasks', file));
 });
 

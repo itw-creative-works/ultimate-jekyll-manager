@@ -7,17 +7,7 @@ export default function(Manager, options) {
   const TRANSPARENT_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
   // Configuration
-  const config = {
-    selector: '[data-lazy]',
-    rootMargin: '50px 0px', // Start loading 50px before element comes into view
-    threshold: 0.01, // Trigger when 1% of element is visible
-    loadedClass: 'lazy-loaded',
-    loadingClass: 'lazy-loading',
-    errorClass: 'lazy-error'
-  };
-
-  // Merge with any provided options
-  Object.assign(config, options?.lazyLoading || {});
+  const config = webManager.config.lazyLoading.config;
 
   // Track loaded elements to avoid reprocessing
   const loadedElements = new WeakSet();

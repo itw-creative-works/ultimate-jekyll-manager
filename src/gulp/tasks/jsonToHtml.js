@@ -118,7 +118,7 @@ function jsonToHtml(complete) {
     logger.log('Finished!');
 
     // Trigger rebuild
-    Manager.triggerRebuild(compiled, logger);
+    Manager.triggerRebuild(compiled);
 
     // Complete
     return complete();
@@ -147,4 +147,8 @@ function jsonToHtmlWatcher(complete) {
 }
 
 // Default Task
-module.exports = series(jsonToHtml, jsonToHtmlWatcher);
+module.exports = series(
+  // Manager.wrapTask('jsonToHtml', jsonToHtml),
+  jsonToHtml,
+  jsonToHtmlWatcher
+);

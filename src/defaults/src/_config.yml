@@ -110,12 +110,22 @@ web_manager:
     enabled: true
     config:
       timeout: 1000 * 60 * 60 * 4
-      handler: null
       title: "Want 15% off?"
       message: "Get 15% off your purchase of our Premium plans."
       okButton:
         text: "Claim 15% Discount"
         link: "/pricing"
+  lazyLoading:
+    enabled: true
+    config:
+      rootMargin: "50px 0px"
+      threshold: 0.01
+  socialSharing:
+    enabled: false
+    config:
+      defaultPlatforms: ["facebook", "twitter", "linkedin", "pinterest", "reddit", "email", "copy"]
+      buttonClass: ""
+      openInNewWindow: true
   pushNotifications:
     enabled: true
     config:

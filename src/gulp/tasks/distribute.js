@@ -19,7 +19,12 @@ const input = [
   'src/**/*',
 
   // Files to exclude
-  // '!dist/**',
+  // Images handled by imagemin
+  '!src/**/*.{jpg,jpeg,png,gif,svg,webp}',
+  // JS files handled by webpack
+  '!src/**/*.js',
+  // CSS/SCSS files handled by sass task
+  '!src/**/*.{css,scss,sass}',
 ];
 const output = 'dist';
 const delay = 250;
@@ -40,9 +45,7 @@ function distribute() {
     return src(input, {
       base: 'src',
       dot: true,
-      encoding: false,
-      // ignore: ['**/assets/images/**/*.{jpg,jpeg,png,gif,svg,webp}'] // Images handled by imagemin
-      ignore: ['**/assets/images/**/*.{jpg,jpeg,png}'] // Images handled by imagemin
+      encoding: false
     })
       .pipe(customTransform())
       .pipe(createTemplateTransform({site: config}))
@@ -113,6 +116,8 @@ function distributeWatcher(complete) {
 }
 
 // Default Task
-module.exports = series(distribute, distributeWatcher);
-
-
+module.exports = series(
+  // Manager.wrapTask('distribute', distribute),
+  distribute,
+  distributeWatcher
+);

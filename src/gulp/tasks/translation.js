@@ -25,12 +25,12 @@ const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
 // Check if BEM env variable is set
-// get cached translations JSON (only once per run, so keep track of how many times this has run) from branch uj-translations
+// get cached translations JSON (only once per run, so keep track of how many times this has run) from branch uj-translation
 // loop thru all html and md pages in pages/ dir (main and project)
   // SKIP files in _translations dir
 // if there is no translation (or translation is too old), send to AI @ itw
 // save the translation into the cache (file path, date) and write the file to _translations/{code}/{original file path + name}
-// push the updated translation JSON to the branch uj-translations
+// push the updated translation JSON to the branch uj-translation
 
 // Settings
 const AI = {
@@ -40,7 +40,7 @@ const AI = {
 }
 const CACHE_DIR = '.temp/translations';
 const RECHECK_DAYS = 0;
-const TRANSLATION_BRANCH = 'uj-translations';
+const TRANSLATION_BRANCH = 'uj-translation';
 // const LOUD = false;
 const LOUD = Manager.isServer() || process.env.UJ_LOUD_LOGS === 'true';
 const CONTROL = 'UJ-TRANSLATION-CONTROL';
@@ -183,7 +183,7 @@ async function processTranslation() {
     return logger.error('❌ openAIKey not set. Translation requires OpenAI API key.');
   }
 
-  // Pull latest cached translations from uj-translations branch
+  // Pull latest cached translations from uj-translation branch
   // if (Manager.isBuildMode()) {
     await fetchTranslationsBranch();
   // }
@@ -513,7 +513,7 @@ async function processTranslation() {
   logger.log(`   📤 Output cost: $${outputCost.toFixed(4)}`);
   logger.log(`   💵 Total cost:  $${totalCost.toFixed(4)}`);
 
-  // Push updated translation cache back to uj-translations
+  // Push updated translation cache back to uj-translation
   if (Manager.isBuildMode()) {
     await pushTranslationBranch(updatedFiles);
   }
@@ -1014,7 +1014,7 @@ async function fetchTranslationsBranch() {
     const { data: commit } = await octokit.git.createCommit({
       owner,
       repo,
-      message: 'Initial empty uj-translations branch with placeholder',
+      message: 'Initial empty uj-translation branch with placeholder',
       tree: tree.sha,
       parents: []
     })

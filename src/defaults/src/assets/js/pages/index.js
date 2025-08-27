@@ -1,16 +1,13 @@
-// Libraries
-// ...
+// @TODO: DELETE THIS FILE when the project is ready
 
 // Module
-export default (Manager, options) => {
-  return new Promise(async function (resolve, reject) {
-    // Shortcuts
-    const { webManager } = Manager;
+export default async (Manager, options) => {
+  // Shortcuts
+  const { webManager } = Manager;
 
-    // Custom code
-    // ...
+  // Log
+  console.log('Loaded #project index.js');
 
-    // Resolve
-    return resolve();
-  });
+  // Custom code
+  // ...
 }

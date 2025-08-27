@@ -1,11 +1,14 @@
 // Import Ultimate Jekyll Manager
-const Manager = new (require('ultimate-jekyll-manager'));
+import Manager from 'ultimate-jekyll-manager';
+
+// Create instance
+const manager = new Manager();
 
 // Initialize
-Manager.initialize()
+manager.initialize()
 .then(() => {
   // Shortcuts
-  const { webManager } = Manager;
+  const { webManager } = manager;
 
   // Log
   console.log('Ultimate Jekyll Manager initialized successfully');
