@@ -7,7 +7,7 @@ export default function(Manager, options) {
   const config = webManager.config.socialSharing.config;
 
   // CDN base URL for Font Awesome SVG icons
-  const ICON_BASE_URL = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/svgs';
+  const ICON_BASE_URL = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.0.0/svgs';
 
   // Platform configurations
   const platforms = {

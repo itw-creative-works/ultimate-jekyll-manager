@@ -10,10 +10,9 @@ const cheerio = require('cheerio');
 const crypto = require('crypto');
 const yaml = require('js-yaml');
 const { execute, wait, template } = require('node-powertools');
-const { Octokit } = require('@octokit/rest')
-const AdmZip = require('adm-zip') // npm install adm-zip
 
 // Utils
+const GitHubCache = require('./utils/github-cache');
 const collectTextNodes = require('./utils/collectTextNodes');
 const formatDocument = require('./utils/formatDocument');
 
@@ -38,9 +37,9 @@ const AI = {
   inputCost: 0.40, // $0.40 per 1M tokens
   outputCost: 1.60, // $1.60 per 1M tokens
 }
-const CACHE_DIR = '.temp/translations';
+const CACHE_DIR = '.temp/translation';
+const CACHE_BRANCH = 'uj-translation';
 const RECHECK_DAYS = 0;
-const TRANSLATION_BRANCH = 'uj-translation';
 // const LOUD = false;
 const LOUD = Manager.isServer() || process.env.UJ_LOUD_LOGS === 'true';
 const CONTROL = 'UJ-TRANSLATION-CONTROL';
@@ -76,7 +75,8 @@ const SYSTEM_PROMPT = `
 `;
 
 // Variables
-let octokit;
+let githubCache;
+let index = -1;
 
 // Glob
 const input = [
@@ -88,6 +88,9 @@ const delay = 250;
 
 // Task
 async function translation(complete) {
+  // Increment index
+  index++;
+
   // Log
   logger.log('Starting...');
 
@@ -97,23 +100,13 @@ async function translation(complete) {
     return complete();
   }
 
-  // Quit if no GH_TOKEN is set
-  if (!process.env.GH_TOKEN) {
-    logger.error('❌ GH_TOKEN not set. Translation requires GitHub access token.');
-    return complete();
-  }
-
-  // Quit if no GITHUB_REPOSITORY is set
-  if (!process.env.GITHUB_REPOSITORY) {
-    logger.error('❌ GITHUB_REPOSITORY not set. Translation requires GitHub repository information.');
-    return complete();
-  }
-
-  if (!octokit) {
-    // Initialize Octokit for GitHub API
-    octokit = new Octokit({
-      auth: process.env.GH_TOKEN,
-    });
+  // Initialize cache on first run
+  if (index === 0) {
+    githubCache = await initializeCache();
+    if (!githubCache) {
+      logger.error('❌ Translation cache requires GitHub credentials (GH_TOKEN and GITHUB_REPOSITORY)');
+      return complete();
+    }
   }
 
   // Log ignored pages
@@ -159,7 +152,9 @@ function translationWatcher(complete) {
 }
 
 // Default Task
-module.exports = series(translation);
+module.exports = series(
+  translation
+);
 
 // Process translation
 async function processTranslation() {
@@ -171,6 +166,7 @@ async function processTranslation() {
   if (!enabled) {
     return logger.warn('🚫 Translation is disabled in config.');
   }
+
   if (!languages.length) {
     return logger.warn('🚫 No target languages configured.');
   }
@@ -182,11 +178,6 @@ async function processTranslation() {
   if (!openAIKey) {
     return logger.error('❌ openAIKey not set. Translation requires OpenAI API key.');
   }
-
-  // Pull latest cached translations from uj-translation branch
-  // if (Manager.isBuildMode()) {
-    await fetchTranslationsBranch();
-  // }
 
   // Get files
   const allFiles = glob(input, getGlobOptions());
@@ -513,9 +504,20 @@ async function processTranslation() {
   logger.log(`   📤 Output cost: $${outputCost.toFixed(4)}`);
   logger.log(`   💵 Total cost:  $${totalCost.toFixed(4)}`);
 
-  // Push updated translation cache back to uj-translation
-  if (Manager.isBuildMode()) {
-    await pushTranslationBranch(updatedFiles);
+  // Push updated translation cache back to cache branch
+  if (githubCache && githubCache.hasCredentials()) {
+    // Collect all cache files to push
+    const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
+
+    // Push to GitHub
+    await githubCache.pushBranch(allCacheFiles, {
+      stats: {
+        timestamp: new Date().toISOString(),
+        sourceCount: allFiles.length,
+        cachedCount: allCacheFiles.length,
+        details: `Translated ${allFiles.length} pages to ${languages.length} languages`
+      }
+    });
   }
 }
 
@@ -970,175 +972,31 @@ function getGlobOptions() {
   }
 }
 
-// Git Sync: Pull
-async function fetchTranslationsBranch() {
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
-  logger.log(`📥 Syncing full branch '${TRANSLATION_BRANCH}' from ${owner}/${repo}`)
-
-  // Check if the translations branch exists
-  let branchExists = false
-  try {
-    await octokit.repos.getBranch({ owner, repo, branch: TRANSLATION_BRANCH })
-    branchExists = true
-  } catch (e) {
-    // If the error is not a 404 (branch not found), rethrow it
-    if (e.status !== 404) throw e
+// Initialize or get cache
+async function initializeCache() {
+  const useCache = process.env.UJ_TRANSLATION_CACHE !== 'false';
+  if (!useCache) {
+    return null;
   }
 
-  if (!branchExists) {
-    logger.warn(`⚠️ Branch '${TRANSLATION_BRANCH}' does not exist. Creating blank branch with placeholder...`)
+  const cache = new GitHubCache({
+    branchName: CACHE_BRANCH,
+    cacheDir: CACHE_DIR,
+    logger: logger,
+    cacheType: 'Translation',
+    description: 'cached translations for faster builds'
+  });
 
-    // 1. Create a blob (file object) for the placeholder content
-    const { data: blob } = await octokit.git.createBlob({
-      owner,
-      repo,
-      content: 'This branch is used for storing translation caches\n',
-      encoding: 'utf-8'
-    })
-
-    // 2. Create a tree structure using the blob for a README.md file
-    const { data: tree } = await octokit.git.createTree({
-      owner,
-      repo,
-      tree: [
-        {
-          path: 'README.md',
-          mode: '100644', // Standard file permission
-          type: 'blob',
-          sha: blob.sha
-        }
-      ]
-    })
-
-    // 3. Commit the tree (creates a new commit with no parents)
-    const { data: commit } = await octokit.git.createCommit({
-      owner,
-      repo,
-      message: 'Initial empty uj-translation branch with placeholder',
-      tree: tree.sha,
-      parents: []
-    })
-
-    // 4. Create a new branch reference pointing to the commit
-    await octokit.git.createRef({
-      owner,
-      repo,
-      ref: `refs/heads/${TRANSLATION_BRANCH}`,
-      sha: commit.sha
-    })
-
-    logger.log(`✅ Created empty branch '${TRANSLATION_BRANCH}' with .placeholder`)
-    return
+  // Check if credentials available
+  if (!cache.hasCredentials()) {
+    return null;
   }
 
-  // If the branch exists, download it as a ZIP archive
-  const zipBallArchive = await octokit.repos.downloadZipballArchive({
-    owner,
-    repo,
-    ref: TRANSLATION_BRANCH,
-  })
+  // Fetch cache from GitHub if credentials available
+  await cache.fetchBranch();
+  logger.log(`📦 Translation cache initialized with ${glob(path.join(CACHE_DIR, '**/*'), { nodir: true }).length} files`);
 
-  // Define path to save the downloaded zip and extraction destination
-  const zipPath = path.join('.temp', `${repo}.zip`)
-  const extractDir = '.temp'
-
-  // Write the ZIP archive to disk
-  jetpack.write(zipPath, Buffer.from(zipBallArchive.data))
-  logger.log(`📦 Saved archive to ${zipPath}`)
-
-  // Extract the ZIP archive contents
-  const zip = new AdmZip(zipPath)
-  zip.extractAllTo(extractDir, true)
-  logger.log(`✅ Extracted translation branch to ${extractDir}`)
-
-  // Get the name of the root folder from the extracted archive
-  const extractedRoot = jetpack.list(extractDir).find(name => name.startsWith(`${owner}-${repo}-`))
-  const extractedFullPath = path.join(extractDir, extractedRoot)
-  const targetPath = path.join(extractDir, 'translations');
-
-  // Remove any existing 'translations' folder and move the extracted folder there
-  if (jetpack.exists(targetPath)) jetpack.remove(targetPath)
-  jetpack.move(extractedFullPath, targetPath)
-
-  // Clean up the ZIP file
-  jetpack.remove(zipPath)
-  logger.log(`✅ Renamed ${extractedRoot} to 'translations'`)
-}
-
-// Git Sync: Push
-async function pushTranslationBranch(updatedFiles) {
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-  const localRoot = path.join('.temp', 'translations');
-
-  // Convert Set to array
-  const files = [...updatedFiles];
-  logger.log(`📤 Pushing ${files.length} updated file(s) to '${TRANSLATION_BRANCH}'`);
-  // console.log(files);
-
-  // Abort if .temp/translations doesn't exist
-  if (!jetpack.exists(localRoot)) {
-    logger.warn(`⚠️ Nothing to push — '${localRoot}' does not exist.`);
-    return;
-  }
-
-  for (const filePath of files) {
-    const fullPath = path.resolve(filePath);
-
-    // Skip missing files
-    if (!jetpack.exists(fullPath)) {
-      logger.warn(`⚠️ Skipping missing file: ${filePath}`);
-      continue;
-    }
-
-    const content = jetpack.read(fullPath, 'utf8');
-    const encoded = Buffer.from(content).toString('base64');
-
-    // Make sure the path is inside the .temp/translations folder
-    const relativePath = path.relative(localRoot, fullPath).replace(/\\/g, '/');
-    if (relativePath.startsWith('..')) {
-      logger.warn(`⚠️ Skipping file outside translation folder: ${relativePath}`);
-      continue;
-    }
-
-    // Check if file already exists in the branch to get SHA
-    let sha = null;
-    let remoteHash = null;
-    try {
-      const { data } = await octokit.repos.getContent({
-        owner,
-        repo,
-        path: relativePath,
-        ref: TRANSLATION_BRANCH
-      });
-
-      sha = data.sha; // Required for updates
-      remoteHash = crypto.createHash('sha256').update(Buffer.from(data.content, 'base64')).digest('hex');
-    } catch (e) {
-      if (e.status !== 404) throw e; // 404 = new file, which is fine
-    }
-
-    // Compare local and remote hashes, skip upload if identical
-    const localHash = crypto.createHash('sha256').update(content).digest('hex');
-    if (sha && localHash === remoteHash) {
-      logger.log(`⏭️ Skipped (no change): ${relativePath}`);
-      continue;
-    }
-
-    // Create or update file
-    await octokit.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      branch: TRANSLATION_BRANCH,
-      path: relativePath,
-      message: `🔄 Update ${relativePath}`,
-      content: encoded,
-      sha
-    });
-
-    logger.log(`✅ Uploaded ${relativePath}`);
-  }
-
-  logger.log(`🎉 Finished pushing ${files.length} file(s) to '${TRANSLATION_BRANCH}'`);
+  return cache;
 }
 
 async function fetchOpenAIKey() {

@@ -130,7 +130,7 @@ testimonials:
 </section>
 
 <!-- Features Section -->
-<section class="py-8 bg-body-tertiary">
+<section class="py-8">
   <div class="container">
     <div class="text-center mb-5">
       <h2 class="display-4 fw-bold mb-3">
@@ -142,13 +142,13 @@ testimonials:
     <div class="row g-4">
       {% for feature in page.resolved.features %}
       <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0 shadow-sm text-center rounded-3">
+        <div class="card h-100 border-0 shadow-sm text-center rounded-3 bg-body-tertiary">
           <div class="card-body p-4">
             <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
               {% uj_icon feature.icon, "text-white fs-2" %}
             </div>
             <h4 class="fw-bold mb-3">{{ feature.title }}</h4>
-            <p class="text-muted">{{ feature.description }}</p>
+            <p class="text-muted mb-0">{{ feature.description }}</p>
           </div>
         </div>
       </div>
@@ -202,12 +202,10 @@ testimonials:
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-8 bg-body-tertiary">
+<section class="py-8">
   <div class="container">
     <div class="text-center mb-5">
-      <h2 class="display-5 fw-bold mb-3">
-        What Our Students Say About <span class="gradient-text">{{ site.brand.name }}</span>
-      </h2>
+      <h2 class="display-5 fw-bold mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
     </div>
 
     {% if page.resolved.testimonials %}
@@ -222,8 +220,8 @@ testimonials:
         {% for testimonial in page.resolved.testimonials %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
           <div class="row justify-content-center">
-            <div class="col-lg-8">
-              <div class="card border-0 shadow-lg rounded-3">
+            <div class="col-md-8">
+              <div class="card border-0 shadow-sm bg-body-tertiary rounded-3">
                 <div class="card-body p-5 text-center">
                   <div class="d-flex justify-content-center mb-4">
                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
@@ -231,12 +229,9 @@ testimonials:
                     </div>
                   </div>
                   <blockquote class="mb-4">
-                    <p class="fs-4 fw-bold text-dark">"{{ testimonial.quote }}"</p>
+                    <p class="fs-4 fw-bold">"{{ testimonial.quote }}"
                   </blockquote>
-                  <div>
-                    <h5 class="fw-bold mb-1">{{ testimonial.author }}</h5>
-                    <p class="text-muted mb-0">{{ testimonial.role }} at {{ testimonial.company }}</p>
-                  </div>
+                  <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                 </div>
               </div>
             </div>

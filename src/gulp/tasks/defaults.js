@@ -97,20 +97,23 @@ const delay = 250;
 let index = -1;
 
 // Main task
-function defaults(complete) {
+function defaults(complete, changedFile) {
   // Increment index
   index++;
 
   // Log
   logger.log('Starting...');
-  logger.log('input', input)
+  
+  // Use changedFile if provided, otherwise use all inputs
+  const filesToProcess = changedFile ? [changedFile] : input;
+  logger.log('input', filesToProcess)
 
   // Log files being used
   logger.log('Files being used:');
 
   // Complete
   // return src(input, { base: 'src' })
-  return src(input, { base: `${rootPathPackage}/dist/defaults`, dot: true, encoding: false })  // Add base to preserve directory structure
+  return src(filesToProcess, { base: `${rootPathPackage}/dist/defaults`, dot: true, encoding: false })  // Add base to preserve directory structure
     // .pipe(through2.obj(function (file, _, callback) {
     //   // Log each file being processed
     //   logger.log(`  - ${file.path}`);
@@ -143,7 +146,7 @@ function customTransform() {
 
     // Get relative path
     const relativePath = path.relative(file.base, file.path).replace(/\\/g, '/');
-    
+
     // Check if this is a binary file BEFORE any processing
     const isBinaryFile = /\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|otf|eot|pdf|zip|tar|gz|mp3|mp4|avi|mov)$/i.test(file.path);
 
@@ -229,9 +232,11 @@ function defaultsWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay, dot: true }, defaults)
-  .on('change', (path) => {
-    logger.log(`[watcher] File changed (${path})`);
+  watch(input, { delay: delay, dot: true })
+  .on('change', (changedPath) => {
+    logger.log(`[watcher] File changed (${changedPath})`);
+    // Call defaults with just the changed file
+    defaults(() => {}, changedPath);
   });
 
   // Complete
