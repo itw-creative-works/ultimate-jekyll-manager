@@ -1,0 +1,14 @@
+// Muted link style that looks like text-muted
+.link-muted {
+  --bs-text-opacity: 1;
+  color: var(--bs-secondary-color) !important;
+  text-decoration: none;
+  transition: opacity 0.15s ease-in-out;
+
+  &:hover,
+  &:focus {
+    color: var(--bs-secondary-color) !important;
+    text-decoration: underline;
+    opacity: 0.75;
+  }
+}

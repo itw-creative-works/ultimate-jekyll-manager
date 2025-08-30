@@ -8,7 +8,8 @@ sitemap:
 member:
   name: Alex Raeburn
   position: Social Media Manager
-  excerpt: "Alex is an experienced social media expert from Beverly Hills, CA and is a major contributor to our blog."
+  description: "Alex is an experienced social media expert from Beverly Hills, CA and is a major contributor to our blog."
+  id: alex
 
   location: Beverly Hills, CA
   skills: Writing, Blog Management

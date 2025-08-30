@@ -23,10 +23,6 @@ const inputMain = [
   // Project entry point
   'src/assets/js/main.js',
 
-  // Page-specific js
-  `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
-  'src/assets/js/pages/**/*.js',
-
   // Modules (standalone webpacked scripts)
   `${rootPathPackage}/dist/assets/js/modules/**/*.js`,
   'src/assets/js/modules/**/*.js',
@@ -38,6 +34,22 @@ const inputMain = [
 const inputServiceWorker = [
   // Project service worker
   'src/service-worker.js',
+];
+
+// Additional files to watch (but not compile as entry points)
+const watchInput = [
+  ...inputMain,
+  ...inputServiceWorker,
+  // Page-specific js - watch for changes but don't compile as entry points
+  `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
+  'src/assets/js/pages/**/*.js',
+
+  // Theme js - watch for changes but don't compile as entry points
+  `${rootPathPackage}/dist/assets/themes/**/*.js`,
+  'src/assets/themes/**/*.js',
+
+  // So we can watch for changes while we're developing web-manager
+  `${rootPathPackage}/../web-manager/src`,
 ];
 
 // Files to copy directly without webpack processing
@@ -315,16 +327,8 @@ function webpackWatcher(complete) {
   // Log
   logger.log('[watcher] Watching for changes...');
 
-  // Build watched input
-  const inputWatched = [
-    ...inputMain,
-    ...inputServiceWorker,
-    // So we can watch for changes while we're developing web-manager
-    `${rootPathPackage}/../web-manager/src`,
-  ];
-
   // Watch for changes
-  watch(inputWatched, { delay: delay, dot: true }, webpack)
+  watch(watchInput, { delay: delay, dot: true }, webpack)
   .on('change', (path) => {
     // Log
     logger.log(`[watcher] File changed (${path})`);
@@ -371,12 +375,13 @@ function updateEntryPoints(inputArray) {
     }
 
     // Don't include pages in the entry points
-    if (
-      file.includes('assets/js/pages/')
-      || file.includes('assets/js/global.js')
-    ) {
-      return acc;
-    }
+    // if (
+    //   file.includes('assets/js/pages/')
+    //   || file.includes('assets/js/global.js')
+    //   || file.includes('assets/themes/')
+    // ) {
+    //   return acc;
+    // }
 
     // Update entry points
     acc[name] = file;

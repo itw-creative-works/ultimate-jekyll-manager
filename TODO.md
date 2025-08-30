@@ -65,7 +65,7 @@ MIGRATIONS
     - adsense-in-feed
     - adsense-multiplex
 post:
-  excerpt: ---> description: (IN THE ACTUAL POSTS)
+  description: ---> description: (IN THE ACTUAL POSTS)
 
 site.time | date: '%s'  --> site.uj.cache_breaker
 

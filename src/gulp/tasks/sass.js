@@ -37,18 +37,28 @@ const input = [
   // Project entry point
   'src/assets/css/main.scss',
 
-  // Main page css
+  // Page-specific CSS
   `${rootPathPackage}/dist/assets/css/pages/**/*.scss`,
-
-  // Project page css
   'src/assets/css/pages/**/*.scss',
 
   // Files to exclude
   // '!dist/**',
 ];
+
+// Additional files to watch (but not compile as entry points)
+const watchInput = [
+  ...input,
+  // Theme CSS - watch for changes but don't compile as entry points
+  `${rootPathPackage}/dist/assets/themes/**/*.scss`,
+  'src/assets/themes/**/*.scss',
+];
+
 const output = 'dist/assets/css';
 const delay = 250;
 const compiled = {};
+
+// Configuration
+const MAIN_BUNDLE_PAGE_PARTIALS = false; // Set to true to merge pages into _page-specific.scss, false to compile separately
 
 // SASS Compilation Task
 function sass(complete) {
@@ -60,8 +70,8 @@ function sass(complete) {
 
   // Compile
   return src(input, { sourcemaps: true })
-    // Skip page partials
-    .pipe(filter(file => !isPagePartial(file.path), { restore: true }))
+    // Skip files based on configuration
+    .pipe(filter(file => !shouldSkip(file.path), { restore: true }))
     // Compile SASS
     .pipe(compiler({
       loadPaths: [
@@ -87,10 +97,16 @@ function sass(complete) {
       format: Manager.isBuildMode() ? 'compressed' : 'beautify',
     }))
     .pipe(rename((file) => {
+      // Add bundle to the name
       file.basename += '.bundle';
 
+      // If its NOT basename === main.bundle, add pages/ before dirname
+      if (file.basename !== 'main.bundle') {
+        file.dirname = `pages/${file.dirname}`;
+      }
+
       // Track the full output path
-      const fullPath = path.resolve(output, `${file.basename}${file.extname}`);
+      const fullPath = path.resolve(output, file.dirname, `${file.basename}${file.extname}`);
       compiled[fullPath] = true;
     }))
     .pipe(dest(output, { sourcemaps: '.' }))
@@ -119,7 +135,7 @@ function sassWatcher(complete) {
   logger.log('[watcher] Watching for changes...');
 
   // Watch for changes
-  watch(input, { delay: delay, dot: true }, sass)
+  watch(watchInput, { delay: delay, dot: true }, sass)
   .on('change', (path) => {
     logger.log(`[watcher] File changed (${path})`);
   });
@@ -183,6 +199,20 @@ function findPageFiles() {
 }
 
 function generatePageScss() {
+  // Only generate _page-specific.scss if we're skipping page partials
+  if (!MAIN_BUNDLE_PAGE_PARTIALS) {
+    // When compiling pages separately, we can either:
+    // 1. Create an empty file with a comment
+    // 2. Create imports to the compiled page bundles (for backwards compatibility)
+    const outputPath = path.resolve(rootPathProject, 'dist/assets/css/_page-specific.scss');
+    const content = '/*\n  AUTO-GENERATED PAGE-SPECIFIC SCSS\n  Pages are now compiled separately when MAIN_BUNDLE_PAGE_PARTIALS = false\n  Find compiled page CSS in dist/assets/css/pages/\n*/\n\n';
+
+    jetpack.write(outputPath, content);
+    Manager.triggerRebuild(outputPath);
+    return;
+  }
+
+  // Original behavior when MAIN_BUNDLE_PAGE_PARTIALS is true
   // Get all page files to extract permalinks
   const pageFiles = findPageFiles();
 
@@ -258,6 +288,14 @@ function generatePageScss() {
 
 function isPagePartial(file) {
   return file.includes('/assets/css/pages/') && file.endsWith('index.scss');
+}
+
+function shouldSkip(file) {
+  // Skip page partials only if MAIN_BUNDLE_PAGE_PARTIALS is true
+  if (MAIN_BUNDLE_PAGE_PARTIALS && isPagePartial(file)) {
+    return true;
+  }
+  return false;
 }
 
 // Indentify the output

@@ -1,57 +1,55 @@
-<!-- Page Variables -->
-{% assign page-is-post = false %}
-{%- iftruthy page.resolved.post.id -%}
-  {% assign page-is-post = true %}
-{% endiftruthy %}
-
-<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, minimum-scale=1, maximum-scale=5"> --> <!-- DISABLED 4/8/23 to prevent auto-zooming on text fields -->
+<!-- Meta Variables -->
 {% assign page-viewport = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" %}
 {%- iftruthy page.resolved.meta.viewport -%}
   {% assign page-viewport = page.resolved.meta.viewport | liquify %}
 {% endiftruthy %}
 
-{% assign page-referrer = 'strict-origin-when-cross-origin' %}
+{% assign page-referrer = "strict-origin-when-cross-origin" %}
 {%- iftruthy page.resolved.meta.referrer -%}
   {% assign page-referrer = page.resolved.meta.referrer | liquify %}
 {%- endiftruthy -%}
 
-{% assign page-keywords = '' %}
+{% assign page-keywords = "" %}
 {%- iftruthy page.resolved.meta.keywords -%}
   {% assign page-keywords = page.resolved.meta.keywords | liquify %}
 {%- endiftruthy -%}
 
-{% assign page-title = page.resolved.meta.title | liquify %}
-{%- iftruthy page.resolved.post.title -%}
-  {% assign page-title = page.resolved.post.title | liquify %}
-{%- endiftruthy -%}
-
-{% assign page-description = page.resolved.meta.description | liquify %}
-{%- iftruthy page.resolved.post.description -%}
-  {% assign page-description = page.resolved.post.description | liquify %}
-{%- endiftruthy -%}
-
-{%- if page-is-post and page.post.id != null and page.post.id != '' -%}
-  {% capture page-image %}{{ site.url }}/assets/images/blog/posts/post-{{ page.post.id }}/{{ page.canonical.url | split: '/' | last }}.jpg{% endcapture %}
-{%- elsif page.meta.og-image != null and page.meta.og-image != '' -%}
-  {% capture page-image %}{%- if page.meta.og-image contains '://' -%}{%- else -%}{{ site.url }}/assets/images/og{%- endif -%}{{ page.meta.og-image }}{% endcapture %}
-{%- else -%}
-  {% capture page-image %}{%- if site.meta.og-image contains '://' -%}{%- else -%}{{ site.url }}/assets/images/og{%- endif -%}{{ site.meta.og-image }}{% endcapture %}
-{%- endif -%}
-
-{% assign page-og-type = 'website' %}
-{%- if page-is-post -%}
-  {% assign page-og-type = 'article' %}
-{%- endif -%}
-
-{% assign favicon-path = site.url | append: '/assets/images/favicon' %}
+{% assign favicon-path = site.url | append: "/assets/images/favicon" %}
 {%- iftruthy page.resolved.favicon.path -%}
   {% assign favicon-path = page.resolved.favicon.path %}
 {%- endiftruthy -%}
 
-{% assign page-robots = 'index' %}
+{% assign page-robots = "index" %}
 {%- if page.resolved.meta.index == false -%}
-  {% assign page-robots = 'noindex' %}
+  {% assign page-robots = "noindex" %}
 {%- endif -%}
+
+{% capture page-css-path %}/assets/css/pages{{ page.canonical.path }}/index.bundle.css{% endcapture %}
+
+<!-- Assign Default Dynamic Variables -->
+{% assign page-title = page.resolved.meta.title | liquify %}
+{% assign page-description = page.resolved.meta.description | liquify %}
+{% assign page-image = page.resolved.meta.image | liquify %}
+{% assign page-og-type = "website" %}
+
+<!-- Assign Post Dynamic Variables -->
+{%- iftruthy page.resolved.post.id -%}
+  {% assign page-title = page.resolved.post.title | liquify %}
+  {% assign page-description = page.resolved.post.description | liquify %}
+  {% capture page-image %}{%- uj_post page.resolved.post.id, "image" -%}{% endcapture %}
+  {% assign page-og-type = "article" %}
+{% endiftruthy %}
+
+<!-- Assign Member Dynamic Variables -->
+{%- iftruthy page.resolved.member.id -%}
+  {% assign page-title = page.resolved.member.name | liquify %}
+  {% assign page-description = page.resolved.member.description | liquify %}
+  {% capture page-image %}{%- uj_member page.resolved.member.id, "image" -%}{% endcapture %}
+  {% assign page-og-type = "profile" %}
+{% endiftruthy %}
+
+<!-- Resolve Image -->
+{% capture page-image %}{% uj_external page-image %}{% endcapture %}
 
 {% capture page-ie-script %}
   <style media="screen">
@@ -60,8 +58,6 @@
     }
   </style>
 {% endcapture %}
-
-{% assign page-translation-default = page.resolved.translation.default | default: 'en' | liquify %}
 
 <!-- Prefetch -->
 <link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
@@ -143,8 +139,11 @@
   {{ page-ie-script }}
 <![endif]-->
 
-<!-- CSS Bundle -->
+<!-- CSS Bundles -->
 <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+{% iffile page-css-path %}
+  <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-path }}?cb={{ site.uj.cache_breaker }}"/>
+{% endiffile %}
 
 <!-- Style - Scripts are Disabled -->
 <noscript>

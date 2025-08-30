@@ -1,0 +1,14 @@
+// Import the Bootstrap theme as the base
+@use '../bootstrap/scss/bootstrap.scss' as *;
+
+// Import theme components
+@import 'components/buttons';
+@import 'components/navigation';
+@import 'components/links';
+@import 'components/spacing';
+@import 'components/avatars';
+@import 'components/soft-colors';
+@import 'components/blog';
+
+// Add any additional custom code here
+// ...

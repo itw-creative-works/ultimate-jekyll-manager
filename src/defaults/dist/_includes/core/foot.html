@@ -1,14 +1,3 @@
-<!-- Page Variables -->
-{% assign page-is-post = false %}
-{%- iftruthy page.resolved.post.id -%}
-  {% assign page-is-post = true %}
-{% endiftruthy %}
-
-{% assign page-is-team-member = false %}
-{%- iftruthy page.resolved.member.name -%}
-  {% assign page-is-team-member = true %}
-{% endiftruthy %}
-
 <!-- Main - Exit Popup -->
 <div id="modal-exit-popup" class="modal fade" tabindex="-1" hidden>
   <div class="modal-dialog">
@@ -56,9 +45,7 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    gtag('config', '{{ site.tracking.google-analytics }}', {
-      // 'user_id': 'USER_ID',
-    });
+    gtag('config', '{{ site.tracking.google-analytics }}');
   </script>
 {% endiftruthy %}
 {% iffalsy page.resolved.tracking.google-analytics %}
@@ -235,42 +222,43 @@
 </script>
 
 <!-- Schema - BlogPosting -->
-{%- if page-is-post == true -%}
+{%- iftruthy page.resolved.post.id -%}
   <script id="uj-schema-blog" type="application/ld+json">
     {
       "@context": "http://schema.org",
       "@type": "BlogPosting",
-      "@id": "{{ site.url }}{{ page.url }}#BlogPosting",
-      "url": "{{ site.url }}{{ page.url }}",
-      "name": "{{ page.post.title | liquify }}",
-      "description": "{{ page.post.description | liquify }} ",
-      "headline": "{{ page.post.title | liquify }}",
+      "@id": "{{ page.canonical.url }}#BlogPosting",
+      "url": "{{ page.canonical.url }}",
+      "name": "{{ page.resolved.post.title | liquify }}",
+      "description": "{{ page.resolved.post.description | liquify }} ",
+      "headline": "{{ page.resolved.post.title | liquify }}",
       "datePublished": "{{ page.date | date_to_xmlschema }}",
       "dateModified": "{{ site.time | date_to_xmlschema }}",
       "author": {
         "@type": "Person",
-        "name": "{{ page.post.author }}",
-        "url": "{{ site.url }}/team/{{ page.post.author }}#Person"
+        "name": "{%- uj_member page.resolved.post.author, "name" -%}",
+        "url": "{%- uj_member page.resolved.post.author, "url" -%}#Person"
       },
       "publisher": {
-        "@id": "{{ site.url }}#{{ site.brand.type }}"
+        "@id": "{{ site.url }}#{{ page.resolved.brand.type }}"
       },
       "isPartOf": {
         "@id": "{{ site.url }}/blog"
       },
       "mainEntityOfPage": {
-        "@id": "{{ site.url }}{{ page.url }}"
+        "@id": "{{ page.canonical.url }}"
       },
-      "image": [
-        "{{ site.url }}/assets/images/blog/posts/post-{{ page.post.id }}/{{ page.url | split: '/' | last }}.jpg"
-      ],
+      "image": {
+        "@type": "ImageObject",
+        "url": "{{ site.url }}{%- uj_post page.resolved.post.id, "image" -%}"
+      },
       "inLanguage": "{{ site.translation.default |  default: 'en' }}"
     }
   </script>
-{% endif %}
+{% endiftruthy %}
 
 <!-- Schema - Person -->
-{%- if page-is-team-member == true -%}
+{%- iftruthy page.resolved.member.id -%}
   <script id="uj-schema-person" type="application/ld+json">
     {
       "@context": "http://schema.org",
@@ -280,7 +268,7 @@
       "name": "{%- uj_member page.post.author, "name" -%}",
       "image": {
         "@type": "ImageObject",
-        "url": "{%- uj_member page.post.author, "image" -%}"
+        "url": "{{ site.url }}{%- uj_member page.resolved.member.id, "image" -%}"
       },
       "jobTitle": "Blog Author",
       "worksFor": {
@@ -301,7 +289,7 @@
       {% endcomment %}
     }
   </script>
-{% endif %}
+{% endiftruthy %}
 
 <!-- Schema - Product -->
 {%- if page-is-product == true -%}
@@ -309,8 +297,8 @@
     {
       "@context": "http://schema.org",
       "@type": "Product",
-      "@id": "{{ site.url }}{{ page.url }}#Product",
-      "url": "{{ site.url }}{{ page.url }}",
+      "@id": "{{ page.canonical.url }}#Product",
+      "url": "{{ page.canonical.url }}",
       "name": "{{ page.product.title | liquify }}",
       "description": "{{ page.product.description | liquify }}",
       "image": [
@@ -321,7 +309,7 @@
       },
       "offers": {
         "@type": "Offer",
-        "url": "{{ site.url }}{{ page.url }}",
+        "url": "{{ page.canonical.url }}",
         "priceCurrency": "{{ site.currency }}",
         "price": "{{ page.product.price }}",
         "itemCondition": "http://schema.org/NewCondition",
@@ -332,15 +320,15 @@
 {% endif %}
 
 <!-- Schema - ContactPage -->
-{%- if page-is-contact == true -%}
+{%- if page.url == "/contact" -%}
   <script id="uj-schema-contact" type="application/ld+json">
     {
       "@context": "http://schema.org",
       "@type": "ContactPage",
-      "@id": "{{ site.url }}{{ page.url }}#ContactPage",
-      "url": "{{ site.url }}{{ page.url }}",
-      "name": "{{ page.meta.title | liquify }}",
-      "description": "{{ page.meta.description | liquify }}",
+      "@id": "{{ page.canonical.url }}#ContactPage",
+      "url": "{{ page.canonical.url }}",
+      "name": "{{ page.resolved.meta.title | liquify }}",
+      "description": "{{ page.resolved.meta.description | liquify }}",
       "mainEntity": {
         "@type": "Organization",
         "@id": "{{ site.url }}#{{ site.brand.type }}"

@@ -1,0 +1,35 @@
+// Avatar sizes map
+$avatar-sizes: (
+  null: 3rem,    // default
+  xs: 1.5rem,
+  sm: 2rem,
+  md: 2.5rem,
+  lg: 3.5rem,
+  xl: 5rem,
+  xxl: 7.5rem
+);
+
+// Avatar base styles
+.avatar {
+  display: inline-block;
+  height: map-get($avatar-sizes, null);
+  position: relative;
+  width: map-get($avatar-sizes, null);
+
+  img {
+    height: 100%;
+    -o-object-fit: cover;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+// Generate avatar size classes
+@each $size, $dimension in $avatar-sizes {
+  @if $size != null {
+    .avatar-#{$size} {
+      height: $dimension;
+      width: $dimension;
+    }
+  }
+}

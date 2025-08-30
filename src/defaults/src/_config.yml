@@ -26,7 +26,7 @@ theme:
 meta:
   title: ""
   description: ""
-  og-image: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/socials/itw-creative-works-brandmark-square-black-1024x1024.png"
+  image: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/socials/itw-creative-works-brandmark-square-black-1024x1024.png"
   keywords: ""
   viewport: ""
   index: true

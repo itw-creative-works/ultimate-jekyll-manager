@@ -60,6 +60,12 @@ async function imagemin(complete) {
     githubCache = await initializeCache();
   }
 
+  // Short circuit if no GitHub credentials
+  if (!githubCache || !githubCache.hasCredentials()) {
+    logger.log('⏭️ Skipping imagemin - no GitHub cache credentials');
+    return complete();
+  }
+
   // Get all images
   const files = glob(input);
   if (files.length === 0) {
