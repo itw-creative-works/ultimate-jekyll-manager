@@ -2,7 +2,7 @@
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 
 // Module
-export default function(Manager) {
+export default function (Manager) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -152,29 +152,21 @@ export default function(Manager) {
         // Determine the provider from the result
         const providerId = result.providerId || result.user.providerData?.[0]?.providerId || 'unknown';
 
-        // Track success based on whether this is a new user
+        // Track based on whether this is a new user
         const isNewUser = result.additionalUserInfo?.isNewUser;
         const pagePath = document.documentElement.getAttribute('data-page-path');
         const isSignupPage = pagePath === '/signup';
 
         if (isNewUser || isSignupPage) {
-          trackSignupSuccess(providerId, result.user);
+          trackSignup(providerId, result.user);
         } else {
-          trackLoginSuccess(providerId, result.user);
+          trackLogin(providerId, result.user);
         }
       }
     } catch (error) {
-      console.error('Error handling redirect result:', error);
-
-      // Determine if this was a signup or signin attempt based on the page
-      const pagePath = document.documentElement.getAttribute('data-page-path');
-      const isSignupPage = pagePath === '/signup';
-      const providerId = 'unknown';
-
-      if (isSignupPage) {
-        trackSignupError(providerId, error.code || 'redirect_error');
-      } else {
-        trackLoginError(providerId, error.code || 'redirect_error');
+      // Only capture unexpected errors to Sentry
+      if (!isUserError(error.code)) {
+        webManager.sentry().captureException(new Error('Error handling redirect result', { cause: error }));
       }
 
       // Handle specific OAuth errors
@@ -283,8 +275,6 @@ export default function(Manager) {
       return;
     }
 
-    // Track signup attempt
-    trackSignupAttempt('email');
 
     try {
       // Import Firebase auth functions
@@ -294,14 +284,16 @@ export default function(Manager) {
       const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Track successful signup
-      trackSignupSuccess('email', userCredential.user);
+      // Track signup
+      trackSignup('email', userCredential.user);
 
       // FormManager will handle the success state
       formManager.setFormState('submitted');
     } catch (error) {
-      // Track signup error
-      trackSignupError('email', error.code || 'unknown_error');
+      // Only capture unexpected errors to Sentry (not user errors)
+      if (!isUserError(error.code)) {
+        webManager.sentry().captureException(new Error('Signup error', { cause: error }));
+      }
 
       // Handle Firebase-specific errors
       if (error.code === 'auth/email-already-in-use') {
@@ -312,13 +304,18 @@ export default function(Manager) {
 
           const userCredential = await attemptEmailSignIn(email, password);
 
-          // Track this as a successful login instead of signup
-          trackLoginSuccess('email', userCredential.user);
+          // Track this as a login instead of signup
+          trackLogin('email', userCredential.user);
 
           // Set success state
           formManager.setFormState('submitted');
           return;
         } catch (signInError) {
+          // Only capture unexpected errors to Sentry
+          if (!isUserError(signInError.code)) {
+            webManager.sentry().captureException(new Error('Signin error during signup flow', { cause: signInError }));
+          }
+
           // If sign in fails, set back to ready and show error
           formManager.setFormState('ready');
           formManager.showError('An account with this email already exists');
@@ -379,23 +376,21 @@ export default function(Manager) {
       return;
     }
 
-    // Track login attempt
-    trackLoginAttempt('email');
 
     try {
       // Sign in with email and password
       const userCredential = await attemptEmailSignIn(email, password);
 
-      // Track successful login
-      trackLoginSuccess('email', userCredential.user);
+      // Track login
+      trackLogin('email', userCredential.user);
 
       // FormManager will handle the success state
       formManager.setFormState('submitted');
     } catch (error) {
-      console.error('Firebase auth error:', error);
-
-      // Track login error
-      trackLoginError('email', error.code || 'unknown_error');
+      // Only capture unexpected errors to Sentry (not user errors)
+      if (!isUserError(error.code)) {
+        webManager.sentry().captureException(new Error('Login error', { cause: error }));
+      }
 
       // Set form back to ready state
       formManager.setFormState('ready');
@@ -443,6 +438,7 @@ export default function(Manager) {
       return;
     }
 
+
     try {
       // Import Firebase auth functions
       const { getAuth, sendPasswordResetEmail } = await import('web-manager/node_modules/firebase/auth');
@@ -453,16 +449,25 @@ export default function(Manager) {
       // Send password reset email
       await sendPasswordResetEmail(auth, email);
 
+      // Track password reset
+      trackPasswordReset();
+
       // Show success message
       formManager.showSuccess(`Password reset email sent to ${email}. Please check your inbox.`);
 
       // Set form to submitted state
       formManager.setFormState('submitted');
     } catch (error) {
+      // Only capture unexpected errors to Sentry (not user errors)
+      if (!isUserError(error.code)) {
+        webManager.sentry().captureException(new Error('Password reset error', { cause: error }));
+      }
+
       // Handle Firebase-specific errors
       if (error.code === 'auth/user-not-found') {
         // For security, we don't reveal if the user exists
         // Still show success to prevent email enumeration
+        trackPasswordReset(email); // Track as success for security
         formManager.showSuccess(`If an account exists for ${email}, a password reset email has been sent.`);
         formManager.setFormState('submitted');
         return;
@@ -489,12 +494,6 @@ export default function(Manager) {
 
 
   async function signInWithProvider(providerName, action = 'signin') {
-    // Track the attempt
-    if (action === 'signup') {
-      trackSignupAttempt(providerName);
-    } else {
-      trackLoginAttempt(providerName);
-    }
 
     try {
       // Import Firebase auth functions and providers
@@ -534,12 +533,12 @@ export default function(Manager) {
         const result = await signInWithPopup(auth, provider);
         console.log('Successfully authenticated via popup:', result.user.email);
 
-        // Track success based on whether this is a new user
+        // Track based on whether this is a new user
         const isNewUser = result.additionalUserInfo?.isNewUser;
         if (isNewUser || action === 'signup') {
-          trackSignupSuccess(providerName, result.user);
+          trackSignup(providerName, result.user);
         } else {
-          trackLoginSuccess(providerName, result.user);
+          trackLogin(providerName, result.user);
         }
 
         // Set form to submitted state
@@ -564,11 +563,9 @@ export default function(Manager) {
         }
       }
     } catch (error) {
-      // Track the error
-      if (action === 'signup') {
-        trackSignupError(providerName, error.code || 'unknown_error');
-      } else {
-        trackLoginError(providerName, error.code || 'unknown_error');
+      // Only capture unexpected errors to Sentry
+      if (!isUserError(error.code)) {
+        webManager.sentry().captureException(new Error('OAuth provider sign-in error', { cause: error }));
       }
 
       // Handle specific errors
@@ -619,28 +616,48 @@ export default function(Manager) {
     });
   }
 
-  // Analytics tracking functions
-  function trackSignupAttempt(method) {
+  // Helper function to determine if an error is a user error
+  function isUserError(errorCode) {
+    const userErrors = [
+      'auth/user-not-found',
+      'auth/wrong-password',
+      'auth/invalid-credential',
+      'auth/invalid-email',
+      'auth/weak-password',
+      'auth/email-already-in-use',
+      'auth/user-disabled',
+      'auth/too-many-requests',
+      'auth/popup-closed-by-user',
+      'auth/cancelled-popup-request'
+    ];
+    return userErrors.includes(errorCode);
+  }
+
+  function trackLogin(method, user) {
+    const userId = user.uid;
+
     // Google Analytics 4
-    gtag('event', 'sign_up_attempt', {
-      method: method
+    gtag('event', 'login', {
+      method: method,
+      user_id: userId
     });
 
     // Facebook Pixel
-    fbq('trackCustom', 'SignUpAttempt', {
-      method: method
+    fbq('trackCustom', 'Login', {
+      method: method,
+      status: 'success'
     });
 
     // TikTok Pixel
-    ttq.track('ClickButton', {
-      content_name: 'Sign Up',
-      content_type: method
+    ttq.track('Login', {
+      content_name: 'Account',
+      content_id: userId,
+      status: 'success'
     });
-
-    console.log('Tracked signup attempt:', { method });
   }
 
-  function trackSignupSuccess(method, user) {
+  // Analytics tracking functions
+  function trackSignup(method, user) {
     const userId = user.uid;
 
     // Google Analytics 4
@@ -663,98 +680,26 @@ export default function(Manager) {
       content_id: userId,
       status: 'success'
     });
-
-    console.log('Tracked signup success:', { method, userId });
   }
 
-  function trackSignupError(method, errorCode) {
+  // Password reset tracking function
+  function trackPasswordReset() {
     // Google Analytics 4
-    gtag('event', 'sign_up_error', {
-      method: method,
-      error_code: errorCode
+    gtag('event', 'password_reset', {
+      method: 'email',
+      status: 'success'
     });
 
     // Facebook Pixel
-    fbq('trackCustom', 'SignUpError', {
-      method: method,
-      error_code: errorCode
-    });
-
-    // TikTok Pixel
-    ttq.track('FormSubmit', {
-      content_name: 'Sign Up Error',
-      content_type: method,
-      description: errorCode
-    });
-
-    console.log('Tracked signup error:', { method, errorCode });
-  }
-
-  function trackLoginAttempt(method) {
-    // Google Analytics 4
-    gtag('event', 'login_attempt', {
-      method: method
-    });
-
-    // Facebook Pixel
-    fbq('trackCustom', 'LoginAttempt', {
-      method: method
-    });
-
-    // TikTok Pixel
-    ttq.track('ClickButton', {
-      content_name: 'Login',
-      content_type: method
-    });
-
-    console.log('Tracked login attempt:', { method });
-  }
-
-  function trackLoginSuccess(method, user) {
-    const userId = user.uid;
-
-    // Google Analytics 4
-    gtag('event', 'login', {
-      method: method,
-      user_id: userId
-    });
-
-    // Facebook Pixel
-    fbq('trackCustom', 'Login', {
-      method: method,
+    fbq('trackCustom', 'PasswordReset', {
+      method: 'email',
       status: 'success'
     });
 
     // TikTok Pixel
-    ttq.track('Login', {
-      content_name: 'Account',
-      content_id: userId,
-      status: 'success'
+    ttq.track('SubmitForm', {
+      content_name: 'Password Reset',
+      content_type: 'account_recovery'
     });
-
-    console.log('Tracked login success:', { method, userId });
-  }
-
-  function trackLoginError(method, errorCode) {
-    // Google Analytics 4
-    gtag('event', 'login_error', {
-      method: method,
-      error_code: errorCode
-    });
-
-    // Facebook Pixel
-    fbq('trackCustom', 'LoginError', {
-      method: method,
-      error_code: errorCode
-    });
-
-    // TikTok Pixel
-    ttq.track('FormSubmit', {
-      content_name: 'Login Error',
-      content_type: method,
-      description: errorCode
-    });
-
-    console.log('Tracked login error:', { method, errorCode });
   }
 }

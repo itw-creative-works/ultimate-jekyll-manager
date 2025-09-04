@@ -1,8 +1,5 @@
 // Libraries
-let webManager = null;
 import fetch from 'wonderful-fetch';
-
-// Import section modules
 import * as profileSection from './sections/profile.js';
 import * as notificationsSection from './sections/notifications.js';
 import * as securitySection from './sections/security.js';
@@ -12,13 +9,33 @@ import * as referralsSection from './sections/referrals.js';
 import * as apiKeysSection from './sections/api-keys.js';
 import * as deleteSection from './sections/delete.js';
 import * as connectionsSection from './sections/connections.js';
+let webManager = null;
 
-// DOM Elements
+// Module
+export default (Manager) => {
+  return new Promise(async function (resolve) {
+    // Shortcuts
+    webManager = Manager.webManager;
+
+    // Initialize when DOM is ready
+    await webManager.dom().ready();
+
+    try {
+      await initializeAccount();
+    } catch (error) {
+      webManager.sentry().captureException(new Error('Failed to initialize account page', { cause: error }));
+    }
+
+    // Resolve after initialization
+    return resolve();
+  });
+};
+
+// Global state
 let $navLinks = null;
 let $sections = null;
-
-// Shared app data
 let appData = null;
+let fetchAppDataPromise = null;
 
 // Section modules map
 const sectionModules = {
@@ -33,83 +50,72 @@ const sectionModules = {
   connections: connectionsSection
 };
 
-// Initialize account page
+// Main initialization
 async function initializeAccount() {
-  try {
-    // Get DOM elements
-    $navLinks = document.querySelectorAll('#account-nav .nav-link');
-    $sections = document.querySelectorAll('.account-section');
+  // Get DOM elements
+  $navLinks = document.querySelectorAll('#account-nav .nav-link');
+  $sections = document.querySelectorAll('.account-section');
 
-    // Initially hide all sections except loading
-    hideAllSectionsExceptLoading();
+  // Initially hide all sections except loading
+  hideAllSectionsExceptLoading();
 
-    // Setup navigation
-    setupNavigation();
+  // Setup navigation
+  setupNavigation();
 
-    // Check if delete hash is present on initial load
-    if (window.location.hash === '#delete') {
-      showDeleteOption();
+  // Check if delete hash is present on initial load
+  if (window.location.hash === '#delete') {
+    showDeleteOption();
+  }
+
+  // Initialize all section modules
+  Object.values(sectionModules).forEach(module => {
+    if (module.init) {
+      module.init(webManager);
     }
+  });
 
-    // Initialize all section modules
-    Object.values(sectionModules).forEach(module => {
-      if (module.init) {
-        module.init(webManager);
-      }
-    });
+  // Setup auth listener with account data
+  webManager.auth().listen({ account: true }, async (state) => {
+    console.log('Auth state with account data:', state);
 
-    // Fetch app data early for all sections to use
-    fetchAppData();
+    /* @dev-only:start */
+    {
+      // Check for test subscription parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const testSubscription = urlParams.get('_test_subscription');
 
-    // Setup auth listener with account data
-    webManager.auth().listen({ account: true }, async (state) => {
-      console.log('Auth state with account data:', state);
+      if (testSubscription && webManager.isDevelopment()) {
+        try {
+          console.log(`Loading test subscription: ${testSubscription}`);
+          const testModule = await import(`./test-subscriptions/${testSubscription}.js`);
 
-      /* @dev-only:start */
-      {
-        // Check for test subscription parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const testSubscription = urlParams.get('_test_subscription');
-
-        if (testSubscription && webManager.isDevelopment()) {
-          try {
-            console.log(`Loading test subscription: ${testSubscription}`);
-            const testModule = await import(`./test-subscriptions/${testSubscription}.js`);
-
-            // Override the account subscription with test data
-            if (state.account) {
-              state.account.subscription = testModule.default;
-              console.log('Test subscription loaded:', testModule.default);
-            }
-          } catch (error) {
-            console.error(`Failed to load test subscription '${testSubscription}':`, error);
+          // Override the account subscription with test data
+          if (state.account) {
+            state.account.subscription = testModule.default;
+            console.log('Test subscription loaded:', testModule.default);
           }
+        } catch (error) {
+          console.error(`Failed to load test subscription '${testSubscription}':`, error);
         }
       }
-      /* @dev-only:end */
+    }
+    /* @dev-only:end */
 
-      // Load user data with the account information
-      if (state.user && state.account) {
-        // Wait for app data to be fetched before loading section data
-        await ensureAppDataFetched();
+    // Load user data with the account information
+    // Wait for app data to be fetched before loading section data
+    await fetchAppData();
 
-        loadAllSectionData(state);
+    loadAllSectionData(state);
 
-        // Hide loading section and show the appropriate section
-        hideLoadingSection();
+    // Hide loading section and show the appropriate section
+    hideLoadingSection();
 
-        // Handle initial hash or show default section
-        handleHashChange();
-      }
-    });
-
-  } catch (error) {
-    console.error('Failed to initialize account page:', error);
-  }
+    // Handle initial hash or show default section
+    handleHashChange();
+  });
 }
 
 // Fetch app data to get configuration and OAuth settings
-let fetchAppDataPromise = null;
 async function fetchAppData() {
   if (fetchAppDataPromise) return fetchAppDataPromise;
 
@@ -117,11 +123,6 @@ async function fetchAppData() {
     try {
       // Get app ID from site configuration
       const appId = webManager.config.brand.id;
-
-      // Get API base URL
-      // const apiBaseUrl = webManager.isDevelopment()
-      //   ? 'http://localhost:5002'
-      //   : 'https://api.itwcreativeworks.com';
       const apiBaseUrl = 'https://api.itwcreativeworks.com';
 
       // Fetch app data
@@ -137,20 +138,12 @@ async function fetchAppData() {
 
       return response;
     } catch (error) {
-      console.error('Failed to fetch app data:', error);
+      webManager.sentry().captureException(new Error('Failed to fetch app data', { cause: error }));
       return null;
     }
   })();
 
   return fetchAppDataPromise;
-}
-
-// Ensure app data is fetched
-async function ensureAppDataFetched() {
-  if (!appData) {
-    await fetchAppData();
-  }
-  return appData;
 }
 
 // Load data for all sections
@@ -202,6 +195,7 @@ function setupNavigation() {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const sectionId = link.dataset.section;
+
       showSection(sectionId);
 
       // Update URL hash
@@ -214,6 +208,7 @@ function setupNavigation() {
   if ($mobileNavSelect) {
     $mobileNavSelect.addEventListener('change', (e) => {
       const sectionId = e.target.value;
+
       showSection(sectionId);
       window.location.hash = sectionId;
     });
@@ -240,6 +235,7 @@ function handleHashChange() {
     } else {
       // Section doesn't exist, default to profile
       console.warn(`Section "${hash}" not found, defaulting to profile`);
+      webManager.sentry().captureException(new Error(`Invalid account section hash: ${hash}`));
       window.location.hash = '#profile';
       showSection('profile');
     }
@@ -270,7 +266,6 @@ function showDeleteOption() {
     }
   }
 }
-
 
 // Hide all sections except loading
 function hideAllSectionsExceptLoading() {
@@ -307,6 +302,9 @@ function showSection(sectionId) {
   const $targetSection = document.getElementById(`${sectionId}-section`);
   if ($targetSection) {
     $targetSection.classList.remove('d-none');
+
+    // Track section view when actually shown
+    trackAccountSectionView(sectionId);
   }
 
   // Update nav active state
@@ -331,20 +329,16 @@ function showSection(sectionId) {
   }
 }
 
-// Module export
-export default (Manager) => {
-  return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
-    // Initialize when DOM is ready
-    webManager.dom().ready()
-    .then(() => {
-      // Initialize account page
-      initializeAccount();
-    });
-
-    // Resolve
-    return resolve();
+// Tracking functions
+function trackAccountSectionView(sectionId) {
+  gtag('event', 'account_section_view', {
+    section_name: sectionId
   });
-};
+  fbq('trackCustom', 'AccountSectionView', {
+    section: sectionId
+  });
+  ttq.track('ViewContent', {
+    content_name: `Account ${sectionId}`,
+    content_type: 'account_section'
+  });
+}

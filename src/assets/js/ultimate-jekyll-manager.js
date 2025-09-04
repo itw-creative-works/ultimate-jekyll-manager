@@ -1,5 +1,5 @@
 // Ultimate Jekyll Manager Module
-export default async function(Manager, options) {
+export default async function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 

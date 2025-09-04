@@ -1,14 +1,13 @@
-// @TODO: DELETE THIS FILE when the project is ready
+// Libraries
+let webManager = null;
+
 // Module
 export default (Manager, options) => {
-  return new Promise(async function (resolve, reject) {
-    // Shortcuts
-    const { webManager } = Manager;
-
-    // Log
-    console.error('------- AAA main/index.js');
+  return new Promise(async function (resolve) {
+    // Set webManager
+    webManager = Manager.webManager;
 
     // Resolve
     return resolve();
   });
-}
+};

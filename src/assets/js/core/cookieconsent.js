@@ -1,5 +1,5 @@
 // Cookie Consent Module
-export default function(Manager, options) {
+export default function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -17,6 +17,8 @@ export default function(Manager, options) {
     } else {
       // Show full banner if not consented
       createCookieBanner(config);
+      // Track cookie banner shown
+      trackCookieBannerShown();
     }
   });
 
@@ -120,6 +122,8 @@ export default function(Manager, options) {
 
       // Accept cookies after a small delay to ensure the action feels natural
       setTimeout(() => {
+        // Track auto-accept
+        trackCookieAutoAccepted(event.type);
         acceptCookies(banner);
       }, 300);
     };
@@ -234,9 +238,16 @@ export default function(Manager, options) {
 
     // Handle click to reopen banner
     button.addEventListener('click', () => {
+      // Track cookie policy reopened
+      trackCookiePolicyReopened();
+
+      // Remove minimized button
       button.remove();
+
       // Clear consent to show banner again
       webManager.storage().remove('cookies.consent');
+
+      // Recreate cookie banner
       createCookieBanner(config);
     });
 
@@ -268,6 +279,9 @@ export default function(Manager, options) {
       // Show minimized button
       createMinimizedButton(config);
     }, 300);
+
+    // Track cookie acceptance
+    trackCookieAccepted();
   }
 
   function denyCookies(banner) {
@@ -289,5 +303,67 @@ export default function(Manager, options) {
       // Show minimized button even after denial
       createMinimizedButton(config);
     }, 300);
+
+    // Track cookie denial
+    trackCookieDenied();
+  }
+
+  // Tracking functions
+  function trackCookieBannerShown() {
+    gtag('event', 'cookie_banner_shown', {
+      event_category: 'consent'
+    });
+    fbq('trackCustom', 'CookieBannerShown');
+    ttq.track('ViewContent', {
+      content_name: 'Cookie Banner'
+    });
+  }
+
+  function trackCookieAccepted() {
+    gtag('event', 'cookie_consent_accepted', {
+      event_category: 'consent',
+      consent_type: config.type
+    });
+    fbq('trackCustom', 'CookieConsentAccepted');
+    ttq.track('ClickButton', {
+      content_name: 'Cookie Consent Accept',
+      content_type: 'consent'
+    });
+  }
+
+  function trackCookieDenied() {
+    gtag('event', 'cookie_consent_denied', {
+      event_category: 'consent',
+      consent_type: config.type
+    });
+    fbq('trackCustom', 'CookieConsentDenied');
+    ttq.track('ClickButton', {
+      content_name: 'Cookie Consent Deny',
+      content_type: 'consent'
+    });
+  }
+
+  function trackCookieAutoAccepted(trigger) {
+    gtag('event', 'cookie_consent_auto_accepted', {
+      event_category: 'consent',
+      trigger: trigger
+    });
+    fbq('trackCustom', 'CookieConsentAutoAccepted', {
+      trigger: trigger
+    });
+    ttq.track('ViewContent', {
+      content_name: 'Cookie Consent Auto Accept',
+      content_type: trigger
+    });
+  }
+
+  function trackCookiePolicyReopened() {
+    gtag('event', 'cookie_policy_reopened', {
+      event_category: 'consent'
+    });
+    fbq('trackCustom', 'CookiePolicyReopened');
+    ttq.track('ClickButton', {
+      content_name: 'Cookie Policy Reopen'
+    });
   }
 }

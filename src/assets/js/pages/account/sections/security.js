@@ -64,7 +64,7 @@ async function updateSigninMethods() {
   // Use Firebase auth directly for most up-to-date provider information
   const firebaseUser = firebaseAuth?.currentUser;
   if (!firebaseUser) return;
-  
+
   // Get the formatted user from webManager for consistency, but we'll use firebaseUser for provider data
   const user = webManager.auth().getUser();
   if (!user) return;
@@ -295,11 +295,10 @@ async function updateActiveSessions(account) {
 // Initialize FormManager for signin methods
 function initializeSigninMethodForms() {
   // Initialize password form
-  const passwordFormId = 'signin-method-password-form';
-  const passwordForm = document.getElementById(passwordFormId);
+  const $passwordForm = document.getElementById('signin-method-password-form');
 
-  if (passwordForm && !signinMethodForms.has('password')) {
-    const formManager = new FormManager(`#${passwordFormId}`, {
+  if ($passwordForm && !signinMethodForms.has('password')) {
+    const formManager = new FormManager($passwordForm, {
       allowMultipleSubmit: false,
       autoDisable: true,
       showSpinner: true,
@@ -319,11 +318,10 @@ function initializeSigninMethodForms() {
   }
 
   // Initialize Google form
-  const googleFormId = 'signin-method-google-form';
-  const googleForm = document.getElementById(googleFormId);
+  const $googleForm = document.getElementById('signin-method-google-form');
 
-  if (googleForm && !signinMethodForms.has('google')) {
-    const formManager = new FormManager(`#${googleFormId}`, {
+  if ($googleForm && !signinMethodForms.has('google')) {
+    const formManager = new FormManager($googleForm, {
       autoDisable: true,
       showSpinner: true
     });
@@ -343,7 +341,7 @@ function initializeSigninMethodForms() {
 
         // Set form state back to ready first
         formManager.setFormState('ready');
-        
+
         // Then update display (after FormManager has restored button)
         // Use setTimeout to ensure FormManager has finished updating
         setTimeout(() => {
@@ -352,7 +350,7 @@ function initializeSigninMethodForms() {
       } catch (error) {
         // Reset form state
         formManager.setFormState('ready');
-        
+
         // If user cancelled, also update the display to ensure button state is correct
         if (error.message === 'Disconnection cancelled') {
           // Update display to ensure button reflects current state
@@ -376,11 +374,10 @@ function initializeSigninMethodForms() {
 
 // Initialize FormManager for sign out all sessions
 function initializeSignoutAllForm() {
-  const formId = 'signout-all-sessions-form';
-  const form = document.getElementById(formId);
+  const $form = document.getElementById('signout-all-sessions-form');
 
-  if (form && !signoutAllForm) {
-    signoutAllForm = new FormManager(`#${formId}`, {
+  if ($form && !signoutAllForm) {
+    signoutAllForm = new FormManager($form, {
       autoDisable: true,
       showSpinner: true
     });
@@ -425,10 +422,10 @@ async function connectGoogleProvider() {
     // Try popup first for better UX
     const result = await linkWithPopup(firebaseAuth.currentUser, provider);
     webManager.utilities().showNotification('Google account connected successfully', 'success');
-    
+
     // Force refresh of the current user to get updated provider data
     await firebaseAuth.currentUser.reload();
-    
+
     return result;
   } catch (error) {
     // Check if we should fallback to redirect
@@ -457,12 +454,12 @@ async function connectGoogleProvider() {
 async function disconnectGoogleProvider() {
   // Wait 1 ms to allow FormManager to show "Processing..." spinner
   await new Promise(resolve => setTimeout(resolve, 1));
-  
+
   // Confirm disconnection
   if (!confirm('Are you sure you want to disconnect your Google account?')) {
     throw new Error('Disconnection cancelled');
   }
-  
+
   // Dynamic import of Firebase auth methods
   const { unlink } = await import('web-manager/node_modules/firebase/auth');
 

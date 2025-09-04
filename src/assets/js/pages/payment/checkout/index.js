@@ -1,8 +1,4 @@
 // Libraries
-let webManager = null;
-let formManager = null;
-
-// Import modules
 import { state } from './modules/state.js';
 import { fetchProductDetails, fetchTrialEligibility, warmupServer } from './modules/api.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
@@ -20,9 +16,28 @@ import {
   generateCheckoutId,
   buildPaymentIntentData,
 } from './modules/session.js';
+let webManager = null;
+let formManager = null;
 
-// Variables
-const recaptchaSiteKey = '6LdxsmAnAAAAACbft_UmKZXJV_KTEiuG-7tfgJJ5';
+// Constants
+const RECAPTCHA_SITE_KEY = '6LdxsmAnAAAAACbft_UmKZXJV_KTEiuG-7tfgJJ5';
+
+// Module export
+export default (Manager, options) => {
+  return new Promise(async function (resolve) {
+    // Set webManager
+    webManager = Manager.webManager;
+
+    // Initialize when DOM is ready
+    await webManager.dom().ready();
+
+    // Initialize checkout
+    await initializeCheckout();
+
+    // Resolve
+    return resolve();
+  });
+}
 
 // Analytics tracking functions
 function trackBeginCheckout(product, price, billingCycle) {
@@ -158,7 +173,7 @@ function setupEventListeners() {
     const basePrice = state.isSubscription
       ? (state.billingCycle === 'monthly' ? state.product.price_monthly : state.product.price_annually)
       : state.product.price;
-    
+
     trackAddPaymentInfo(state.product, state.total || basePrice, state.billingCycle, paymentMethod);
     console.log('Tracked add_payment_info event:', paymentMethod);
 
@@ -286,7 +301,7 @@ async function initializeCheckout() {
     const [productData, trialEligible, recaptchaInit] = await Promise.allSettled([
       fetchProductDetails(appId, productId, webManager),
       fetchTrialEligibility(appId, productId, webManager),
-      initializeRecaptcha(recaptchaSiteKey, webManager)
+      initializeRecaptcha(RECAPTCHA_SITE_KEY, webManager)
     ]);
 
     // Handle product fetch result
@@ -330,7 +345,7 @@ async function initializeCheckout() {
     availableMethods.forEach(method => {
       console.log(`- ${method.name} (${method.processor})`);
     });
-    
+
     if (availableMethods.length === 0) {
       console.error('No payment methods available! Check API keys configuration.');
       showError('No payment methods are currently available. Please contact support for assistance.');
@@ -363,7 +378,7 @@ async function initializeCheckout() {
     const basePrice = state.isSubscription
       ? (state.billingCycle === 'monthly' ? state.product.price_monthly : state.product.price_annually)
       : state.product.price;
-    
+
     trackBeginCheckout(state.product, basePrice, state.billingCycle);
     console.log('Tracked begin_checkout event for:', state.product.id);
 
@@ -379,22 +394,4 @@ async function initializeCheckout() {
       hidePreloader();
     });
   }
-}
-
-// Module export
-export default (Manager) => {
-  return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
-    // Initialize when DOM is ready
-    webManager.dom().ready()
-    .then(() => {
-      // Initialize checkout
-      initializeCheckout();
-    });
-
-    // Resolve
-    return resolve();
-  });
 }

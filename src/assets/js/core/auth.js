@@ -1,7 +1,7 @@
 import fetch from 'wonderful-fetch';
 
 // Auth Module
-export default function(Manager, options) {
+export default function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -48,6 +48,7 @@ export default function(Manager, options) {
         // Check if this is a new user account (created in last 5 minutes) and send metadata
         const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
         const fiveMinutes = 5 * 60 * 1000;
+
         /* @dev-only:start */
         {
           // Log account age for debugging
@@ -55,6 +56,8 @@ export default function(Manager, options) {
           console.log('Account age:', ageInMinutes, 'minutes');
         }
         /* @dev-only:end */
+
+        // Send user signup metadata if account is new
         if (accountAge < fiveMinutes) {
           await sendUserSignupMetadata(user, webManager);
         }

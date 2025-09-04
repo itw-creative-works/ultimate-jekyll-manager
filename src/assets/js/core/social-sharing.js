@@ -1,5 +1,5 @@
 // Social Sharing Module
-export default function(Manager, options) {
+export default function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -76,6 +76,13 @@ export default function(Manager, options) {
     // Find all social sharing containers
     const $containers = document.querySelectorAll(config.selector);
 
+    // Quit if no containers found
+    if ($containers.length === 0) {
+      console.warn('No social sharing containers found');
+      return;
+    }
+
+    // Setup each container
     $containers.forEach($container => {
       setupContainer($container);
     });
@@ -199,6 +206,7 @@ export default function(Manager, options) {
     // If platform has custom handler, use it
     if (platform.handler) {
       platform.handler(shareConfig);
+
       return;
     }
 
@@ -227,15 +235,12 @@ export default function(Manager, options) {
       const windowFeatures = `width=${config.windowWidth},height=${config.windowHeight},menubar=no,toolbar=no,resizable=yes,scrollbars=yes`;
       window.open(shareUrl, `share-${platformKey}`, windowFeatures);
     } else {
-      window.location.href = shareUrl;
+      // Open new tab
+      window.open(shareUrl, `_blank`);
     }
 
-    // GA4 - Track share event
-    gtag('event', 'share', {
-      method: platformKey,
-      content_type: 'article',
-      item_id: shareConfig.url
-    });
+    // Track share event
+    trackShare(platformKey, shareConfig);
   }
 
   function copyToClipboard(shareConfig) {
@@ -243,7 +248,12 @@ export default function(Manager, options) {
 
     // Use webManager utility for clipboard copy
     webManager.utilities().clipboardCopy(url);
+
+    // Show success message
     showCopySuccess();
+
+    // Track
+    trackCopyLink(shareConfig);
   }
 
   function showCopySuccess() {
@@ -274,6 +284,42 @@ export default function(Manager, options) {
           $label.textContent = originalLabel;
         }
       }, 2000);
+    });
+  }
+
+  // Tracking functions
+  function trackShare(platformKey, shareConfig) {
+    gtag('event', 'share', {
+      method: platformKey,
+      content_type: 'article',
+      item_id: shareConfig.url
+    });
+
+    fbq('track', 'Share', {
+      content_name: shareConfig.title,
+      content_url: shareConfig.url,
+      share_method: platformKey
+    });
+
+    ttq.track('Share', {
+      content_name: shareConfig.title,
+      content_url: shareConfig.url,
+      share_method: platformKey
+    });
+  }
+
+  function trackCopyLink(shareConfig) {
+    gtag('event', 'copy_link', {
+      content_type: 'share',
+      item_id: shareConfig.url
+    });
+
+    fbq('trackCustom', 'CopyLink', {
+      content_url: shareConfig.url
+    });
+
+    ttq.track('ClickButton', {
+      content_name: 'Copy Link'
     });
   }
 };

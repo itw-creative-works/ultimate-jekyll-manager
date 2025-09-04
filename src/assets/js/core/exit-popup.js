@@ -1,5 +1,5 @@
 // Exit Popup Module
-export default function(Manager, options) {
+export default function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -60,9 +60,9 @@ export default function(Manager, options) {
     // Detect when mouse leaves document
     document.addEventListener('mouseleave', (e) => {
       /* @dev-only:start */
-      {
-        console.log('Mouse leave detected:', shouldShow, e.clientY);
-      }
+      // {
+      //   console.log('Mouse leave detected:', shouldShow, e.clientY);
+      // }
       /* @dev-only:end */
 
       // Only trigger if:
@@ -90,7 +90,7 @@ export default function(Manager, options) {
     // Find the modal element only when needed
     const $modalElement = document.getElementById('modal-exit-popup');
     if (!$modalElement) {
-      console.warn('Exit popup modal element not found');
+      webManager.sentry().captureException(new Error('Exit popup modal element not found'));
       return;
     }
 
@@ -99,7 +99,7 @@ export default function(Manager, options) {
 
     // Check if Bootstrap is available
     if (!window.bootstrap || !window.bootstrap.Modal) {
-      console.warn('Bootstrap Modal not available when trying to show exit popup');
+      webManager.sentry().captureException(new Error('Bootstrap Modal not available for exit popup'));
       return;
     }
 
@@ -108,7 +108,7 @@ export default function(Manager, options) {
     try {
       modal = new window.bootstrap.Modal($modalElement);
     } catch (error) {
-      console.error('Error initializing Bootstrap modal:', error);
+      webManager.sentry().captureException(new Error('Error initializing Bootstrap modal for exit popup', { cause: error }));
       return;
     }
 
@@ -116,13 +116,77 @@ export default function(Manager, options) {
     try {
       modal.show();
 
-      // Track analytics event
-      gtag('event', 'exit_popup_shown', {
-        event_category: 'engagement',
-        event_label: config.title
-      });
+      // Track exit popup shown
+      trackExitPopupShown();
+
+      // Track button clicks on the exit popup
+      const $button = $modalElement.querySelector('.modal-footer .btn');
+      if ($button && !$button.hasAttribute('data-exit-popup-tracked')) {
+        $button.setAttribute('data-exit-popup-tracked', 'true');
+        $button.addEventListener('click', () => {
+          trackExitPopupClick();
+        });
+      }
+
+      // Track modal dismiss
+      $modalElement.addEventListener('hidden.bs.modal', () => {
+        trackExitPopupDismissed();
+      }, { once: true });
     } catch (error) {
-      console.error('Error showing exit popup:', error);
+      webManager.sentry().captureException(new Error('Error showing exit popup', { cause: error }));
     }
+  }
+
+  // Tracking functions
+  function trackExitPopupShown() {
+    gtag('event', 'exit_popup_shown', {
+      event_category: 'engagement',
+      event_label: config.title,
+      page_path: window.location.pathname
+    });
+
+    fbq('trackCustom', 'ExitPopupShown', {
+      content_name: config.title,
+      page_path: window.location.pathname
+    });
+
+    ttq.track('ViewContent', {
+      content_name: 'Exit Popup',
+      content_type: config.title
+    });
+  }
+
+  function trackExitPopupClick() {
+    gtag('event', 'exit_popup_click', {
+      event_category: 'engagement',
+      event_label: config.okButton?.text || 'OK',
+      destination_url: config.okButton?.link
+    });
+
+    fbq('track', 'Lead', {
+      content_name: 'Exit Popup Click',
+      content_category: config.title
+    });
+
+    ttq.track('ClickButton', {
+      content_name: 'Exit Popup CTA',
+      content_type: config.okButton?.text || 'OK'
+    });
+  }
+
+  function trackExitPopupDismissed() {
+    gtag('event', 'exit_popup_dismissed', {
+      event_category: 'engagement',
+      event_label: config.title
+    });
+
+    fbq('trackCustom', 'ExitPopupDismissed', {
+      content_name: config.title
+    });
+
+    ttq.track('ViewContent', {
+      content_name: 'Exit Popup Dismissed',
+      content_type: config.title
+    });
   }
 };

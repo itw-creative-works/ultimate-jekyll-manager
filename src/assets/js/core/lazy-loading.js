@@ -1,5 +1,5 @@
 // Lazy Loading Module
-export default function(Manager, options) {
+export default function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
@@ -23,12 +23,10 @@ export default function(Manager, options) {
   function initLazyLoading() {
     // Check if IntersectionObserver is supported
     if (!('IntersectionObserver' in window)) {
-      /* @dev-only:start */
-      {
-        console.warn('IntersectionObserver not supported, loading all images immediately');
-      }
-      /* @dev-only:end */
+      // Load all images immediately
       loadAllImages();
+
+      // Stop initialization
       return;
     }
 

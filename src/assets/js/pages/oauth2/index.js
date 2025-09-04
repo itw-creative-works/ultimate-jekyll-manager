@@ -1,7 +1,23 @@
-// OAuth2 callback handler
+// Libraries
 import fetch from 'wonderful-fetch';
-
 let webManager = null;
+
+// Module
+export default (Manager, options) => {
+  return new Promise(async function (resolve) {
+    // Set webManager
+    webManager = Manager.webManager;
+
+    // Initialize when DOM is ready
+    await webManager.dom().ready();
+
+    // Handle OAuth callback
+    handleOAuthCallback();
+
+    // Resolve after initialization
+    return resolve();
+  });
+};
 
 // Parse and validate OAuth callback
 async function handleOAuthCallback() {
@@ -126,7 +142,7 @@ function showSuccess(redirectUrl) {
   // Redirect after delay
   setTimeout(() => {
     window.location.href = redirectUrl;
-  }, 1500);
+  }, 500);
 }
 
 // Show error state
@@ -148,7 +164,7 @@ function showError(message) {
   // Set return button href
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get('state');
-  
+
   if (stateParam) {
     try {
       const state = JSON.parse(decodeURIComponent(stateParam));
@@ -166,9 +182,9 @@ function isValidRedirectUrl(url) {
   try {
     const parsed = new URL(url);
     const current = new URL(window.location.href);
-    
+
     // Allow same origin or configured trusted domains
-    return parsed.origin === current.origin || 
+    return parsed.origin === current.origin ||
            isAllowedDomain(parsed.hostname);
   } catch (e) {
     return false;
@@ -184,7 +200,7 @@ function isAllowedDomain(hostname) {
     webManager?.config?.brand?.domain
   ].filter(Boolean);
 
-  return allowedDomains.some(domain => 
+  return allowedDomains.some(domain =>
     hostname === domain || hostname.endsWith('.' + domain)
   );
 }
@@ -194,21 +210,3 @@ function capitalizeFirstLetter(string) {
   if (!string) return '';
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
-// Module export
-export default (Manager) => {
-  return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
-    // Initialize when DOM is ready
-    webManager.dom().ready()
-    .then(() => {
-      // Handle OAuth callback
-      handleOAuthCallback();
-    });
-
-    // Resolve
-    return resolve();
-  });
-};

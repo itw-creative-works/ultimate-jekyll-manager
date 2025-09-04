@@ -1,5 +1,5 @@
 // Service Worker Core Library
-export default function(Manager, options) {
+export default function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 

@@ -1,7 +1,7 @@
 // Libraries
-// ...
+let webManager = null;
 
-// Variables
+// Global variables
 let hasLostFocus = false;
 let launchTimeout;
 let errorTimeout;
@@ -12,65 +12,73 @@ let $downloadButton;
 let $errorAlert;
 
 // Module
-export default (Manager) => {
-  return new Promise(async function (resolve, reject) {
-    // Shortcuts
-    const { webManager } = Manager;
+export default (Manager, options) => {
+  return new Promise(async function (resolve) {
+    // Set webManager
+    webManager = Manager.webManager;
 
-    // Get elements and URL parameters
-    $launchButton = document.getElementById('launch-button');
-    $downloadButton = document.getElementById('download-button');
-    $errorAlert = document.getElementById('error-alert');
-    const urlParams = window.location.search;
+    // Initialize when DOM is ready
+    await webManager.dom().ready();
 
-    // Enable both buttons
-    [$launchButton, $downloadButton].forEach(button => {
-      button.removeAttribute('disabled');
-      button.classList.remove('disabled');
-    });
+    setupPage();
 
-    // window.addEventListener('blur', () => {
-    //   hasLostFocus = true;
-    //   if (launchTimeout) {
-    //     clearTimeout(launchTimeout);
-    //   }
-    // });
-
-    // window.addEventListener('focus', () => {
-    //   if (hasLostFocus) {
-    //     window.close();
-    //   }
-    // });
-
-    // Build app URL with parameters
-    const baseUrl = $launchButton.getAttribute('href');
-    const appUrl = `${baseUrl}${urlParams}`;
-    $launchButton.setAttribute('href', appUrl);
-
-    // Handle launch button click
-    launchApp(appUrl);
-
-    // Handle launch button click
-    $launchButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      launchApp(appUrl);
-    });
-
-    // Close window after 5 seconds regardless
-    // launchTimeout = setTimeout(() => {
-    //   if (!hasLostFocus) {
-    //     console.log('App did not launch, closing window');
-    //   }
-    //   window.close();
-    // }, 5000)
-
-    // Resolve
+    // Resolve after initialization
     return resolve();
   });
+};
+
+// Initialize app page
+function setupPage() {
+  // Get elements and URL parameters
+  $launchButton = document.getElementById('launch-button');
+  $downloadButton = document.getElementById('download-button');
+  $errorAlert = document.getElementById('error-alert');
+  const urlParams = window.location.search;
+
+  // Enable both buttons
+  [$launchButton, $downloadButton].forEach(button => {
+    button.removeAttribute('disabled');
+    button.classList.remove('disabled');
+  });
+
+  // window.addEventListener('blur', () => {
+  //   hasLostFocus = true;
+  //   if (launchTimeout) {
+  //     clearTimeout(launchTimeout);
+  //   }
+  // });
+
+  // window.addEventListener('focus', () => {
+  //   if (hasLostFocus) {
+  //     window.close();
+  //   }
+  // });
+
+  // Build app URL with parameters
+  const baseUrl = $launchButton.getAttribute('href');
+  const appUrl = `${baseUrl}${urlParams}`;
+  $launchButton.setAttribute('href', appUrl);
+
+  // Handle launch button click
+  launchApp(appUrl);
+
+  // Handle launch button click
+  $launchButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    launchApp(appUrl);
+  });
+
+  // Close window after 5 seconds regardless
+  // launchTimeout = setTimeout(() => {
+  //   if (!hasLostFocus) {
+  //     console.log('App did not launch, closing window');
+  //   }
+  //   window.close();
+  // }, 5000)
 }
 
 function launchApp(appUrl) {
-    // Attempt to launch app
+  // Attempt to launch app
   const launchTime = Date.now();
   window.location.href = appUrl;
 
