@@ -1,14 +1,90 @@
-// Import the Bootstrap theme as the base
-@use '../bootstrap/scss/bootstrap.scss' as *;
+// First, override Bootstrap variables before importing
+$primary: #5B47FB;
+$secondary: #6C757D;
+$success: #10B981;
+$info: #00D4FF;
+$warning: #FFB800;
+$danger: #DC3545;
+$light: #F8F9FA;
+$dark: #1A1A23;
+
+// Custom theme colors
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark
+);
+
+// Typography
+$font-family-sans-serif: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$headings-font-weight: 700;
+
+// Borders
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+$border-radius-xl: 1rem;
+$border-radius-2xl: 1.5rem;
+$border-radius-pill: 50rem;
+
+// Import the Bootstrap theme with our overrides
+@use '../bootstrap/scss/bootstrap.scss' with (
+  $primary: $primary,
+  $secondary: $secondary,
+  $theme-colors: $theme-colors,
+  $font-family-sans-serif: $font-family-sans-serif,
+  $border-radius: $border-radius,
+  $border-radius-lg: $border-radius-lg
+);
+
+// Import theme variables first
+@import 'css/variables';
+@import 'css/typography';
 
 // Import theme components
-@import 'components/buttons';
-@import 'components/navigation';
-@import 'components/links';
-@import 'components/spacing';
-@import 'components/avatars';
-@import 'components/soft-colors';
-@import 'components/blog';
+@import 'css/buttons';
+@import 'css/navigation';
+@import 'css/links';
+@import 'css/spacing';
+@import 'css/avatars';
+@import 'css/soft-colors';
+@import 'css/blog';
+@import 'css/cards';
+@import 'css/badges';
+@import 'css/forms';
+@import 'css/utilities';
 
-// Add any additional custom code here
-// ...
+// Global theme improvements
+body {
+  font-family: $font-family-sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// CRITICAL: Force all elements with badges to allow overflow
+// This is the nuclear option but ensures badges are never clipped
+body * {
+  &:has(> .badge) {
+    overflow: visible !important;
+  }
+}
+
+// Make sure text is readable
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $headings-font-weight;
+  letter-spacing: -0.02em;
+}
+
+// Improve link appearance
+a {
+  transition: all 0.2s ease;
+
+  &:hover {
+    text-decoration: none;
+  }
+}

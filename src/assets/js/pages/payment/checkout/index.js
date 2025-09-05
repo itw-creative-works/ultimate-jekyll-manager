@@ -187,6 +187,15 @@ function setupEventListeners() {
     const currentUrl = encodeURIComponent(window.location.href);
     switchAccountLink.href = `/signin?authSignout=true&authReturnUrl=${currentUrl}`;
   }
+
+  // Help button - opens Chatsy
+  const helpButton = document.getElementById('checkout-help-button');
+  if (helpButton) {
+    helpButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      chatsy.open();
+    });
+  }
 }
 
 // Complete purchase

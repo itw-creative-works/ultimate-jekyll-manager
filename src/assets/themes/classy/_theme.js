@@ -11,6 +11,13 @@ window.bootstrap = bootstrap;
 }
 /* @dev-only:end */
 
-// Add any custom code here
-// ...
+// Import navbar scroll functionality
+import setupNavbarScroll from './js/navbar-scroll.js';
+
+// Initialize navbar scroll effect when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupNavbarScroll);
+} else {
+  setupNavbarScroll();
+}
 

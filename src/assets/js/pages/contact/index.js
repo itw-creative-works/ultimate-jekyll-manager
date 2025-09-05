@@ -11,9 +11,9 @@ export default (Manager) => {
 
     // Initialize when DOM is ready
     await webManager.dom().ready();
-    
+
     setupForm();
-    
+
     // Resolve after initialization
     return resolve();
   });
@@ -64,14 +64,14 @@ function setupFormScrolling() {
 
         // Open chat window
         try {
-          window.chatsy.open();
+          chatsy.open();
         } catch (error) {
           webManager.sentry().captureException(new Error('Error opening chat', { cause: error }));
           webManager.utilities().showNotification('Chat is currently unavailable. Please try again later.', 'danger');
         }
       } else if (href === '#form') {
         trackFormClick();
-        
+
         // Find the form section by ID
         const $formSection = document.getElementById('form');
 
@@ -82,18 +82,26 @@ function setupFormScrolling() {
             block: 'start'
           });
 
-          // After scrolling, focus the first visible input field
-          setTimeout(() => {
-            // Find the first visible, enabled input field (first_name)
-            const firstInput = document.querySelector('#contact-form input:not([type="hidden"]):not([readonly]):not([disabled])');
-            if (firstInput) {
-              firstInput.focus();
-              // Also select the text for better UX
-              if (firstInput.select) {
-                firstInput.select();
-              }
+          // Focus the first input immediately and after scroll completes
+          const focusFirstInput = () => {
+            // Find the first input field in the form
+            const $firstInput = document.querySelector('#contact-form input');
+            if (!$firstInput) {
+              return;
             }
-          }, 600); // Slightly longer delay to ensure scroll completes
+
+            $firstInput.focus();
+            // Don't select text on mobile devices
+            if (!('ontouchstart' in window) && $firstInput.select) {
+              $firstInput.select();
+            }
+          };
+
+          // Try focusing immediately
+          focusFirstInput();
+
+          // Also try after scroll animation completes
+          setTimeout(focusFirstInput, 800);
         }
       }
     });

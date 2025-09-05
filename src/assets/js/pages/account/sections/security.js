@@ -267,7 +267,7 @@ async function updateActiveSessions(account) {
     const location = formatSessionLocation(session);
 
     return `
-    <div class="list-group-item px-0">
+    <div class="list-group-item px-0 bg-body-tertiary">
       <div class="d-flex justify-content-between align-items-start">
         <div class="d-flex align-items-start">
           <div class="me-3 mt-1">

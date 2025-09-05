@@ -141,13 +141,18 @@ faqs:
             <label class="btn btn-outline-adaptive rounded-start-pill" for="monthly">Monthly</label>
 
             <input type="radio" class="btn-check" name="billing" id="annually" autocomplete="off" checked data-billing="annually">
-            <label class="btn btn-outline-adaptive rounded-end-pill position-relative" for="annually">
+            <label class="btn btn-primary rounded-end-pill position-relative" for="annually">
               Annually
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+              <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
                 up to 20% off
                 <span class="visually-hidden">discount</span>
-              </span>
+              </span> -->
             </label>
+
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                up to 20% off!
+                <span class="visually-hidden">discount</span>
+            </span>
           </div>
         </div>
 
@@ -219,12 +224,13 @@ faqs:
                     <!-- Button -->
                     <div class="d-grid mb-3">
                       {% if plan.id == "basic" %}
-                        <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-lg fw-semibold">
-                          Get Started Free
+                        <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-lg fw-semibold px-2">
+                          Get started for free
                         </a>
                       {% else %}
-                        <button class="btn btn-primary btn-lg fw-semibold" data-plan-id="{{ plan.id }}">
-                          Try {{ plan.name }} for 14 days
+                        <button class="btn btn-primary btn-lg fw-semibold px-2" data-plan-id="{{ plan.id }}">
+                          <!-- Try {{ plan.name }} for 14 days -->
+                          Try free for 14 days
                         </button>
                       {% endif %}
                     </div>
@@ -391,7 +397,7 @@ faqs:
             right <strong class="">{{ site.brand.name }} plan</strong>
             for your needs?
           </h2>
-          <p class="fs-5 text-white-50 mb-4">Talk to our support team 24/7</p>
+          <p class="fs-5 text-muted mb-4">Talk to our support team 24/7</p>
           <a href="/contact" class="btn btn-adaptive btn-lg px-5 py-3 rounded-pill">
             {% uj_icon "comments", "fa-lg me-2" %}
             Talk to Us
@@ -446,7 +452,7 @@ faqs:
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
           <div class="row justify-content-center">
             <div class="col-md-8">
-              <div class="card border-0 shadow-sm bg-body-tertiary">
+              <div class="card border-0 shadow-sm bg-body-tertiary my-1">
                 <div class="card-body p-5 text-center">
                   <div class="d-flex justify-content-center mb-4">
                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
@@ -466,11 +472,11 @@ faqs:
       </div>
 
       <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+        <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
       </button>
       <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+        <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
         <span class="visually-hidden">Next</span>
       </button>
     </div>

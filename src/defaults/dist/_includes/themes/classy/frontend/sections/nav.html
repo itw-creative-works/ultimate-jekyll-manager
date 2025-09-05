@@ -1,5 +1,6 @@
-<nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary">
-  <div class="container">
+<div class="navbar-wrapper">
+  <nav class="navbar navbar-expand-lg navbar-floating">
+    <div class="container">
     <!-- Logo -->
     {% capture logo_href %}{% assign temp_href = data.logo.href | default: site.brand.href | default: '/' %}{% if temp_href and temp_href != '' and temp_href != 'null' %}{{ temp_href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
     {% capture logo_src %}{% if data.logo.src %}{{ data.logo.src }}{% else %}{{ site.brand.images.brandmark | default: null }}{% endif %}{% endcapture %}
@@ -41,7 +42,7 @@
             <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 280px;">
               <!-- User info header (clickable) -->
               <li>
-                <a href="/account#profile" class="dropdown-item px-3 py-2 border-bottom text-decoration-none">
+                <a href="/account#profile" class="dropdown-item px-3 py-2 text-decoration-none">
                   <div class="d-flex align-items-center">
                     <div class="position-relative me-3">
                       <div class="rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden">
@@ -64,7 +65,7 @@
                 {% if child.divider %}
                   <li><hr class="dropdown-divider"></li>
                 {% else %}
-                  {% capture child_active %}{% if page.url == child.href %} active{% endif %}{% endcapture %}
+                  {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
                   {% capture child_classes %}dropdown-item d-flex align-items-center text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                   {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                   {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
@@ -90,7 +91,7 @@
       <ul class="navbar-nav mx-auto">
         {% for link in data.links %}
           {% if link.dropdown %}
-            {% capture link_active %}{% if page.url == link.href or link.href contains page.url %} active{% endif %}{% endcapture %}
+            {% capture link_active %} {% urlmatches link.href, "active" %}{% endcapture %}
             {% capture link_classes %}nav-link link-muted dropdown-toggle text-body{{ link_active }}{% if link.classes %} {{ link.classes | join: ' ' }}{% endif %}{% endcapture %}
             {% capture link_attributes %}{% if link.attributes %}{% for attr in link.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             <li class="nav-item dropdown">
@@ -104,7 +105,7 @@
               </button>
               <ul class="dropdown-menu">
                 {% for child in link.dropdown %}
-                  {% capture child_active %}{% if page.url == child.href or child.href contains page.url %} active{% endif %}{% endcapture %}
+                  {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
                   {% capture child_classes %}dropdown-item text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% endcapture %}
                   {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                   {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
@@ -122,7 +123,7 @@
               </ul>
             </li>
           {% else %}
-            {% capture link_active %}{% if page.url == link.href or link.href contains page.url %} active{% endif %}{% endcapture %}
+            {% capture link_active %} {% urlmatches link.href, "active" %}{% endcapture %}
             {% capture link_classes %}nav-link link-muted text-body{{ link_active }}{% if link.classes %} {{ link.classes | join: ' ' }}{% endif %}{% endcapture %}
             {% capture link_attributes %}{% if link.attributes %}{% for attr in link.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             {% capture link_href %}{% if link.href and link.href != '' and link.href != 'null' %}{{ link.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
@@ -164,7 +165,7 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 280px;">
                   <!-- User info header (clickable) -->
                   <li>
-                    <a href="/account#profile" class="dropdown-item px-3 py-2 border-bottom text-decoration-none">
+                    <a href="/account#profile" class="dropdown-item px-3 py-2 text-decoration-none">
                       <div class="d-flex align-items-center">
                         <div class="position-relative me-3">
                           <div class="rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden">
@@ -187,7 +188,7 @@
                     {% if child.divider %}
                       <li><hr class="dropdown-divider"></li>
                     {% else %}
-                      {% capture child_active %}{% if page.url == child.href %} active{% endif %}{% endcapture %}
+                      {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
                       {% capture child_classes %}dropdown-item d-flex align-items-center text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                       {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                       {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
@@ -218,7 +219,7 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                   {% for child in action.dropdown %}
-                    {% capture child_active %}{% if page.url == child.href or child.href contains page.url %} active{% endif %}{% endcapture %}
+                    {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
                     {% capture child_classes %}dropdown-item text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
@@ -271,7 +272,7 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end w-100">
                   {% for child in action.dropdown %}
-                    {% capture child_active %}{% if page.url == child.href or child.href contains page.url %} active{% endif %}{% endcapture %}
+                    {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
                     {% capture child_classes %}dropdown-item text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
@@ -307,3 +308,4 @@
     </div>
   </div>
 </nav>
+</div>

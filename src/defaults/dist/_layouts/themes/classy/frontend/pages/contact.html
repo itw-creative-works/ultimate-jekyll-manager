@@ -111,11 +111,6 @@ faqs:
             <div class="alert alert-success contact-success-alert mb-3 d-none" role="alert"></div>
 
             <form id="contact-form" autocomplete="on" novalidate>
-              <!-- Honeypot field -->
-              <div class="form-group mb-3" style="display: none;">
-                <input type="text" class="form-control" id="url_check" name="url_check" placeholder="URL Check">
-              </div>
-
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label for="first_name" class="form-label fw-semibold">
@@ -145,6 +140,11 @@ faqs:
                     required>
                   <div class="invalid-feedback"></div>
                 </div>
+              </div>
+
+              <!-- Honeypot field -->
+              <div class="form-group mb-3" style="display: none;">
+                <input type="text" class="form-control" id="url_check" name="url_check" placeholder="URL Check">
               </div>
 
               <div class="mb-4">

@@ -47,9 +47,50 @@ function setupBillingToggle() {
       const billingType = this.dataset.billing;
       console.log('Billing type changed to:', billingType);
 
+      // Update button styling for toggle buttons
+      updateToggleButtons(this);
+
       trackPricingToggle(billingType);
       updatePricing(billingType, amountElements, billingInfoElements, pricePerUnitElements);
     });
+  });
+
+  // Initialize toggle button styling on page load
+  const checkedRadio = document.querySelector(`${config.selectors.billingRadios}:checked`);
+  if (checkedRadio) {
+    updateToggleButtons(checkedRadio);
+  }
+}
+
+// Update toggle button styling
+function updateToggleButtons(activeRadio) {
+  // Find all toggle buttons (labels for the radio inputs)
+  const toggleGroup = activeRadio.closest('.btn-group, .btn-group-toggle');
+  if (!toggleGroup) return;
+
+  const allButtons = toggleGroup.querySelectorAll('label.btn');
+
+  console.log('Toggle group found:', toggleGroup);
+  console.log('All buttons found:', allButtons.length);
+  console.log('Active radio:', activeRadio);
+
+  allButtons.forEach(button => {
+    // Remove all button classes first
+    button.classList.remove('btn-primary', 'btn-outline-adaptive');
+
+    // Check if this button's for attribute matches the active radio's id
+    const forAttribute = button.getAttribute('for');
+    const isActive = forAttribute && forAttribute === activeRadio.id;
+
+    console.log('Button for:', forAttribute, 'Radio id:', activeRadio.id, 'Is active:', isActive);
+
+    if (isActive) {
+      // Active button - make it outline primary
+      button.classList.add('btn-primary');
+    } else {
+      // Inactive button - make it outline adaptive
+      button.classList.add('btn-outline-adaptive');
+    }
   });
 }
 
