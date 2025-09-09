@@ -145,6 +145,13 @@ module.exports = async function serve(complete) {
     },
   }
 
+  // Check if browserSync is already running
+  if (browserSync.active) {
+    logger.log('BrowserSync is already running');
+
+    return complete();
+  }
+
   // Initialize browserSync
   browserSync.init(settings, async (e, instance) => {
     // Quit if there's an error

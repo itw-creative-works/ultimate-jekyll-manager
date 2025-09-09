@@ -1,5 +1,5 @@
 <!-- Meta Variables -->
-{% assign page-viewport = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" %}
+{% assign page-viewport = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no" %}
 {%- iftruthy page.resolved.meta.viewport -%}
   {% assign page-viewport = page.resolved.meta.viewport | liquify %}
 {% endiftruthy %}
