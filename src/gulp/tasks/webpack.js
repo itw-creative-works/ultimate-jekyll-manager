@@ -38,8 +38,10 @@ const inputServiceWorker = [
 
 // Additional files to watch (but not compile as entry points)
 const watchInput = [
+  // Watch the paths we're compiling
   ...inputMain,
   ...inputServiceWorker,
+
   // Page-specific js - watch for changes but don't compile as entry points
   `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
   'src/assets/js/pages/**/*.js',

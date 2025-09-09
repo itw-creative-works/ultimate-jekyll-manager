@@ -4,17 +4,17 @@
 
 // Properly hide things
 .hidden, [hidden] {
-  display: none;
+  display: none !important
 }
 
 // Pointer events - can help fix bubbling issues for click listeners
 .pointer-none {
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
-// Prevent pointer events on icons inside buttons and links
-button i, a i {
-  pointer-events: none;
+// Prevent pointer events on all children inside buttons and links
+button *, a * {
+  pointer-events: none !important;
 }
 
 // Reset styles for HTML5 elements

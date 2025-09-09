@@ -8,13 +8,36 @@
   left: 0;
   right: 0;
   z-index: 1030;
-  padding: 0 1rem;
   pointer-events: none;
 
   .navbar {
     pointer-events: auto;
-    max-width: 1200px;
-    margin: 0 auto;
+    // Match Bootstrap's container exactly (same as .container class)
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: var(--bs-gutter-x, 0.75rem);
+    padding-left: var(--bs-gutter-x, 0.75rem);
+    
+    @media (min-width: 576px) {
+      max-width: 540px;
+    }
+    
+    @media (min-width: 768px) {
+      max-width: 720px;
+    }
+    
+    @media (min-width: 992px) {
+      max-width: 960px;
+    }
+    
+    @media (min-width: 1200px) {
+      max-width: 1140px;
+    }
+    
+    @media (min-width: 1400px) {
+      max-width: 1320px;
+    }
   }
 }
 
@@ -32,6 +55,36 @@
     .container,
     .container-fluid {
       padding: 0;
+    }
+    
+    // Always show glassy background on mobile - matching .bg-glassy exactly
+    @media (max-width: 991.98px) {
+      background: transparent !important;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+      position: relative;
+      
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--bs-body-bg);
+        opacity: 0.7;
+        border-radius: inherit;
+        z-index: -1;
+        pointer-events: none;
+      }
+      
+      [data-bs-theme="dark"] & {
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+        
+        &::before {
+          opacity: 0.6;
+        }
+      }
     }
   }
 }
@@ -125,13 +178,15 @@
 
 // Mobile Menu Toggle
 .navbar-toggler {
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   padding: 0.25rem 0.5rem;
   border-radius: $classy-radius-md;
   transition: $classy-transition-fast;
+  background: rgba(255, 255, 255, 0.9);
 
   &:hover {
-    background: $classy-gray-lightest;
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(0, 0, 0, 0.2);
   }
 
   &:focus {
@@ -141,6 +196,22 @@
   .navbar-toggler-icon {
     width: 1.25em;
     height: 1.25em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+  
+  // Dark mode styles for toggle button
+  [data-bs-theme="dark"] & {
+    background: rgba(33, 37, 41, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    &:hover {
+      background: rgba(33, 37, 41, 1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
   }
 }
 
@@ -195,7 +266,7 @@
 
 // Global dropdown styles - apply to ALL dropdowns
 .dropdown-menu {
-  background: var(--bs-body-bg);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -269,7 +340,7 @@
 // Dark mode dropdown styles
 [data-bs-theme="dark"] {
   .dropdown-menu {
-    background: var(--bs-body-bg);
+    background: rgba(33, 37, 41, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     

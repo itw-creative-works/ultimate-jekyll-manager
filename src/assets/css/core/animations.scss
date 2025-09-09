@@ -143,38 +143,7 @@
 	animation: popup .25s ease-in-out;
 }
 
-@keyframes popup-long {
-	0% {
-		transform: scale(.93);
-		opacity: 0;
-	}
-
-	85% {
-		transform: scale(.93);
-		opacity: 0;
-	}
-
-	90% {
-		transform: scale(.93);
-		opacity: .8;
-	}
-
-	95% {
-		transform: scale(1.02);
-		opacity: 1;
-	}
-
-	to {
-		transform: scale(1);
-		opacity: 1;
-	}
-}
-
-.animation-popup-long {
-	animation: popup-long 3s ease-in-out
-}
-
-@keyframes popup-short {
+@keyframes popup-medium {
 	0% {
 		transform: scale(.93);
 		opacity: 0;
@@ -201,8 +170,8 @@
 	}
 }
 
-.animation-popup-short {
-	animation: popup-short 1.5s ease-in-out;
+.animation-popup-medium {
+	animation: popup-medium 1.5s ease-in-out;
 }
 
 @keyframes pulse {

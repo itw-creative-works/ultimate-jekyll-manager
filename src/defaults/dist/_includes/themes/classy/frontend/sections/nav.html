@@ -1,13 +1,12 @@
 <div class="navbar-wrapper">
   <nav class="navbar navbar-expand-lg navbar-floating">
-    <div class="container">
     <!-- Logo -->
     {% capture logo_href %}{% assign temp_href = data.logo.href | default: site.brand.href | default: '/' %}{% if temp_href and temp_href != '' and temp_href != 'null' %}{{ temp_href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
     {% capture logo_src %}{% if data.logo.src %}{{ data.logo.src }}{% else %}{{ site.brand.images.brandmark | default: null }}{% endif %}{% endcapture %}
     {% capture logo_text %}{{ data.logo.text | default: site.brand.name | liquify }}{% endcapture %}
     <a class="navbar-brand d-inline-flex align-items-center" href="{{ logo_href }}">
       {% if logo_src and logo_src != '' and logo_src != 'null' %}
-        <img src="{{ logo_src }}" alt="{{ logo_text }}" height="40" class="me-2">
+        <img src="{{ logo_src }}" alt="{{ logo_text }} Logo" height="40" class="me-2">
       {% endif %}
       {% if logo_text and logo_text != '' and logo_text != 'null' %}
         <span class="text-body">{{ logo_text }}</span>
@@ -25,7 +24,7 @@
       {% for action in data.actions %}
         {% if action.type == 'account' and action.dropdown %}
           {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
-          <div class="dropdown animation-slide-up ms-2">
+          <div class="dropdown animation-slide-up ms-2 d-inline-flex" data-wm-bind="@show user">
             <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
               <div class="d-flex align-items-center">
                 <div class="position-relative">
@@ -66,11 +65,11 @@
                   <li><hr class="dropdown-divider"></li>
                 {% else %}
                   {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
-                  {% capture child_classes %}dropdown-item d-flex align-items-center text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
+                  {% capture child_class %}dropdown-item d-flex align-items-center text-body{{ child_active }}{% if child.class %} {{ child.class | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                   {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                   {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
                   <li>
-                    <a class="{{ child_classes }}" href="{{ child_href }}" {{ child_attributes }}>
+                    <a class="{{ child_class }}" href="{{ child_href }}" {{ child_attributes }}>
                       {% if child.icon %}
                         {% uj_icon child.icon, "fa-md me-3" %}
                       {% endif %}
@@ -92,10 +91,10 @@
         {% for link in data.links %}
           {% if link.dropdown %}
             {% capture link_active %} {% urlmatches link.href, "active" %}{% endcapture %}
-            {% capture link_classes %}nav-link link-muted dropdown-toggle text-body{{ link_active }}{% if link.classes %} {{ link.classes | join: ' ' }}{% endif %}{% endcapture %}
+            {% capture link_class %}nav-link link-muted dropdown-toggle text-body{{ link_active }}{% if link.class %} {{ link.class | join: ' ' }}{% endif %}{% endcapture %}
             {% capture link_attributes %}{% if link.attributes %}{% for attr in link.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             <li class="nav-item dropdown">
-              <button class="{{ link_classes }}" type="button" data-bs-toggle="dropdown" {{ link_attributes }}>
+              <button class="{{ link_class }}" type="button" data-bs-toggle="dropdown" {{ link_attributes }}>
                 <span class="d-inline-flex align-items-center">
                   {% if link.icon %}
                     {% uj_icon link.icon, "fa-md me-2" %}
@@ -106,11 +105,11 @@
               <ul class="dropdown-menu">
                 {% for child in link.dropdown %}
                   {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
-                  {% capture child_classes %}dropdown-item text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% endcapture %}
+                  {% capture child_class %}dropdown-item text-body{{ child_active }}{% if child.class %} {{ child.class | join: ' ' }}{% endif %}{% endcapture %}
                   {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                   {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
                   <li>
-                    <a class="{{ child_classes }}" href="{{ child_href }}" {{ child_attributes }}>
+                    <a class="{{ child_class }}" href="{{ child_href }}" {{ child_attributes }}>
                       <span class="d-inline-flex align-items-center">
                         {% if child.icon %}
                           {% uj_icon child.icon, "fa-md me-2" %}
@@ -124,11 +123,11 @@
             </li>
           {% else %}
             {% capture link_active %} {% urlmatches link.href, "active" %}{% endcapture %}
-            {% capture link_classes %}nav-link link-muted text-body{{ link_active }}{% if link.classes %} {{ link.classes | join: ' ' }}{% endif %}{% endcapture %}
+            {% capture link_class %}nav-link link-muted text-body{{ link_active }}{% if link.class %} {{ link.class | join: ' ' }}{% endif %}{% endcapture %}
             {% capture link_attributes %}{% if link.attributes %}{% for attr in link.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             {% capture link_href %}{% if link.href and link.href != '' and link.href != 'null' %}{{ link.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
             <li class="nav-item">
-              <a class="{{ link_classes }}" href="{{ link_href }}" {{ link_attributes }}>
+              <a class="{{ link_class }}" href="{{ link_href }}" {{ link_attributes }}>
                 <span class="d-inline-flex align-items-center">
                   {% if link.icon %}
                     {% uj_icon link.icon, "fa-md me-2" %}
@@ -148,7 +147,7 @@
             {% if action.type == 'account' %}
               <!-- Account dropdown with profile picture (desktop) -->
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
-              <div class="dropdown ms-lg-3 animation-slide-up">
+              <div class="dropdown ms-lg-3 animation-slide-up d-inline-flex" data-wm-bind="@show user">
                 <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
                   <div class="d-flex align-items-center">
                     <div class="position-relative">
@@ -189,11 +188,11 @@
                       <li><hr class="dropdown-divider"></li>
                     {% else %}
                       {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
-                      {% capture child_classes %}dropdown-item d-flex align-items-center text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
+                      {% capture child_class %}dropdown-item d-flex align-items-center text-body{{ child_active }}{% if child.class %} {{ child.class | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                       {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                       {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
                       <li>
-                        <a class="{{ child_classes }}" href="{{ child_href }}" {{ child_attributes }}>
+                        <a class="{{ child_class }}" href="{{ child_href }}" {{ child_attributes }}>
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-md me-3" %}
                           {% endif %}
@@ -206,10 +205,10 @@
               </div>
             {% else %}
               <!-- Regular button dropdown -->
-              {% capture action_classes %}btn btn-{{ action.color }} dropdown-toggle{% if action.classes %} {{ action.classes | join: ' ' }}{% endif %}{% endcapture %}
+              {% capture action_class %}btn btn-{{ action.color }} dropdown-toggle{% if action.class %} {{ action.class | join: ' ' }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
               <div class="dropdown ms-lg-3">
-                <button class="{{ action_classes }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
+                <button class="{{ action_class }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
                   <span class="d-inline-flex align-items-center">
                     {% if action.icon %}
                       {% uj_icon action.icon, "fa-md me-2" %}
@@ -220,11 +219,11 @@
                 <ul class="dropdown-menu dropdown-menu-end">
                   {% for child in action.dropdown %}
                     {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
-                    {% capture child_classes %}dropdown-item text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
+                    {% capture child_class %}dropdown-item text-body{{ child_active }}{% if child.class %} {{ child.class | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
                     <li>
-                      <a class="{{ child_classes }}" href="{{ child_href }}" {{ child_attributes }}>
+                      <a class="{{ child_class }}" href="{{ child_href }}" {{ child_attributes }}>
                         <span class="d-inline-flex align-items-center">
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-md me-2" %}
@@ -238,10 +237,10 @@
               </div>
             {% endif %}
           {% else %}
-            {% capture action_classes %}btn btn-{{ action.color }} ms-lg-3{% if action.classes %} {{ action.classes | join: ' ' }}{% endif %}{% endcapture %}
+            {% capture action_class %}btn btn-{{ action.color }} ms-lg-3{% if action.class %} {{ action.class | join: ' ' }}{% endif %}{% endcapture %}
             {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             {% capture action_href %}{% if action.href and action.href != '' and action.href != 'null' %}{{ action.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
-            <a class="{{ action_classes }}" href="{{ action_href }}" role="button" {{ action_attributes }}>
+            <a class="{{ action_class }}" href="{{ action_href }}" role="button" {{ action_attributes }}>
               <span class="d-inline-flex align-items-center">
                 {% if action.icon %}
                   {% uj_icon action.icon, "fa-md me-2" %}
@@ -259,10 +258,10 @@
           {% if action.type != 'account' %}
             {% if action.dropdown %}
               <!-- Regular button dropdown -->
-              {% capture action_classes %}btn btn-{{ action.color }} dropdown-toggle w-100 mt-3{% if action.classes %} {{ action.classes | join: ' ' }}{% endif %}{% endcapture %}
+              {% capture action_class %}btn btn-{{ action.color }} dropdown-toggle w-100 mt-3{% if action.class %} {{ action.class | join: ' ' }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
               <div class="dropdown">
-                <button class="{{ action_classes }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
+                <button class="{{ action_class }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
                   <span class="d-inline-flex align-items-center">
                     {% if action.icon %}
                       {% uj_icon action.icon, "fa-md me-2" %}
@@ -273,11 +272,11 @@
                 <ul class="dropdown-menu dropdown-menu-end w-100">
                   {% for child in action.dropdown %}
                     {% capture child_active %} {% urlmatches child.href, "active" %}{% endcapture %}
-                    {% capture child_classes %}dropdown-item text-body{{ child_active }}{% if child.classes %} {{ child.classes | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
+                    {% capture child_class %}dropdown-item text-body{{ child_active }}{% if child.class %} {{ child.class | join: ' ' }}{% endif %}{% if child.class %} {{ child.class }}{% endif %}{% endcapture %}
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     {% capture child_href %}{% if child.href and child.href != '' and child.href != 'null' %}{{ child.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
                     <li>
-                      <a class="{{ child_classes }}" href="{{ child_href }}" {{ child_attributes }}>
+                      <a class="{{ child_class }}" href="{{ child_href }}" {{ child_attributes }}>
                         <span class="d-inline-flex align-items-center">
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-md me-2" %}
@@ -290,10 +289,10 @@
                 </ul>
               </div>
             {% else %}
-              {% capture action_classes %}btn btn-{{ action.color }} w-100 mt-3{% if action.classes %} {{ action.classes | join: ' ' }}{% endif %}{% endcapture %}
+              {% capture action_class %}btn btn-{{ action.color }} w-100 mt-3{% if action.class %} {{ action.class | join: ' ' }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
               {% capture action_href %}{% if action.href and action.href != '' and action.href != 'null' %}{{ action.href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
-              <a class="{{ action_classes }}" href="{{ action_href }}" role="button" {{ action_attributes }}>
+              <a class="{{ action_class }}" href="{{ action_href }}" role="button" {{ action_attributes }}>
                 <span class="d-inline-flex align-items-center">
                   {% if action.icon %}
                     {% uj_icon action.icon, "fa-md me-2" %}
@@ -306,6 +305,5 @@
         {% endfor %}
       </div>
     </div>
-  </div>
-</nav>
+  </nav>
 </div>

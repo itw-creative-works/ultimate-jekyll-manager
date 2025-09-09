@@ -1,8 +1,2 @@
-// Gradient text effect
-.gradient-text {
-  background: linear-gradient(90deg, #6B46C1 0%, #EC4899 50%, #F97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+// Text gradient moved to buttons.scss
 

@@ -130,10 +130,6 @@
   a {
     color: inherit;
     text-decoration: underline;
-
-    &:hover {
-      opacity: 0.8;
-    }
   }
 }
 
@@ -185,7 +181,7 @@
   --tab-offset: 2rem;
 
   &.cookie-consent-minimized-show {
-    opacity: 0.9;
+    opacity: 1;
     transform: translateY(var(--tab-offset));
 
     &:hover {

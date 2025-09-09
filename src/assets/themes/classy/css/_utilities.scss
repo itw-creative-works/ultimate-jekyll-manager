@@ -22,18 +22,6 @@
   background: $classy-gradient-aurora !important;
 }
 
-.bg-glass {
-  background: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.bg-glass-dark {
-  background: rgba(15, 15, 20, 0.7) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
 // Glassy effect with transparent background
 .bg-glassy {
   background: transparent !important;
@@ -118,11 +106,28 @@
 }
 
 // Borders
-.border-gradient {
-  border: 2px solid transparent;
-  background-image: linear-gradient(white, white), $classy-gradient-primary;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+.border-gradient-rainbow {
+  position: relative;
+  border: none !important;
+  
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+    background-size: 300% 300%;
+    z-index: -1;
+  }
+  
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    z-index: -1;
+  }
 }
 
 // Shadows

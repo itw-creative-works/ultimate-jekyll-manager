@@ -107,13 +107,8 @@ h6, .h6 {
 }
 
 // Text Utilities
-.text-gradient {
-  background: $classy-gradient-primary;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
+// Note: .text-gradient is defined in Core CSS (buttons.scss)
+// Only defining theme-specific gradient here
 .text-gradient-aurora {
   background: $classy-gradient-aurora;
   -webkit-background-clip: text;
