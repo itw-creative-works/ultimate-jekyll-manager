@@ -59,9 +59,13 @@
   </style>
 {% endcapture %}
 
-<!-- Prefetch -->
+<!-- Prefetch and Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
 <link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net"/>
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"/>
 
@@ -112,7 +116,12 @@
 <meta property="og:url" content="{{ page.canonical.url }}"/>
 <meta property="og:type" content="{{ page-og-type }}"/>
 <meta property="og:locale" content="{{ page-translation-default }}"/>
-<meta property="og:site_name" content="{{ site.brand.name }}" />
+<meta property="og:site_name" content="{{ site.brand.name }}"/>
+
+<!-- Additional SEO Tags -->
+<meta property="article:author" content="{{ site.brand.name }}"/>
+<meta property="article:publisher" content="{{ site.url }}"/>
+<meta name="twitter:creator" content="@{{ site.socials.twitter }}"/>
 
 <!-- Main Feed -->
 <link href="{{ site.url }}/feeds/posts.xml" type="application/atom+xml" rel="alternate" title="{{ site.brand.name }} Feed"/>

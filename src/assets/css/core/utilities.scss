@@ -32,3 +32,10 @@ button *, a * {
 .filter-black {
   filter: brightness(0) invert(1) hue-rotate(180deg);
 }
+
+// Focus visible styles for better keyboard navigation
+// :focus-visible {
+//   outline: 2px solid var(--bs-primary) !important;
+//   outline-offset: 2px !important;
+// }
+

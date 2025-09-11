@@ -69,7 +69,11 @@ Here are some examples:
 
 ### Run the `audit` task:
 ```bash
+# Run the audit task
 npx uj audit
+
+# Run with a Lighthouse URL (defaults to "/" if not provided)
+npx uj audit -- --lighthouseUrl="/contact
 ```
 
 ### Run the `translation` task:

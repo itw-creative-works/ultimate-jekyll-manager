@@ -30,7 +30,7 @@ layout: null
     {%- include /core/body.html -%}
 
     <!-- Content -->
-    {{ content }}
+    {{ content | uj_content_format }}
 
     <!-- Foot -->
     {%- include /core/foot.html -%}

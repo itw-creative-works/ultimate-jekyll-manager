@@ -21,8 +21,8 @@ module.exports = async function (options) {
   // Build list of directories to clean
   const dirsToClean = [...dirs];
 
-  // Add .cache if requested
-  if (options.cache !== false) {
+  // Add .cache if requested (skip if explicitly set to 'false')
+  if (options.cache !== 'false') {
     dirsToClean.push('.cache');
   }
 

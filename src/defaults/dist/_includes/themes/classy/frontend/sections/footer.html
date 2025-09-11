@@ -1,4 +1,4 @@
-<footer class="pt-5 pb-4 border-top mt-auto">
+<footer class="pt-5 pb-4 border-top mt-auto" role="contentinfo" aria-label="Site footer">
   <div class="container">
     <!-- Logo Row -->
     <div class="row mb-4">
@@ -9,16 +9,16 @@
         {% capture logo_text %}{{ data.logo.text | default: site.brand.name | liquify }}{% endcapture %}
         {% capture logo_description %}{{ data.logo.description | default: site.brand.description | liquify }}{% endcapture %}
 
-        <h5 class="mb-3">
+        <div class="h5 mb-3">
           <a class="d-flex align-items-center text-decoration-none text-body" href="{{ logo_href }}">
             {% if logo_src and logo_src != '' and logo_src != 'null' %}
-              <img data-lazy="@src {{ logo_src }}" alt="{{ logo_text }} Logo" height="40" class="me-2">
+              <img data-lazy="@src {{ logo_src }}" alt="{{ logo_text }} Logo" height="40" class="me-2"/>
             {% endif %}
             {% if logo_text and logo_text != '' and logo_text != 'null' %}
               <span>{{ logo_text }}</span>
             {% endif %}
           </a>
-        </h5>
+        </div>
         {% if logo_description and logo_description != '' and logo_description != 'null' %}
           <p class="text-body-secondary mb-0">{{ logo_description }}</p>
         {% endif %}
@@ -44,7 +44,7 @@
             {% for link_group in data.links %}
               {% capture group_label %}{{ link_group.label | default: 'Links' }}{% endcapture %}
               <div class="{{ col_class }}">
-            <h5 class="mb-4">{{ group_label }}</h5>
+            <h6 class="mb-4 fw-semibold">{{ group_label }}</h6>
             <ul class="list-unstyled">
               {% for link in link_group.links %}
                 {% capture link_classes %}link-muted text-decoration-none{% if link.classes %} {{ link.classes | join: ' ' }}{% endif %}{% endcapture %}

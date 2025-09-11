@@ -49,6 +49,18 @@ Main.prototype.process = async function (options) {
   options = options || {};
   options._ = options._ || [];
 
+  // Parse --key=value arguments from the _ array
+  if (options._ && options._.length > 0) {
+    options._.forEach(arg => {
+      if (typeof arg === 'string' && arg.startsWith('--') && arg.includes('=')) {
+        const [key, value] = arg.substring(2).split('=');
+        // Convert kebab-case to camelCase
+        const camelKey = key.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        options[camelKey] = value;
+      }
+    });
+  }
+
   // Determine the command (use default if not provided)
   const command = resolveCommand(options);
 

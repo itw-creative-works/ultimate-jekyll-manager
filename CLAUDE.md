@@ -38,3 +38,9 @@ src/assets/themes = Theme scss and js files that are can be picked and used by t
 ## CSS
 DO NOT USE `bg-light`, `bg-dark`, `text-light`, or `text-dark`. We support BOTH light and dark mode, so instead use `bg-body`, `bg-body-secondary`, `bg-body-tertiary`, `text-body` and for buttons you can use `btn-adaptive` or `btn-outline-adaptive`.
 These classes adapt to light and dark mode automatically.
+
+## Audits
+I may ask you to help me fix problems identified by the AUDIT TASK (@src/gulp/tasks/audit.js)
+* In that case, please LOOK AT THE AUDIT FILES (Which I will provide the location to) and help me fix the issues ONE BY ONE.
+* Make a TODO list for each category in the audit, then read the ENTIRE AUDIT file and make a plan for what items in that category need to be fixed.
+* Remember, these are BIG AUDIT FILES, so you will have to tackle them in parts. DO NOT TRY TO FIX EVERYTHING AT ONCE.

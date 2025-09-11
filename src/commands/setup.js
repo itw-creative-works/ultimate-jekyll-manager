@@ -6,7 +6,7 @@ const path = require('path');
 const jetpack = require('fs-jetpack');
 const version = require('wonderful-version');
 const fetch = require('wonderful-fetch');
-const { execute, template, force } = require('node-powertools');
+const { execute, template } = require('node-powertools');
 const NPM = require('npm-api');
 const glob = require('glob').globSync;
 const { minimatch } = require('minimatch');
@@ -22,18 +22,18 @@ const DEPENDENCY_MAP = {
 }
 
 module.exports = async function (options) {
-  // Fix options
+  // Fix options - handle string 'false' values
   options = options || {};
-  options.checkManager = force(options.checkManager || true, 'boolean');
-  options.checkNode = force(options.checkNode || true, 'boolean');
-  options.checkBundler = force(options.checkBundler || true, 'boolean');
-  options.checkRuby = force(options.checkRuby || true, 'boolean');
-  options.checkPeerDependencies = force(options.checkPeerDependencies || true, 'boolean');
-  options.setupScripts = force(options.setupScripts || true, 'boolean');
-  options.createCname = force(options.createCname || true, 'boolean');
-  options.fetchFirebaseAuth = force(options.fetchFirebaseAuth || true, 'boolean');
-  options.checkLocality = force(options.checkLocality || true, 'boolean');
-  options.updateBundle = force(options.updateBundle || true, 'boolean');
+  options.checkManager = options.checkManager !== 'false';
+  options.checkNode = options.checkNode !== 'false';
+  options.checkBundler = options.checkBundler !== 'false';
+  options.checkRuby = options.checkRuby !== 'false';
+  options.checkPeerDependencies = options.checkPeerDependencies !== 'false';
+  options.setupScripts = options.setupScripts !== 'false';
+  options.createCname = options.createCname !== 'false';
+  options.fetchFirebaseAuth = options.fetchFirebaseAuth !== 'false';
+  options.checkLocality = options.checkLocality !== 'false';
+  options.updateBundle = options.updateBundle !== 'false';
 
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
