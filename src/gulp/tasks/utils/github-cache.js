@@ -150,49 +150,20 @@ class GitHubCache {
     const readme = options.stats ? this.generateReadme(options.stats) : 
                    options.branchReadme || this.generateDefaultReadme();
 
-    // If forceRecreate is true, use safe replacement strategy
+    // If forceRecreate is true, we'll handle it in uploadFilesViaGit
     if (forceRecreate) {
-      const tempBranch = `${this.branchName}-temp-${Date.now()}`;
-      const originalBranch = this.branchName;
-      
-      try {
-        this.logger.log(`🔄 Creating temporary branch for safe replacement...`);
-        
-        // Temporarily use temp branch name
-        this.branchName = tempBranch;
-        
-        // Create new branch with clean files
-        await this.ensureBranchExists(readme);
-        const uploadedCount = await this.uploadFilesViaGit(files, true, readme);
-        
-        // Restore original branch name
-        this.branchName = originalBranch;
-        
-        // Atomically replace old branch with new one
-        await this.replaceBranch(tempBranch, originalBranch);
-        
-        this.logger.log(`🎉 Safely replaced cache branch with ${uploadedCount} file(s)`);
-        return uploadedCount;
-      } catch (error) {
-        // Restore original branch name
-        this.branchName = originalBranch;
-        
-        // Try to clean up temp branch if it exists
-        try {
-          await this.deleteBranch(tempBranch);
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-        
-        this.logger.error(`❌ Failed to recreate cache branch, original remains intact`);
-        throw error;
-      }
+      this.logger.log(`🔄 Force recreating cache branch with clean files...`);
+      const uploadedCount = await this.uploadFilesViaGit(files, true, readme);
+      this.logger.log(`🎉 Recreated cache branch with ${uploadedCount} file(s)`);
+      return uploadedCount;
     } else {
       // Normal update
       await this.ensureBranchExists(readme);
       const uploadedCount = await this.uploadFilesViaGit(files, false, readme);
       
-      this.logger.log(`🎉 Pushed ${uploadedCount} file(s) to cache branch`);
+      if (uploadedCount > 0) {
+        this.logger.log(`🎉 Pushed ${uploadedCount} file(s) to cache branch`);
+      }
       return uploadedCount;
     }
   }
@@ -399,87 +370,117 @@ class GitHubCache {
   // Upload files using git commands (much faster for multiple files)
   async uploadFilesViaGit(files, forceRecreate = false, readme = null) {
     const { execSync } = require('child_process');
-    const tempDir = path.join(this.cacheDir, '../git-temp');
     
     this.logger.log(`🚀 Using fast git upload for ${files.length} files`);
     
     try {
-      // Clean and create temp directory
-      jetpack.remove(tempDir);
-      jetpack.dir(tempDir);
+      // Work directly in the cache directory
+      const gitDir = path.join(this.cacheDir, '.git');
       
       if (forceRecreate) {
-        // For force recreate, just init a new repo
-        this.logger.log(`🆕 Initializing fresh repository...`);
-        execSync('git init', { cwd: tempDir, stdio: 'ignore' });
-        execSync(`git remote add origin https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git`, { cwd: tempDir, stdio: 'ignore' });
-        execSync(`git checkout -b ${this.branchName}`, { cwd: tempDir, stdio: 'ignore' });
-      } else {
-        // Clone the branch (shallow clone for speed)
-        this.logger.log(`📥 Cloning cache branch...`);
+        // For force recreate, remove git dir and init fresh
+        this.logger.log(`🆕 Initializing fresh repository in ${this.cacheDir}...`);
+        jetpack.remove(gitDir);
+        execSync('git init', { cwd: this.cacheDir, stdio: 'ignore' });
+        execSync(`git remote add origin https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git`, { cwd: this.cacheDir, stdio: 'ignore' });
+        execSync(`git checkout -b ${this.branchName}`, { cwd: this.cacheDir, stdio: 'ignore' });
+      } else if (!jetpack.exists(gitDir)) {
+        // If no git dir exists, clone the branch
+        this.logger.log(`📥 Initializing git in cache directory...`);
+        
+        // Save current files temporarily
+        const tempBackup = path.join(path.dirname(this.cacheDir), `${path.basename(this.cacheDir)}-backup-${Date.now()}`);
+        if (jetpack.exists(this.cacheDir)) {
+          jetpack.move(this.cacheDir, tempBackup);
+        }
+        
+        // Clone the branch
         execSync(
-          `git clone --depth 1 --branch ${this.branchName} https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git .`,
-          { cwd: tempDir, stdio: 'ignore' }
+          `git clone --depth 1 --branch ${this.branchName} https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git "${this.cacheDir}"`,
+          { stdio: 'ignore' }
         );
+        
+        // Restore backed up files (overwriting cloned files)
+        if (jetpack.exists(tempBackup)) {
+          jetpack.copy(tempBackup, this.cacheDir, { overwrite: true });
+          jetpack.remove(tempBackup);
+        }
+      } else {
+        // Git dir exists, just pull latest
+        this.logger.log(`📥 Pulling latest changes...`);
+        try {
+          execSync('git fetch origin ' + this.branchName, { cwd: this.cacheDir, stdio: 'ignore' });
+          execSync('git reset --hard origin/' + this.branchName, { cwd: this.cacheDir, stdio: 'ignore' });
+        } catch (e) {
+          // If pull fails, continue anyway - we'll force push if needed
+          this.logger.warn('⚠️ Pull failed, will force push if needed');
+        }
       }
       
       // Add README if provided
+      let readmeChanged = false;
       if (readme) {
-        const readmePath = path.join(tempDir, 'README.md');
+        const readmePath = path.join(this.cacheDir, 'README.md');
+        const existingReadme = jetpack.exists(readmePath) ? jetpack.read(readmePath) : '';
+        
+        if (existingReadme !== readme) {
+          this.logger.log('📝 README content has changed, updating...');
+          readmeChanged = true;
+        }
+        
         jetpack.write(readmePath, readme);
       }
       
-      // Copy all files to the temp directory
-      let copiedCount = 0;
-      for (const filePath of files) {
-        const fullPath = path.resolve(filePath);
-        if (!jetpack.exists(fullPath)) {
-          continue;
-        }
-        
-        // Get relative path from cache directory
-        const relativePath = path.relative(this.cacheDir, fullPath);
-        if (relativePath.startsWith('..')) {
-          continue;
-        }
-        
-        const destPath = path.join(tempDir, relativePath);
-        jetpack.copy(fullPath, destPath, { overwrite: true });
-        copiedCount++;
-      }
-      
       // Check if there are changes
-      const status = execSync('git status --porcelain', { cwd: tempDir }).toString();
+      const status = execSync('git status --porcelain', { cwd: this.cacheDir }).toString();
       if (!status.trim()) {
-        this.logger.log('⏭️  No changes to commit');
+        this.logger.log('⏭️  No changes to commit (including README)');
         return 0;
       }
       
+      // Log what changed
+      const changedFiles = status.trim().split('\n').length;
+      if (readmeChanged && changedFiles === 1) {
+        this.logger.log('📄 Only README.md has changed, committing update...');
+      } else if (readmeChanged) {
+        this.logger.log(`📄 README.md and ${changedFiles - 1} cache files have changed`);
+      } else {
+        this.logger.log(`📝 ${changedFiles} files have changed`);
+      }
+      
       // Add all changes
-      this.logger.log(`📝 Staging ${copiedCount} files...`);
-      execSync('git add -A', { cwd: tempDir, stdio: 'ignore' });
+      this.logger.log(`📝 Staging changes...`);
+      execSync('git add -A', { cwd: this.cacheDir, stdio: 'ignore' });
+      
+      // Create commit message based on what changed
+      let commitMessage;
+      if (readmeChanged && changedFiles === 1) {
+        commitMessage = '📊 Update cache statistics in README';
+      } else if (readmeChanged) {
+        commitMessage = `📦 Update cache: ${changedFiles - 1} files + README stats`;
+      } else {
+        commitMessage = `📦 Update cache: ${changedFiles} files`;
+      }
       
       // Commit
       execSync(
-        `git -c user.name="GitHub Actions" -c user.email="actions@github.com" commit -m "📦 Update cache: ${copiedCount} files"`,
-        { cwd: tempDir, stdio: 'ignore' }
+        `git -c user.name="GitHub Actions" -c user.email="actions@github.com" commit -m "${commitMessage}"`,
+        { cwd: this.cacheDir, stdio: 'ignore' }
       );
       
       // Push
       this.logger.log(`📤 Pushing to GitHub...`);
-      if (forceRecreate) {
-        execSync('git push --force --set-upstream origin ' + this.branchName, { cwd: tempDir, stdio: 'ignore' });
-      } else {
-        execSync('git push', { cwd: tempDir, stdio: 'ignore' });
+      try {
+        execSync('git push origin ' + this.branchName, { cwd: this.cacheDir, stdio: 'ignore' });
+      } catch (e) {
+        // If normal push fails, try force push
+        this.logger.warn('⚠️ Normal push failed, attempting force push...');
+        execSync('git push --force origin ' + this.branchName, { cwd: this.cacheDir, stdio: 'ignore' });
       }
       
-      // Clean up
-      jetpack.remove(tempDir);
-      
-      return copiedCount;
+      return changedFiles;
     } catch (error) {
       this.logger.error(`❌ Git command failed: ${error.message}`);
-      jetpack.remove(tempDir);
       throw error; // No fallback - git is required
     }
   }
@@ -557,14 +558,92 @@ This branch stores ${this.description}.
       readme += `- **Cached Files:** ${stats.cachedCount}\n`;
     }
 
+    // Add timing information if provided
+    if (stats.timing) {
+      const { startTime, endTime, elapsedMs } = stats.timing;
+      const elapsedFormatted = this.formatElapsedTime(elapsedMs);
+      readme += `
+## Timing Information
+
+- **Start Time:** ${new Date(startTime).toLocaleTimeString()}
+- **End Time:** ${new Date(endTime).toLocaleTimeString()}
+- **Total Elapsed:** ${elapsedFormatted}
+`;
+    }
+
     // Add last run stats if provided
-    if (stats.processedNow !== undefined || stats.fromCache !== undefined) {
+    if (stats.processedNow !== undefined || stats.fromCache !== undefined || stats.newlyProcessed !== undefined) {
       readme += `
 ## Last Run Statistics
 
-- **Processed:** ${stats.processedNow || 0} files
-- **From Cache:** ${stats.fromCache || 0} files
+- **Total Files Processed:** ${stats.processedNow || 0}
+- **Files From Cache:** ${stats.fromCache || 0}
+- **Newly Processed:** ${stats.newlyProcessed || 0}
 `;
+      
+      // Add percentage if both values exist
+      if (stats.processedNow && stats.fromCache !== undefined) {
+        const cacheRate = ((stats.fromCache / stats.processedNow) * 100).toFixed(1);
+        readme += `- **Cache Hit Rate:** ${cacheRate}%\n`;
+      }
+    }
+
+    // Add language breakdown for translation
+    if (stats.languageBreakdown && stats.languageBreakdown.length > 0) {
+      readme += `
+## Language Breakdown
+
+`;
+      stats.languageBreakdown.forEach(lang => {
+        const cacheRate = lang.total > 0 ? ((lang.fromCache / lang.total) * 100).toFixed(1) : 0;
+        readme += `### ${lang.language.toUpperCase()}\n`;
+        readme += `- **Total Files:** ${Math.round(lang.total)}\n`;
+        readme += `- **From Cache:** ${lang.fromCache} (${cacheRate}%)\n`;
+        readme += `- **Newly Translated:** ${lang.newlyTranslated}\n`;
+        if (lang.failed > 0) {
+          readme += `- **Failed:** ${lang.failed}\n`;
+        }
+        readme += '\n';
+      });
+    }
+
+    // Add token usage and costs for translation
+    if (stats.tokenUsage) {
+      const { inputTokens, outputTokens, totalTokens, inputCost, outputCost, totalCost } = stats.tokenUsage;
+      readme += `
+## Token Usage & Costs
+
+- **Input Tokens:** ${(inputTokens || 0).toLocaleString()}
+- **Output Tokens:** ${(outputTokens || 0).toLocaleString()}
+- **Total Tokens:** ${(totalTokens || 0).toLocaleString()}
+
+### Cost Breakdown
+- **Input Cost:** $${(inputCost || 0).toFixed(4)}
+- **Output Cost:** $${(outputCost || 0).toFixed(4)}
+- **Total Cost:** $${(totalCost || 0).toFixed(4)}
+`;
+    }
+
+    // Add image optimization stats if provided
+    if (stats.imageStats) {
+      const { totalImages, optimized, skipped, totalSizeBefore, totalSizeAfter, totalSaved } = stats.imageStats;
+      readme += `
+## Image Optimization Statistics
+
+- **Total Images:** ${totalImages || 0}
+- **Optimized:** ${optimized || 0}
+- **Skipped (from cache):** ${skipped || 0}
+`;
+      
+      if (totalSizeBefore && totalSizeAfter) {
+        const savedPercent = ((totalSaved / totalSizeBefore) * 100).toFixed(1);
+        readme += `
+### Size Reduction
+- **Original Size:** ${this.formatBytes(totalSizeBefore)}
+- **Optimized Size:** ${this.formatBytes(totalSizeAfter)}
+- **Total Saved:** ${this.formatBytes(totalSaved)} (${savedPercent}%)
+`;
+      }
     }
 
     // Add custom details section if provided
@@ -582,6 +661,31 @@ ${stats.details}
 `;
 
     return readme;
+  }
+
+  // Helper to format elapsed time
+  formatElapsedTime(ms) {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+  // Helper to format bytes
+  formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
   // Calculate file hash

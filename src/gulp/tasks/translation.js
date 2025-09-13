@@ -161,6 +161,9 @@ async function processTranslation() {
   const enabled = config?.translation?.enabled !== false;
   const languages = config?.translation?.languages || [];
   const updatedFiles = new Set();
+  
+  // Track timing
+  const startTime = Date.now();
 
   // Quit if translation is disabled or no languages are configured
   if (!enabled) {
@@ -216,9 +219,17 @@ async function processTranslation() {
     metas[lang] = { meta, path: metaPath, skipped: new Set() };
   }
 
-  // Track token usage
+  // Track token usage and statistics
   const tokens = { input: 0, output: 0 };
   const queue = [];
+  const stats = {
+    fromCache: 0,
+    newlyProcessed: 0,
+    totalProcessed: 0,
+    failedFiles: [],
+    cachedFiles: [],
+    processedFiles: []
+  };
 
   for (const filePath of allFiles) {
     // Get relative path and original HTML
@@ -302,6 +313,8 @@ async function processTranslation() {
         ) {
           translated = jetpack.read(cachePath);
           logger.log(`📦 Success: ${logTag} - Using cache`);
+          stats.fromCache++;
+          stats.cachedFiles.push(logTag);
         } else {
           try {
             const { result, usage } = await translateWithAPI(openAIKey, bodyText, lang);
@@ -322,6 +335,8 @@ async function processTranslation() {
 
             // Set result
             setResult(true);
+            stats.newlyProcessed++;
+            stats.processedFiles.push(logTag);
           } catch (e) {
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
             logger.error(`❌ Failed: ${logTag} — ${e.message} (Elapsed time: ${elapsedTime}s)`);
@@ -331,6 +346,7 @@ async function processTranslation() {
 
             // Save failure to cache
             setResult(false);
+            stats.failedFiles.push(logTag);
           }
         }
 
@@ -448,6 +464,7 @@ async function processTranslation() {
         // Track updated files
         updatedFiles.add(cachePath);
         updatedFiles.add(metas[lang].path);
+        stats.totalProcessed++;
       };
 
       // Add to queue
@@ -487,35 +504,101 @@ async function processTranslation() {
     jetpack.write(metas[lang].path, metas[lang].meta);
   }
 
+  // Calculate timing
+  const endTime = Date.now();
+  const elapsedMs = endTime - startTime;
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
+  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+  const elapsedFormatted = elapsedMinutes > 0 
+    ? `${elapsedMinutes}m ${elapsedSeconds % 60}s`
+    : `${elapsedSeconds}s`;
+
   // Calculate costs using AI pricing (per 1M tokens)
   const inputCost = (tokens.input / 1000000) * AI.inputCost;
   const outputCost = (tokens.output / 1000000) * AI.outputCost;
   const totalCost = inputCost + outputCost;
 
-  // Log total token usage
-  logger.log('🧠 OpenAI Token Usage Summary:');
-  logger.log(`   🟣 Input tokens:      ${tokens.input.toLocaleString()}`);
-  logger.log(`   🟢 Output tokens:     ${tokens.output.toLocaleString()}`);
-  logger.log(`   🔵 Total tokens:      ${(tokens.input + tokens.output).toLocaleString()}`);
+  // Log detailed statistics
+  logger.log('\n📊 Translation Statistics:');
+  logger.log('═══════════════════════════════════════');
+  
+  // Timing
+  logger.log('⏱️  Timing:');
+  logger.log(`   Start time:      ${new Date(startTime).toLocaleTimeString()}`);
+  logger.log(`   End time:        ${new Date(endTime).toLocaleTimeString()}`);
+  logger.log(`   Total elapsed:   ${elapsedFormatted}`);
+  
+  // File processing stats
+  logger.log('\n📁 File Processing:');
+  logger.log(`   Total processed:     ${stats.totalProcessed}`);
+  logger.log(`   From cache:          ${stats.fromCache} (${((stats.fromCache / stats.totalProcessed) * 100).toFixed(1)}%)`);
+  logger.log(`   Newly translated:    ${stats.newlyProcessed} (${((stats.newlyProcessed / stats.totalProcessed) * 100).toFixed(1)}%)`);
+  if (stats.failedFiles.length > 0) {
+    logger.log(`   Failed:              ${stats.failedFiles.length}`);
+  }
 
-  // Cost summary
-  logger.log('💰 Cost Breakdown:');
-  logger.log(`   📥 Input cost:  $${inputCost.toFixed(4)}`);
-  logger.log(`   📤 Output cost: $${outputCost.toFixed(4)}`);
-  logger.log(`   💵 Total cost:  $${totalCost.toFixed(4)}`);
+  // Token usage
+  if (tokens.input > 0 || tokens.output > 0) {
+    logger.log('\n🧠 OpenAI Token Usage:');
+    logger.log(`   Input tokens:        ${tokens.input.toLocaleString()}`);
+    logger.log(`   Output tokens:       ${tokens.output.toLocaleString()}`);
+    logger.log(`   Total tokens:        ${(tokens.input + tokens.output).toLocaleString()}`);
+
+    // Cost summary
+    logger.log('\n💰 Cost Breakdown:');
+    logger.log(`   Input cost:          $${inputCost.toFixed(4)}`);
+    logger.log(`   Output cost:         $${outputCost.toFixed(4)}`);
+    logger.log(`   Total cost:          $${totalCost.toFixed(4)}`);
+  }
+  
+  logger.log('═══════════════════════════════════════\n');
 
   // Push updated translation cache back to cache branch
   if (githubCache && githubCache.hasCredentials()) {
+    logger.log(`📊 Updating translation cache README with latest statistics...`);
+    
     // Collect all cache files to push
     const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
 
-    // Push to GitHub
+    // ALWAYS force recreate the branch (fresh branch with no history)
     await githubCache.pushBranch(allCacheFiles, {
+      forceRecreate: true,  // ALWAYS create a fresh branch - no history needed
       stats: {
         timestamp: new Date().toISOString(),
         sourceCount: allFiles.length,
         cachedCount: allCacheFiles.length,
-        details: `Translated ${allFiles.length} pages to ${languages.length} languages`
+        processedNow: stats.totalProcessed,
+        fromCache: stats.fromCache,
+        newlyProcessed: stats.newlyProcessed,
+        timing: {
+          startTime,
+          endTime,
+          elapsedMs
+        },
+        tokenUsage: tokens.input > 0 || tokens.output > 0 ? {
+          inputTokens: tokens.input,
+          outputTokens: tokens.output,
+          totalTokens: tokens.input + tokens.output,
+          inputCost,
+          outputCost,
+          totalCost
+        } : undefined,
+        languageBreakdown: languages.map(lang => ({
+          language: lang,
+          total: stats.totalProcessed / languages.length,
+          fromCache: stats.cachedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
+          newlyTranslated: stats.processedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
+          failed: stats.failedFiles.filter(f => f.startsWith(`[${lang}]`)).length
+        })),
+        details: `Translated ${allFiles.length} pages to ${languages.length} languages (${languages.join(', ')})\n\n### Language Breakdown:\n${languages.map(lang => {
+          const langStats = {
+            total: stats.totalProcessed / languages.length,
+            fromCache: stats.cachedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
+            newlyTranslated: stats.processedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
+            failed: stats.failedFiles.filter(f => f.startsWith(`[${lang}]`)).length
+          };
+          return `**${lang.toUpperCase()}:** ${langStats.total} total (${langStats.fromCache} cached, ${langStats.newlyTranslated} new${langStats.failed > 0 ? `, ${langStats.failed} failed` : ''})`;
+        }).join('\n')}\n\n### Files from cache:\n${stats.cachedFiles.length > 0 ? stats.cachedFiles.slice(0, 10).map(f => `- ${f}`).join('\n') + (stats.cachedFiles.length > 10 ? `\n- ... and ${stats.cachedFiles.length - 10} more` : '') : 'None'}\n\n### Newly translated files:\n${stats.processedFiles.length > 0 ? stats.processedFiles.slice(0, 10).map(f => `- ${f}`).join('\n') + (stats.processedFiles.length > 10 ? `\n- ... and ${stats.processedFiles.length - 10} more` : '') : 'None'}${stats.failedFiles.length > 0 ? `\n\n### Failed translations:\n${stats.failedFiles.slice(0, 10).map(f => `- ${f}`).join('\n') + (stats.failedFiles.length > 10 ? `\n- ... and ${stats.failedFiles.length - 10} more` : '')}` : ''}`
       }
     });
   }

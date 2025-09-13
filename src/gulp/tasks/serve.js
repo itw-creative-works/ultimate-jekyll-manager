@@ -32,116 +32,13 @@ module.exports = async function serve(complete) {
     https: await getHttpsConfig(), // Enable HTTPS with mkcert or self-signed certificates
     server: {
       baseDir: '_site',
-      middleware: async function (req, res, next) {
-        const url = new URL(`${localUrl}${req.url}`);
-        const pathname = url.pathname;
-
-        // Set the query object
-        req.query = {};
-        req.body = {};
-
-        // If the file has no ext, log it
-        if (!path.extname(pathname)) {
-          logger.log(`Serving ${pathname}`);
-        }
-
-        // Process the post request
-        if (pathname.match(/\/_process/)) {
-          const qsUrl = url.searchParams.get('url');
-          let lib;
-
-          // Set query
-          url.searchParams.forEach((value, key) => {
-            req.query[key] = value;
-          })
-
-          // Set body
-          if (req.method === 'POST') {
-            req.body = await receiveRequestBody(req);
-          }
-
-          // Try to load the library
-          try {
-            // Clear the cache
-            delete require.cache[require.resolve(`../${qsUrl}`)];
-
-            // Load the library
-            lib = require(`../${qsUrl}`);
-          } catch (e) {
-            // Log the error
-            logger.error(`Error processing ${qsUrl}`);
-
-            // Set the status code
-            res.statusCode = 500;
-
-            // Return an error
-            return res.write(`Cannot find ${qsUrl}`);
-          }
-
-          // Log
-          logger.log(`Processing ${qsUrl}`);
-
-          // Process the library
-          return await lib({
-            req: req,
-            res: res,
-          })
-          .then((r) => {
-            // Set the status code
-            res.statusCode = 200;
-
-            // Write the response (if it's JSON, set the content type)
-            try {
-              r = JSON.stringify(r);
-              res.setHeader('Content-Type', 'application/json');
-            } catch (e) {
-            }
-
-            // End the response
-            res.write(r);
-            res.end();
-          })
-          .catch((e) => {
-            // Set the status code
-            res.statusCode = 500;
-
-            // Write the error
-            res.write(`Error processing ${qsUrl}: ${e}`);
-            res.end();
-          });
-        }
-
-        // Check if the URL is missing a trailing slash and does not have an extension
-        if (!pathname.endsWith('/') && !path.extname(pathname)) {
-          // Get the new URL
-          const newURL = `${pathname}.html`;
-
-          // Log
-          // logger.log(`Rewriting ${pathname} to ${newURL}`);
-
-          // Rewrite it to serve the .html extension
-          req.url = newURL;
-        }
-
-        // Special case: Rewrite /blog to blog.html since Jekyll fucks it up locally (probably due to pagination)
-        if (pathname === '/blog') {
-          req.url = '/blog/index.html';
-        }
-
-        // Strip query parameters and hash fragments from the URL for file path lookup
-        const cleanUrl = req.url.split('?')[0].split('#')[0];
-        const rawFilePath = path.join(rootPathProject, '_site', cleanUrl);
-
-        // Serve 404.html if the file does not exist
-        if (!jetpack.exists(rawFilePath) && rawFilePath.endsWith('.html')) {
-          // Log
-          logger.log(`File not found: ${req.url}. Serving 404.html instead.`);
-          req.url = '/404.html';
-        }
-
-        // Continue
-        return next();
-      },
+      middleware: [
+        // require('compression')({
+        //   threshold: 0, // Compress all files regardless of size
+        //   level: 9 // Maximum compression (1-9)
+        // }),
+        processRequestMiddleware
+      ],
     },
   }
 
@@ -284,6 +181,119 @@ async function generateMkcertCertificates(certPath) {
     logger.log('mkcert not found. Install with: brew install mkcert');
     return false;
   }
+}
+
+// Middleware function to process requests
+async function processRequestMiddleware(req, res, next) {
+  const url = new URL(`${localUrl}${req.url}`);
+  const pathname = url.pathname;
+
+  // Set the query object
+  req.query = {};
+  req.body = {};
+
+  // If the file has no ext, log it
+  if (!path.extname(pathname)) {
+    logger.log(`Serving ${pathname}`);
+  }
+
+  // Process the post request
+  if (pathname.match(/\/_process/)) {
+    const qsUrl = url.searchParams.get('url');
+    let lib;
+
+    // Set query
+    url.searchParams.forEach((value, key) => {
+      req.query[key] = value;
+    })
+
+    // Set body
+    if (req.method === 'POST') {
+      req.body = await receiveRequestBody(req);
+    }
+
+    // Try to load the library
+    try {
+      // Clear the cache
+      delete require.cache[require.resolve(`../${qsUrl}`)];
+
+      // Load the library
+      lib = require(`../${qsUrl}`);
+    } catch (e) {
+      // Log the error
+      logger.error(`Error processing ${qsUrl}`);
+
+      // Set the status code
+      res.statusCode = 500;
+
+      // Return an error
+      return res.write(`Cannot find ${qsUrl}`);
+    }
+
+    // Log
+    logger.log(`Processing ${qsUrl}`);
+
+    // Process the library
+    return await lib({
+      req: req,
+      res: res,
+    })
+    .then((r) => {
+      // Set the status code
+      res.statusCode = 200;
+
+      // Write the response (if it's JSON, set the content type)
+      try {
+        r = JSON.stringify(r);
+        res.setHeader('Content-Type', 'application/json');
+      } catch (e) {
+      }
+
+      // End the response
+      res.write(r);
+      res.end();
+    })
+    .catch((e) => {
+      // Set the status code
+      res.statusCode = 500;
+
+      // Write the error
+      res.write(`Error processing ${qsUrl}: ${e}`);
+      res.end();
+    });
+  }
+
+  // Check if the URL is missing a trailing slash and does not have an extension
+  if (!pathname.endsWith('/') && !path.extname(pathname)) {
+    // Get the new URL
+    const newURL = `${pathname}.html`;
+
+    // Log
+    // logger.log(`Rewriting ${pathname} to ${newURL}`);
+
+    // Rewrite it to serve the .html extension
+    req.url = newURL;
+  }
+
+  // Special LOCAL case: Rewrite /blog to blog.html since Jekyll fucks it up locally (probably due to pagination)
+  // Disaboed because we moved it to the jekyll task
+  // if (pathname === '/blog') {
+  //   req.url = '/blog/index.html';
+  // }
+
+  // Strip query parameters and hash fragments from the URL for file path lookup
+  const cleanUrl = req.url.split('?')[0].split('#')[0];
+  const rawFilePath = path.join(rootPathProject, '_site', cleanUrl);
+
+  // Special LOCAL case: Serve 404.html if the file does not exist
+  if (!jetpack.exists(rawFilePath) && rawFilePath.endsWith('.html')) {
+    // Log
+    logger.log(`File not found: ${req.url}. Serving 404.html instead.`);
+    req.url = '/404.html';
+  }
+
+  // Continue
+  return next();
 }
 
 function receiveRequestBody(req) {

@@ -73,6 +73,12 @@ Manager.isBuildMode = function () {
 }
 Manager.prototype.isBuildMode = Manager.isBuildMode;
 
+// actLikeProduction - determines if we should act like production mode
+Manager.actLikeProduction = function () {
+  return Boolean(Manager.isBuildMode() || process.env.UJ_AUDIT_FORCE === 'true');
+}
+Manager.prototype.actLikeProduction = Manager.actLikeProduction;
+
 // getEnvironment (calls isServer ? 'production' : 'development')
 Manager.getEnvironment = function () {
   return Manager.isServer() ? 'production' : 'development';

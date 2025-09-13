@@ -44,7 +44,7 @@
             {% for link_group in data.links %}
               {% capture group_label %}{{ link_group.label | default: 'Links' }}{% endcapture %}
               <div class="{{ col_class }}">
-            <h6 class="mb-4 fw-semibold">{{ group_label }}</h6>
+            <div class="h6 mb-4 fw-semibold">{{ group_label }}</div>
             <ul class="list-unstyled">
               {% for link in link_group.links %}
                 {% capture link_classes %}link-muted text-decoration-none{% if link.classes %} {{ link.classes | join: ' ' }}{% endif %}{% endcapture %}

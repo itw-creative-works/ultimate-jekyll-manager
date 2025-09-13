@@ -4,7 +4,6 @@ const logger = Manager.logger('minifyHtml');
 const { src, dest, series } = require('gulp');
 const { minify } = require('html-minifier-terser');
 const through2 = require('through2');
-const terser = require('terser');
 
 // Load package
 const package = Manager.getPackage('main');

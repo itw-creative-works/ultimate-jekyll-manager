@@ -51,6 +51,9 @@ async function imagemin(complete) {
   // Log
   logger.log('Starting...');
 
+  // Track timing
+  const startTime = Date.now();
+
   // Initialize cache on first run
   if (index === 0) {
     // Log responsive configurations
@@ -66,6 +69,18 @@ async function imagemin(complete) {
     return complete();
   }
 
+  // Track statistics
+  const stats = {
+    totalImages: 0,
+    fromCache: 0,
+    optimized: 0,
+    cachedFiles: [],
+    optimizedFiles: [],
+    sizeBefore: 0,
+    sizeAfter: 0,
+    savedBytes: 0
+  };
+
   // Get all images
   const files = glob(input);
   if (files.length === 0) {
@@ -73,6 +88,7 @@ async function imagemin(complete) {
     return complete();
   }
 
+  stats.totalImages = files.length;
   logger.log(`Found ${files.length} images to process`);
 
   // Load metadata
@@ -85,16 +101,34 @@ async function imagemin(complete) {
   }
 
   // Determine what needs processing
-  const { filesToProcess, validCachePaths } = await determineFilesToProcess(files, meta, githubCache);
+  const { filesToProcess, validCachePaths } = await determineFilesToProcess(files, meta, githubCache, stats);
 
   // Handle case where all files are from cache
   if (filesToProcess.length === 0) {
     logger.log('✅ All images from cache');
-    await handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePaths, files.length);
+
+    // Calculate timing
+    const endTime = Date.now();
+    const elapsedMs = endTime - startTime;
+
+    // Log statistics
+    logImageStatistics(stats, startTime, endTime);
+
+    await handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePaths, files.length, stats, { startTime, endTime, elapsedMs });
     return complete();
   }
 
   logger.log(`🔄 Processing ${filesToProcess.length} images`);
+  stats.optimized = filesToProcess.length;
+
+  // Track sizes for optimization
+  for (const file of filesToProcess) {
+    const fileStats = jetpack.inspect(file);
+    if (fileStats) {
+      stats.sizeBefore += fileStats.size;
+    }
+    stats.optimizedFiles.push(path.relative(rootPathProject, file));
+  }
 
   // Process images
   return src(filesToProcess, { base: 'src/assets/images' })
@@ -113,11 +147,29 @@ async function imagemin(complete) {
       const relativePath = path.relative(path.join(rootPathProject, output), file.path);
       const cachePath = path.join(CACHE_DIR, 'images', relativePath);
       jetpack.copy(file.path, cachePath, { overwrite: true });
+
+      // Track size after optimization
+      const fileStats = jetpack.inspect(file.path);
+      if (fileStats) {
+        stats.sizeAfter += fileStats.size;
+      }
     })
     .on('finish', async () => {
+      // Calculate final statistics
+      stats.savedBytes = stats.sizeBefore - stats.sizeAfter;
+
+      // Calculate timing
+      const endTime = Date.now();
+      const elapsedMs = endTime - startTime;
+
+      // Log statistics
+      logImageStatistics(stats, startTime, endTime);
+
       // Save metadata and push cache
       if (githubCache && githubCache.hasCredentials()) {
         githubCache.saveMetadata(metaPath, meta);
+
+        logger.log(`📊 Updating cache with ${stats.optimized} new optimizations and README stats...`);
 
         // Collect all cache files to push (metadata will be auto-included)
         const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
@@ -129,8 +181,23 @@ async function imagemin(complete) {
             timestamp: new Date().toISOString(),
             sourceCount: files.length,
             cachedCount: allCacheFiles.length - 1,
-            processedNow: filesToProcess.length,
-            fromCache: files.length - filesToProcess.length
+            processedNow: stats.optimized,
+            fromCache: stats.fromCache,
+            newlyProcessed: stats.optimized,
+            timing: {
+              startTime,
+              endTime,
+              elapsedMs
+            },
+            imageStats: {
+              totalImages: stats.totalImages,
+              optimized: stats.optimized,
+              skipped: stats.fromCache,
+              totalSizeBefore: stats.sizeBefore,
+              totalSizeAfter: stats.sizeAfter,
+              totalSaved: stats.savedBytes
+            },
+            details: `Optimized ${stats.optimized} images, ${stats.fromCache} from cache\n\n### Files from cache:\n${stats.cachedFiles.length > 0 ? stats.cachedFiles.map(f => `- ${f}`).join('\n') : 'None'}\n\n### Newly optimized files:\n${stats.optimizedFiles.length > 0 ? stats.optimizedFiles.map(f => `- ${f}`).join('\n') : 'None'}`
           }
         });
       }
@@ -221,7 +288,7 @@ async function initializeCache() {
 }
 
 // Determine which files need processing
-async function determineFilesToProcess(files, meta, githubCache) {
+async function determineFilesToProcess(files, meta, githubCache, stats) {
   const filesToProcess = [];
   const validCachePaths = new Set();
 
@@ -263,6 +330,24 @@ async function determineFilesToProcess(files, meta, githubCache) {
           jetpack.copy(src, dst, { overwrite: true });
         });
         logger.log(`📦 Using cache: ${relativePath}`);
+        stats.fromCache++;
+        stats.cachedFiles.push(relativePath);
+
+        // Track size of cached files
+        outputs.forEach(name => {
+          const cachePath = path.join(CACHE_DIR, 'images', dirName, name);
+          const fileStats = jetpack.inspect(cachePath);
+          if (fileStats) {
+            stats.sizeAfter += fileStats.size;
+          }
+        });
+
+        // Track original size
+        const originalStats = jetpack.inspect(file);
+        if (originalStats) {
+          stats.sizeBefore += originalStats.size;
+        }
+
         continue;
       }
     }
@@ -272,11 +357,11 @@ async function determineFilesToProcess(files, meta, githubCache) {
     meta[relativePath] = { hash, timestamp: new Date().toISOString() };
   }
 
-  return { filesToProcess, validCachePaths };
+  return { filesToProcess, validCachePaths, cacheStats: stats };
 }
 
 // Handle cache-only update (when no files need processing)
-async function handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePaths, fileCount) {
+async function handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePaths, fileCount, stats, timing) {
   if (!githubCache || !githubCache.hasCredentials()) {
     return;
   }
@@ -284,24 +369,78 @@ async function handleCacheOnlyUpdate(githubCache, metaPath, meta, validCachePath
   // Save metadata
   githubCache.saveMetadata(metaPath, meta);
 
-  // Check for orphans locally to decide if we need to push
-  const orphanCheck = await githubCache.checkForOrphans(validCachePaths);
-  if (orphanCheck.hasOrphans) {
-    logger.log(`🗑️ Found ${orphanCheck.orphanedCount} orphaned files - updating cache`);
+  // ALWAYS update README with latest stats, even if no orphans
+  logger.log(`📊 Updating cache README with latest statistics...`);
 
-    // Collect all valid cache files
-    const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
+  // Collect all valid cache files
+  const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
 
-    // Push to GitHub (pushBranch will handle orphan detection internally)
-    await githubCache.pushBranch(allCacheFiles, {
-      validFiles: validCachePaths,
-      stats: {
-        timestamp: new Date().toISOString(),
-        sourceCount: fileCount,
-        cachedCount: allCacheFiles.length - 1, // Subtract meta.json
-        processedNow: 0,
-        fromCache: fileCount
-      }
-    });
+  // Push to GitHub (will update README even if no file changes)
+  await githubCache.pushBranch(allCacheFiles, {
+    validFiles: validCachePaths,
+    stats: {
+      timestamp: new Date().toISOString(),
+      sourceCount: fileCount,
+      cachedCount: allCacheFiles.length - 1, // Subtract meta.json
+      processedNow: stats.totalImages,
+      fromCache: stats.fromCache,
+      newlyProcessed: stats.optimized,
+      timing: timing,
+      imageStats: {
+        totalImages: stats.totalImages,
+        optimized: stats.optimized,
+        skipped: stats.fromCache,
+        totalSizeBefore: stats.sizeBefore,
+        totalSizeAfter: stats.sizeAfter,
+        totalSaved: stats.sizeBefore - stats.sizeAfter
+      },
+      details: `All ${fileCount} images served from cache`
+    }
+  });
+}
+
+// Log image statistics
+function logImageStatistics(stats, startTime, endTime) {
+  const elapsedMs = endTime - startTime;
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
+  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+  const elapsedFormatted = elapsedMinutes > 0
+    ? `${elapsedMinutes}m ${elapsedSeconds % 60}s`
+    : `${elapsedSeconds}s`;
+
+  logger.log('\n📊 Image Optimization Statistics:');
+  logger.log('═══════════════════════════════════════');
+
+  // Timing
+  logger.log('⏱️  Timing:');
+  logger.log(`   Start time:      ${new Date(startTime).toLocaleTimeString()}`);
+  logger.log(`   End time:        ${new Date(endTime).toLocaleTimeString()}`);
+  logger.log(`   Total elapsed:   ${elapsedFormatted}`);
+
+  // File processing stats
+  logger.log('\n📁 File Processing:');
+  logger.log(`   Total images:        ${stats.totalImages}`);
+  logger.log(`   From cache:          ${stats.fromCache} (${((stats.fromCache / stats.totalImages) * 100).toFixed(1)}%)`);
+  logger.log(`   Newly optimized:     ${stats.optimized} (${((stats.optimized / stats.totalImages) * 100).toFixed(1)}%)`);
+
+  // Size reduction stats
+  if (stats.sizeBefore > 0 && stats.sizeAfter > 0) {
+    const savedPercent = ((stats.savedBytes / stats.sizeBefore) * 100).toFixed(1);
+    logger.log('\n💾 Size Reduction:');
+    logger.log(`   Original size:       ${formatBytes(stats.sizeBefore)}`);
+    logger.log(`   Optimized size:      ${formatBytes(stats.sizeAfter)}`);
+    logger.log(`   Total saved:         ${formatBytes(stats.savedBytes)} (${savedPercent}%)`);
   }
+
+  logger.log('═══════════════════════════════════════\n');
+}
+
+// Helper to format bytes
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }

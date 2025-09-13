@@ -16,7 +16,7 @@ module.exports = async function (options) {
   const autoExit = options.autoExit !== 'false'; // Default true unless explicitly 'false'
 
   // Build environment variables with all options
-  const envVars = `UJ_AUDIT_FORCE=true UJ_AUDIT_AUTOEXIT=${autoExit} UJ_AUDIT_LIGHTHOUSE_URL="${lighthouseUrl}"`;
+  const envVars = `UJ_AUDIT_FORCE=true UJ_MINIFY_HTML_FORCE=true UJ_PURGECSS=true UJ_AUDIT_LIGHTHOUSE_URL="${lighthouseUrl}" UJ_AUDIT_AUTOEXIT=${autoExit}`;
 
   // Run the full build process with audit force enabled
   await execute(`npx uj clean && ${envVars} bundle exec npm run gulp --`, { log: true })

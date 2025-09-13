@@ -67,12 +67,11 @@ const delay = 250;
 // Bundle naming configuration
 const bundleNaming = {
   // Files that should have stable (non-hashed) names
-  stable: {
-    exact: ['main', 'project', 'service-worker'],
-    patterns: [
-      /^modules\//,  // All module files get stable names
-    ]
-  },
+  stable: [
+    /^main$/,                      // Main bundle
+    /^service-worker$/,            // Service worker
+    /^modules\//,                  // All module files get stable names
+  ],
   // Special output paths (relative to dist/assets/js/)
   specialPaths: {
     'service-worker': '../../service-worker.js'
@@ -80,9 +79,9 @@ const bundleNaming = {
 };
 
 const settings = {
-  mode: Manager.isBuildMode() ? 'production' : 'development',
+  mode: Manager.actLikeProduction() ? 'production' : 'development',
   target: ['web', 'es5'],
-  devtool: Manager.isBuildMode() ? 'source-map' : 'eval-source-map',
+  devtool: Manager.actLikeProduction() ? 'source-map' : 'eval-source-map',
   // devtool: false,
   plugins: [
     new StripDevBlocksPlugin(),
@@ -198,7 +197,7 @@ const settings = {
     ]
   },
   optimization: {
-    minimize: Manager.isBuildMode(),
+    minimize: Manager.actLikeProduction(),
     // splitChunks: {
     //   chunks: 'all',
     //   cacheGroups: {
@@ -221,19 +220,17 @@ const settings = {
 
 // Helper function to determine if a bundle should have a stable name
 function shouldHaveStableName(name) {
-  // Check exact matches
-  if (bundleNaming.stable.exact.includes(name)) {
-    return true;
-  }
-
-  // Check patterns
-  return bundleNaming.stable.patterns.some(pattern => pattern.test(name));
+  return bundleNaming.stable.some(pattern => pattern.test(name));
 }
 
 // Task
 function webpack(complete) {
   // Log
   logger.log('Starting...');
+
+  // Log mode and devtools
+  logger.log(`Mode: ${settings.mode}`);
+  logger.log(`Devtool: ${settings.devtool}`);
 
   // Copy files
   copyFilesDirectly();
@@ -356,37 +353,18 @@ function updateEntryPoints(inputArray) {
 
   // Update from src
   const entries = files.reduce((acc, file) => {
-    const isProject = file.startsWith(rootPathProject);
-    const root = isProject ? rootPathProject : rootPathPackage;
-    const relativePath = path.relative(root, file).replace(/\\/g, '/').replace(/\.js$/, '');
-
-    // Remove known base paths
-    let name = relativePath
-      .replace(/^dist\/assets\/js\//, '')
-      .replace(/^src\/assets\/js\//, '')
-      .replace(/^src\//, '');
+    let name;
 
     // Determine naming based on file type
-    if (name.includes('pages/')) {
-      // Pages: add .main or .project suffix
-      name += isProject ? '.project' : '.main';
-    } else if (name.includes('modules/')) {
-      // Modules: keep the full path structure for clarity
-      // This ensures modules/redirect becomes modules/redirect
-      // and modules/analytics/tracker becomes modules/analytics/tracker
+    if (file.includes('/assets/js/modules/')) {
+      name = file.split('/assets/js/')[1];
     } else {
       // Everything else: just use the base filename
-      name = path.basename(name);
+      name = path.basename(file);
     }
 
-    // Don't include pages in the entry points
-    // if (
-    //   file.includes('assets/js/pages/')
-    //   || file.includes('assets/js/global.js')
-    //   || file.includes('assets/themes/')
-    // ) {
-    //   return acc;
-    // }
+    // Strip .js extension
+    name = name.replace(/\.js$/, '');
 
     // Update entry points
     acc[name] = file;

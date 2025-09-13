@@ -1,5 +1,5 @@
 <!-- Meta Variables -->
-{% assign page-viewport = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no" %}
+{% assign page-viewport = "width=device-width, initial-scale=1.0, user-scalable=yes, shrink-to-fit=no" %}
 {%- iftruthy page.resolved.meta.viewport -%}
   {% assign page-viewport = page.resolved.meta.viewport | liquify %}
 {% endiftruthy %}
@@ -60,14 +60,35 @@
 {% endcapture %}
 
 <!-- Prefetch and Preconnect -->
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
 <link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
-<link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin/>
-<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
-<link rel="dns-prefetch" href="https://cdn.jsdelivr.net"/>
-<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="dns-prefetch" href="https://fonts.gstatic.com"/>
+<!-- <link rel="preconnect" href="https://cdn.jsdelivr.net"/> -->
+<!-- <link rel="preconnect" href="https://cdnjs.cloudflare.com"/> -->
+<!-- <link rel="dns-prefetch" href="https://cdn.jsdelivr.net"/> -->
+<!-- <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"/> -->
+
+<!-- Google Adsense (conditionally loaded) -->
+{% iftruthy page.resolved.advertising.google-adsense.client %}
+  <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin/>
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com"/>
+  <!-- Additional AdSense domains if needed -->
+  <!-- <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin/> -->
+  <!-- <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net"/> -->
+  <!-- <link rel="preconnect" href="https://tpc.googlesyndication.com" crossorigin/> -->
+  <!-- <link rel="dns-prefetch" href="https://tpc.googlesyndication.com"/> -->
+{% endiftruthy %}
+
+<!-- Chatsy (if used) -->
+{% iftruthy page.resolved.web_manager.chatsy.enabled %}
+  <link rel="preconnect" href="https://app.chatsy.ai" crossorigin/>
+  <link rel="dns-prefetch" href="https://app.chatsy.ai"/>
+{% endiftruthy %}
+
+<!-- Cloudflare Insights (if used) -->
+<!-- <link rel="preconnect" href="https://static.cloudflareinsights.com"/>
+<link rel="dns-prefetch" href="https://static.cloudflareinsights.com"/> -->
 
 <!-- Meta -->
 <meta charset="utf-8"/>

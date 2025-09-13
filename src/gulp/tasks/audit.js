@@ -47,6 +47,14 @@ async function audit(complete) {
   // Perform HTML/XML audit
   await processAudit();
 
+  // Real quick, lets check if were in build mode and IF NOT then we run minifyHtml
+  if (!Manager.isBuildMode()) {
+    const minifyHtml = require('./minifyHtml');
+    await new Promise((resolve) => {
+      minifyHtml(resolve);
+    });
+  }
+
   // Perform Lighthouse audit if URL is provided
   if (process.env.UJ_AUDIT_LIGHTHOUSE_URL) {
     await runLighthouseAudit();
@@ -71,6 +79,11 @@ module.exports = series(audit);
 async function validateFormat(file, content) {
   // Log
   // logger.log(`➡️ Validating HTML in ${file}`);
+
+  // Skip any file that is a blog post
+  // if (file.includes('/blog/')) {
+  //   return { valid: true, messages: [] };
+  // }
 
   // Initialize an array to hold formatted messages
   let valid = true;
@@ -289,15 +302,15 @@ async function processAudit() {
   // Save validation results to validator folder
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const validatorDir = `${rootPathProject}/.temp/audit/validator`;
-  
+
   // Ensure validator directory exists
   jetpack.dir(validatorDir);
-  
+
   // Save validation summary
   const summaryPath = `${validatorDir}/validation-${timestamp}.json`;
   jetpack.write(summaryPath, JSON.stringify(summary, null, 2));
   logger.log(`📄 Validation report saved to: ${summaryPath}`);
-  
+
   // Save latest validation
   const latestPath = `${validatorDir}/latest-validation.json`;
   jetpack.write(latestPath, JSON.stringify({
@@ -320,7 +333,7 @@ function format(messages) {
 // Lighthouse audit functionality
 async function runLighthouseAudit() {
   logger.log('📊 Starting Lighthouse audit...');
-  
+
   let serverStarted = false;
   let auditUrl = null;
 
@@ -334,7 +347,7 @@ async function runLighthouseAudit() {
 
     // Get the URL to test (default to homepage if not specified)
     const customUrl = process.env.UJ_AUDIT_LIGHTHOUSE_URL || '/';
-    
+
     // Check if it's just a path (starts with /)
     if (customUrl.startsWith('/')) {
       // Try to get the working URL and append the path
@@ -356,7 +369,7 @@ async function runLighthouseAudit() {
       auditUrl = customUrl;
       logger.log(`Using custom Lighthouse URL: ${auditUrl}`);
     }
-    
+
     // If we couldn't set a URL from the custom path, try to get the working URL
     if (!auditUrl) {
       // Try to get the working URL (from BrowserSync if it's running)
@@ -373,21 +386,21 @@ async function runLighthouseAudit() {
         // No server running yet
       }
     }
-    
+
     // If no working server and no custom URL, we need to ensure BrowserSync is running
     if (!auditUrl || !auditUrl.includes(':')) {
       logger.log('Ensuring BrowserSync server is running for Lighthouse audit...');
-      
+
       // Run serve task (it will check if already running)
       const serve = require('./serve');
       await new Promise((resolve) => {
         serve(resolve);
       });
-      
+
       // Wait for server to be ready and get the URL
       const maxRetries = 30;
       let retries = 0;
-      
+
       while (retries < maxRetries) {
         try {
           auditUrl = Manager.getWorkingUrl();
@@ -401,18 +414,18 @@ async function runLighthouseAudit() {
         } catch (e) {
           // Continue waiting
         }
-        
+
         retries++;
         if (retries % 5 === 0) {
           logger.log(`Waiting for server... (attempt ${retries}/${maxRetries})`);
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      
+
       if (!auditUrl || !auditUrl.includes(':')) {
         throw new Error('Failed to get server URL for Lighthouse audit');
       }
-      
+
       // Append the path now that the server is running
       const pathToTest = process.env.UJ_AUDIT_LIGHTHOUSE_URL || '/';
       if (pathToTest.startsWith('/')) {
@@ -420,7 +433,7 @@ async function runLighthouseAudit() {
         logger.log(`Using path with server: ${auditUrl}`);
       }
     }
-    
+
     logger.log(`Running Lighthouse on ${auditUrl}`);
 
     // Lighthouse configuration
@@ -428,6 +441,10 @@ async function runLighthouseAudit() {
       logLevel: 'info',
       output: ['html', 'json'],
       onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+      skipAudits: [
+        // Skip these audits since local doesn't support HTTP/2
+        'uses-http2',
+      ],
       port: 9222,
     };
 

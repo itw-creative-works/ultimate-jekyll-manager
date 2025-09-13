@@ -73,7 +73,10 @@ Here are some examples:
 npx uj audit
 
 # Run with a Lighthouse URL (defaults to "/" if not provided)
-npx uj audit -- --lighthouseUrl="/contact
+npx uj audit -- --lighthouseUrl="/contact"
+
+# Add autoExit to continue developing and testing AFTER the audit
+npx uj audit -- --lighthouseUrl="/contact" --autoExit=false
 ```
 
 ### Run the `translation` task:

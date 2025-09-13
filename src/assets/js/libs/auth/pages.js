@@ -140,7 +140,7 @@ export default function (Manager) {
   async function handleRedirectResult() {
     try {
       // Import Firebase auth functions
-      const { getAuth, getRedirectResult } = await import('web-manager/node_modules/firebase/auth');
+      const { getAuth, getRedirectResult } = await import('@firebase/auth');
       const auth = getAuth();
 
       // Check for redirect result
@@ -233,7 +233,7 @@ export default function (Manager) {
   }
 
   async function attemptEmailSignIn(email, password) {
-    const { getAuth, signInWithEmailAndPassword } = await import('web-manager/node_modules/firebase/auth');
+    const { getAuth, signInWithEmailAndPassword } = await import('@firebase/auth');
     const auth = getAuth();
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential;
@@ -278,7 +278,7 @@ export default function (Manager) {
 
     try {
       // Import Firebase auth functions
-      const { getAuth, createUserWithEmailAndPassword } = await import('web-manager/node_modules/firebase/auth');
+      const { getAuth, createUserWithEmailAndPassword } = await import('@firebase/auth');
 
       // Get auth instance and create user
       const auth = getAuth();
@@ -441,7 +441,7 @@ export default function (Manager) {
 
     try {
       // Import Firebase auth functions
-      const { getAuth, sendPasswordResetEmail } = await import('web-manager/node_modules/firebase/auth');
+      const { getAuth, sendPasswordResetEmail } = await import('@firebase/auth');
 
       // Get auth instance
       const auth = getAuth();
@@ -505,7 +505,7 @@ export default function (Manager) {
         FacebookAuthProvider,
         TwitterAuthProvider,
         GithubAuthProvider
-      } = await import('web-manager/node_modules/firebase/auth');
+      } = await import('@firebase/auth');
 
       const auth = getAuth();
       let provider;

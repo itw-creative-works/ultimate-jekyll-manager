@@ -44,7 +44,7 @@ async function initializeSigninMethods() {
 // Check for redirect result from Google auth
 async function checkRedirectResult() {
   try {
-    const { getRedirectResult } = await import('web-manager/node_modules/firebase/auth');
+    const { getRedirectResult } = await import('@firebase/auth');
     const result = await getRedirectResult(firebaseAuth);
 
     if (result && result.user) {
@@ -414,7 +414,7 @@ function initializeSignoutAllForm() {
 // Connect Google provider
 async function connectGoogleProvider() {
   // Dynamic import of Firebase auth methods
-  const { GoogleAuthProvider, linkWithPopup, linkWithRedirect } = await import('web-manager/node_modules/firebase/auth');
+  const { GoogleAuthProvider, linkWithPopup, linkWithRedirect } = await import('@firebase/auth');
 
   const provider = new GoogleAuthProvider();
 
@@ -461,7 +461,7 @@ async function disconnectGoogleProvider() {
   }
 
   // Dynamic import of Firebase auth methods
-  const { unlink } = await import('web-manager/node_modules/firebase/auth');
+  const { unlink } = await import('@firebase/auth');
 
   const user = firebaseAuth.currentUser;
 
@@ -491,7 +491,7 @@ async function handleChangePassword() {
     }
 
     // Import Firebase auth method
-    const { sendPasswordResetEmail } = await import('web-manager/node_modules/firebase/auth');
+    const { sendPasswordResetEmail } = await import('@firebase/auth');
 
     // Send password reset email
     await sendPasswordResetEmail(firebaseAuth, user.email);

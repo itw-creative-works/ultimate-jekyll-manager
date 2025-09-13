@@ -11,6 +11,8 @@ const rename = require('gulp-rename');
 const filter = require('gulp-filter').default;
 const { template } = require('node-powertools');
 const yaml = require('js-yaml');
+const postcss = require('gulp-postcss');
+const purgeCss = require('@fullhuman/postcss-purgecss').default;
 
 // Load package
 const package = Manager.getPackage('main');
@@ -64,6 +66,8 @@ const compiled = {};
 
 // Configuration
 const MAIN_BUNDLE_PAGE_PARTIALS = false; // Set to true to merge pages into _page-specific.scss, false to compile separately
+// Enable PurgeCSS via environment variable or in production mode
+const ENABLE_PURGECSS = Manager.isBuildMode() || process.env.UJ_PURGECSS === 'true';
 
 // SASS Compilation Task
 function sass(complete) {
@@ -74,7 +78,7 @@ function sass(complete) {
   generatePageScss();
 
   // Compile
-  return src(input, { sourcemaps: true })
+  let stream = src(input, { sourcemaps: true })
     // Skip files based on configuration
     .pipe(filter(file => !shouldSkip(file.path), { restore: true }))
     // Compile SASS
@@ -97,9 +101,125 @@ function sass(complete) {
       // Only show warnings once
       verbose: false
     })
-    .on('error', complete))
+    .on('error', complete));
+
+  // Apply PurgeCSS if enabled
+  if (ENABLE_PURGECSS) {
+    logger.log('PurgeCSS enabled - removing unused CSS');
+    stream = stream.pipe(postcss([
+      purgeCss({
+        content: [
+          // All Ultimate Jekyll defaults EXCEPT themes subdirectories
+          `${rootPathPackage}/dist/defaults/**/*.{html,liquid,md}`,
+
+          // Explicitly exclude ALL theme directories, then include only the active theme
+          `!${rootPathPackage}/dist/defaults/**/_includes/themes/**`,
+          `!${rootPathPackage}/dist/defaults/**/_layouts/themes/**`,
+
+          // Include ONLY the active theme's files
+          `${rootPathPackage}/dist/defaults/**/_includes/themes/${config.theme.id}/**/*.{html,liquid,md}`,
+          `${rootPathPackage}/dist/defaults/**/_layouts/themes/${config.theme.id}/**/*.{html,liquid,md}`,
+
+          // Project HTML
+          'src/**/*.{html,liquid,md}',
+          'dist/**/*.{html,liquid,md}',
+
+          // Main JS
+          `${rootPathPackage}/dist/assets/js/**/*.js`,
+          `${rootPathPackage}/node_modules/web-manager/**/*.js`,
+
+          // Theme JS
+          `${rootPathPackage}/dist/assets/themes/${config.theme.id}/**/*.js`,
+
+          // Project JS
+          'src/assets/js/**/*.js',
+        ],
+        // Safelist patterns for dynamic classes
+        safelist: {
+          standard: [
+            // Bootstrap JavaScript components
+            /^modal-/,
+            /^bs-/,
+            /^data-bs-/,
+            /^carousel-/,
+            /^collapse/,
+            /^dropdown-/,
+            /^offcanvas-/,
+            /^tooltip-/,
+            /^popover-/,
+            /^toast-/,
+            /^show$/,
+            /^showing$/,
+            /^hide$/,
+            /^fade$/,
+            /^active$/,
+            /^disabled$/,
+
+            // Common dynamic classes
+            /^is-/,
+            /^has-/,
+            /^was-/,
+
+            // Font Awesome
+            /^fa-/,
+            /^fas$/,
+            /^far$/,
+            /^fab$/,
+
+            // Theme-specific
+            /^theme-/,
+            /^dark$/,
+            /^light$/,
+
+            // Animations
+            /^animate-/,
+            /^animation-/,
+
+            // Spinner
+            /^spinner-/,
+
+            // Utilities that might be added dynamically
+            /^[mp][trblxy]?-[0-9]+$/,
+            /^text-/,
+            /^bg-/,
+            /^border-/,
+            /^rounded-/,
+            /^shadow-/,
+            /^d-/,
+            /^flex-/,
+            /^justify-/,
+            /^align-/,
+            /^order-/,
+            /^overflow-/,
+            /^position-/,
+            /^w-/,
+            /^h-/,
+            /^mw-/,
+            /^mh-/,
+            /^min-/,
+            /^max-/,
+          ],
+          deep: [
+            // For third-party libraries that might inject styles
+            /^ck-/, // CKEditor
+            /^tox-/, // TinyMCE
+            /^swal2-/, // SweetAlert2
+          ],
+          greedy: []
+        },
+        // Don't remove CSS variables
+        variables: true,
+        // Keep keyframes
+        keyframes: true,
+        // Keep font-face rules
+        fontFace: true
+      })
+    ]));
+  }
+
+  return stream
     .pipe(cleanCSS({
-      format: Manager.isBuildMode() ? 'compressed' : 'beautify',
+      format: Manager.actLikeProduction() ? 'compressed' : 'beautify',
     }))
     .pipe(rename((file) => {
       // Add bundle to the name
