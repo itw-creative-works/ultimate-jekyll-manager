@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.55",
+  "version": "0.0.60",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {

@@ -307,15 +307,33 @@ function webpack(complete) {
     // Log
     logger.log('Finished!');
 
-    // Error
+    // Handle fatal webpack errors
     if (e) {
-      logger.error(e);
-    } else {
-      logger.log('Stats:\n', stats.toString({ colors: true }));
+      logger.error('Fatal webpack error:', e);
+      return complete(e);
     }
 
-    // Complete
-    return complete(e);
+    // Log stats
+    const statsString = stats.toString({ colors: true });
+    logger.log('Stats:\n', statsString);
+
+    // Check for compilation errors
+    if (stats.hasErrors()) {
+      const info = stats.toJson();
+      logger.error('Webpack compilation failed with errors');
+      // Create an error to pass to complete() so the build fails
+      const compilationError = new Error(`Webpack compilation failed: ${info.errors.length} error(s)`);
+      return complete(compilationError);
+    }
+
+    // Check for warnings (optional - don't fail build but log them)
+    if (stats.hasWarnings()) {
+      const info = stats.toJson();
+      logger.warn(`Webpack compilation completed with ${info.warnings.length} warning(s)`);
+    }
+
+    // Complete successfully
+    return complete();
   });
 }
 // Watcher task

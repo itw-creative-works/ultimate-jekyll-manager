@@ -106,34 +106,70 @@ function sass(complete) {
   // Apply PurgeCSS if enabled
   if (ENABLE_PURGECSS) {
     logger.log('PurgeCSS enabled - removing unused CSS');
+
+    // Define content patterns for PurgeCSS
+    const contentPatterns = [
+      // All Ultimate Jekyll defaults EXCEPT themes subdirectories
+      `${rootPathPackage}/dist/defaults/**/*.{html,liquid,md}`,
+
+      // Explicitly exclude ALL theme directories, then include only the active theme
+      `!${rootPathPackage}/dist/defaults/**/_includes/themes/**`,
+      `!${rootPathPackage}/dist/defaults/**/_layouts/themes/**`,
+
+      // Exclude test pages that include all components (would prevent PurgeCSS from working)
+      `!${rootPathPackage}/dist/defaults/**/pages/test/**/*.{html,liquid,md}`,
+
+      // Include ONLY the active theme's files
+      `${rootPathPackage}/dist/defaults/**/_includes/themes/${config.theme.id}/**/*.{html,liquid,md}`,
+      `${rootPathPackage}/dist/defaults/**/_layouts/themes/${config.theme.id}/**/*.{html,liquid,md}`,
+
+      // Project HTML
+      'src/**/*.{html,liquid,md}',
+      'dist/**/*.{html,liquid,md}',
+
+      // Main JS
+      `${rootPathPackage}/dist/assets/js/**/*.js`,
+      `${rootPathPackage}/node_modules/web-manager/**/*.js`,
+
+      // Theme JS
+      `${rootPathPackage}/dist/assets/themes/${config.theme.id}/**/*.js`,
+
+      // Project JS
+      'src/assets/js/**/*.js',
+    ];
+
+    // // Log the files that will be analyzed
+    // logger.log('PurgeCSS content patterns:', contentPatterns);
+
+    // // Separate inclusion and exclusion patterns for glob
+    // const includePatterns = contentPatterns.filter(p => !p.startsWith('!'));
+    // const excludePatterns = contentPatterns.filter(p => p.startsWith('!')).map(p => p.substring(1));
+
+    // // Use glob to get the actual files (respecting exclusions)
+    // const allFiles = glob(includePatterns, { ignore: excludePatterns });
+
+    // logger.log(`PurgeCSS will analyze ${allFiles.length} total files:`);
+
+    // // Group files by type for better readability
+    // const fileGroups = {
+    //   'HTML/Liquid/MD files': allFiles.filter(f => /\.(html|liquid|md)$/.test(f)),
+    //   'JavaScript files': allFiles.filter(f => /\.js$/.test(f))
+    // };
+
+    // Object.entries(fileGroups).forEach(([groupName, files]) => {
+    //   if (files.length > 0) {
+    //     logger.log(`  ${groupName}: ${files.length} files`);
+    //     // Show first 5 files as examples
+    //     files.forEach(file => {
+    //       logger.log(`    - ${file}`);
+    //     });
+    //   }
+    // });
+
+    // Apply PurgeCSS
     stream = stream.pipe(postcss([
       purgeCss({
-        content: [
-          // All Ultimate Jekyll defaults EXCEPT themes subdirectories
-          `${rootPathPackage}/dist/defaults/**/*.{html,liquid,md}`,
-
-          // Explicitly exclude ALL theme directories, then include only the active theme
-          `!${rootPathPackage}/dist/defaults/**/_includes/themes/**`,
-          `!${rootPathPackage}/dist/defaults/**/_layouts/themes/**`,
-
-          // Include ONLY the active theme's files
-          `${rootPathPackage}/dist/defaults/**/_includes/themes/${config.theme.id}/**/*.{html,liquid,md}`,
-          `${rootPathPackage}/dist/defaults/**/_layouts/themes/${config.theme.id}/**/*.{html,liquid,md}`,
-
-          // Project HTML
-          'src/**/*.{html,liquid,md}',
-          'dist/**/*.{html,liquid,md}',
-
-          // Main JS
-          `${rootPathPackage}/dist/assets/js/**/*.js`,
-          `${rootPathPackage}/node_modules/web-manager/**/*.js`,
-
-          // Theme JS
-          `${rootPathPackage}/dist/assets/themes/${config.theme.id}/**/*.js`,
-
-          // Project JS
-          'src/assets/js/**/*.js',
-        ],
+        content: contentPatterns,
         // Safelist patterns for dynamic classes
         safelist: {
           standard: [
@@ -175,9 +211,6 @@ function sass(complete) {
             /^animate-/,
             /^animation-/,
 
-            // Spinner
-            /^spinner-/,
-
             // Utilities that might be added dynamically
             /^[mp][trblxy]?-[0-9]+$/,
             /^text-/,
@@ -199,13 +232,12 @@ function sass(complete) {
             /^min-/,
             /^max-/,
           ],
-          deep: [
-            // For third-party libraries that might inject styles
-            /^ck-/, // CKEditor
-            /^tox-/, // TinyMCE
-            /^swal2-/, // SweetAlert2
-          ],
-          greedy: []
+          deep: [],
+          greedy: [],
+          // Preserve keyframe animations
+          keyframes: [
+            /^spinner-/
+          ]
         },
         // Don't remove CSS variables
         variables: true,
@@ -217,6 +249,7 @@ function sass(complete) {
     ]));
   }
 
+  // Process
   return stream
     .pipe(cleanCSS({
       format: Manager.actLikeProduction() ? 'compressed' : 'beautify',

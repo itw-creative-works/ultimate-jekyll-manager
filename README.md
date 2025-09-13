@@ -60,6 +60,11 @@ npm start -- --debug=true
 npm start -- --ujPluginDevMode=true
 ```
 
+### Other ENV variables
+```bash
+UJ_PURGECSS=true # Enables PurgeCSS to remove unused CSS (normally only happens in production builds)
+```
+
 ## Running Specific Tasks
 You can run specific tasks using the `npm run gulp` command with the appropriate task name.
 
@@ -81,6 +86,14 @@ npx uj audit -- --lighthouseUrl="/contact" --autoExit=false
 
 ### Run the `translation` task:
 ```bash
+# Test translation with GitHub cache (requires GH_TOKEN and GITHUB_REPOSITORY)
+GH_TOKEN=XXX \
+GITHUB_REPOSITORY=XXX \
+UJ_TRANSLATION_CACHE=true \
+npx uj translation
+
+# Test with only 1 file
+UJ_TRANSLATION_ONLY="index.html" \
 GH_TOKEN=XXX \
 GITHUB_REPOSITORY=XXX \
 UJ_TRANSLATION_CACHE=true \

@@ -2,6 +2,17 @@
   Initialize styles for the application.
 */
 
+// Enable safe area insets for mobile browsers
+html {
+  // Ensure viewport-fit=cover works properly
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+}
+
+// Reset body padding to prevent double safe area spacing
+body {
+  padding: 0;
+}
+
 @font-face {
   font-display: auto;
 }

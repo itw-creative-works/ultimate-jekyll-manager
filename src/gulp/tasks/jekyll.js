@@ -88,6 +88,9 @@ async function jekyll(complete) {
   // Build Jekyll
   await execute(command.join(' '), {log: true});
 
+  // Log working URL
+  logger.log(`Your site is being served at: ${logger.format.cyan(Manager.getWorkingUrl())}`);
+
   // Reposition "/blog/index.html" to "/blog.html" for compatibility
   // This is needed because Jekyll creates a folder for the blog index page
   // but we want it to be at the root level for compatibility with various hosting providers
@@ -196,7 +199,7 @@ async function launchBrowserSync() {
   }
 
   // Get external URL
-  const externalUrl = global.browserSync.instance.options.get('urls').get('external');
+  const externalUrl = Manager.getWorkingUrl();
 
   // Check if the tab is already open
   const isOpen = await isBrowserTabOpen(externalUrl);
@@ -297,18 +300,18 @@ async function fixBlogIndex() {
   try {
     const blogIndexPath = '_site/blog/index.html';
     const blogTargetPath = '_site/blog.html';
-    
+
     // Check if blog/index.html exists
     if (jetpack.exists(blogIndexPath)) {
       // Move blog/index.html to blog.html
       jetpack.move(blogIndexPath, blogTargetPath, { overwrite: true });
-      
+
       // Remove empty blog directory if it exists and is empty
       const blogDir = '_site/blog';
       if (jetpack.exists(blogDir) && jetpack.list(blogDir).length === 0) {
         jetpack.remove(blogDir);
       }
-      
+
       logger.log('Moved blog/index.html to blog.html');
     }
   } catch (e) {

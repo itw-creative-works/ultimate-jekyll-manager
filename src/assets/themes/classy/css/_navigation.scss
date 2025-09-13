@@ -18,23 +18,30 @@
     margin-left: auto;
     padding-right: var(--bs-gutter-x, 0.75rem);
     padding-left: var(--bs-gutter-x, 0.75rem);
-    
+
+    // XS screens (less than 576px) - maintain margin
+    @media (max-width: 575.98px) {
+      max-width: calc(100% - 2rem);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     @media (min-width: 576px) {
       max-width: 540px;
     }
-    
+
     @media (min-width: 768px) {
       max-width: 720px;
     }
-    
+
     @media (min-width: 992px) {
       max-width: 960px;
     }
-    
+
     @media (min-width: 1200px) {
       max-width: 1140px;
     }
-    
+
     @media (min-width: 1400px) {
       max-width: 1320px;
     }
@@ -56,7 +63,7 @@
     .container-fluid {
       padding: 0;
     }
-    
+
     // Always show glassy background on mobile - matching .bg-glassy exactly
     @media (max-width: 991.98px) {
       background: transparent !important;
@@ -65,7 +72,7 @@
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
       position: relative;
-      
+
       &::before {
         content: "";
         position: absolute;
@@ -76,11 +83,11 @@
         z-index: -1;
         pointer-events: none;
       }
-      
+
       [data-bs-theme="dark"] & {
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-        
+
         &::before {
           opacity: 0.6;
         }
@@ -150,7 +157,7 @@
       background-color: rgba(0, 0, 0, 0.08);
     }
   }
-  
+
   // Dark mode nav links
   [data-bs-theme="dark"] & {
     .nav-link {
@@ -198,17 +205,17 @@
     height: 1.25em;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
   }
-  
+
   // Dark mode styles for toggle button
   [data-bs-theme="dark"] & {
     background: rgba(33, 37, 41, 0.9);
     border-color: rgba(255, 255, 255, 0.1);
-    
+
     &:hover {
       background: rgba(33, 37, 41, 1);
       border-color: rgba(255, 255, 255, 0.2);
     }
-    
+
     .navbar-toggler-icon {
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     }
@@ -295,34 +302,34 @@
       background: $primary;
       color: white;
     }
-    
+
     &:focus {
       background: rgba($primary, 0.08);
       outline: none;
     }
-    
+
     // Support for text utility classes
     &.text-danger {
       color: $danger !important;
-      
+
       &:hover {
         background: rgba($danger, 0.08);
         color: $danger !important;
       }
     }
-    
+
     &.text-warning {
       color: $warning !important;
-      
+
       &:hover {
         background: rgba($warning, 0.08);
         color: $warning !important;
       }
     }
-    
+
     &.text-success {
       color: $success !important;
-      
+
       &:hover {
         background: rgba($success, 0.08);
         color: $success !important;
@@ -343,47 +350,47 @@
     background: rgba(33, 37, 41, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    
+
     .dropdown-item {
       color: var(--bs-body-color);
-      
+
       &:hover {
         background: rgba(255, 255, 255, 0.1);
         color: white;
       }
-      
+
       &.active,
       &:active {
         background: $primary;
         color: white;
       }
-      
+
       &:focus {
         background: rgba(255, 255, 255, 0.05);
       }
-      
+
       // Support for text utility classes in dark mode
       &.text-danger {
         color: $danger !important;
-        
+
         &:hover {
           background: rgba($danger, 0.15);
           color: lighten($danger, 10%) !important;
         }
       }
-      
+
       &.text-warning {
         color: $warning !important;
-        
+
         &:hover {
           background: rgba($warning, 0.15);
           color: lighten($warning, 10%) !important;
         }
       }
-      
+
       &.text-success {
         color: $success !important;
-        
+
         &:hover {
           background: rgba($success, 0.15);
           color: lighten($success, 10%) !important;
