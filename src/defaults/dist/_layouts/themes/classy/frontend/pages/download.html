@@ -1,0 +1,355 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/base
+
+platforms:
+  - id: "windows"
+    name: "Windows"
+    icon: "windows"
+    description: "Windows 10+"
+    types:
+      - type: "universal"
+        name: "Windows Installer"
+        icon: "download"
+  - id: "mac"
+    name: "macOS"
+    icon: "apple"
+    description: "macOS 10.15+"
+    types:
+      - type: "universal"
+        name: "macOS Installer"
+        icon: "download"
+  - id: "linux"
+    name: "Linux"
+    icon: "linux"
+    description: "Ubuntu 18.04+"
+    types:
+      - type: "debian"
+        name: "Debian Package"
+        icon: "download"
+      - type: "snap"
+        name: "Snap Package"
+        icon: "download"
+  - id: "android"
+    name: "Android"
+    icon: "android"
+    description: "Android 8.0+"
+    types:
+      - type: "universal"
+        name: "APK Download"
+        icon: "download"
+  - id: "ios"
+    name: "iOS"
+    icon: "apple"
+    description: "iOS 13+"
+    types:
+      - type: "universal"
+        name: "Download from App Store"
+        icon: "apple"
+
+features:
+  - title: "Lightning Fast"
+    description: "Install in seconds and start using immediately"
+    icon: "bolt"
+  - title: "Cross-Platform"
+    description: "Seamlessly sync across all your devices"
+    icon: "sync"
+  - title: "Auto-Update"
+    description: "Always get the latest features automatically"
+    icon: "cloud-arrow-down"
+  - title: "Secure"
+    description: "Enterprise-grade security built-in"
+    icon: "shield-check"
+---
+
+<!-- Hero Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-12">
+        <div data-lazy="@class animation-slide-up">
+          <h1 class="h1 fw-bold mb-4">
+            Download
+            <span class="text-gradient-rainbow">{{ site.brand.name }}</span>
+          </h1>
+          <p class="fs-4 text-muted mb-5">
+            Download {{ site.brand.name }} for your platform and get started right away
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Selector -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-12">
+        <div class="d-flex flex-wrap justify-content-center gap-3" id="platform-selector" data-lazy="@class animation-slide-up">
+          {% for platform in page.resolved.platforms %}
+            {% assign has_download = false %}
+            {% for type in platform.types %}
+              {% assign config_url = site.download[platform.id][type.type] %}
+              {% iftruthy config_url %}
+                {% assign has_download = true %}
+                {% break %}
+              {% endiftruthy %}
+            {% endfor %}
+
+            {% if has_download %}
+              <button
+                class="btn {% if platform.id == "windows" %}btn-primary{% else %}btn-outline-adaptive{% endif %} btn-lg platform-btn d-flex align-items-center justify-content-center"
+                data-platform="{{ platform.id }}"
+              >
+                {% uj_icon platform.icon, "fa-3xl me-2" %}
+                {{ platform.name }}
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Buttons -->
+    <div class="row justify-content-center">
+      {% for platform in page.resolved.platforms %}
+        {% assign has_download = false %}
+        {% for type in platform.types %}
+          {% assign config_url = site.download[platform.id][type.type] %}
+          {% iftruthy config_url %}
+            {% assign has_download = true %}
+            {% break %}
+          {% endiftruthy %}
+        {% endfor %}
+
+        {% if has_download %}
+          <div
+            class="col-lg-8 platform-downloads"
+            data-platform="{{ platform.id }}"
+            {% unless platform.id == "windows" %}hidden{% endunless %}
+          >
+            <div class="card border-0 shadow-lg bg-body-tertiary animation-fade-in">
+              <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                  <div class="avatar avatar-2xl rounded-circle bg-primary bg-gradient d-inline-flex align-items-center justify-content-center">
+                    {% uj_icon platform.icon, "display-4 text-white" %}
+                  </div>
+                </div>
+                <h2 class="h2 fw-bold mb-2">{{ platform.name }}</h2>
+                <p class="text-muted fs-5 mb-4">{{ platform.description }}</p>
+
+                <div class="d-flex flex-column gap-3">
+                  {% for type in platform.types %}
+                    {% assign config_url = site.download[platform.id][type.type] %}
+                    {% iftruthy config_url %}
+                      <a
+                        href="{{ config_url }}"
+                        class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
+                      >
+                        {% uj_icon type.icon, "fa-3xl me-2" %}
+                        {{ type.name }}
+                      </a>
+                    {% endiftruthy %}
+                  {% endfor %}
+                </div>
+
+                {% if platform.id == "linux" %}
+                  <div class="mt-4">
+                    <details class="text-start">
+                      <summary class="text-muted cursor-pointer">Installation instructions</summary>
+                      <div class="mt-3 p-3 bg-body rounded">
+                        {% assign debian_url = site.download.linux.debian %}
+                        {% iftruthy debian_url %}
+                          <p class="small mb-2"><strong>Debian/Ubuntu:</strong></p>
+                          <code class="d-block mb-3 p-2 bg-dark text-light rounded">sudo dpkg -i {{ site.brand.name | downcase }}.deb</code>
+                        {% endiftruthy %}
+
+                        {% assign snap_url = site.download.linux.snap %}
+                        {% iftruthy snap_url %}
+                          <p class="small mb-2"><strong>Snap:</strong></p>
+                          <code class="d-block p-2 bg-dark text-light rounded">sudo snap install {{ site.brand.name | downcase }}</code>
+                        {% endiftruthy %}
+                      </div>
+                    </details>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 fw-bold mb-3">
+        Why Download <span class="_text-gradient-rainbow">{{ site.brand.name }}</span>?
+      </h2>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      {% for feature in page.resolved.features %}
+        <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+          <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
+            <div class="card-body p-4">
+              <div class="bg-primary bg-gradient avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                {% uj_icon feature.icon, "text-white fs-2" %}
+              </div>
+              <h4 class="fw-bold mb-3">{{ feature.title }}</h4>
+              <p class="text-muted mb-0">{{ feature.description }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- System Requirements -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8" data-lazy="@class animation-slide-up">
+        <div class="card border-0 shadow-sm bg-body-tertiary">
+          <div class="card-body p-5">
+            <h2 class="h2 fw-bold mb-4 text-center">
+              System <span class="_text-gradient-rainbow">Requirements</span>
+            </h2>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <h5 class="fw-bold mb-3">
+                  {% uj_icon "desktop", "me-2 text-primary" %}
+                  Desktop
+                </h5>
+                <ul class="list-unstyled text-muted">
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}Windows 10 or later</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}macOS 10.15 (Catalina) or later</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}Linux (Ubuntu 18.04+, Fedora 30+)</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}2GB RAM minimum</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}500MB free disk space</li>
+                </ul>
+              </div>
+
+              <div class="col-md-6">
+                <h5 class="fw-bold mb-3">
+                  {% uj_icon "mobile", "me-2 text-primary" %}
+                  Mobile
+                </h5>
+                <ul class="list-unstyled text-muted">
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}iOS 13 or later</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}Android 8.0 (Oreo) or later</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}100MB free storage</li>
+                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %}Internet connection required</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+          <h2 class="h2 fw-bold mb-3">
+            Frequently Asked <span class="_text-gradient-rainbow">Questions</span>
+          </h2>
+        </div>
+
+        <div class="accordion" id="downloadFaqAccordion" data-lazy="@class animation-slide-up">
+          <div class="accordion-item border-0 mb-3">
+            <h2 class="accordion-header">
+              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1">
+                <span class="fw-semibold">Is {{ site.brand.name }} free to download?</span>
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
+              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                Yes! {{ site.brand.name }} is completely free to download and use. We offer premium features for power users, but the core functionality is always free.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border-0 mb-3">
+            <h2 class="accordion-header">
+              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                <span class="fw-semibold">How do I update {{ site.brand.name }}?</span>
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
+              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                {{ site.brand.name }} automatically checks for updates and will notify you when a new version is available. You can also manually check for updates in the app settings.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border-0 mb-3">
+            <h2 class="accordion-header">
+              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                <span class="fw-semibold">Can I use {{ site.brand.name }} on multiple devices?</span>
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
+              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                Absolutely! Your {{ site.brand.name }} account works across all platforms. Download the app on all your devices and your data will sync automatically.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border-0 mb-3">
+            <h2 class="accordion-header">
+              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
+                <span class="fw-semibold">Is my data secure?</span>
+              </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
+              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                Yes. We use enterprise-grade encryption to protect your data both in transit and at rest. Your privacy and security are our top priorities.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-8">
+  <div class="container">
+    <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient" data-lazy="@class animation-slide-up">
+      <div class="row align-items-center py-4">
+        <div class="col-lg-8 text-white text-center text-lg-start">
+          <h2 class="h2 fw-bold lh-sm mb-4">
+            Need help getting started?
+          </h2>
+          <p class="fs-5 text-muted mb-4">
+            Our support team is here 24/7 to help you with installation and setup
+          </p>
+          <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+            <a href="/contact" class="btn btn-adaptive btn-lg px-5 py-3">
+              {% uj_icon "headset", "me-2" %}
+              Contact Support
+            </a>
+            <a href="/docs" class="btn btn-outline-adaptive btn-lg px-5 py-3">
+              {% uj_icon "book", "me-2" %}
+              View Docs
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 d-none d-lg-block text-end">
+          {% uj_icon "download", "text-white display-1" %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ content | uj_content_format }}
