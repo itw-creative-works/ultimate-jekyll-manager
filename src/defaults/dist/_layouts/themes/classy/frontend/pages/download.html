@@ -338,7 +338,7 @@ features:
               {% uj_icon "headset", "me-2" %}
               Contact Support
             </a>
-            <a href="/docs" class="btn btn-outline-adaptive btn-lg px-5 py-3">
+            <a href="#docs" class="btn btn-outline-adaptive btn-lg px-5 py-3">
               {% uj_icon "book", "me-2" %}
               View Docs
             </a>
@@ -351,5 +351,197 @@ features:
     </div>
   </div>
 </section>
+
+<!-- Onboarding Modal -->
+<div class="modal fade" id="onboardingModal" tabindex="-1" aria-labelledby="onboardingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="onboardingModalLabel">
+          {% uj_icon "rocket", "text-primary me-2" %}
+          Getting Started
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+          {% uj_icon "check-circle", "fs-4 me-3" %}
+          <div>
+            <h6 class="mb-0">Download Started!</h6>
+            <small class="text-muted">Your download should begin automatically.</small>
+          </div>
+        </div>
+
+        <h6 class="fw-bold mb-3">Next Steps:</h6>
+
+        <!-- Windows Instructions -->
+        <div class="platform-instructions" data-platform="windows" hidden>
+          <div class="position-relative mb-3">
+            <div class="mb-1">
+              <h6 class="mb-0">1. Open your Downloads folder</h6>
+              <small class="text-muted">Find the <strong>Downloads</strong> folder on your computer</small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <div class="folder-icon animation-flex position-relative d-flex align-items-center justify-content-center">
+                  {% uj_icon "download", "display-4" %}
+                </div>
+                <span class="fw-bold">Downloads</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-relative mb-3">
+            <div class="mb-1">
+              <h6 class="mb-0">2. Double-click {{ site.brand.name }}-Setup.exe</h6>
+              <small class="text-muted">Click <strong>"Yes"</strong> if Windows asks for permission</small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex flex-column align-items-center gap-2 position-relative">
+                <div class="file-to-click bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
+                  <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }}" class="brandmark"/>
+                </div>
+                <span class="fw-bold">{{ site.brand.name }}-Setup.exe</span>
+                <div class="click-indicator position-absolute top-50 start-50">
+                  <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                  <div class="pointer-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="48px" height="48px"><path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/><path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-relative mb-3">
+            <div class="mb-1">
+              <h6 class="mb-0">3. Follow the installation setup</h6>
+              <small class="text-muted">Click <strong>"Next"</strong> through the steps and accept the terms</small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="wizard-window card border-2 rounded-3 shadow overflow-hidden">
+                <div class="wizard-header bg-primary text-white d-flex align-items-center px-2 small fw-bold">
+                  {{ site.brand.name }} Setup
+                </div>
+                <div class="wizard-content bg-adaptive-inverse d-flex flex-column justify-content-center p-3">
+                  <div class="small text-adaptive mb-2 text-center">Installing...</div>
+                  <div class="progress-bar-container bg-secondary rounded-pill overflow-hidden w-100">
+                    <div class="progress-fill"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-relative mb-3">
+            <div class="mb-1">
+              <h6 class="mb-0">4. Launch the app</h6>
+              <small class="text-muted">Find {{ site.brand.name }} in your <strong>Start Menu</strong> or <strong>Desktop</strong> shortcut</small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <div class="app-icon animation-flex bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
+                  <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }}" class="brandmark"/>
+                </div>
+                <span class="fw-bold">{{ site.brand.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- macOS Instructions -->
+        <div class="platform-instructions" data-platform="mac" hidden>
+          <ol class="mb-0">
+            <li class="mb-3">
+              <strong>Locate the downloaded file ({{ site.brand.name }}.dmg)</strong><br>
+              <small class="text-muted">Look in your <strong>Downloads</strong> folder</small>
+            </li>
+            <li class="mb-3">
+              <strong>Double-click the downloaded .dmg file</strong><br>
+              <small class="text-muted">This mounts the disk image</small>
+            </li>
+            <li class="mb-3">
+              <strong>Drag to Applications</strong><br>
+              <small class="text-muted">This installs the app for all users</small>
+            </li>
+            <li>
+              <strong>Open from Applications</strong><br>
+              <small class="text-muted">Find it in your Applications folder or use Spotlight</small>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Linux Instructions -->
+        <div class="platform-instructions" data-platform="linux" hidden>
+          <ol class="mb-0">
+            <li class="mb-3">
+              <strong>Open Terminal</strong><br>
+              <small class="text-muted">Press Ctrl+Alt+T</small>
+            </li>
+            <li class="mb-3">
+              <strong>Navigate to Downloads</strong><br>
+              <small class="text-muted">Run the command below:</small><br>
+              <code class="d-block p-2 bg-dark text-light rounded">cd ~/Downloads</code>
+            </li>
+            <li class="mb-3">
+              <strong>Install the package</strong><br>
+              <small class="text-muted d-block mb-1">For Debian/Ubuntu:</small>
+              <code class="d-block p-2 bg-dark text-light rounded mb-3">sudo dpkg -i {{ site.brand.name | downcase }}_amd64.deb</code>
+              <small class="text-muted d-block mb-1">For Fedora/RHEL:</small>
+              <code class="d-block p-2 bg-dark text-light rounded">sudo rpm -i {{ site.brand.name | downcase }}_amd64.rpm</code>
+            </li>
+            <li>
+              <strong>Launch from menu</strong><br>
+              <small class="text-muted">Find it in your applications menu</small>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Android Instructions -->
+        <div class="platform-instructions" data-platform="android" hidden>
+          <ol class="mb-0">
+            <li class="mb-3">
+              <strong>Open the Play Store app</strong><br>
+              <small class="text-muted">Or follow the download link that opened</small>
+            </li>
+            <li class="mb-3">
+              <strong>Tap "Install"</strong><br>
+              <small class="text-muted">Grant any required permissions</small>
+            </li>
+            <li>
+              <strong>Tap "Open"</strong><br>
+              <small class="text-muted">Or find the app icon on your home screen</small>
+            </li>
+          </ol>
+        </div>
+
+        <!-- iOS Instructions -->
+        <div class="platform-instructions" data-platform="ios" hidden>
+          <ol class="mb-0">
+            <li class="mb-3">
+              <strong>Open the App Store</strong><br>
+              <small class="text-muted">Or follow the link that opened</small>
+            </li>
+            <li class="mb-3">
+              <strong>Tap "Get" or the download button</strong><br>
+              <small class="text-muted">You may need to verify with Face ID or Touch ID</small>
+            </li>
+            <li>
+              <strong>Tap "Open"</strong><br>
+              <small class="text-muted">Or find the app icon on your home screen</small>
+            </li>
+          </ol>
+        </div>
+
+        <div class="alert alert-info mt-4" role="alert">
+          {% uj_icon "lightbulb", "me-2" %}
+          <strong>Need help?</strong> Please <a href="/contact" class="alert-link">contact support</a>.
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 {{ content | uj_content_format }}
