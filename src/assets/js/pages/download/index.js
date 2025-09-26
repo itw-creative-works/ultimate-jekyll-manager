@@ -13,6 +13,7 @@ export default (Manager) => {
     setupPlatformDetection();
     setupPlatformSwitcher();
     setupDownloadTracking();
+    setupCopyButtons();
 
     // Expose modal function globally for testing
     window.showDownloadModal = showOnboardingModal;
@@ -216,7 +217,7 @@ function trackDownloadClick(platform, downloadName, downloadUrl) {
     download_url: downloadUrl
   });
 
-  fbq('track', 'InitiateCheckout', {
+  fbq('trackCustom', 'Download', {
     content_name: downloadName,
     content_category: platform,
     content_type: 'download'
@@ -225,5 +226,37 @@ function trackDownloadClick(platform, downloadName, downloadUrl) {
   ttq.track('Download', {
     content_name: downloadName,
     content_type: platform
+  });
+}
+
+// Setup copy command buttons
+function setupCopyButtons() {
+  const $copyButtons = document.querySelectorAll('.copy-command-btn');
+
+  $copyButtons.forEach($button => {
+    $button.addEventListener('click', async function() {
+      const $input = this.closest('.input-group').querySelector('input');
+
+      if (!$input || !$input.value) return;
+
+      try {
+        await webManager.utilities().clipboardCopy($input);
+
+        const $text = this.querySelector('.button-text');
+        const originalText = $text.textContent;
+
+        $text.textContent = 'Copied!';
+        this.classList.remove('btn-outline-adaptive');
+        this.classList.add('btn-success');
+
+        setTimeout(() => {
+          $text.textContent = originalText;
+          this.classList.remove('btn-success');
+          this.classList.add('btn-outline-adaptive');
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to copy command:', error);
+      }
+    });
   });
 }
