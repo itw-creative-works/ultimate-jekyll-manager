@@ -450,24 +450,87 @@ features:
 
         <!-- macOS Instructions -->
         <div class="platform-instructions" data-platform="mac" hidden>
-          <ol class="mb-0">
-            <li class="mb-3">
-              <strong>Locate the downloaded file ({{ site.brand.name }}.dmg)</strong><br>
-              <small class="text-muted">Look in your <strong>Downloads</strong> folder</small>
-            </li>
-            <li class="mb-3">
-              <strong>Double-click the downloaded .dmg file</strong><br>
-              <small class="text-muted">This mounts the disk image</small>
-            </li>
-            <li class="mb-3">
-              <strong>Drag to Applications</strong><br>
+          <div class="position-relative mb-5">
+            <div class="mb-3">
+              <h6 class="mb-0">1. Open your Downloads folder</h6>
+              <small class="text-muted">Find the <strong>Downloads</strong> folder on your Mac</small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <div class="folder-icon animation-flex position-relative d-flex align-items-center justify-content-center">
+                  {% uj_icon "download", "display-4" %}
+                </div>
+                <span class="fw-bold">Downloads</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-relative mb-5">
+            <div class="mb-3">
+              <h6 class="mb-0">2. Double-click {{ site.brand.name }}.dmg</h6>
+              <small class="text-muted">This will mount the disk image</small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex flex-column align-items-center gap-2 position-relative">
+                <div class="file-to-click bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
+                  <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }}" class="brandmark"/>
+                </div>
+                <span class="fw-bold">{{ site.brand.name }}.dmg</span>
+                <div class="click-indicator position-absolute top-50 start-50">
+                  <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                  <div class="pointer-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="48px" height="48px"><path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/><path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-relative mb-5">
+            <div class="mb-3">
+              <h6 class="mb-0">3. Drag {{ site.brand.name }} to Applications folder</h6>
               <small class="text-muted">This installs the app for all users</small>
-            </li>
-            <li>
-              <strong>Open from Applications</strong><br>
-              <small class="text-muted">Find it in your Applications folder or use Spotlight</small>
-            </li>
-          </ol>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex gap-5 align-items-center">
+                <div class="d-flex flex-column align-items-center gap-2">
+                  <div class="file-to-click bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
+                    <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }}" class="brandmark"/>
+                  </div>
+                  <span class="fw-bold">{{ site.brand.name }}</span>
+                </div>
+                <div class="text-primary animation-pulse-right">
+                  {% uj_icon "arrow-right", "fs-1" %}
+                </div>
+                <div class="d-flex flex-column align-items-center gap-2">
+                  <div class="folder-icon position-relative d-flex align-items-center justify-content-center">
+                    <i class="fa display-4">
+                      <?xml version="1.0" encoding="utf-8"?>
+                        <svg width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path fill="#1D81F3" d="M3,17 C2.44771525,17 2,16.5522847 2,16 C2,15.4477153 2.44771525,15 3,15 L13.5,15 C14.5,15 15.5,17 15,17 L3,17 Z M17,17 C16.4477153,17 16,16.5522847 16,16 C16,15.4477153 16.4477153,15 17,15 L21,15 C21.5522847,15 22,15.4477153 22,16 C22,16.5522847 21.5522847,17 21,17 L17,17 Z M12.6333775,3.50103556 C12.908948,3.02241319 13.5203421,2.85780709 13.9989644,3.13337754 C14.4775868,3.408948 14.6421929,4.02034208 14.3666225,4.49896444 L7.45953351,16.4954873 C7.18396306,16.9741097 6.57256898,17.1387158 6.09394661,16.8631454 C5.61532424,16.5875749 5.45071815,15.9761808 5.7262886,15.4975585 L12.6333775,3.50103556 Z M4,18.5 C4.5,17.5 7.5,16.5 6.5,18.2208385 C6.32221095,18.5267848 5.77775177,19.4528267 4.86662246,20.9989644 C4.591052,21.4775868 3.97965792,21.6421929 3.50103556,21.3666225 C3.02241319,21.091052 2.85780709,20.4796579 3.13337754,20.0010356 L4,18.5 Z M9.13337754,4.49896444 C8.85780709,4.02034208 9.02241319,3.408948 9.50103556,3.13337754 C9.97965792,2.85780709 10.591052,3.02241319 10.8666225,3.50103556 L12.6104584,6.52980328 C12.8860289,7.00842564 12.7214228,7.61981972 12.2428004,7.89539018 C11.764178,8.17096063 11.152784,8.00635453 10.8772135,7.52773217 L9.13337754,4.49896444 Z M13,11.5 C12.1018662,10 13,7 13.7163439,8.49589818 L20.3666225,20.0010356 C20.6421929,20.4796579 20.4775868,21.091052 19.9989644,21.3666225 C19.5203421,21.6421929 18.908948,21.4775868 18.6333775,20.9989644 L13,11.5 Z"/>
+                        </svg>
+                    </i>
+                  </div>
+                  <span class="fw-bold">Applications</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-relative mb-3">
+            <div class="mb-3">
+              <h6 class="mb-0">4. Launch the app</h6>
+              <small class="text-muted">Find {{ site.brand.name }} in your <strong>Applications</strong> folder or use <strong>Spotlight</strong></small>
+            </div>
+            <div class="bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative" style="min-height: 200px;">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <div class="app-icon animation-flex bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
+                  <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }}" class="brandmark"/>
+                </div>
+                <span class="fw-bold">{{ site.brand.name }}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Linux Instructions -->

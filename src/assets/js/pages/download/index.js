@@ -19,7 +19,7 @@ export default (Manager) => {
 
     /* @dev-only:start */
     {
-      window.showDownloadModal('windows');
+      window.showDownloadModal('mac');
     }
     /* @dev-only:end */
 

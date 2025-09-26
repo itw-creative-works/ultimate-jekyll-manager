@@ -18,10 +18,34 @@
     height: 12px;
     background: linear-gradient(135deg, #f6c041 0%, #f1bc40 100%);
     border-radius: 4px 4px 0 0;
+    z-index: -1;
   }
 
   i {
     color: rgba(0, 0, 0, 0.25);
+  }
+}
+
+// Mac platform folder styling
+[data-platform="mac"] .folder-icon {
+  background: linear-gradient(135deg, #6BB6FF 0%, #4A9FFF 100%);
+
+  &::before {
+    background: linear-gradient(135deg, #5AA5EE 0%, #4A9FFF 100%);
+    z-index: 1;
+  }
+
+  i {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  svg {
+    opacity: 0.4;
+    fill: white;
+    
+    path {
+      fill: white;
+    }
   }
 }
 
