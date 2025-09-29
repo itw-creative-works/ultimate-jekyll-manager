@@ -1,3 +1,23 @@
+
+NEW TODO
+- service working failing to load scripts??
+- test SW on live site (and lighthouse)
+
+
+
+Make an admin dashboard backend
+
+Admin dashboard backend pages
+* View and search users
+* Read and write to firestore
+  * I should be able to put in a path and get the whole JSON object into a nice code textarea editor
+  * Then i can make changes and save it back
+* Plan creator page
+  * Can put in monthly and annual price and ID etc
+  * It iwll creat the product in firestore
+  * Create the product in stripe, paypal, etc
+
+
 TEST:
 <br>
 site.uj.cache_breaker={{ site.uj.cache_breaker }}

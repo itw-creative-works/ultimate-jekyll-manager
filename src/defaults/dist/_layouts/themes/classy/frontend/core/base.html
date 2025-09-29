@@ -35,7 +35,7 @@ theme:
       // Read and parse localStorage data
       var managerData = localStorage.getItem('_manager');
       var parsedData = managerData ? JSON.parse(managerData) : null;
-      var isLoggedIn = !!(parsedData && parsedData.auth && parsedData.auth.user && parsedData.auth.user.auth && parsedData.auth.user.auth.uid);
+      var isLoggedIn = !!(parsedData && parsedData.auth && parsedData.auth.user && parsedData.auth.user.uid);
 
       // Quit if NOT logged in
       if (!isLoggedIn) {
