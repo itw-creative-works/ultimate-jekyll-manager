@@ -13,6 +13,11 @@ export default (Manager) => {
     setupBillingToggle();
     setupPlanButtons();
 
+    // Setup promo countdown
+    setTimeout(() => {
+      setupPromoCountdown();
+    }, 1000);
+
     // Resolve after initialization
     return resolve();
   });
@@ -246,4 +251,82 @@ function trackEnterpriseContact() {
   ttq.track('Contact', {
     content_name: 'Enterprise Plan'
   });
+}
+
+function setupPromoCountdown() {
+  const $countdownEl = document.getElementById('pricing-promo-countdown');
+  const $promoTextEl = document.getElementById('pricing-promo-text');
+
+  if (!$countdownEl || !$promoTextEl) {
+    return;
+  }
+
+  const now = new Date();
+  const month = now.getMonth();
+
+  const seasons = [
+    { name: 'Winter', months: [11, 0, 1], endMonth: 1, endDay: 28 },
+    { name: 'Spring', months: [2, 3, 4], endMonth: 4, endDay: 31 },
+    { name: 'Summer', months: [5, 6, 7], endMonth: 7, endDay: 31 },
+    { name: 'Fall', months: [8, 9, 10], endMonth: 10, endDay: 30 }
+  ];
+
+  const currentSeason = seasons.find(s => s.months.includes(month));
+
+  if (!currentSeason) {
+    return;
+  }
+
+  const seasonStartDate = new Date(now.getFullYear(), currentSeason.months[0], 1);
+  const seasonEndDate = new Date(now.getFullYear(), currentSeason.endMonth, currentSeason.endDay, 23, 59, 59);
+  const seasonDuration = seasonEndDate - seasonStartDate;
+  const seasonProgress = (now - seasonStartDate) / seasonDuration;
+
+  const isEndOfSeason = seasonProgress >= 0.7;
+  const saleName = isEndOfSeason ? `End of ${currentSeason.name} Sale` : `${currentSeason.name} Sale`;
+
+  $promoTextEl.textContent = saleName;
+
+  const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+  const cycleStart = Math.floor(now.getTime() / twoDaysInMs) * twoDaysInMs;
+  const cycleEnd = cycleStart + twoDaysInMs;
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = cycleEnd - now.getTime();
+
+    if (diff <= 0) {
+      $countdownEl.textContent = '0d : 00h : 00m : 00s';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+    const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+    const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+
+    $countdownEl.textContent = `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+  }
+
+  // Initial call and interval setup
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Adjust navbar offset to account for banner height
+  adjustNavbarOffset();
+}
+
+function adjustNavbarOffset() {
+  const $promoBanner = document.getElementById('pricing-promo-banner');
+  const $navbarWrapper = document.querySelector('.navbar-wrapper');
+
+  if (!$promoBanner || !$navbarWrapper) {
+    return;
+  }
+
+  // Remove hidden attribute
+  $promoBanner.removeAttribute('hidden');
+
+  const bannerHeight = $promoBanner.offsetHeight;
+  $navbarWrapper.style.marginTop = `${bannerHeight - 10}px`;
 }

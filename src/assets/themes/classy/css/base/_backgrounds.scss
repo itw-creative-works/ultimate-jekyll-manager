@@ -1,0 +1,105 @@
+// Classy Background Utilities
+// Background gradients, patterns, and visual effects
+
+// ============================================
+// Gradient Backgrounds
+// ============================================
+.bg-gradient-primary {
+  background: $classy-gradient-primary !important;
+}
+
+.bg-gradient-dark {
+  background: $classy-gradient-dark !important;
+}
+
+.bg-gradient-light {
+  background: $classy-gradient-light !important;
+}
+
+.bg-gradient-sunset {
+  background: $classy-gradient-sunset !important;
+}
+
+.bg-gradient-aurora {
+  background: $classy-gradient-aurora !important;
+}
+
+// ============================================
+// Glass Morphism Mixin
+// ============================================
+@mixin glassy-effect {
+  background: transparent !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  position: relative;
+
+  // Glass effect overlay with body color using custom property
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--bs-body-bg);
+    opacity: var(--navbar-before-opacity, 0.25);
+    border-radius: inherit;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  // Dark mode adjustments
+  [data-bs-theme="dark"] & {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+// ============================================
+// Glass Morphism Classes
+// ============================================
+.bg-glassy {
+  @include glassy-effect;
+}
+
+// ============================================
+// Pattern Overlays
+// ============================================
+.bg-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235B47FB' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+// ============================================
+// Blur Effects
+// ============================================
+.blur-sm {
+  filter: blur(4px);
+}
+
+.blur-md {
+  filter: blur(8px);
+}
+
+.blur-lg {
+  filter: blur(16px);
+}
+
+// ============================================
+// Filter Effects
+// ============================================
+.grayscale {
+  filter: grayscale(100%);
+
+  &:hover {
+    filter: grayscale(0);
+  }
+}
+
+// ============================================
+// Adaptive Inverse Background
+// ============================================
+.bg-adaptive-inverse {
+  @extend .bg-dark;
+}
+
+[data-bs-theme="dark"] .bg-adaptive-inverse {
+  @extend .bg-light;
+}

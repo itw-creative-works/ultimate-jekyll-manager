@@ -1,27 +1,29 @@
-/*
-  Utilities Styles
-*/
+// Core Utility Styles
+// Common utility classes and helpers
+
+// ============================================
+// Display Utilities
+// ============================================
 
 // Properly hide things
 .hidden, [hidden] {
   display: none !important
 }
 
-// Pointer events - can help fix bubbling issues for click listeners
-.pointer-none {
-  pointer-events: none !important;
+// Show disabled mouse on disabled things
+.disabled, [disabled] {
+  cursor: not-allowed !important;
 }
 
 // Prevent pointer events on all children inside buttons and links
+// This helps fix event bubbling issues for click listeners
 button *, a * {
   pointer-events: none !important;
 }
 
-// Reset styles for HTML5 elements
-// article, aside, details, figcaption, figure,
-// footer, header, hgroup, menu, nav, section {
-//   display: block;
-// }
+// ============================================
+// Filter Utilities
+// ============================================
 
 // Filter white
 .filter-white {
@@ -33,9 +35,30 @@ button *, a * {
   filter: brightness(0) invert(1) hue-rotate(180deg);
 }
 
-// Focus visible styles for better keyboard navigation
-// :focus-visible {
-//   outline: 2px solid var(--bs-primary) !important;
-//   outline-offset: 2px !important;
-// }
+// ============================================
+// Adaptive Theming
+// ============================================
 
+// Filter adaptive - automatically uses theme body color
+.filter-adaptive {
+  // Set the color context to body color
+  color: var(--bs-body-color);
+
+  svg {
+    // Make SVG fill use currentColor (inherits from parent color)
+    fill: currentColor;
+
+    path, g, polygon, rect, circle {
+      fill: currentColor;
+    }
+  }
+}
+
+// ============================================
+// Opacity Utilities
+// ============================================
+@for $i from 0 through 10 {
+  .opacity-#{$i * 10} {
+    opacity: $i * 0.1 !important;
+  }
+}

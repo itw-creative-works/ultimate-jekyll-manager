@@ -116,7 +116,7 @@ function sass(complete) {
       `!${rootPathPackage}/dist/defaults/**/_includes/themes/**`,
       `!${rootPathPackage}/dist/defaults/**/_layouts/themes/**`,
 
-      // Exclude test pages that include all components (would prevent PurgeCSS from working)
+      // Exclude test pages that include components we don't normally use (would prevent PurgeCSS from working)
       `!${rootPathPackage}/dist/defaults/**/pages/test/**/*.{html,liquid,md}`,
 
       // Include ONLY the active theme's files
@@ -196,19 +196,7 @@ function sass(complete) {
             /^has-/,
             /^was-/,
 
-            // Font Awesome
-            /^fa-/,
-            /^fas$/,
-            /^far$/,
-            /^fab$/,
-
-            // Theme-specific
-            /^theme-/,
-            /^dark$/,
-            /^light$/,
-
             // Animations
-            /^animate-/,
             /^animation-/,
 
             // Utilities that might be added dynamically
@@ -231,6 +219,19 @@ function sass(complete) {
             /^mh-/,
             /^min-/,
             /^max-/,
+
+            // Libraries
+            // Cookies
+            /^cookie-consent-/,
+
+            // Font Awesome
+            /^fa-/,
+
+            // Lazy
+            /^lazy-/,
+
+            // Social
+            /^social-share-/,
           ],
           deep: [],
           greedy: [],

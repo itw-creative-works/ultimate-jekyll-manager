@@ -26,28 +26,33 @@ function updatePlanInfo(account) {
   const $planName = document.getElementById('current-plan-name');
   const $planStatus = document.getElementById('plan-status');
   const $upgradeBtn = document.getElementById('upgrade-plan-btn');
+  const $manageBtn = document.getElementById('manage-plan-btn');
 
   if ($planName) {
     // Get the product ID
-    const productId = subscription.product || subscription.id || 'free';
-    
+    const productId = subscription.product || 'basic';
+
     // Look up the product name from appData
     let displayName = 'Free';
     if (appData?.products?.[productId]) {
       displayName = appData.products[productId].name || productId;
-    } else if (productId !== 'free') {
+    } else if (productId !== 'basic') {
       // Fallback to capitalizing the product ID if no name found
       displayName = productId.charAt(0).toUpperCase() + productId.slice(1);
     }
-    
+
     $planName.textContent = displayName;
   }
+
+  // Hide all buttons first
+  document.querySelectorAll('.plan-action-btn').forEach(btn => btn.classList.add('d-none'));
 
   if ($planStatus) {
     // Check subscription status
     if (subscription.status === 'suspended' || subscription.paymentIssue?.hasIssue) {
-      $planStatus.innerHTML = '<span class="badge bg-danger">Payment Issue</span>';
-      if ($upgradeBtn) $upgradeBtn.textContent = 'Update Payment Method';
+      $planStatus.className = 'badge bg-danger';
+      $planStatus.textContent = 'Payment Issue';
+      if ($manageBtn) $manageBtn.classList.remove('d-none');
 
       // Show payment issue message if available
       if (subscription.paymentIssue?.message) {
@@ -63,33 +68,38 @@ function updatePlanInfo(account) {
     } else if (subscription.cancellation?.requested && subscription.status === 'active') {
       // Active but cancellation requested
       const cancelDate = subscription.cancellation.effectiveAt;
-      $planStatus.innerHTML = '<span class="badge bg-warning">Cancelling</span>';
+      $planStatus.className = 'badge bg-warning';
+      $planStatus.textContent = 'Cancelling';
       if (cancelDate) {
         const daysLeft = Math.ceil((cancelDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
         if (daysLeft > 0) {
-          $planStatus.innerHTML += ` <small class="text-muted">Ends in ${daysLeft} days</small>`;
+          $planStatus.textContent += ` (${daysLeft} days left)`;
         }
       }
-      if ($upgradeBtn) $upgradeBtn.textContent = 'Resume Subscription';
+      if ($manageBtn) $manageBtn.classList.remove('d-none');
     } else if (subscription.status === 'active' || subscription.access === true) {
-      $planStatus.innerHTML = '<span class="badge bg-success">Active</span>';
-      if ($upgradeBtn) $upgradeBtn.textContent = 'Manage Plan';
+      $planStatus.className = 'badge bg-success';
+      $planStatus.textContent = 'Active';
+      if ($manageBtn) $manageBtn.classList.remove('d-none');
     } else if (subscription.status === 'trialing') {
       const trialEnd = subscription.trial?.endedAt || subscription.trial?.expires?.timestamp;
-      $planStatus.innerHTML = `<span class="badge bg-info">Trial</span>`;
+      $planStatus.className = 'badge bg-info';
+      $planStatus.textContent = 'Trial';
       if (trialEnd) {
         const daysLeft = Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24));
         if (daysLeft > 0) {
-          $planStatus.innerHTML += ` <small class="text-muted">${daysLeft} days left</small>`;
+          $planStatus.textContent += ` (${daysLeft} days left)`;
         }
       }
-      if ($upgradeBtn) $upgradeBtn.textContent = 'Upgrade Now';
+      if ($manageBtn) $upgradeBtn.classList.remove('d-none');
     } else if (subscription.status === 'cancelled') {
-      $planStatus.innerHTML = '<span class="badge bg-secondary">Cancelled</span>';
-      if ($upgradeBtn) $upgradeBtn.textContent = 'Reactivate Plan';
+      $planStatus.className = 'badge bg-secondary';
+      $planStatus.textContent = 'Cancelled';
+      if ($upgradeBtn) $upgradeBtn.classList.remove('d-none');
     } else {
-      $planStatus.innerHTML = '<span class="badge bg-secondary">Basic</span>';
-      if ($upgradeBtn) $upgradeBtn.textContent = 'Upgrade Plan';
+      $planStatus.className = 'badge bg-secondary';
+      $planStatus.textContent = 'Basic';
+      if ($upgradeBtn) $upgradeBtn.classList.remove('d-none');
     }
   }
 }
@@ -144,7 +154,7 @@ function updateUsageInfo(account) {
   if (!$container) return;
 
   // Get the user's current plan/product
-  const productId = subscription.product;
+  const productId = subscription.product || 'basic';
   const product = appData?.products?.[productId];
   const limits = product?.limits || {};
 
@@ -263,33 +273,17 @@ function formatBytes(bytes, decimals = 2) {
 // Setup button handlers
 function setupButtons() {
   const $upgradeBtn = document.getElementById('upgrade-plan-btn');
+  const $manageBtn = document.getElementById('manage-plan-btn');
 
   if ($upgradeBtn) {
-    $upgradeBtn.addEventListener('click', handleUpgradeClick);
+    $upgradeBtn.addEventListener('click', () => {
+      window.location.href = '/pricing';
+    });
   }
-}
 
-// Handle upgrade button click
-function handleUpgradeClick(event) {
-  const buttonText = event.target.textContent;
-
-  // Route to appropriate action based on button text
-  switch(buttonText) {
-    case 'Update Payment Method':
-      window.location.href = '/payment/update';
-      break;
-    case 'Resume Subscription':
-      // Handle subscription resumption
-      console.log('Resume subscription');
-      break;
-    case 'Reactivate Plan':
+  if ($manageBtn) {
+    $manageBtn.addEventListener('click', () => {
       window.location.href = '/pricing';
-      break;
-    case 'Upgrade Plan':
-    case 'Upgrade Now':
-    case 'Manage Plan':
-    default:
-      window.location.href = '/pricing';
-      break;
+    });
   }
 }

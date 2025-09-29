@@ -25,6 +25,9 @@ const input = [
   '!src/**/*.js',
   // CSS/SCSS files handled by sass task
   '!src/**/*.{css,scss,sass}',
+  // Exlcude .DS_Store files
+  '!**/.DS_Store',
+  // Exclude any temp files
 ];
 const output = 'dist';
 const delay = 250;

@@ -1,5 +1,8 @@
 // Libraries
+import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import fetch from 'wonderful-fetch';
 let webManager = null;
+let mobileEmailForms = {};
 
 // Module
 export default (Manager) => {
@@ -14,14 +17,15 @@ export default (Manager) => {
     setupPlatformSwitcher();
     setupDownloadTracking();
     setupCopyButtons();
+    setupMobileEmailForms();
 
     // Expose modal function globally for testing
     window.showDownloadModal = showOnboardingModal;
 
     /* @dev-only:start */
-    {
-      window.showDownloadModal('mac');
-    }
+    // {
+    //   window.showDownloadModal('mac');
+    // }
     /* @dev-only:end */
 
     // Resolve after initialization
@@ -34,7 +38,7 @@ const config = {
   selectors: {
     platformButtons: '.platform-btn',
     platformDownloads: '.platform-downloads',
-    downloadButtons: '.platform-downloads .btn-primary'
+    downloadButtons: '.platform-downloads .btn-primary:not([type="submit"])'
   }
 };
 
@@ -43,11 +47,24 @@ function setupPlatformDetection() {
   const detectedPlatform = detectPlatform();
   console.log('Detected platform:', detectedPlatform);
 
-  // Small delay to let the page render before switching
+  // Show loading state initially, then switch to detected platform
   setTimeout(() => {
+    // Hide loading card
+    const $loadingCard = document.querySelector('.platform-downloads[data-platform="loading"]');
+    if ($loadingCard) {
+      $loadingCard.setAttribute('hidden', '');
+    }
+
+    // Enable all platform buttons
+    const platformButtons = document.querySelectorAll(config.selectors.platformButtons);
+    platformButtons.forEach(button => {
+      button.disabled = false;
+    });
+
+    // Show detected platform
     showPlatform(detectedPlatform);
     // trackPlatformDetection(detectedPlatform);
-  }, 100);
+  }, 800);
 }
 
 // Detect user's platform from user agent
@@ -86,6 +103,13 @@ function setupPlatformSwitcher() {
     button.addEventListener('click', function() {
       const platformId = this.dataset.platform;
       showPlatform(platformId);
+
+      // Scroll to the platform downloads section
+      const $platformDownload = document.querySelector(`.platform-downloads[data-platform="${platformId}"]`);
+      if ($platformDownload) {
+        $platformDownload.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
       // trackPlatformSwitch(platformId);
     });
   });
@@ -259,4 +283,70 @@ function setupCopyButtons() {
       }
     });
   });
+}
+
+// Setup mobile email forms
+function setupMobileEmailForms() {
+  const $forms = document.querySelectorAll('.mobile-email-form');
+
+  $forms.forEach($form => {
+    const platform = $form.dataset.platform;
+    const formId = `#mobile-email-form-${platform}`;
+
+    const formManager = new FormManager(formId, {
+      autoDisable: true,
+      showSpinner: true,
+      validateOnSubmit: true,
+      allowMultipleSubmit: false,
+      submitButtonLoadingText: 'Sending...',
+      submitButtonSuccessText: 'Sent!',
+      fieldErrorClass: 'is-invalid',
+      fieldSuccessClass: 'is-valid'
+    });
+
+    formManager.addEventListener('submit', (e) => handleMobileEmailSubmit(e, platform));
+
+    mobileEmailForms[platform] = formManager;
+  });
+}
+
+// Handle mobile email form submission
+async function handleMobileEmailSubmit(event, platform) {
+  event.preventDefault();
+  
+  const formData = event.detail.data;
+  const email = formData.email;
+  const formManager = mobileEmailForms[platform];
+  
+  console.log('Mobile email form submitted:', {
+    platform: platform,
+    email: email
+  });
+  
+  try {
+    // Get API endpoint
+    const apiEndpoint = webManager.getApiUrl() + '/backend-manager';
+    
+    // Send request using wonderful-fetch
+    await fetch(apiEndpoint, {
+      method: 'POST',
+      body: {
+        command: 'general:send-email',
+        payload: {
+          id: 'general:download-app-link',
+          email: email,
+        }
+      },
+      response: 'json',
+      timeout: 30000
+    });
+    
+    // Handle successful response
+    formManager.showSuccess('Success! Please check your email for the download link.');
+    formManager.setFormState('submitted');
+  } catch (error) {
+    webManager.sentry().captureException(new Error('Mobile email form submission error', { cause: error }));
+    formManager.showError(error.message || 'Failed to send email');
+    formManager.setFormState('ready');
+  }
 }

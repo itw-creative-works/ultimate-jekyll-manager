@@ -1,65 +1,62 @@
+<!-- Get Client ID -->
 {%- assign page-adsense-client = page.resolved.advertising.google-adsense.client -%}
+
+<!-- Determine the type of ad unit -->
+{% assign type = include.type | default: "display" %}
+
+<!-- Configure based on type -->
+{% if type == "display" %}
+  {% assign slot = include.slot | default: page.resolved.advertising.google-adsense.display-slot %}
+  {% assign layout = "" %}
+  {% assign layout-key = "" %}
+  {% assign style = include.style | default: "" %}
+  {% assign format = "auto" %}
+  {% assign full-width-responsive = "true" %}
+{% elsif type == "in-article" %}
+  {% assign slot = include.slot | default: page.resolved.advertising.google-adsense.in-article-slot %}
+  {% assign layout = "in-article" %}
+  {% assign layout-key = "" %}
+  {% assign style = include.style | default: "" %}
+  {% assign format = "fluid" %}
+  {% assign full-width-responsive = "" %}
+{% elsif type == "in-feed" %}
+  {% assign slot = include.slot | default: page.resolved.advertising.google-adsense.in-feed-slot %}
+  {% assign layout = "" %}
+  {% assign layout-key-input = include.layout | default: "image-above" %}
+  {% if layout-key-input == "image-above" %}
+    {% assign layout-key = "-6t+ed+2x-11-88" %}
+  {% elsif layout-key-input == "image-side" %}
+    {% assign layout-key = "-fb+5w+4e-db+86" %}
+  {% else %}
+    {% assign layout-key = layout-key-input %}
+  {% endif %}
+  {% assign style = include.style | default: "" %}
+  {% assign format = "fluid" %}
+  {% assign full-width-responsive = "" %}
+{% elsif type == "multiplex" %}
+  {% assign slot = include.slot | default: page.resolved.advertising.google-adsense.multiplex-slot %}
+  {% assign layout = "" %}
+  {% assign layout-key = "" %}
+  {% assign style = include.style | default: "" %}
+  {% assign format = "autorelaxed" %}
+  {% assign full-width-responsive = "" %}
+{% endif %}
+
+<!-- Inject Ad -->
 {%- iftruthy page-adsense-client -%}
-  <ad-unit>
-    <!-- Include the Adsense script -->
-    {%- if include.include-adsense-script == true -%}
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-{{ page-adsense-client }}" crossorigin="anonymous"></script>
-    {%- endif -%}
-
-    <!-- Setup Ad Unit -->
-    <div class="uj-vert-unit" data-plan-id="basic" data-plan-visibility="visible">
-      <!-- Determine the type of ad unit -->
-      {% assign type = include.type | default: 'display' %}
-      {% if type == 'display' %}
-        <ins class="adsbygoogle"
-          style="display:block; {{ include.style }}"
-          data-ad-client="ca-{{ page-adsense-client }}"
-          data-ad-slot="{{ include.slot | default: page.resolved.advertising.google-adsense.display-slot }}"
-          data-ad-format="auto"
-          data-full-width-responsive="true">
-        </ins>
-      {% elsif type == 'in-article' %}
-        <ins class="adsbygoogle"
-          style="display:block; text-align:center; {{ include.style }}"
-          data-ad-layout="in-article"
-          data-ad-format="fluid"
-          data-ad-client="ca-{{ page-adsense-client }}"
-          data-ad-slot="{{ include.slot | default: page.resolved.advertising.google-adsense.in-article-slot }}">
-        </ins>
-      {% elsif type == 'in-feed' %}
-        <!-- Determine the layout key -->
-        {% assign layout-key = include.layout | default: 'image-above' %}
-        {%- if layout-key == 'image-above' -%}
-          {% assign layout-key = '-6t+ed+2x-11-88' %}
-        {%- elsif layout-key == 'image-side' -%}
-          {% assign layout-key = '-fb+5w+4e-db+86' %}
-        {%- endif -%}
-
-        <ins class="adsbygoogle"
-          style="display:block; {{ include.style }}"
-          data-ad-format="fluid"
-          data-ad-layout-key="{{ layout-key }}"
-          data-ad-client="ca-{{ page-adsense-client }}"
-          data-ad-slot="{{ include.slot | default: page.resolved.advertising.google-adsense.in-feed-slot }}">
-        </ins>
-      {% elsif type == 'multiplex' %}
-        <ins class="adsbygoogle"
-          style="display:block; {{ include.style }}"
-          data-ad-format="autorelaxed"
-          data-ad-client="ca-{{ page-adsense-client }}"
-          data-ad-slot="{{ include.slot | default: page.resolved.advertising.google-adsense.multiplex-slot }}">
-        </ins>
-      {% else %}
-        <p>Unsupported ad type: {{ type }}</p>
-      {% endif %}
-
-      <!-- Push the ad to the adsbygoogle array -->
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-    </div>
-
-    <!-- Include our fallback ad unit -->
-    {% include /modules/adunits/fallback.html %}
-  </ad-unit>
+  <div data-lazy='@script {
+    "src": "{{ site.url }}/assets/js/modules/vert.bundle.js?cb={{ site.uj.cache_breaker }}",
+    "attributes": {
+      "data-ad-client": "{{ page-adsense-client }}",
+      "data-ad-type": "{{ type }}",
+      "data-ad-slot": "{{ slot }}",
+      "data-ad-layout": "{{ layout }}",
+      "data-ad-layout-key": "{{ layout-key }}",
+      "data-ad-style": "{{ style }}",
+      "data-ad-format": "{{ format }}",
+      "data-full-width-responsive": "{{ full-width-responsive }}",
+      "async": ""
+    }
+  }'>
+  </div>
 {%- endiftruthy -%}

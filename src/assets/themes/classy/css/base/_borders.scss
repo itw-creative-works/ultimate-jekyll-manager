@@ -1,0 +1,56 @@
+// Classy Border Utilities
+// Border styles, gradients, and decorative dividers
+
+// ============================================
+// Border Radius
+// ============================================
+.rounded-sm { border-radius: $classy-radius-sm !important; }
+.rounded-md { border-radius: $classy-radius-md !important; }
+.rounded-lg { border-radius: $classy-radius-lg !important; }
+.rounded-xl { border-radius: $classy-radius-xl !important; }
+.rounded-2xl { border-radius: $classy-radius-2xl !important; }
+.rounded-full { border-radius: $classy-radius-full !important; }
+
+// ============================================
+// Gradient Borders
+// ============================================
+.border-gradient-rainbow {
+  position: relative;
+  border: none !important;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+    background-size: 300% 300%;
+    z-index: -1;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    z-index: -1;
+  }
+}
+
+// ============================================
+// Divider Styles
+// ============================================
+.divider {
+  height: 1px;
+  background: $classy-gray-lighter;
+  margin: $classy-spacing-2xl 0;
+
+  &.divider-gradient {
+    background: $classy-gradient-primary;
+  }
+
+  &.divider-fade {
+    background: linear-gradient(to right, transparent, $classy-gray-lighter 20%, $classy-gray-lighter 80%, transparent);
+  }
+}

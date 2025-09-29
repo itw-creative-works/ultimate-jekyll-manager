@@ -28,6 +28,7 @@
     environment: "{{ site.uj.environment }}",
     buildTime: {{ site.uj.cache_breaker }},
     brand: {{ page.resolved.brand | jsonify }},
+    advertising: {{ page.resolved.advertising | jsonify }},
     {% for item in page.resolved.web_manager %}
       {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
     {% endfor %}
@@ -106,9 +107,11 @@
 {% endiffalsy %}
 
 <!-- Script - Google Adsense -->
+{% comment %}
 {% iftruthy page.resolved.advertising.google-adsense.client %}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-{{ site.advertising.google-adsense.client }}" crossorigin="anonymous"></script>
 {% endiftruthy %}
+{% endcomment %}
 
 <!-- Schema - Breadcrumbs -->
 <!-- Only include the https://schema.org if size > -1 because it throws an error on Google Search Console if the itemListElement is empty -->

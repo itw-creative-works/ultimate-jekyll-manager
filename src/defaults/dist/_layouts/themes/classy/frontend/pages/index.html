@@ -2,241 +2,345 @@
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/base
 
+# Hero Section
+hero:
+  tagline: "Empower Your Business Growth Today"
+  headline: "The #1 Platform"
+  headline_accent: "for Business Success"
+  description: "Transform your business with powerful tools, expert guidance, and proven strategies. Join thousands of successful companies today."
+  cta_primary:
+    text: "Get Started Free"
+    icon: "play-circle"
+    href: "/signup"
+  cta_secondary:
+    text: "Explore Solutions"
+    icon: "book-open"
+    href: "/pricing"
+
+# Features
 features:
-  - title: "Expert Instructors"
-    description: "Learn from industry professionals with years of real-world experience"
+  - title: "Expert Support"
+    description: "Get guidance from industry professionals with years of real-world experience"
     icon: "graduation-cap"
-  - title: "Flexible Learning"
-    description: "Study at your own pace with 24/7 access to all course materials"
+  - title: "Flexible Solutions"
+    description: "Scale at your own pace with 24/7 access to all platform features"
     icon: "clock"
   - title: "Supportive Community"
-    description: "Join thousands of learners in our vibrant and helpful community"
+    description: "Join thousands of businesses in our vibrant and helpful network"
     icon: "users"
   - title: "Certification"
-    description: "Earn recognized certificates to boost your career prospects"
+    description: "Earn recognized credentials to boost your business credibility"
     icon: "certificate"
 
+# Stats Section
+stats:
+  users:
+    number: "50,000+"
+    label: "Active Users"
+    sublabel: "From 120+ Countries"
+    icon: "users"
+  items:
+    number: "200+"
+    label: "Solutions"
+    sublabel: "Industry-Leading"
+    icon: "book"
+  rating:
+    number: "4.9"
+    label: "Average Rating"
+    icon: "star"
+  success:
+    number: "98%"
+    label: "Success Rate"
+    sublabel: "Business Growth"
+    icon: "certificate"
+  # Cards shown in hero section
+  hero_cards:
+    card1:
+      number: "50K+"
+      label: "Active Users"
+      icon: "users"
+    card2:
+      number: "98%"
+      label: "Success Rate"
+      icon: "certificate"
+    card3:
+      number: "200+"
+      label: "Solutions"
+      icon: "book"
+    card4:
+      number: "4.9/5"
+      label: "Average Rating"
+      icon: "star"
+  badge:
+    title: "Industry Leader"
+    subtitle: "2024 Award"
+    icon: "trophy"
+
+# Testimonials
 testimonials:
-  - quote: "This platform transformed my career. The instructors are incredible!"
+  - quote: "This platform transformed my business. The support is incredible!"
     author: "Sarah Johnson"
-    role: "Software Engineer"
-    company: "Google"
+    role: "CEO"
+    company: "TechStart Inc"
     initial: "S"
-  - quote: "Best investment I've made. Learned more here than in my entire degree."
+  - quote: "Best investment I've made. Achieved more here than with any consultant."
     author: "Michael Chen"
-    role: "Data Scientist"
-    company: "Netflix"
+    role: "Founder"
+    company: "DataFlow"
     initial: "M"
-  - quote: "The community support made all the difference in my learning journey."
+  - quote: "The community support made all the difference in our growth journey."
     author: "Emily Davis"
-    role: "UX Designer"
-    company: "Apple"
+    role: "Director"
+    company: "Creative Studio"
     initial: "E"
+
+# CTA Section
+cta:
+  headline: "Ready to Transform Your Business?"
+  description: "Join thousands of successful companies who have already accelerated their growth with"
+  primary_button:
+    text: "Start Today"
+    icon: "rocket"
+    href: "/signup"
+  secondary_button:
+    text: "Talk to an Expert"
+    icon: "comments"
+    href: "/contact"
+
+# Section Headings
+sections:
+  features:
+    headline: "Why Choose"
+    subheadline: "Everything you need to accelerate your business growth"
+
+# Trusted By Section
+trusted_by:
+  headline: "Trusted by the Best"
+  logos:
+    # - name: "airbnb"
+    - name: "amazon"
+    - name: "google"
+    - name: "hubspot"
+    - name: "paypal"
+    # - name: "netflix"
+    # - name: "spotify"
+    - name: "slack"
+    - name: "shopify"
+    - name: "stripe"
+    # - name: "uber"
 ---
 
-<!-- Hero Section -->
-<section class="py-8">
+{% comment %}
+<section>
   <div class="container">
     <div class="row align-items-center min-vh-75">
       <div class="col-lg-6">
-        <div class="mb-4">
+        <div class="mb-4" data-lazy="@class animation-slide-up">
           <div class="d-flex align-items-center mb-3">
             {% uj_icon "rocket", "text-primary fs-2 me-2" %}
-            <span class="text-primary fw-semibold fs-5">Empower Your Learning Journey Today</span>
+            <span class="text-primary fw-semibold fs-5">{{ page.resolved.hero.tagline }}</span>
           </div>
 
-          <h1 class="display-2 fw-bold mb-4">
-            The <span class="gradient-text">#1 Learning</span><br>
-            Platform for Success
+          <h1 class="h1 mb-3">
+            {{ page.resolved.hero.headline | split: " " | slice: 0, -2 | join: " " }} <span class="text-gradient-rainbow">{{ page.resolved.hero.headline | split: " " | slice: -2, 2 | join: " " }}</span><br>
+            {{ page.resolved.hero.headline_accent }}
           </h1>
 
           <p class="fs-5 text-muted mb-4">
-            Transform your career with hands-on training, expert instruction, and industry-recognized certifications. Join thousands of successful learners today.
+            {{ page.resolved.hero.description }}
           </p>
 
           <ul class="list-unstyled mb-4">
             {% for feature in page.resolved.features limit: 3 %}
-            <li class="d-flex align-items-center mb-3">
-              {% uj_icon "check-circle", "text-success fs-5 me-3" %}
-              <span class="fs-6">{{ feature.title }}</span>
-            </li>
+              <li class="d-flex align-items-center mb-3">
+                {% uj_icon "check-circle", "text-success fs-5 me-3" %}
+                <span class="fs-6">{{ feature.title }}</span>
+              </li>
             {% endfor %}
           </ul>
 
           <div class="d-flex flex-column flex-sm-row gap-3">
-            <a href="/signup" class="btn btn-primary btn-lg px-4 py-3">
-              {% uj_icon "play-circle", "me-2" %}
-              Start Learning Free
+            <a href="{{ page.resolved.hero.cta_primary.href }}" class="btn btn-primary btn-lg px-4 py-3">
+              {% uj_icon page.resolved.hero.cta_primary.icon, "me-2" %}
+              {{ page.resolved.hero.cta_primary.text }}
             </a>
-            <a href="#courses" class="btn btn-outline-adaptive btn-lg px-4 py-3">
-              {% uj_icon "book-open", "me-2" %}
-              Explore Courses
+            <a href="{{ page.resolved.hero.cta_secondary.href }}" class="btn btn-outline-adaptive btn-lg px-4 py-3">
+              {% uj_icon page.resolved.hero.cta_secondary.icon, "me-2" %}
+              {{ page.resolved.hero.cta_secondary.text }}
             </a>
           </div>
         </div>
       </div>
 
-      <div class="col-lg-6">
-        <div class="position-relative">
+      <div class="col-lg-6 mt-5 mt-lg-0">
+        <div class="position-relative" data-lazy="@class animation-slide-up">
           <div class="row g-4">
             <div class="col-6">
-              <div class="bg-primary bg-gradient rounded-4 p-4 text-white text-center" style="height: 200px;">
+              <div class="bg-primary rounded-4 p-4 text-light text-center" style="height: 200px;">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon "users", "display-4 mb-3 text-white" %}
-                  <h3 class="fw-bold mb-1">50K+</h3>
-                  <p class="mb-0">Active Students</p>
+                  {% uj_icon page.resolved.stats.hero_cards.card1.icon, "display-4 mb-3 text-light" %}
+                  <h3 class="mb-1">{{ page.resolved.stats.hero_cards.card1.number }}</h3>
+                  <p class="mb-0">{{ page.resolved.stats.hero_cards.card1.label }}</p>
                 </div>
               </div>
-              <div class="bg-success bg-gradient rounded-4 p-4 text-white text-center mt-4" style="height: 150px;">
+              <div class="bg-success rounded-4 p-4 text-light text-center mt-4" style="height: 150px;">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon "certificate", "fs-1 mb-2 text-white" %}
-                  <h4 class="fw-bold mb-1">98%</h4>
-                  <p class="mb-0 small">Completion Rate</p>
+                  {% uj_icon page.resolved.stats.hero_cards.card2.icon, "fs-1 mb-2 text-light" %}
+                  <h3 class="h4 mb-1">{{ page.resolved.stats.hero_cards.card2.number }}</h3>
+                  <p class="mb-0 small">{{ page.resolved.stats.hero_cards.card2.label }}</p>
                 </div>
               </div>
             </div>
             <div class="col-6 d-flex flex-column">
-              <div class="bg-warning bg-gradient rounded-4 p-4 text-white text-center mb-4" style="height: 150px;">
+              <div class="bg-warning rounded-4 p-4 text-light text-center mb-4" style="height: 150px;">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon "book", "fs-1 mb-2 text-white" %}
-                  <h4 class="fw-bold mb-1">200+</h4>
-                  <p class="mb-0 small">Courses</p>
+                  {% uj_icon page.resolved.stats.hero_cards.card3.icon, "fs-1 mb-2 text-light" %}
+                  <h3 class="h4 mb-1">{{ page.resolved.stats.hero_cards.card3.number }}</h3>
+                  <p class="mb-0 small">{{ page.resolved.stats.hero_cards.card3.label }}</p>
                 </div>
               </div>
-              <div class="bg-info bg-gradient rounded-4 p-4 text-white text-center" style="height: 200px;">
+              <div class="bg-info rounded-4 p-4 text-light text-center" style="height: 200px;">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon "star", "display-4 mb-3 text-white" %}
-                  <h3 class="fw-bold mb-1">4.9/5</h3>
-                  <p class="mb-0">Average Rating</p>
+                  {% uj_icon page.resolved.stats.hero_cards.card4.icon, "display-4 mb-3 text-light" %}
+                  <h3 class="mb-1">{{ page.resolved.stats.hero_cards.card4.number }}</h3>
+                  <p class="mb-0">{{ page.resolved.stats.hero_cards.card4.label }}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Floating Achievement Badge -->
           <div class="position-absolute top-0 end-0 bg-body-tertiary rounded-4 p-3 shadow-lg" style="transform: translate(20px, -20px);">
             <div class="d-flex align-items-center">
-              {% uj_icon "trophy", "text-warning fs-4 me-2" %}
+              {% uj_icon page.resolved.stats.badge.icon, "text-warning fs-4 me-2" %}
               <div>
-                <div class="fw-bold small">Industry Leader</div>
-                <div class="text-muted small">2024 Award</div>
+                <div class="small">{{ page.resolved.stats.badge.title }}</div>
+                <div class="text-muted small">{{ page.resolved.stats.badge.subtitle }}</div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endcomment %}
+
+<!-- Hero Section -->
+<section class="section-full-width bg-gradient-rainbow gradient-animated text-light overflow-hidden position-relative min-vh-50 d-flex align-items-center">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 text-center py-5">
+        <div data-lazy="@class animation-slide-up">
+          <p class="text-uppercase fw-semibold mb-3 opacity-80">{{ page.resolved.hero.tagline }}</p>
+
+          <h1 class="h1 fw-900 mb-4">
+            {{ page.resolved.hero.headline }}<br>
+            {{ page.resolved.hero.headline_accent }}
+          </h1>
+
+          <p class="fs-4 mb-4 opacity-80">
+            {{ page.resolved.hero.description }}
+          </p>
+
+          <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+            <a href="{{ page.resolved.hero.cta_primary.href }}" class="btn btn-light btn-lg px-5 py-3">
+              {% uj_icon page.resolved.hero.cta_primary.icon, "me-2" %}
+              {{ page.resolved.hero.cta_primary.text }}
+            </a>
+            <a href="{{ page.resolved.hero.cta_secondary.href }}" class="btn btn-outline-light btn-lg px-5 py-3">
+              {% uj_icon page.resolved.hero.cta_secondary.icon, "me-2" %}
+              {{ page.resolved.hero.cta_secondary.text }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trusted By Section -->
+<section class="overflow-hidden">
+  <div class="container-fluid px-0">
+    <div class="text-center mb-4" data-lazy="@class animation-slide-up">
+      <h3 class="fs-4">{{ page.resolved.trusted_by.headline }}</h3>
+    </div>
+
+    <div class="logo-scroll-wrapper" data-lazy="@class animation-slide-up">
+      <div class="logo-scroll-track">
+        {% for logo in page.resolved.trusted_by.logos %}
+          <div class="logo-item filter-adaptive hover-opacity">
+            {% uj_logo logo.name, "combomarks", "original" %}
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>
 </section>
 
 <!-- Features Section -->
-<section class="py-8">
+<section>
   <div class="container">
-    <div class="text-center mb-5">
-      <h2 class="display-4 fw-bold mb-3">
-        Why Choose <span class="gradient-text">{{ site.brand.name }}</span>?
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 mb-3">
+        {{ page.resolved.sections.features.headline }} <span class="text-gradient-rainbow">{{ site.brand.name }}</span>?
       </h2>
-      <p class="fs-5 text-muted">Everything you need to accelerate your learning journey</p>
+      <p class="fs-5 text-muted">{{ page.resolved.sections.features.subheadline }}</p>
     </div>
 
     <div class="row g-4">
       {% for feature in page.resolved.features %}
-      <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0 shadow-sm text-center rounded-3 bg-body-tertiary">
-          <div class="card-body p-4">
-            <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-              {% uj_icon feature.icon, "text-white fs-2" %}
+        <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+          <div class="card h-100 border-0 shadow-sm text-center rounded-3 bg-body-tertiary">
+            <div class="card-body p-4">
+              <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                {% uj_icon feature.icon, "text-light fs-2" %}
+              </div>
+              <h4 class="mb-3">{{ feature.title }}</h4>
+              <p class="text-muted mb-0">{{ feature.description }}</p>
             </div>
-            <h4 class="fw-bold mb-3">{{ feature.title }}</h4>
-            <p class="text-muted mb-0">{{ feature.description }}</p>
           </div>
         </div>
-      </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<!-- Stats Section -->
-<section class="py-8">
-  <div class="container">
-    <div class="row text-center g-4">
-      <div class="col-lg-3 col-md-6">
-        <div class="mb-3">
-          {% uj_icon "users", "text-primary display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">50,000+</h3>
-        <p class="text-muted mb-0">Active Students</p>
-        <p class="small text-muted">From 120+ Countries</p>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="mb-3">
-          {% uj_icon "book", "text-success display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">200+</h3>
-        <p class="text-muted mb-0">Expert Courses</p>
-        <p class="small text-muted">Industry-Relevant</p>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="mb-3">
-          {% uj_icon "star", "text-warning display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">4.9</h3>
-        <div class="mb-2">
-          {% for i in (1..5) %}
-            {% uj_icon "star", "text-warning" %}
-          {% endfor %}
-        </div>
-        <p class="text-muted mb-0">Average Rating</p>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="mb-3">
-          {% uj_icon "certificate", "text-info display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">98%</h3>
-        <p class="text-muted mb-0">Success Rate</p>
-        <p class="small text-muted">Career Advancement</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- Testimonials Section -->
-<section class="py-8">
+<section>
   <div class="container">
-    <div class="text-center mb-5">
-      <h2 class="display-5 fw-bold mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
     </div>
 
     {% if page.resolved.testimonials %}
-    <div id="homeTestimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div id="homeTestimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
       <div class="carousel-indicators">
         {% for testimonial in page.resolved.testimonials %}
-        <button type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
+          <button type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
         {% endfor %}
       </div>
 
       <div class="carousel-inner">
         {% for testimonial in page.resolved.testimonials %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <div class="row justify-content-center">
-            <div class="col-md-8">
-              <div class="card border-0 shadow-sm bg-body-tertiary my-1 rounded-3">
-                <div class="card-body p-5 text-center">
-                  <div class="d-flex justify-content-center mb-4">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                      <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <div class="row justify-content-center">
+              <div class="col-md-8">
+                <div class="card border-0 shadow-sm bg-body-tertiary my-1 rounded-3">
+                  <div class="card-body p-5 text-center">
+                    <div class="d-flex justify-content-center mb-4">
+                      <div class="avatar avatar-xl rounded-circle bg-primary text-light d-flex align-items-center justify-content-center">
+                        <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+                      </div>
                     </div>
+                    <blockquote class="mb-4">
+                      <p class="fs-4 fw-bold">"{{ testimonial.quote }}"
+                    </blockquote>
+                    <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                   </div>
-                  <blockquote class="mb-4">
-                    <p class="fs-4 fw-bold">"{{ testimonial.quote }}"
-                  </blockquote>
-                  <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         {% endfor %}
       </div>
 
@@ -253,26 +357,70 @@ testimonials:
   </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-8">
+<!-- Stats Section -->
+<section>
   <div class="container">
-    <div class="rounded-4 p-5 bg-primary bg-gradient text-white text-center">
+    <div class="row text-center g-4">
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+        <div class="mb-3">
+          {% uj_icon page.resolved.stats.users.icon, "text-primary display-4" %}
+        </div>
+        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.users.number }}</h3>
+        <p class="text-muted mb-0">{{ page.resolved.stats.users.label }}</p>
+        <p class="small text-muted">{{ page.resolved.stats.users.sublabel }}</p>
+      </div>
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+        <div class="mb-3">
+          {% uj_icon page.resolved.stats.items.icon, "text-success display-4" %}
+        </div>
+        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.items.number }}</h3>
+        <p class="text-muted mb-0">{{ page.resolved.stats.items.label }}</p>
+        <p class="small text-muted">{{ page.resolved.stats.items.sublabel }}</p>
+      </div>
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+        <div class="mb-3">
+          {% uj_icon page.resolved.stats.rating.icon, "text-warning display-4" %}
+        </div>
+        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.rating.number }}</h3>
+        <div class="mb-0">
+          {% for i in (1..5) %}
+            {% uj_icon "star", "text-warning" %}
+          {% endfor %}
+        </div>
+        <p class="text-muted mb-0">{{ page.resolved.stats.rating.label }}</p>
+      </div>
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+        <div class="mb-3">
+          {% uj_icon page.resolved.stats.success.icon, "text-info display-4" %}
+        </div>
+        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.success.number }}</h3>
+        <p class="text-muted mb-0">{{ page.resolved.stats.success.label }}</p>
+        <p class="small text-muted">{{ page.resolved.stats.success.sublabel }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section>
+  <div class="container">
+    <div class="rounded-4 p-5 bg-primary bg-gradient text-light text-center" data-lazy="@class animation-slide-up">
       <div class="row justify-content-center">
         <div class="col-lg-8">
-          <h2 class="display-4 fw-bold mb-4">
-            Ready to Transform Your Career?
+          <h2 class="h2 mb-4">
+            {{ page.resolved.cta.headline }}
           </h2>
           <p class="fs-5 mb-4 opacity-90">
-            Join thousands of successful learners who have already advanced their careers with {{ site.brand.name }}
+            {{ page.resolved.cta.description }} {{ site.brand.name }}
           </p>
           <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-            <a href="/signup" class="btn btn-light btn-lg px-5 py-3">
-              {% uj_icon "rocket", "me-2" %}
-              Start Learning Today
+            <a href="{{ page.resolved.cta.primary_button.href }}" class="btn btn-light btn-lg px-5 py-3">
+              {% uj_icon page.resolved.cta.primary_button.icon, "me-2" %}
+              {{ page.resolved.cta.primary_button.text }}
             </a>
-            <a href="/contact" class="btn btn-outline-light btn-lg px-5 py-3">
-              {% uj_icon "comments", "me-2" %}
-              Talk to an Expert
+            <a href="{{ page.resolved.cta.secondary_button.href }}" class="btn btn-outline-light btn-lg px-5 py-3">
+              {% uj_icon page.resolved.cta.secondary_button.icon, "me-2" %}
+              {{ page.resolved.cta.secondary_button.text }}
             </a>
           </div>
         </div>

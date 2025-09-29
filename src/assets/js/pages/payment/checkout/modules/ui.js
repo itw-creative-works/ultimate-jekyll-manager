@@ -5,11 +5,11 @@ import { calculatePrices } from './pricing.js';
 // Unified UI update function - handles all state changes
 export function updateAllUI() {
   console.log('updateAllUI called, product:', state.product);
-  
+
   // Update product info
   document.getElementById('product-name').textContent = state.product.name;
   document.getElementById('product-description').textContent = state.product.description;
-  
+
   // Update selected plan name in billing cycle section
   const selectedPlanName = document.getElementById('selected-plan-name');
   if (selectedPlanName) {
@@ -27,14 +27,14 @@ export function updateAllUI() {
     const annualMonthlyRate = (state.product.price_annually / 12).toFixed(2);
     document.getElementById('monthly-price-lg').textContent = `$${state.product.price_monthly.toFixed(2)}`;
     document.getElementById('annually-price-lg').textContent = `$${annualMonthlyRate}`;
-    
+
     // Update payment text based on selected billing cycle
     const paymentText = document.getElementById('billing-cycle-payment-text');
     if (paymentText) {
       if (state.billingCycle === 'monthly') {
-        paymentText.textContent = `Pay $${state.product.price_monthly.toFixed(2)} monthly`;
+        paymentText.textContent = `$${state.product.price_monthly.toFixed(2)} monthly`;
       } else {
-        paymentText.textContent = `Pay $${state.product.price_annually.toFixed(2)} annually`;
+        paymentText.textContent = `$${state.product.price_annually.toFixed(2)} annually`;
       }
     }
 
@@ -132,13 +132,13 @@ function updateBillingCycleButtons() {
       // Monthly is selected
       document.getElementById('monthly').checked = true;
       monthlyLabel.classList.add('billing-selected');
-      monthlyCheckmark.className = 'bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center';
+      monthlyCheckmark.className = 'bg-primary text-light rounded-circle d-inline-flex align-items-center justify-content-center';
       annuallyCheckmark.className = 'bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center';
     } else {
       // Annually is selected
       document.getElementById('annually').checked = true;
       annuallyLabel.classList.add('billing-selected');
-      annuallyCheckmark.className = 'bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center';
+      annuallyCheckmark.className = 'bg-primary text-light rounded-circle d-inline-flex align-items-center justify-content-center';
       monthlyCheckmark.className = 'bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center';
     }
   }
@@ -269,7 +269,7 @@ export function updatePaymentButtonVisibility(paymentManager) {
     const button = document.getElementById(buttonId);
     if (button) {
       const isAvailable = paymentManager.isPaymentMethodAvailable(paymentMethod);
-      
+
       if (isAvailable) {
         // Show the button
         button.classList.remove('d-none');

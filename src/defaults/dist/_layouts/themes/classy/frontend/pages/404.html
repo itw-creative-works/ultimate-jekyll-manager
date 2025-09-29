@@ -24,22 +24,19 @@ suggested_pages:
 <div class="d-flex justify-content-center align-items-center flex-column">
   <div class="col-12 col-lg-8">
     <!-- Logo -->
-    <!-- <div class="mb-4">
+    <div class="mb-3">
       <a href="{{ site.url }}">
-        <img class="mb-4" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 6rem;">
+        <div class="avatar avatar-xl">
+          <img id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}"/>
+        </div>
       </a>
-    </div> -->
-
-    <!-- 404 Icon -->
-    <div class="mb-4">
-      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient text-white" style="width: 120px; height: 120px;">
-        {% uj_icon "exclamation-triangle", "display-4" %}
-      </div>
     </div>
 
     <!-- Main Content -->
-    <h1 class="display-1 fw-bold text-primary mb-2">404</h1>
-    <h2 class="h3 fw-bold mb-3">Oops! Page Not Found</h2>
+    <h1 class="h1 text-primary mb-3">
+      404
+    </h1>
+    <h2 class="h3 mb-3">Oops! Page Not Found</h2>
     <p class="fs-5 text-muted mb-4">
       Sorry, the page you're looking for doesn't exist or has been moved. Don't worry, it happens to the best of us!
     </p>
@@ -62,28 +59,6 @@ suggested_pages:
         Go Back
       </button>
     </div>
-
-    <!-- Suggested Pages -->
-    {% comment %}
-    <div class="mt-5">
-      <h3 class="h5 fw-bold mb-4">Or try these popular pages:</h3>
-      <div class="row g-3">
-        {% for page in page.resolved.suggested_pages %}
-        <div class="col-lg-3 col-md-6">
-          <a href="{{ page.link }}" class="card h-100 border-0 bg-body-tertiary text-decoration-none card-hover">
-            <div class="card-body p-4 text-center">
-              <div class="mb-3">
-                {% uj_icon page.icon, "text-primary fs-2" %}
-              </div>
-              <h4 class="h6 fw-bold mb-2 text-dark">{{ page.title }}</h4>
-              <p class="small text-muted mb-0">{{ page.description }}</p>
-            </div>
-          </a>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endcomment %}
 
     <!-- Help Section -->
     <div class="mt-5 pt-4 border-top">

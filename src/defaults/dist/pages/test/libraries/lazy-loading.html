@@ -13,7 +13,7 @@ meta:
 <div class="container py-5">
   <div class="row">
     <div class="col-lg-8 mx-auto">
-      <h1 class="display-4 mb-4">Lazy Loading Test Page</h1>
+      <h1 class="h2 mb-4">Lazy Loading Test Page</h1>
       <p class="lead mb-5">This page demonstrates lazy loading of images, iframes, and other media. Scroll down to see content load as it comes into view.</p>
 
       <!-- Instructions -->
@@ -28,7 +28,7 @@ meta:
       </div>
 
       <!-- First visible image (should load immediately) -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">1. Above the Fold Image (Lazy Loading Starts Immediately)</h2>
         <p>This image is visible on page load, so it should start loading immediately:</p>
         <img data-lazy="@src https://placehold.co/800x400?text=Immediate+Load"
@@ -37,7 +37,7 @@ meta:
       </section>
 
       <!-- Spacer to push content below fold -->
-      <div style="height: 100vh;" class="d-flex align-items-center justify-content-center text-muted">
+      <div class="d-flex align-items-center justify-content-center text-muted vh-100">
         <div class="text-center">
           <i class="fas fa-arrow-down fa-3x mb-3"></i>
           <p class="h4">Scroll down to trigger lazy loading...</p>
@@ -45,7 +45,7 @@ meta:
       </div>
 
       <!-- Lazy loaded images with data-src -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">2. Standard Lazy Loading (data-src)</h2>
         <p>These images use <code>data-src</code> attribute and will load when scrolled into view:</p>
 
@@ -74,10 +74,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Responsive images with srcset -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">3. Responsive Images with srcset</h2>
         <p>These images use <code>data-srcset</code> for responsive loading:</p>
 
@@ -87,10 +87,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Picture element with multiple sources -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">4. Picture Element with Art Direction</h2>
         <p>Picture element with different sources for different screen sizes:</p>
 
@@ -106,10 +106,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Background images -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">5. Background Images</h2>
         <p>These divs use <code>data-lazy-bg</code> for background images:</p>
 
@@ -145,10 +145,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Lazy Classes -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">6. Lazy Loaded Classes</h2>
         <p>These elements get classes added when they come into view:</p>
 
@@ -186,10 +186,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Iframes -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">7. Lazy Loaded Iframes</h2>
         <p>YouTube videos and other iframes that load on scroll:</p>
 
@@ -210,10 +210,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Gallery of many images -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">8. Image Gallery</h2>
         <p>A grid of many images to test performance with multiple lazy-loaded elements:</p>
 
@@ -234,10 +234,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Video -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">9. Lazy Loaded Video</h2>
         <p>HTML5 video that loads when scrolled into view:</p>
 
@@ -249,10 +249,10 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Slow Loading Test with Picsum -->
-      <section class="mb-5">
+      <section>
         <h2 class="h3 mb-3">10. Slow Loading Test (Loading Animation Demo)</h2>
         <p>These images from picsum.photos load slowly, so you can see the loading animation:</p>
 
@@ -299,17 +299,35 @@ meta:
       </section>
 
       <!-- Another spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
+
+      <!-- HTML Loading Test -->
+      <section>
+        <h2 class="h3 mb-3">11. Lazy Loaded HTML Content</h2>
+        <p>This container will load HTML content when scrolled into view:</p>
+
+        <div data-lazy="@html <div class='alert alert-success'><h4 class='alert-heading'>🎉 HTML Loaded!</h4><p class='mb-0'>This HTML content was injected when you scrolled to this section.</p></div>"
+             class="border rounded p-3 mb-4"
+             style="min-height: 100px;">
+        </div>
+
+        <div data-lazy="@html <div class='card'><div class='card-body'><h5 class='card-title'>Dynamic Card</h5><p class='card-text'>This entire card was lazy loaded as HTML content.</p><a href='#' class='btn btn-primary btn-sm'>Example Button</a></div></div>"
+             class="mb-4">
+        </div>
+      </section>
+
+      <!-- Another spacer -->
+      <div class="vh-50"></div>
 
       <!-- Error handling test -->
-      <section class="mb-5">
-        <h2 class="h3 mb-3">11. Error Handling Test</h2>
+      <section>
+        <h2 class="h3 mb-3">12. Error Handling Test</h2>
         <p>These images have invalid URLs to test error handling:</p>
 
         <div class="row g-4">
           <div class="col-md-6">
             <div class="card">
-              <img data-lazy="@src https://invalid-url-that-does-not-exist.com/image.jpg"
+              <img data-lazy="@src https://itwcreativeworks.com/image.jpg"
                    class="card-img-top"
                    alt="This should show error state">
               <div class="card-body">
@@ -331,11 +349,11 @@ meta:
       </section>
 
       <!-- Final spacer -->
-      <div style="height: 50vh;"></div>
+      <div class="vh-50"></div>
 
       <!-- Very last image -->
-      <section class="mb-5">
-        <h2 class="h3 mb-3">12. Final Image at Bottom</h2>
+      <section>
+        <h2 class="h3 mb-3">13. Final Image at Bottom</h2>
         <p>This image is at the very bottom of the page:</p>
 
         <img data-lazy="@src https://placehold.co/800x400?text=Final+Image"
@@ -350,8 +368,8 @@ meta:
       </div>
 
       <!-- Dynamic content test -->
-      <section class="mt-5 mb-5">
-        <h2 class="h3 mb-3">12. Dynamic Content Test</h2>
+      <section>
+        <h2 class="h3 mb-3">14. Dynamic Content Test</h2>
         <p>Click the button below to dynamically add new lazy-loaded images to test MutationObserver:</p>
 
         <button id="add-dynamic-images" class="btn btn-primary mb-4">Add Dynamic Images</button>

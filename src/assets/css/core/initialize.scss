@@ -1,17 +1,28 @@
-/*
-  Initialize styles for the application.
-*/
+// Core Initialization Styles
+// Essential baseline styles and resets for the application
+
+// ============================================
+// Safe Area Support
+// ============================================
 
 // Enable safe area insets for mobile browsers
+// Ensure viewport-fit=cover works properly
 html {
-  // Ensure viewport-fit=cover works properly
   padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
 }
+
+// ============================================
+// Body Reset
+// ============================================
 
 // Reset body padding to prevent double safe area spacing
 body {
   padding: 0;
 }
+
+// ============================================
+// Font Display Configuration
+// ============================================
 
 @font-face {
   font-display: auto;

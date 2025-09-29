@@ -15,7 +15,9 @@ member:
   skills: Writing, Blog Management
   hobbies: Instagram
   joined: 2017-10-20
-  website: https://www.instagram.com/_alexraeburn
+  links:
+    linkedin: https://www.linkedin.com/in/alexraeburn
+    instagram: https://www.instagram.com/alexraeburn
 ---
 
 Hey everyone, I'm Alex. I was born and raised in Beverly Hills, CA. Writing and technology have always been an important part of my life and I'm excited to be a part of this project.

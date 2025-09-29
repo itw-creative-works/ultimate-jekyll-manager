@@ -1,6 +1,15 @@
 // Libraries
 const serviceWorker = self;
 
+// Import Firebase libraries at the top level (before any async operations)
+// These must be imported synchronously at the beginning
+importScripts(
+  'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-messaging-compat.js',
+  // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-database-compat.js',
+  // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-firestore-compat.js',
+);
+
 // Class
 function Manager() {
   const self = this;
@@ -41,9 +50,6 @@ Manager.prototype.initialize = function () {
     // Setup listeners
     self.setupListeners();
 
-    // Import firebase
-    self.importFirebase();
-
     // Update cache
     self.updateCache();
 
@@ -79,16 +85,24 @@ Manager.prototype.parseConfiguration = function () {
 
   try {
     const params = new URLSearchParams(serviceWorker.location.search);
-    self.config = JSON.parse(params.get('config'));
 
-    // Fix config defaults
-    self.environment = self.config.environment;
-    self.app = self.config.id || 'default';
-    self.cache.breaker = self.config.cb;
-    self.cache.name = self.app + '-' + self.cache.breaker;
+    // Just get cache breaker from URL
+    const cacheBreaker = params.get('cb') || Date.now().toString();
+
+    // Initialize with defaults - config will come via postMessage
+    self.config = {
+      cb: cacheBreaker
+    };
+
+    self.cache.breaker = cacheBreaker;
+    self.cache.name = 'default-' + self.cache.breaker;
+
+    // These will be updated when config is received via postMessage
+    self.environment = 'production';
+    self.app = 'default';
 
     // Log
-    console.log('Parsed configuration', self.config);
+    console.log('Initialized with cache breaker:', cacheBreaker);
   } catch (e) {
     console.error('Error parsing configuration', e);
   }
@@ -152,7 +166,30 @@ Manager.prototype.setupListeners = function () {
     console.log('message', command, payload, event);
 
     // Handle commands
-    if (command === 'update-cache') {
+    if (command === 'update-config') {
+      // Update configuration from postMessage
+      self.config = Object.assign(self.config || {}, payload);
+
+      // Update properties based on new config
+      if (payload.app) {
+        self.app = payload.app;
+        self.cache.name = self.app + '-' + self.cache.breaker;
+      }
+      if (payload.environment) {
+        self.environment = payload.environment;
+      }
+      if (payload.firebase) {
+        // Re-initialize Firebase with new config if needed
+        if (!self.libraries.firebase && payload.firebase) {
+          self.initializeFirebase();
+        }
+      }
+
+      console.log('Updated configuration via postMessage:', self.config);
+
+      // Send success response if port is available
+      event.ports[0]?.postMessage({ status: 'success' });
+    } else if (command === 'update-cache') {
       const pages = payload.pages || [];
       self.updateCache(pages)
         .then(() => {
@@ -168,22 +205,26 @@ Manager.prototype.setupListeners = function () {
   console.log('Set up listeners');
 }
 
-Manager.prototype.importFirebase = function () {
+Manager.prototype.initializeFirebase = function () {
   const self = this;
 
+  // Check if Firebase config is available
+  if (!self.config.firebase) {
+    console.log('Firebase config not available yet, skipping Firebase initialization');
+    return;
+  }
+
+  // Check if already initialized
+  if (self.libraries.firebase) {
+    console.log('Firebase already initialized');
+    return;
+  }
+
   // Log
-  console.log('Importing Firebase libraries v%%% firebaseVersion %%%');
+  console.log('Initializing Firebase v%%% firebaseVersion %%%');
 
-  // Import Firebase libraries
-  importScripts(
-    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-app-compat.js',
-    'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-messaging-compat.js',
-    // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-database-compat.js',
-    // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-firestore-compat.js',
-  );
-
-  // Initialize app
-  const app = firebase.initializeApp(self.config.firebase);
+  // Initialize app (libraries were already imported at the top)
+  firebase.initializeApp(self.config.firebase);
 
   // Initialize messaging
   self.libraries.messaging = firebase.messaging();

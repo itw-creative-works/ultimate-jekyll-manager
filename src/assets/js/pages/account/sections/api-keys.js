@@ -91,14 +91,16 @@ async function handleCopyApiKey() {
     await webManager.utilities().clipboardCopy($apiKeyInput);
 
     // Update button text temporarily
-    const originalHTML = $copyBtn.innerHTML;
-    $copyBtn.innerHTML = '<i class="fa-solid fa-check me-2"></i><span class="button-text">Copied!</span>';
+    const $text = $copyBtn.querySelector('.button-text');
+    const originalText = $text.textContent;
+    
+    $text.textContent = 'Copied!';
     $copyBtn.classList.remove('btn-outline-adaptive');
     $copyBtn.classList.add('btn-success');
 
     // Reset after 2 seconds
     setTimeout(() => {
-      $copyBtn.innerHTML = originalHTML;
+      $text.textContent = originalText;
       $copyBtn.classList.remove('btn-success');
       $copyBtn.classList.add('btn-outline-adaptive');
     }, 2000);

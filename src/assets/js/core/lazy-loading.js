@@ -67,8 +67,8 @@ export default function (Manager, options) {
     }
 
     // Mark as loading
-    element.classList.add(config.loadingClass);
     element.classList.remove(config.errorClass);
+    element.classList.add(config.loadingClass);
 
     // Get the lazy attribute value
     const lazyValue = element.getAttribute('data-lazy');
@@ -84,7 +84,7 @@ export default function (Manager, options) {
       return;
     }
 
-    const type = lazyValue.slice(0, spaceIndex);
+    const type = lazyValue.slice(0, spaceIndex).trim();
     const value = lazyValue.slice(spaceIndex + 1).trim();
 
     // Validate value exists
@@ -96,9 +96,12 @@ export default function (Manager, options) {
     // Log
     /* @dev-only:start */
     {
-      // console.log('Lazy-loading:', value, 'for element:', element);
+      // console.log('Lazy-loading:', type, value, 'for element:', element);
     }
     /* @dev-only:end */
+
+    // Remove data-lazy immediately to prevent duplicate processing
+    element.removeAttribute('data-lazy');
 
     // Load based on type
     switch(type) {
@@ -113,6 +116,12 @@ export default function (Manager, options) {
         break;
       case '@class':
         loadClass(element, value);
+        break;
+      case '@html':
+        loadHtml(element, value);
+        break;
+      case '@script':
+        loadScript(element, value);
         break;
       default:
         markAsError(`Unknown lazy load type: ${type}`, element);
@@ -131,7 +140,6 @@ export default function (Manager, options) {
 
       tempImg.onload = () => {
         element.src = value;
-        element.removeAttribute('data-lazy');
         markAsLoaded(element);
       };
 
@@ -149,7 +157,6 @@ export default function (Manager, options) {
     // For iframes and videos, just set src directly
     else if (tagName === 'iframe' || tagName === 'video') {
       element.src = value;
-      element.removeAttribute('data-lazy');
 
       // Listen for load/error events
       const loadEvent = tagName === 'video' ? 'loadeddata' : 'load';
@@ -170,7 +177,6 @@ export default function (Manager, options) {
     } else {
       // Generic src setting
       element.src = value;
-      element.removeAttribute('data-lazy');
       markAsLoaded(element);
     }
   }
@@ -184,7 +190,6 @@ export default function (Manager, options) {
 
       tempImg.onload = () => {
         element.srcset = value;
-        element.removeAttribute('data-lazy');
         markAsLoaded(element);
       };
 
@@ -196,7 +201,6 @@ export default function (Manager, options) {
     } else if (tagName === 'source') {
       // For source elements, just set srcset
       element.srcset = value;
-      element.removeAttribute('data-lazy');
 
       // Force parent picture to re-evaluate
       const picture = element.closest('picture');
@@ -211,7 +215,6 @@ export default function (Manager, options) {
     } else {
       // Generic srcset
       element.srcset = value;
-      element.removeAttribute('data-lazy');
       markAsLoaded(element);
     }
   }
@@ -222,7 +225,6 @@ export default function (Manager, options) {
 
     tempImg.onload = () => {
       element.style.backgroundImage = `url('${value}')`;
-      element.removeAttribute('data-lazy');
       markAsLoaded(element);
     };
 
@@ -233,12 +235,70 @@ export default function (Manager, options) {
     tempImg.src = value;
   }
 
+  function loadHtml(element, value) {
+    element.innerHTML = value;
+    markAsLoaded(element);
+  }
+
+  function loadScript(element, value) {
+    try {
+      const data = JSON.parse(value);
+      const { src, attributes } = data;
+
+      if (!src) {
+        markAsError('No src provided in @script data', element);
+        return;
+      }
+
+      const scriptOptions = {
+        src,
+        attributes,
+        parent: element,
+      };
+
+      webManager.dom().loadScript(scriptOptions)
+        .then(() => {
+          markAsLoaded(element);
+        })
+        .catch((error) => {
+          markAsError(`Failed to load script: ${src} - ${error.message}`, element);
+        });
+
+    } catch (error) {
+      markAsError(`Failed to parse @script JSON: ${error.message}`, element);
+    }
+  }
+
   function loadClass(element, value) {
-    // Simply add the class immediately
+    // Check if this is an animation class
+    const isAnimation = value.includes('animation-');
+
+    // Handle animations specially
+    if (isAnimation) {
+      // First, add a no-fade class to prevent fade-in animation from the "lazy-loaded" CSS class
+      element.classList.add('lazy-loaded-no-fade');
+
+      // Check if page is still loading (set on page load, removed after initial render)
+      const isPageLoading = document.documentElement.getAttribute('data-page-loading') === 'true';
+
+      if (isPageLoading) {
+        // Check if element is already in viewport
+        const rect = element.getBoundingClientRect();
+        const isInInitialViewport = rect.top < window.innerHeight && rect.bottom >= 0;
+
+        // Skip animation if element is already visible on initial page load
+        if (isInInitialViewport) {
+          markAsLoaded(element);
+          return;
+        }
+      }
+    }
+
     // Split value by spaces to support multiple classes
     const classes = value.split(/\s+/).filter(c => c);
+
+    // Normal processing: add the class(es)
     element.classList.add(...classes);
-    element.removeAttribute('data-lazy');
     markAsLoaded(element);
   }
 

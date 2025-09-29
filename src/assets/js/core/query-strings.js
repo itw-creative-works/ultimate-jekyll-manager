@@ -51,13 +51,15 @@ export default function (Manager, options) {
     ];
 
     // Check if any UTM parameters exist
-    const utmData = {};
+    const utmData = {
+      tags: {}
+    };
     let hasUTM = false;
 
     utmParams.forEach(param => {
       const value = urlParams.get(param);
       if (value) {
-        utmData[param] = value;
+        utmData.tags[param] = value;
         hasUTM = true;
       }
     });

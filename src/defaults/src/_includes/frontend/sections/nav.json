@@ -1,43 +1,77 @@
 {
-  logo: {
-
+  "logo": {
+    "href": "/"
   },
-  links: [
+  "links": [
     {
-      label: 'Home',
-      href: '/'
+      "label": "About",
+      "href": "/about"
     },
     {
-      label: 'Services',
-      href: '/services',
-      children: [
+      "label": "Pricing",
+      "href": "/pricing"
+    },
+    {
+      "label": "Explore",
+      "href": null,
+      "dropdown": [
         {
-          label: 'Web Development',
-          href: '/services/web-development'
+          "label": "Blog",
+          "href": "/blog"
         },
         {
-          label: 'Marketing',
-          href: '/services/marketing',
-          children: [
-            {
-              label: 'SEO',
-              href: '/services/marketing/seo'
-            }
-          ]
+          "label": "Team",
+          "href": "/team"
         }
       ]
     },
     {
-      label: 'Blog',
-      href: '/blog'
-    },
-    {
-      label: 'Contact',
-      href: '/contact'
+      "label": "Contact",
+      "href": "/contact"
     }
   ],
-  action: {
-    label: 'Sign Up',
-    href: '/signup'
-  }
+  "actions": [
+    {
+      "label": "Sign Up",
+      "href": "/signup",
+      "color": "gradient-rainbow",
+      "class": "gradient-animated _animation-wiggle",
+      "icon": "user-plus",
+      "attributes": [
+        ["data-wm-bind", "@show !user"]
+      ]
+    },
+    {
+      "type": "account",
+      "attributes": [
+        ["data-wm-bind", "@show user"],
+        ["hidden", ""]
+      ],
+      "dropdown": [
+        {
+          "label": "Profile",
+          "href": "/account#profile",
+          "icon": "user"
+        },
+        {
+          "label": "Subscription",
+          "href": "/account#billing",
+          "icon": "crown"
+        },
+        {
+          "label": "Settings",
+          "href": "/account#settings",
+          "icon": "gear"
+        },
+        {
+          "divider": true
+        },
+        {
+          "label": "Sign Out",
+          "icon": "arrow-right-from-bracket",
+          "class": "auth-signout-btn text-danger"
+        }
+      ]
+    }
+  ]
 }

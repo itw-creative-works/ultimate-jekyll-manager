@@ -19,11 +19,11 @@ export default function (Manager, options) {
         timeout: 30000,
         retries: 2,
         crossorigin: 'anonymous',
-        attributes: [
-          { name: 'data-account-id', value: config.accountId },
-          { name: 'data-chat-id', value: config.chatId },
-          { name: 'data-settings', value: JSON.stringify(config.settings) },
-        ]
+        attributes: {
+          'data-account-id': config.accountId,
+          'data-chat-id': config.chatId,
+          'data-settings': JSON.stringify(config.settings),
+        }
       });
 
       // Track Chatsy initialization

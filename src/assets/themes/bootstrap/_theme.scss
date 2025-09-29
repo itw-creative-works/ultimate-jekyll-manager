@@ -5,7 +5,7 @@
 // ...
 
 // Adaptive button that uses light styles in light mode and dark styles in dark mode
-[data-bs-theme="light"] .btn-adaptive {
+.btn-adaptive {
   @extend .btn-dark;
 }
 
@@ -14,7 +14,7 @@
 }
 
 // Do the same for btn-outline-light, btn-outline-dark,
-[data-bs-theme="light"] .btn-outline-adaptive {
+.btn-outline-adaptive {
   @extend .btn-outline-dark;
 }
 
@@ -113,7 +113,7 @@ $theme-colors: (
 @each $color-name, $color-value in $theme-colors {
   // Soft background colors (10% opacity)
   .bg-#{$color-name}-soft {
-    background-color: rgba(var(--bs-#{$color-name}-rgb), 0.1) !important;
+    background-color: rgba(var(--bs-#{$color-name}-rgb), 0.5) !important;
   }
 
   // Soft text colors (more vibrant for readability)

@@ -1,0 +1,32 @@
+// Classy Extended Spacing
+// Additional spacing utilities beyond Bootstrap's defaults
+
+// ============================================
+// Extended Padding Classes
+// ============================================
+$spacer: 1rem;
+
+@for $i from 6 through 8 {
+  $size: if($i == 6, 4, if($i == 7, 4.5, 5));
+
+  .p-#{$i} { padding: $spacer * $size !important; }
+  .pt-#{$i} { padding-top: $spacer * $size !important; }
+  .pb-#{$i} { padding-bottom: $spacer * $size !important; }
+  .ps-#{$i} { padding-left: $spacer * $size !important; }
+  .pe-#{$i} { padding-right: $spacer * $size !important; }
+  .px-#{$i} {
+    padding-left: $spacer * $size !important;
+    padding-right: $spacer * $size !important;
+  }
+  .py-#{$i} {
+    padding-top: $spacer * $size !important;
+    padding-bottom: $spacer * $size !important;
+  }
+}
+
+// ============================================
+// VH classes
+// ============================================
+.vh-50 { height: 50vh !important; }
+
+.min-vh-50 { min-height: 50vh !important; }

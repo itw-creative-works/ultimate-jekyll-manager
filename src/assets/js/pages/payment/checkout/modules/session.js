@@ -43,14 +43,17 @@ export function buildPaymentIntentData(webManager) {
     }
   }
 
-  // Extract UTM parameters
-  const utm = {
-    source: urlParams.get('utm_source') || '',
-    medium: urlParams.get('utm_medium') || '',
-    campaign: urlParams.get('utm_campaign') || '',
-    term: urlParams.get('utm_term') || '',
-    content: urlParams.get('utm_content') || ''
-  };
+  // Get UTM parameters from storage
+  const utmData = webManager.storage().get('marketing.utm');
+  let utm = {};
+  
+  // Check if stored UTM data exists and is less than 30 days old
+  if (utmData && utmData.timestamp && utmData.tags) {
+    const daysDiff = (new Date() - new Date(utmData.timestamp)) / (1000 * 60 * 60 * 24);
+    if (daysDiff < 30) {
+      utm = utmData.tags;
+    }
+  }
 
   // Check for test app ID override
   const _test_appId = urlParams.get('_test_appId');
@@ -86,8 +89,14 @@ export function buildPaymentIntentData(webManager) {
     // Supplemental form data (any additional form fields)
     supplemental: formData || {},
 
-    // UTM tracking parameters
-    utm: utm,
+    // UTM tracking parameters (convert to expected format)
+    utm: {
+      source: utm.utm_source || '',
+      medium: utm.utm_medium || '',
+      campaign: utm.utm_campaign || '',
+      term: utm.utm_term || '',
+      content: utm.utm_content || ''
+    },
 
     // Cancel URL (current page URL)
     cancelUrl: window.location.href,

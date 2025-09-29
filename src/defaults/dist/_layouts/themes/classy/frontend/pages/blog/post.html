@@ -1,6 +1,7 @@
 ---
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/base
+asset_path: blog/post
 
 ### THEME CONFIG ###
 theme:
@@ -14,23 +15,26 @@ web_manager:
     enabled: true
 ---
 
-<section class="py-7 py-lg-8">
+<!-- Article Header & Content -->
+<article>
   <div class="container">
     <div class="row justify-content-center mb-3">
       <div class="col-xl-8 col-lg-8 col-md-12 col-12">
-        <div class="text-center mb-4">
-          <h1 class="display-3 fw-bold mb-4">{{ page.post.title }}</h1>
-          <div class="">
+        <header class="text-center mb-4" data-lazy="@class animation-slide-up">
+          <h1 class="h1 fw-bold mb-3">{{ page.post.title }}</h1>
+          <time datetime="{{ page.date | date_to_xmlschema }}">
             {{ page.date | date: "%b %d, %Y" }}
-          </div>
-          <div class="badge bg-primary">{%- uj_readtime -%} min read</div>
-        </div>
+          </time>
+          <div class="badge bg-primary">{% uj_readtime post.content %} min read</div>
+        </header>
 
-        <!-- Media -->
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <!-- Author & Share -->
+        <div class="d-flex justify-content-between align-items-center mb-5" data-lazy="@class animation-slide-up">
           <div class="d-flex align-items-center">
             <a href="{%- uj_member page.post.author, "url" -%}" class="text-decoration-none me-2">
-              {%- uj_member page.post.author, "image-tag", class="avatar avatar-md rounded-circle" -%}
+              <div class="avatar avatar-md">
+                {%- uj_member page.post.author, "image-tag", class="rounded-circle" -%}
+              </div>
             </a>
             <div>
               <a href="{%- uj_member page.post.author, "url" -%}" class="text-decoration-none text-body fw-semibold d-block">
@@ -54,23 +58,54 @@ web_manager:
     </div>
 
     <div class="row justify-content-center">
-      <div class="col-xl-10 col-lg-10 col-md-12 col-12 mb-5">
-        {%- uj_post page.post.id, "image-tag", class="img-fluid rounded-3 w-100", alt=page.post.title -%}
+      <div class="col-xl-10 col-lg-10 col-md-12 col-12 mb-5" data-lazy="@class animation-slide-up">
+        {%- uj_post page.post.id, "image-tag", class="img-fluid rounded-3 w-100 blog-post-image", alt=page.post.title -%}
       </div>
     </div>
 
     <div class="row justify-content-center mb-3">
-      <div class="col-xl-8 col-lg-8 col-md-12 col-12">
-        <div>
-          {{ content | uj_content_format }}
-        </div>
+      <div class="blog-post-content col-xl-8 col-lg-8 col-md-12 col-12" data-lazy="@class animation-slide-up">
+        {{ content | uj_content_format }}
       </div>
     </div>
 
+    <!-- Ad -->
     <div class="row justify-content-center mb-3">
-      <div class="col-xl-8 col-lg-8 col-md-12 col-12">
-        <div class="d-flex justify-content-between align-items-center">
-          <h3 class="h2">Tags</h3>
+      <div class="col-xl-8 col-lg-8 col-md-12 col-12" data-lazy="@class animation-slide-up">
+        {% include /modules/adunits/adsense.html type="in-article" %}
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- Author & Comments -->
+<section>
+  <div class="container">
+    <hr class="my-5">
+
+    <div class="row justify-content-center mb-5">
+      <div class="col-xl-8 col-lg-8 col-md-12 col-12" data-lazy="@class animation-slide-up">
+        <h3 class="h2 mb-3">Author</h3>
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3">
+          <div class="d-flex mb-3 mb-sm-0">
+            <div class="flex-shrink-0">
+              <a href="{% uj_member page.post.author, "url" %}">
+                <div class="avatar avatar-lg">
+                  {% uj_member page.post.author, "image-tag", class="rounded-circle" %}
+                </div>
+              </a>
+            </div>
+            <div class="ms-3">
+              <a href="{% uj_member page.post.author, "url" %}" class="text-body text-decoration-none">
+                <div class="fw-semibold">
+                  {%- uj_member page.post.author, "name" -%}
+                </div>
+              </a>
+              <div class="text-muted small">
+                {%- uj_member page.post.author, "position" -%}
+              </div>
+            </div>
+          </div>
           <div data-social-share
                 data-platforms=""
                 data-title=""
@@ -80,8 +115,7 @@ web_manager:
                 data-labels="false">
           </div>
         </div>
-
-        <div class="">
+        <div>
           {% assign tags = '' | split: ',' %}
             {% for tag in page.post.tags %}
               {% assign tag_fixed = tag | uj_title_case %}
@@ -91,52 +125,29 @@ web_manager:
               {% endunless %}
             {% endfor %}
           {% for tag in tags %}
-            <a href="{{ site.url }}/blog?tag={{ tag }}" class="btn btn-adaptive btn-xs mb-2">{{ tag }}</a>
+            <a href="{{ site.url }}/blog?tag={{ tag }}" class="btn btn-adaptive btn-sm px-2 py-1 mb-2" style="font-size: 0.75rem;">{{ tag }}</a>
           {% endfor %}
         </div>
       </div>
     </div>
 
-    <div class="row justify-content-center mb-3">
-      <div class="col-xl-8 col-lg-8 col-md-12 col-12">
-        <h3 class="h2">About the author</h3>
-        <div class="d-sm-flex">
-          <div class="flex-shrink-0 mb-3 mb-sm-0">
-            <a href="{% uj_member page.post.author, "url" %}">
-              {% uj_member page.post.author, "image-tag", class="avatar avatar-xl rounded-circle" %}
-            </a>
-          </div>
-          <div class="flex-grow-1 ms-sm-4">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <a href="{% uj_member page.post.author, "url" %}">
-                <h4 class="mb-0">
-                  {%- uj_member page.post.author, "name" -%}
-                </h4>
-              </a>
-              <a class="btn btn-outline-primary btn-sm" href="{% uj_member page.post.author, "url" %}">
-                <i class="bi-person-plus-fill me-1"></i> Follow
-              </a>
-            </div>
-            <p>
-              {%- uj_member page.post.author, "content" -%}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row justify-content-center mb-3">
-      <div class="col-xl-8 col-lg-8 col-md-12 col-12">
+    <div class="row justify-content-center mb-5">
+      <div class="col-xl-8 col-lg-8 col-md-12 col-12" data-lazy="@class animation-slide-up">
         <h3 class="h2">Comments</h3>
 
         {%- include modules/engagement/giscus.html -%}
       </div>
     </div>
+  </div>
+</section>
 
+<!-- Newsletter -->
+<section>
+  <div class="container">
     <div class="row justify-content-center mb-3 py-lg-8 py-6">
-      <div class="col-xl-8 col-lg-8 col-md-12 col-12">
+      <div class="col-xl-8 col-lg-8 col-md-12 col-12" data-lazy="@class animation-slide-up">
         <div class="text-center mb-5">
-          <h2 class="display-4 fw-bold">Sign up for our Newsletter</h2>
+          <h2 class="h2 fw-bold">Sign up for our Newsletter</h2>
           <p class="mb-0 lead">
             Join our newsletter and get resources, curated content, and inspiration delivered straight to your inbox.
           </p>
@@ -151,10 +162,15 @@ web_manager:
         </form>
       </div>
     </div>
+  </div>
+</section>
 
+<!-- Related Posts -->
+<section>
+  <div class="container">
     <div class="row justify-content-center mb-3">
       <div class="col-12">
-        <div class="mb-3 mb-sm-5">
+        <div class="mb-3 mb-sm-5" data-lazy="@class animation-slide-up">
           <h3 class="h2">Related Posts</h3>
         </div>
         <div class="row g-4">
@@ -164,7 +180,7 @@ web_manager:
             {% if count < 3 %}
               {% if post.id != page.post.id %}
                 {% assign count = count | plus: 1 %}
-                <div class="col-xl-4 col-lg-6 col-md-12">
+                <div class="col-xl-4 col-lg-6 col-md-12" data-lazy="@class animation-slide-up">
                   <article class="card h-100 shadow-sm border-0 bg-body-tertiary">
                     <!-- Image -->
                     <div class="p-3 pb-0">
@@ -199,7 +215,9 @@ web_manager:
                         <div class="d-flex align-items-center">
                           <!-- Author Avatar -->
                           <a href="{%- uj_member post.post.author, "url" -%}" class="text-decoration-none me-2 position-relative z-1">
-                            {%- uj_member post.post.author, "image-tag", class="avatar avatar-md rounded-circle" -%}
+                            <div class="avatar avatar-md">
+                              {%- uj_member post.post.author, "image-tag", class="rounded-circle" -%}
+                            </div>
                           </a>
 
                           <!-- Author Name and Date stacked -->

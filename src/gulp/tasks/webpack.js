@@ -53,6 +53,9 @@ const watchInput = [
   `${rootPathPackage}/dist/assets/themes/**/*.js`,
   'src/assets/themes/**/*.js',
 
+  // UJ Service worker
+  `${rootPathPackage}/dist/service-worker.js`,
+
   // So we can watch for changes while we're developing web-manager
   `${rootPathPackage}/../web-manager/src`,
 ];
@@ -114,6 +117,18 @@ const settings = {
       // For importing the theme
       '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
     },
+    // Add module resolution paths for local web-manager
+    modules: [
+      // Local web-manager's node_modules (for when we're using "web-manager": "file:../web-manager")
+      path.resolve(rootPathPackage, '../web-manager/node_modules'),
+
+      // Ultimate jekyll manager's node_modules
+      path.resolve(rootPathPackage, 'node_modules'),
+
+      // Project's node_modules
+      path.resolve(process.cwd(), 'node_modules'),
+      'node_modules' // Default fallback
+    ],
     // Fallbacks for Node.js modules that don't work in the browser
     fallback: {
       fs: false,

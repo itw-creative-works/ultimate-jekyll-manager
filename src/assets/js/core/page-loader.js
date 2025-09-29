@@ -5,7 +5,9 @@ export default function (Manager, options) {
 
   // Remove page loading state indicator
   const removeLoadingState = () => {
-    document.documentElement.removeAttribute('data-page-loading');
+    setTimeout(() => {
+      document.documentElement.removeAttribute('data-page-loading');
+    }, 16);
   };
 
   // Check if the window is already loaded

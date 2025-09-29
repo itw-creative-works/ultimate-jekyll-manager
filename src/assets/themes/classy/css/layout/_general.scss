@@ -1,0 +1,43 @@
+// Classy General Layout
+// Standard spacing and layout rules
+
+// ============================================
+// Main Content Spacing
+// ============================================
+main {
+  padding-top: 6rem;
+  // padding-bottom: 2rem;
+
+  @media (min-width: 992px) {
+    padding-top: 3.5rem;
+  }
+}
+
+// ============================================
+// Section Spacing
+// ============================================
+main {
+  > section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+
+    @media (min-width: 992px) {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+}
+
+// ============================================
+// Full-Width Section Breakout
+// ============================================
+.section-full-width {
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  width: 100vw;
+  margin-top: -6rem;
+
+  @media (min-width: 992px) {
+    margin-top: -3.5rem;
+  }
+}

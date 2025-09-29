@@ -1,4 +1,10 @@
-// Cookie Consent Styles
+// Core Cookie Consent Styles
+// GDPR-compliant cookie consent banner and minimized tab
+
+// ============================================
+// Banner Base Styles
+// ============================================
+
 .cookie-consent-banner {
   position: fixed;
   z-index: 9999;
@@ -21,8 +27,13 @@
     opacity: 0;
     transform: translateY(1rem);
   }
+}
 
-  // Position variants
+// ============================================
+// Banner Position Variants
+// ============================================
+
+.cookie-consent-banner {
   &.cookie-consent-bottom-left {
     bottom: 1rem;
     left: 1rem;
@@ -48,8 +59,13 @@
       transform: translateX(-50%) translateY(1rem);
     }
   }
+}
 
-  // Theme variants
+// ============================================
+// Theme Variants
+// ============================================
+
+.cookie-consent-banner {
   &.cookie-consent-theme-classic {
     .cookie-consent-container {
       display: flex;
@@ -67,62 +83,11 @@
       }
     }
   }
-
-  // &.cookie-consent-theme-block {
-  //   .cookie-consent-container {
-  //     display: flex;
-  //     flex-direction: column;
-  //     gap: 1rem;
-  //   }
-
-  //   .cookie-consent-buttons {
-  //     display: flex;
-  //     flex-direction: column;
-  //     gap: 0.5rem;
-
-  //     .cookie-consent-button {
-  //       width: 100%;
-  //     }
-  //   }
-  // }
-
-  // &.cookie-consent-theme-edgeless {
-  //   border-radius: 0;
-  //   max-width: 100%;
-  //   width: 100%;
-
-  //   &.cookie-consent-bottom {
-  //     left: 0;
-  //     right: 0;
-  //     bottom: 0;
-  //     transform: none;
-
-  //     &.cookie-consent-show {
-  //       transform: none;
-  //     }
-  //   }
-
-  //   .cookie-consent-container {
-  //     display: flex;
-  //     align-items: center;
-  //     justify-content: space-between;
-  //     gap: 1rem;
-  //     max-width: 1200px;
-  //     margin: 0 auto;
-
-  //     @media (max-width: 768px) {
-  //       flex-direction: column;
-  //       align-items: stretch;
-  //     }
-  //   }
-
-  //   .cookie-consent-buttons {
-  //     .cookie-consent-dismiss {
-  //       width: 100%;
-  //     }
-  //   }
-  // }
 }
+
+// ============================================
+// Message and Button Components
+// ============================================
 
 .cookie-consent-message {
   margin: 0;
@@ -156,7 +121,10 @@
   // Button-specific styles are injected via JavaScript from config
 }
 
-// Minimized tab styles
+// ============================================
+// Minimized Tab Styles
+// ============================================
+
 .cookie-consent-minimized {
   position: fixed;
   z-index: 9998;
@@ -178,7 +146,7 @@
   height: auto;
 
   // Control how much of the tab shows (0 = fully visible, positive = slides down)
-  --tab-offset: 2rem;
+  --tab-offset: 1.75rem;
 
   &.cookie-consent-minimized-show {
     opacity: 1;
@@ -190,7 +158,22 @@
     }
   }
 
-  // Bottom position variants
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  span {
+    display: inline-block;
+  }
+}
+
+// ============================================
+// Minimized Tab Position Variants
+// ============================================
+
+.cookie-consent-minimized {
   &.cookie-consent-minimized-bottom-left {
     bottom: 0;
     left: 2rem;
@@ -217,20 +200,12 @@
       }
     }
   }
-
-
-  svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-  }
-
-  span {
-    display: inline-block;
-  }
 }
 
-// Mobile responsive
+// ============================================
+// Mobile Responsive Styles
+// ============================================
+
 @media (max-width: 576px) {
   .cookie-consent-banner {
     max-width: calc(100% - 2rem);

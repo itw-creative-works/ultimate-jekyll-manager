@@ -1,4 +1,9 @@
-// Lazy Loading Core Styles
+// Core Lazy Loading Styles
+// Progressive image loading with shimmer effects
+
+// ============================================
+// Base Image Configuration
+// ============================================
 
 // Prevent layout shift for lazy images
 img[data-lazy] {
@@ -6,6 +11,10 @@ img[data-lazy] {
   width: 100%; // Maintain width
   height: auto; // Maintain aspect ratio
 }
+
+// ============================================
+// Loading States
+// ============================================
 
 // Loading state with shimmer animation using CSS variables
 .lazy-loading {
@@ -31,6 +40,21 @@ img[data-lazy] {
   --lazy-color-3: rgba(255, 255, 255, 0.03);
 }
 
+// ============================================
+// Loaded State
+// ============================================
+
+// Loaded state with fade in
+// Ensure no fade-in if .lazy-loaded-no-fade is present (which is added when ANIMATION CLASSES are used in the lazy load)
+.lazy-loaded:not(.lazy-loaded-no-fade) {
+  animation: lazy-fadein 0.25s ease-in;
+}
+
+
+// ============================================
+// Animations
+// ============================================
+
 // Shimmer animation
 @keyframes lazy-shimmer {
   0% {
@@ -39,36 +63,6 @@ img[data-lazy] {
   100% {
     background-position: -200% 0;
   }
-}
-
-// // Alternative loading state - Skeleton loading animation
-// .lazy-loading {
-//   --lazy-loading-from: rgba(0, 0, 0, 0.04);
-//   --lazy-loading-to: rgba(0, 0, 0, 0.08);
-
-//   animation: lazy-skeleton 1s linear infinite alternate;
-//   min-height: 100px; // Default minimum height for loading state
-// }
-
-// // Dark theme overrides for skeleton
-// [data-bs-theme="dark"] .lazy-loading {
-//   --lazy-loading-from: rgba(255, 255, 255, 0.04);
-//   --lazy-loading-to: rgba(255, 255, 255, 0.08);
-// }
-
-// // Skeleton animation
-// @keyframes lazy-skeleton {
-//   0% {
-//     background-color: var(--lazy-loading-from);
-//   }
-//   100% {
-//     background-color: var(--lazy-loading-to);
-//   }
-// }
-
-// Loaded state with fade in
-.lazy-loaded {
-  animation: lazy-fadein 0.25s ease-in;
 }
 
 // Fade in animation

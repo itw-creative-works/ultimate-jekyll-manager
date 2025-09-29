@@ -41,21 +41,25 @@ faqs:
 ---
 
 <!-- Hero Section -->
-<section class="py-8">
+<section>
   <div class="container">
-    <div class="row justify-content-center mb-5">
-      <div class="col-12">
-        <div class="text-center" data-lazy="@class animation-fade-in">
-          <h1 class="display-3 fw-bold mb-5">
-            Get in <span class="gradient-text">Touch</span>
-          </h1>
-          <p class="fs-5 text-muted">
-            We're here to help! Reach out to our friendly support team and we'll get back to you as soon as possible.
-          </p>
-        </div>
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-10" data-lazy="@class animation-slide-up">
+        <h1 class="h1 mb-3">
+          Get in <span class="text-gradient-rainbow">Touch</span>
+        </h1>
+        <p class="fs-5 text-muted mb-0">
+          We're here to help! Reach out to our friendly support team and we'll get back to you as soon as possible.
+        </p>
       </div>
     </div>
-    <div class="row g-4 justify-content-center mb-5">
+  </div>
+</section>
+
+<!-- Contact Methods Section -->
+<section>
+  <div class="container">
+    <div class="row g-4 justify-content-center">
       {% assign method_count = page.resolved.contact_methods | size %}
 
       <!-- Determine column classes based on number of contact methods -->
@@ -75,32 +79,32 @@ faqs:
       {% endif %}
 
       {% for method in page.resolved.contact_methods %}
-      <div class="{{ col_classes }}">
-        <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center" data-lazy="@class animation-slide-up">
-          <div class="card-body p-4">
-            <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-              {% uj_icon method.icon, "text-white fs-2" %}
+        <div class="{{ col_classes }}">
+          <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center" data-lazy="@class animation-slide-up">
+            <div class="card-body p-4">
+              <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                {% uj_icon method.icon, "text-light fs-2" %}
+              </div>
+              <h4 class="mb-1">{{ method.title }}</h4>
+              <p class="text-muted mb-3">{{ method.description }}</p>
+              <a href="{{ method.link }}" class="btn btn-outline-primary">{{ method.value }}</a>
             </div>
-            <h4 class="fw-bold mb-3">{{ method.title }}</h4>
-            <p class="text-muted mb-3">{{ method.description }}</p>
-            <a href="{{ method.link }}" class="btn btn-outline-primary">{{ method.value }}</a>
           </div>
         </div>
-      </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
 <!-- Contact Form Section -->
-<section class="py-8" id="form">
+<section id="form">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="card border-0 shadow-lg bg-body-tertiary" data-lazy="@class animation-slide-up">
           <div class="card-body p-5">
             <div class="text-center mb-4">
-              <h2 class="h3 fw-bold mb-3">Send us a Message</h2>
+              <h2 class="h3 mb-3">Send us a Message</h2>
               <p class="text-muted">Fill out the form below and we'll get back to you within 24 hours.</p>
             </div>
 
@@ -188,7 +192,7 @@ faqs:
               </div>
 
               <!-- Honeypot field -->
-              <div class="form-group mb-3" style="opacity: 0; height: 0; position: absolute;" aria-hidden="true">
+              <div class="form-group mb-3 position-absolute" style="opacity: 0; height: 0;" aria-hidden="true">
                 <input type="text" class="form-control" id="slap_honey" name="slap_honey" placeholder="Website" tabindex="-1" autocomplete="off">
               </div>
 
@@ -225,31 +229,31 @@ faqs:
 </section>
 
 <!-- Stats Section -->
-<section class="py-8">
+<section>
   <div class="container">
     <div class="row text-center g-4">
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
         <div class="mb-3">
           {% uj_icon "clock", "text-primary display-4" %}
         </div>
         <h3 class="display-5 fw-bold mb-2">&lt;15m</h3>
         <p class="text-muted mb-0">Response Time</p>
       </div>
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
         <div class="mb-3">
           {% uj_icon "users", "text-success display-4" %}
         </div>
         <h3 class="display-5 fw-bold mb-2">24/7</h3>
         <p class="text-muted mb-0">Live Chat Support</p>
       </div>
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
         <div class="mb-3">
           {% uj_icon "star", "text-warning display-4" %}
         </div>
-        <h3 class="display-5 fw-bold mb-2">4.9/5</h3>
+        <h3 class="display-5 fw-bold mb-2">4.9</h3>
         <p class="text-muted mb-0">Support Rating</p>
       </div>
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
         <div class="mb-3">
           {% uj_icon "globe", "text-info display-4" %}
         </div>
@@ -261,33 +265,33 @@ faqs:
 </section>
 
 <!-- FAQ Section -->
-<section class="py-8">
+<section>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" data-lazy="@class animation-slide-up">
           <h2 class="display-5 fw-bold mb-3">
-            Frequently Asked <span class="gradient-text">Questions</span>
+            Frequently Asked <span class="">Questions</span>
           </h2>
         </div>
 
         {% if page.resolved.faqs %}
-        <div class="accordion" id="contactFaqAccordion">
-          {% for faq in page.resolved.faqs %}
-          <div class="accordion-item border-0 mb-3">
-            <h2 class="accordion-header">
-              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaq{{ forloop.index }}" aria-expanded="false" aria-controls="contactFaq{{ forloop.index }}">
-                <span class="fw-semibold">{{ faq.question }}</span>
-              </button>
-            </h2>
-            <div id="contactFaq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#contactFaqAccordion">
-              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
-                {{ faq.answer }}
+          <div class="accordion" id="contactFaqAccordion">
+            {% for faq in page.resolved.faqs %}
+              <div class="accordion-item border-0 mb-3" data-lazy="@class animation-slide-up">
+                <h2 class="accordion-header">
+                  <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaq{{ forloop.index }}" aria-expanded="false" aria-controls="contactFaq{{ forloop.index }}">
+                    <span class="fw-semibold">{{ faq.question }}</span>
+                  </button>
+                </h2>
+                <div id="contactFaq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#contactFaqAccordion">
+                  <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                    {{ faq.answer }}
+                  </div>
+                </div>
               </div>
-            </div>
+            {% endfor %}
           </div>
-          {% endfor %}
-        </div>
         {% endif %}
       </div>
     </div>

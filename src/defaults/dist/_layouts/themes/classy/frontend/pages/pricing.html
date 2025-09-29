@@ -127,15 +127,47 @@ faqs:
     answer: "We offer a 14 day free trial of the premium plans. You can cancel any time during your trial for a full refund. After the trial period, you can cancel and you may receive a prorated refund for the remaining time on your subscription."
 ---
 
-<section class="py-8">
+<!-- Promo Banner -->
+<div id="pricing-promo-banner" class="position-fixed top-0 start-0 w-100 text-light text-center bg-body animation-slide-down" style="z-index: 1050;" hidden>
+  <div class="bg-primary-soft py-2">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center justify-content-center gap-3">
+        <span id="pricing-promo-badge" class="badge bg-gradient-rainbow px-2 py-1 fs-6 animation-wiggle">
+          SALE
+        </span>
+        <span id="pricing-promo-text" class="fw-semibold">
+          Flash Sale
+        </span>
+        <span class="badge bg-white bg-opacity-25 px-2 py-1">
+          ending in <span id="pricing-promo-countdown">--</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hero Section -->
+<section class="_pb-4 mt-4">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-10">
+        <h1 class="h1 mb-3">
+          The right plans, <span class="text-gradient-rainbow">for the right price</span>
+        </h1>
+        <p class="fs-5 text-muted mb-0">
+          Simple and affordable pricing. No hidden fees, no surprises.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Plans Section -->
+<section class="_pt-4">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12">
-        <div class="text-center mb-5" data-lazy="@class animation-fade-in">
-          <h1 class="display-3 fw-bold mb-5">
-            The right plans, <span class="gradient-text">for the right price</span>
-          </h1>
-
+        <div class="text-center mb-5">
           <div class="btn-group" role="group" aria-label="Billing toggle" data-lazy="@class animation-popup">
             <input type="radio" class="btn-check" name="billing" id="monthly" autocomplete="off" data-billing="monthly">
             <label class="btn btn-outline-adaptive rounded-start-pill" for="monthly">Monthly</label>
@@ -181,8 +213,9 @@ faqs:
             {% else %}
               {% assign border_classes = "border" %}
             {% endif %}
+
             <div class="{{ col_classes }}">
-              <div class="card h-100 {{ border_classes }} position-relative" data-lazy="@class animation-slide-up">
+              <div class="card h-100 {{ border_classes }} position-relative hover-flex" data-lazy="@class animation-slide-up">
                 {% if plan.popular %}
                   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-gradient-rainbow px-3 py-2">
                     Most Popular
@@ -192,7 +225,7 @@ faqs:
                 <div class="card-body d-flex flex-column justify-content-between p-4">
                   <div>
                     <!-- Header -->
-                    <h3 class="card-title h2 fw-bold mb-1">{{ plan.name }}</h3>
+                    <h3 class="card-title h2 mb-1">{{ plan.name }}</h3>
                     <p class="text-muted small mb-3">{{ plan.tagline }}</p>
 
                     <!-- Price -->
@@ -229,7 +262,7 @@ faqs:
                     <!-- Button -->
                     <div class="d-grid mb-3">
                       {% if plan.id == "basic" %}
-                        <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-lg fw-semibold px-2">
+                        <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-md fw-semibold px-2 fs-5">
                           Get started for free
                         </a>
                       {% else %}
@@ -239,7 +272,7 @@ faqs:
                           {% assign btn_style = "btn-primary" %}
                         {% endif %}
                         {% assign btn_style = "btn-primary" %}
-                        <button class="btn {{ btn_style }} btn-lg fw-semibold px-2" data-plan-id="{{ plan.id }}">
+                        <button class="btn {{ btn_style }} btn-md fw-semibold px-2 fs-5" data-plan-id="{{ plan.id }}">
                           <!-- Try {{ plan.name }} for 14 days -->
                           Try free for 14 days
                         </button>
@@ -337,9 +370,9 @@ faqs:
 
         <div class="row g-4 mt-3 justify-content-center">
           <div class="col-12 col-md-8 col-lg-6">
-            <div class="card bg-body-tertiary border-0">
+            <div class="card bg-body-tertiary border-0" data-lazy="@class animation-slide-up">
               <div class="card-body p-4 text-center">
-                <h3 class="h2 fw-bold mb-3">Enterprise</h3>
+                <h3 class="h2 mb-3">Enterprise</h3>
                 <h4 class="text-muted mb-4">Custom pricing</h4>
                 <p class="mb-4">Custom solutions for large organizations. Advanced security and flexible pricing based on your needs.</p>
                 <button class="btn btn-primary btn-lg" data-plan-id="enterprise">
@@ -358,34 +391,144 @@ faqs:
   </div>
 </section>
 
+<!-- Feature Comparison Grid -->
+<section>
+  <div class="container">
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 mb-3">Compare Features</h2>
+      <!-- Mobile scroll indicator -->
+      <div class="d-md-none">
+        <small class="text-muted">
+          <span class="me-2">Swipe to see more</span>
+          <span class="animation-pulse-right d-inline-block">
+            {% uj_icon "arrow-right", "text-primary" %}
+          </span>
+        </small>
+      </div>
+    </div>
+  </div>
+
+  {% assign all_feature_ids = "" | split: "," %}
+  {% assign all_features = "" | split: "," %}
+  {% for plan in page.resolved.plans %}
+    {% for feature in plan.features %}
+      {% unless all_feature_ids contains feature.id %}
+        {% assign all_feature_ids = all_feature_ids | push: feature.id %}
+        {% assign all_features = all_features | push: feature %}
+      {% endunless %}
+    {% endfor %}
+  {% endfor %}
+
+  <div class="container">
+    <div class="table-responsive" data-lazy="@class animation-slide-up">
+      <table class="table caption-top">
+        <caption>Compare Features</caption>
+        <thead>
+          <tr>
+            <th scope="col">Feature</th>
+            {% for plan in page.resolved.plans %}
+              <th scope="col">{{ plan.name }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for feature_def in all_features %}
+            <tr>
+              <th scope="row">{{ feature_def.name }}</th>
+              {% for plan in page.resolved.plans %}
+                <td>
+                  {% assign has_feature = false %}
+                  {% assign feature_value = nil %}
+                  {% assign inherited_feature = false %}
+                  {% assign inherited_value = nil %}
+
+                  {% for plan_feature in plan.features %}
+                    {% if plan_feature.id == feature_def.id %}
+                      {% assign has_feature = true %}
+                      {% assign feature_value = plan_feature.value %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% unless has_feature %}
+                    {% for check_plan in page.resolved.plans %}
+                      {% if check_plan.id == plan.id %}
+                        {% break %}
+                      {% endif %}
+                      {% for check_feature in check_plan.features %}
+                        {% if check_feature.id == feature_def.id %}
+                          {% assign inherited_feature = true %}
+                          {% assign inherited_value = check_feature.value %}
+                          {% break %}
+                        {% endif %}
+                      {% endfor %}
+                      {% if inherited_feature %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endunless %}
+
+                  {% if has_feature %}
+                    {% if feature_value == true or feature_value == "Included" or feature_value == "Available" or feature_value == "Full" %}
+                      {% uj_icon "check-circle", "text-success fs-5" %}
+                    {% elsif feature_value == false %}
+                      {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
+                    {% elsif feature_value %}
+                      {{ feature_value }}
+                    {% else %}
+                      {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
+                    {% endif %}
+                  {% elsif inherited_feature %}
+                    {% if inherited_value == true or inherited_value == "Included" or inherited_value == "Available" or inherited_value == "Full" %}
+                      {% uj_icon "check-circle", "text-success fs-5" %}
+                    {% elsif inherited_value == false %}
+                      {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
+                    {% elsif inherited_value %}
+                      {{ inherited_value }}
+                    {% else %}
+                      {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
+                    {% endif %}
+                  {% else %}
+                    {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <!-- Social Proof Section -->
-<section class="py-8">
+<section>
   <div class="container">
     <div class="row text-center g-4">
-      <div class="col-6 col-md-3">
-        <h2 class="display-5 fw-bold mb-1">5M</h2>
+      <div class="col-6 col-md-3" data-lazy="@class animation-slide-up">
+        <h2 class="display-5 fw-bold mb-0">5M</h2>
         <p class="text-muted mb-0">Customers</p>
         <p class="small text-muted">90 countries</p>
       </div>
-      <div class="col-6 col-md-3">
+      <div class="col-6 col-md-3" data-lazy="@class animation-slide-up">
         <div class="d-flex justify-content-center align-items-center mb-2">
-          <h2 class="display-5 fw-bold mb-0 ms-2">#1</h2>
+          <h2 class="display-5 fw-bold mb-0">#1</h2>
         </div>
-        <p class="small text-muted mb-0">Product of the month</p>
-        <p class="text-muted mb-0">Product Hunt</p>
+        <p class="text-muted mb-0">Product of the month</p>
+        <p class="small text-muted mb-0">Product Hunt</p>
       </div>
-      <div class="col-6 col-md-3">
-        <h2 class="display-5 fw-bold mb-1">4.8</h2>
-        <div class="mb-1">
+      <div class="col-6 col-md-3" data-lazy="@class animation-slide-up">
+        <h2 class="display-5 fw-bold mb-0">4.8</h2>
+        <div class="mb-0">
           {% for i in (1..5) %}
             {% uj_icon "star", "text-primary" %}
           {% endfor %}
         </div>
         <p class="text-muted mb-0">Capterra</p>
       </div>
-      <div class="col-6 col-md-3">
-        <h2 class="display-5 fw-bold mb-1">4.8</h2>
-        <div class="mb-1">
+      <div class="col-6 col-md-3" data-lazy="@class animation-slide-up">
+        <h2 class="display-5 fw-bold mb-0">4.8</h2>
+        <div class="mb-0">
           {% for i in (1..5) %}
             {% uj_icon "star", "text-danger" %}
           {% endfor %}
@@ -397,13 +540,13 @@ faqs:
 </section>
 
 <!-- CTA Section -->
-<section class="py-8">
-  <div class="container">
+<section>
+  <div class="container" data-lazy="@class animation-slide-up">
     <!-- style="background: linear-gradient(135deg, #2d2d2d 0%, #673ab7 50%, #2196f3 100%);" -->
     <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient">
       <div class="row align-items-center py-4">
-        <div class="col-lg-7 text-white">
-          <h2 class="display-4 fw-bold lh-sm mb-4">
+        <div class="col-lg-7 text-light">
+          <h2 class="h2 mb-3">
             Need help finding the
             right <strong class="">{{ site.brand.name }} plan</strong>
             for your needs?
@@ -426,7 +569,7 @@ faqs:
               <!-- <div class="position-absolute bottom-0 end-0 bg-white rounded-circle p-3 shadow-lg">
               </div> -->
               <div class="position-absolute bottom-0 end-0 p-3">
-                {% uj_icon "comment-dots", "text-white display-1" %}
+                {% uj_icon "comment-dots", "text-light display-1" %}
               </div>
             </div>
           </div>
@@ -444,86 +587,86 @@ faqs:
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-8">
+<section>
   <div class="container">
-    <div class="text-center mb-5" data-lazy="@class animation-fade-in">
-      <h2 class="display-5 fw-bold mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
     </div>
 
     {% if page.resolved.testimonials %}
-    <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
-      <div class="carousel-indicators">
-        {% for testimonial in page.resolved.testimonials %}
-        <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
-        {% endfor %}
-      </div>
+      <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
+        <div class="carousel-indicators">
+          {% for testimonial in page.resolved.testimonials %}
+            <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
+          {% endfor %}
+        </div>
 
-      <div class="carousel-inner">
-        {% for testimonial in page.resolved.testimonials %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <div class="row justify-content-center">
-            <div class="col-md-8">
-              <div class="card border-0 shadow-sm bg-body-tertiary my-1">
-                <div class="card-body p-5 text-center">
-                  <div class="d-flex justify-content-center mb-4">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                      <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+        <div class="carousel-inner">
+          {% for testimonial in page.resolved.testimonials %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <div class="row justify-content-center">
+                <div class="col-md-8">
+                  <div class="card border-0 shadow-sm bg-body-tertiary my-1">
+                    <div class="card-body p-5 text-center">
+                      <div class="d-flex justify-content-center mb-4">
+                        <div class="avatar avatar-xl rounded-circle bg-primary text-light d-flex align-items-center justify-content-center">
+                          <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+                        </div>
+                      </div>
+                      <blockquote class="mb-4">
+                        <p class="fs-4 fw-bold">"{{ testimonial.quote }}"</p>
+                      </blockquote>
+                      <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.source }}</p>
                     </div>
                   </div>
-                  <blockquote class="mb-4">
-                    <p class="fs-4 fw-bold">"{{ testimonial.quote }}"</p>
-                  </blockquote>
-                  <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.source }}</p>
                 </div>
               </div>
             </div>
-          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
-      </div>
 
-      <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
     {% endif %}
   </div>
 </section>
 
 <!-- FAQ Section -->
-<section class="py-8">
+<section>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="text-center mb-5" data-lazy="@class animation-fade-in">
-          <h2 class="display-5 fw-bold mb-3">
+        <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+          <h2 class="h2 mb-3">
             Want to<br>
-            <span class="gradient-text">know more?</span>
+            <span class="">know more?</span>
           </h2>
         </div>
 
         {% if page.resolved.faqs %}
-        <div class="accordion" id="faqAccordion" data-lazy="@class animation-slide-up">
-          {% for faq in page.resolved.faqs %}
-          <div class="accordion-item border-0 mb-3">
-            <h2 class="accordion-header">
-              <button class="accordion-button bg-body-tertiary collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
-                <span class="fw-semibold">{{ faq.question }}</span>
-              </button>
-            </h2>
-            <div id="faq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-              <div class="accordion-body bg-body-tertiary text-muted">
-                {{ faq.answer }}
+          <div class="accordion" id="faqAccordion" data-lazy="@class animation-slide-up">
+            {% for faq in page.resolved.faqs %}
+              <div class="accordion-item border-0 mb-3">
+                <h2 class="accordion-header">
+                  <button class="accordion-button bg-body-tertiary collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
+                    <span class="fw-semibold">{{ faq.question }}</span>
+                  </button>
+                </h2>
+                <div id="faq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body bg-body-tertiary text-muted">
+                    {{ faq.answer }}
+                  </div>
+                </div>
               </div>
-            </div>
+            {% endfor %}
           </div>
-          {% endfor %}
-        </div>
         {% endif %}
       </div>
     </div>

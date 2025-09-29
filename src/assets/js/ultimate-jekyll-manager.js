@@ -3,6 +3,9 @@ export default async function (Manager, options) {
   // Shortcuts
   const { webManager } = Manager;
 
+  // Add Manager to global scope for easy access in modules
+  window.Manager = Manager;
+
   // Log
   console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
 

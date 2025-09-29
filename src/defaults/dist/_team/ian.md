@@ -15,7 +15,11 @@ member:
   skills: Software Development, Business Management
   hobbies: Music
   joined: 2017-04-20
-  website: https://ianwiedenman.com
+
+  links:
+    website: https://ianwiedenman.com
+    linkedin: https://www.linkedin.com/in/ianwiedenman
+    instagram: https://www.instagram.com/ianwiedenman
 ---
 
 Hey everyone, I'm Ian.

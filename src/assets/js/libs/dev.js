@@ -32,7 +32,7 @@ function setupHelpers(webManager) {
   // Add development helper functions
 
   // Globalize the webManager
-  window.webManager = webManager;
+  // window.webManager = webManager;
 
   // Log opening tags of common HTML elements
   window.logOpeningTags = function (detail) {
@@ -129,7 +129,7 @@ function setupTrackingInterceptors() {
       const command = args[0];
       const eventNameOrParams = args[1];
       const params = args[2];
-      
+
       // Log the gtag call
       console.log('📊 gtag:', {
         command: command,
@@ -137,7 +137,7 @@ function setupTrackingInterceptors() {
         params: params || eventNameOrParams,
         fullArgs: args
       });
-      
+
       // Call the original gtag function
       return originalGtag.apply(this, arguments);
     };
@@ -147,14 +147,14 @@ function setupTrackingInterceptors() {
   // Intercept Facebook Pixel (fbq)
   if (typeof window.fbq !== 'undefined') {
     const originalFbq = window.fbq;
-    
+
     // Create wrapper function that preserves all properties
     const fbqWrapper = function() {
       const args = Array.from(arguments);
       const command = args[0];
       const event = args[1];
       const params = args[2];
-      
+
       // Log the fbq call
       console.log('📘 fbq:', {
         command: command,
@@ -162,16 +162,16 @@ function setupTrackingInterceptors() {
         params: params,
         fullArgs: args
       });
-      
+
       // Call the original fbq function
       return originalFbq.apply(this, arguments);
     };
-    
+
     // Copy all properties from original fbq to wrapper
     Object.keys(originalFbq).forEach(key => {
       fbqWrapper[key] = originalFbq[key];
     });
-    
+
     // If callMethod exists, wrap it too
     if (originalFbq.callMethod) {
       const originalCallMethod = originalFbq.callMethod;
@@ -181,17 +181,17 @@ function setupTrackingInterceptors() {
         return originalCallMethod.apply(originalFbq, arguments);
       };
     }
-    
+
     // Preserve queue if it exists (for stub implementation)
     if (originalFbq.queue) {
       fbqWrapper.queue = originalFbq.queue;
     }
-    
+
     // Preserve push method if it exists (for stub implementation)
     if (originalFbq.push) {
       fbqWrapper.push = originalFbq.push;
     }
-    
+
     window.fbq = fbqWrapper;
     console.log('✅ fbq interceptor installed');
   }
@@ -203,67 +203,67 @@ function setupTrackingInterceptors() {
     const originalPage = window.ttq.page;
     const originalIdentify = window.ttq.identify;
     const originalLoad = window.ttq.load;
-    
+
     // Intercept track method
     window.ttq.track = function() {
       const args = Array.from(arguments);
       const event = args[0];
       const params = args[1];
-      
+
       // Log the ttq.track call
       console.log('🎵 ttq.track:', {
         event: event,
         params: params,
         fullArgs: args
       });
-      
+
       // Call the original track function
       return originalTrack.apply(originalTtq, arguments);
     };
-    
+
     // Intercept page method
     window.ttq.page = function() {
       const args = Array.from(arguments);
-      
+
       // Log the ttq.page call
       console.log('🎵 ttq.page:', {
         fullArgs: args
       });
-      
+
       // Call the original page function
       return originalPage.apply(originalTtq, arguments);
     };
-    
+
     // Intercept identify method
     window.ttq.identify = function() {
       const args = Array.from(arguments);
-      
+
       // Log the ttq.identify call
       console.log('🎵 ttq.identify:', {
         fullArgs: args
       });
-      
+
       // Call the original identify function
       return originalIdentify.apply(originalTtq, arguments);
     };
-    
+
     // Intercept load method
     window.ttq.load = function() {
       const args = Array.from(arguments);
-      
+
       // Log the ttq.load call
       console.log('🎵 ttq.load:', {
         pixelId: args[0],
         fullArgs: args
       });
-      
+
       // Call the original load function
       return originalLoad.apply(originalTtq, arguments);
     };
-    
+
     console.log('✅ ttq interceptor installed');
   }
-  
+
   // Check again after a delay in case tracking libraries load asynchronously
   setTimeout(() => {
     if (typeof window.gtag === 'undefined') {

@@ -17,9 +17,19 @@ class Manager {
       // Initialize
       await this.webManager.initialize(window.Configuration);
 
-      // Get the page path (MUST BE SANITIZED because webpack wont import if page has leading slashes)
-      const pagePath = document.documentElement.dataset.pagePath.replace(/^\/+/, '');
-      const pageModulePath = pagePath ? `${pagePath}/index.js` : 'index.js';
+      // Get the page path
+      // MUST BE SANITIZED HERE (FOR SOME REASON) because webpack wont import if page has leading slashes and it CANNOT be sanitized later
+      const pagePath = document.documentElement.dataset.pagePath.replace(/^\/+/, '')
+
+      // Check for override asset path (includes filename), otherwise use normal page path
+      // MUST BE SANITIZED HERE (FOR SOME REASON) because webpack wont import if page has leading slashes and it CANNOT be sanitized later
+      const overrideAssetPath = document.documentElement.dataset.assetPath.replace(/^\/+/, '');
+
+      // Build module path
+      const pageModulePath = overrideAssetPath
+        ? `${overrideAssetPath}.js`
+        : (pagePath ? `${pagePath}/index.js` : 'index.js');
+
       const pageModulePathFull = `assets/js/pages/${pageModulePath}`;
 
       // Module options

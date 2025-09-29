@@ -169,12 +169,17 @@ cloudflare:
 
 # Download
 download:
-  mac: ""
-  windows: ""
-  linux-debian: ""
-  linux-snap: ""
-  ios: ""
-  android: ""
+  mac:
+    universal: ""
+  windows:
+    universal: ""
+  linux:
+    debian: ""
+    snap: ""
+  ios:
+    universal: ""
+  android:
+    universal: ""
 
 # Extension
 extension:

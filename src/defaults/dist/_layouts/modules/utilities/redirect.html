@@ -14,11 +14,15 @@ meta:
 {% capture modifier %}{{ page.resolved.redirect.modifier | default: "" }}{% endcapture %}
 
 <div class="d-flex justify-content-center align-items-center flex-column">
-  <a class="" href="{{ site.url }}">
-    <img class="zi-2" id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}" style="width: 8rem;">
-  </a>
+  <div class="mb-3">
+    <a href="{{ site.url }}">
+      <div class="avatar avatar-xl">
+        <img id="main-logo" src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}"/>
+      </div>
+    </a>
+  </div>
   <div class="d-inline-flex justify-content-between align-items-center">
-    <h1>Redirecting...</h1>
+    <h1 class="h1">Redirecting...</h1>
     <div class="spinner-border spinner-border-md text-primary ms-3" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
