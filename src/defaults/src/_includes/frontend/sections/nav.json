@@ -38,13 +38,13 @@
       "class": "gradient-animated _animation-wiggle",
       "icon": "user-plus",
       "attributes": [
-        ["data-wm-bind", "@show !user"]
+        ["data-wm-bind", "@show !auth.user"]
       ]
     },
     {
       "type": "account",
       "attributes": [
-        ["data-wm-bind", "@show user"],
+        ["data-wm-bind", "@show auth.user"],
         ["hidden", ""]
       ],
       "dropdown": [

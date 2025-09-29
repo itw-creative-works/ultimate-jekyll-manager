@@ -35,7 +35,7 @@ theme:
       // Read and parse localStorage data
       var managerData = localStorage.getItem('_manager');
       var parsedData = managerData ? JSON.parse(managerData) : null;
-      var isLoggedIn = !!(parsedData && parsedData.user && parsedData.user.auth && parsedData.user.auth.uid);
+      var isLoggedIn = !!(parsedData && parsedData.auth && parsedData.auth.user && parsedData.auth.user.auth && parsedData.auth.user.auth.uid);
 
       // Quit if NOT logged in
       if (!isLoggedIn) {
@@ -48,10 +48,10 @@ theme:
       $bindElements.forEach(function($el) {
         var bindValue = $el.getAttribute('data-wm-bind');
 
-        if (bindValue === '@show user') {
+        if (bindValue === '@show auth.user') {
           // Show element when user is logged in
           $el.removeAttribute('hidden');
-        } else if (bindValue === '@show !user') {
+        } else if (bindValue === '@show !auth.user') {
           // Hide element when user is logged in (show when not logged in)
           $el.setAttribute('hidden', '');
         }

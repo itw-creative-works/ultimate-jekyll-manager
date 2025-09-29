@@ -202,7 +202,7 @@ badges:
               <div id="avatar-container" class="me-3 position-relative">
                 <!-- Avatar always available from getUser() -->
                 <div class="avatar avatar-lg rounded-circle overflow-hidden border">
-                  <img src="{{ site.uj.placeholder.src }}" alt="Profile picture" class="object-fit-cover w-100 h-100" data-wm-bind="@attr src user.photoURL"/>
+                  <img src="{{ site.uj.placeholder.src }}" alt="Profile picture" class="object-fit-cover w-100 h-100" data-wm-bind="@attr src auth.user.photoURL"/>
                 </div>
                 <!-- Active status indicator -->
                 <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white avatar avatar-2xs rounded-circle mb-2">
@@ -210,7 +210,7 @@ badges:
                 </span>
               </div>
               <div>
-                <h5 class="mb-1" data-wm-bind="@text user.displayName">Loading...</h5>
+                <h5 class="mb-1" data-wm-bind="@text auth.user.displayName">Loading...</h5>
                 <small class="text-muted" id="profile-join-date">Member since Loading...</small>
               </div>
             </div>
