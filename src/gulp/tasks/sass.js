@@ -101,7 +101,7 @@ function sass(complete) {
       // Only show warnings once
       verbose: false
     })
-    .on('error', complete));
+    .on('error', (error) => Manager.reportBuildError(Object.assign(error, { plugin: 'SASS' }), complete)));
 
   // Apply PurgeCSS if enabled
   if (ENABLE_PURGECSS) {
@@ -191,6 +191,11 @@ function sass(complete) {
             /^active$/,
             /^disabled$/,
 
+            // Accordion specific
+            /^accordion/,
+            /^collapsed$/,
+            /^collapsing$/,
+
             // Common dynamic classes
             /^is-/,
             /^has-/,
@@ -237,7 +242,11 @@ function sass(complete) {
           greedy: [],
           // Preserve keyframe animations
           keyframes: [
-            /^spinner-/
+            /^spinner-/,
+            // /^accordion/,
+            // /^fade-/,
+            // /^slide-/,
+            // /^collapse/
           ]
         },
         // Don't remove CSS variables

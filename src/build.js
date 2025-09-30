@@ -61,6 +61,30 @@ Manager.getArguments = function () {
 };
 Manager.prototype.getArguments = Manager.getArguments;
 
+// Report build errors with notification
+Manager.reportBuildError = function (error, callback) {
+  const { execute } = require('node-powertools');
+  const logger = new (require('./lib/logger'))('build-error');
+  
+  // Send notification using notifly
+  const errorMessage = error.message || error.toString() || 'Unknown error';
+  const errorPlugin = error.plugin || 'Build';
+  
+  execute(`notifly --title 'Build Error: ${errorPlugin}' --message '${errorMessage.replace(/'/g, "\\'")}' --appIcon '/Users/ian/claude-ai-icon.png' --timeout 3 --sound 'Sosumi'`);
+  
+  // Log the error
+  logger.error(`[${errorPlugin}] ${errorMessage}`);
+  
+  // If callback provided, call it with error
+  if (callback) {
+    return callback(error);
+  }
+  
+  // Otherwise return a function that calls the callback with error
+  return (cb) => cb ? cb(error) : error;
+};
+Manager.prototype.reportBuildError = Manager.reportBuildError;
+
 // isServer
 Manager.isServer = function () {
   return process.env.UJ_IS_SERVER === 'true';

@@ -2,7 +2,8 @@
 NEW TODO
 - service working failing to load scripts??
 - test SW on live site (and lighthouse)
-
+- cloudflare 1y cache on js and css (it's CB anyway so this will never matter)
+- force babel to NOT add polyfills (pagespeed improvement Array.from)
 
 
 Make an admin dashboard backend

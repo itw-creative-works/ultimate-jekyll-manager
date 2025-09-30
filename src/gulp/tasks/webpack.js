@@ -83,7 +83,8 @@ const bundleNaming = {
 
 const settings = {
   mode: Manager.actLikeProduction() ? 'production' : 'development',
-  target: ['web', 'es5'],
+  // target: ['web', 'es5'],
+  target: ['web', 'es2015'],
   devtool: Manager.actLikeProduction() ? 'source-map' : 'eval-source-map',
   // devtool: false,
   plugins: [
@@ -325,7 +326,7 @@ function webpack(complete) {
     // Handle fatal webpack errors
     if (e) {
       logger.error('Fatal webpack error:', e);
-      return complete(e);
+      return Manager.reportBuildError(Object.assign(e, { plugin: 'Webpack' }), complete);
     }
 
     // Log stats
@@ -338,7 +339,7 @@ function webpack(complete) {
       logger.error('Webpack compilation failed with errors');
       // Create an error to pass to complete() so the build fails
       const compilationError = new Error(`Webpack compilation failed: ${info.errors.length} error(s)`);
-      return complete(compilationError);
+      return Manager.reportBuildError(Object.assign(compilationError, { plugin: 'Webpack' }), complete);
     }
 
     // Check for warnings (optional - don't fail build but log them)

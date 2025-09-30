@@ -42,13 +42,15 @@ $border-radius-pill: 50rem;
   $border-radius-lg: $border-radius-lg
 );
 
-// Import base styles
+// Import base variables
 @import 'css/base/variables';
-@import 'css/base/typography';
-@import 'css/base/spacing';
-@import 'css/base/soft-colors';
+
+// Import base styles
 @import 'css/base/backgrounds';
 @import 'css/base/borders';
+@import 'css/base/soft-colors';
+@import 'css/base/spacing';
+@import 'css/base/typography';
 @import 'css/base/utilities';
 
 // Import layout styles
@@ -58,14 +60,15 @@ $border-radius-pill: 50rem;
 @import 'css/layout/team';
 
 // Import component styles
-@import 'css/components/buttons';
-@import 'css/components/links';
+@import 'css/components/accordion';
 @import 'css/components/avatars';
-@import 'css/components/cards';
 @import 'css/components/badges';
+@import 'css/components/buttons';
+@import 'css/components/cards';
 @import 'css/components/forms';
-@import 'css/components/spinners';
+@import 'css/components/links';
 @import 'css/components/logo-scroll';
+@import 'css/components/spinners';
 
 // Global theme improvements
 body {

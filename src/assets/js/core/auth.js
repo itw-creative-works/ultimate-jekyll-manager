@@ -149,14 +149,16 @@ function setAnalyticsUserId(user) {
   // Facebook Pixel - Set advanced matching with user data
   fbq('init', fbq.pixelId, {
     external_id: userId,
-    em: email ? btoa(email.toLowerCase().trim()) : undefined,
+    // em: email ? btoa(email.toLowerCase().trim()) : undefined,
+    em: email,
     // ph: phone ? btoa(phone.trim()) : undefined
   });
 
   // TikTok Pixel - Identify user
   ttq.identify({
     external_id: userId,
-    email: email ? btoa(email.toLowerCase().trim()) : undefined,
+    // email: email ? btoa(email.toLowerCase().trim()) : undefined,
+    email: email,
     // phone_number: phone ? btoa(phone.trim()) : undefined
   });
 }

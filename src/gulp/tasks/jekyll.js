@@ -47,77 +47,82 @@ async function jekyll(complete) {
   //   });
   // });
 
-  // Log
-  logger.log('Starting...');
+  try {
+    // Log
+    logger.log('Starting...');
 
-  // Increment index
-  index++;
+    // Increment index
+    index++;
 
-  // Notify
-  if (global.browserSync) {
-    global.browserSync.notify('Rebuilding...');
+    // Notify
+    if (global.browserSync) {
+      global.browserSync.notify('Rebuilding...');
+    }
+
+    // Run buildpre hook
+    await hook('build:pre', index);
+
+    // Build Jekyll
+    const command = [
+      // Jekyll command
+      'bundle exec jekyll build',
+      '--source dist',
+      '--config ' + [
+        // This is the base config file with all the user-editable settings
+        `./node_modules/${package.name}/dist/defaults/src/_config.yml`,
+        // This is the default config with NON user-editable settings
+        `./node_modules/${package.name}/dist/config/_config_default.yml`,
+        // This is the user's project config file
+        'dist/_config.yml',
+        // Add browsersync config IF BUILD_MODE is not true
+        Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
+        // Add development config IF BUILD_MODE is not true
+        Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
+      ].join(','),
+      '--incremental',
+      // '--disable-disk-cache',
+    ]
+
+    // Log command
+    logger.log(`Running command: ${logger.format.gray(command.join(' '))}`);
+
+    // Build Jekyll
+    await execute(command.join(' '), {log: true});
+
+    // Log working URL
+    logger.log(`Your site is being served at: ${logger.format.cyan(Manager.getWorkingUrl())}`);
+
+    // Reposition "/blog/index.html" to "/blog.html" for compatibility
+    // This is needed because Jekyll creates a folder for the blog index page
+    // but we want it to be at the root level for compatibility with various hosting providers
+    await fixBlogIndex();
+
+    // Run buildpost hook
+    await hook('build:post', index);
+
+    // Create build JSON with runtime config
+    await createBuildJSON();
+
+    // Log
+    logger.log('Finished!');
+
+    // Launch browser sync
+    if (!browserSyncLaunched) {
+      launchBrowserSync();
+    }
+
+    // Reload browser
+    if (global.browserSync) {
+      global.browserSync.reload();
+    }
+
+    // Complete
+    return complete();
+  } catch (error) {
+    // Handle any errors that occur during Jekyll build
+    return Manager.reportBuildError(Object.assign(error, { plugin: 'Jekyll' }), complete);
   }
-
-  // Run buildpre hook
-  await hook('build:pre', index);
-
-  // Build Jekyll
-  const command = [
-    // Jekyll command
-    'bundle exec jekyll build',
-    '--source dist',
-    '--config ' + [
-      // This is the base config file with all the user-editable settings
-      `./node_modules/${package.name}/dist/defaults/src/_config.yml`,
-      // This is the default config with NON user-editable settings
-      `./node_modules/${package.name}/dist/config/_config_default.yml`,
-      // This is the user's project config file
-      'dist/_config.yml',
-      // Add browsersync config IF BUILD_MODE is not true
-      Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
-      // Add development config IF BUILD_MODE is not true
-      Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
-    ].join(','),
-    '--incremental',
-    // '--disable-disk-cache',
-  ]
-
-  // Log command
-  logger.log(`Running command: ${logger.format.gray(command.join(' '))}`);
-
-  // Build Jekyll
-  await execute(command.join(' '), {log: true});
-
-  // Log working URL
-  logger.log(`Your site is being served at: ${logger.format.cyan(Manager.getWorkingUrl())}`);
-
-  // Reposition "/blog/index.html" to "/blog.html" for compatibility
-  // This is needed because Jekyll creates a folder for the blog index page
-  // but we want it to be at the root level for compatibility with various hosting providers
-  await fixBlogIndex();
-
-  // Run buildpost hook
-  await hook('build:post', index);
-
-  // Create build JSON with runtime config
-  await createBuildJSON();
-
-  // Log
-  logger.log('Finished!');
-
-  // Launch browser sync
-  if (!browserSyncLaunched) {
-    launchBrowserSync();
-  }
-
-  // Reload browser
-  if (global.browserSync) {
-    global.browserSync.reload();
-  }
-
-  // Complete
-  return complete();
-};
+}
 
 // Watch for changes
 function jekyllWatcher(complete) {
