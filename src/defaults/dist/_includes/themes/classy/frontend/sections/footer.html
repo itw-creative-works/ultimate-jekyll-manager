@@ -12,7 +12,9 @@
         <div class="h5 mb-3">
           <a class="d-flex align-items-center text-decoration-none text-body" href="{{ logo_href }}">
             {% if logo_src and logo_src != '' and logo_src != 'null' %}
-              <img data-lazy="@src {{ logo_src }}" alt="{{ logo_text }} Logo" height="40" class="me-2"/>
+              <div class="avatar avatar-md me-2">
+                <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ logo_src }}" alt="{{ logo_text }} Logo"/>
+              </div>
             {% endif %}
             {% if logo_text and logo_text != '' and logo_text != 'null' %}
               <span>{{ logo_text }}</span>

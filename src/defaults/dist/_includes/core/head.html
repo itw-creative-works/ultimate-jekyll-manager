@@ -71,8 +71,10 @@
 
 <!-- Google Adsense (conditionally loaded) -->
 {% iftruthy page.resolved.advertising.google-adsense.client %}
-  <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin/>
-  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com"/>
+  <!-- Google AdSense -->
+  <!-- <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin/> -->
+  <!-- <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com"/> -->
+
   <!-- Additional AdSense domains if needed -->
   <!-- <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin/> -->
   <!-- <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net"/> -->
@@ -179,6 +181,9 @@
 <noscript>
   {{ page-ie-script }}
 </noscript>
+
+<!-- Theme - Injected head -->
+{{ page.resolved.theme.head.content | uj_content_format }}
 
 <!-- Page - Injected head -->
 {{ page.resolved.head.content | uj_content_format }}

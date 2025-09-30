@@ -311,6 +311,9 @@ async function fetchFirebaseAuth() {
     {
       remote: '__/auth/iframe',
       filename: 'iframe.html',
+      replace: (content) => {
+        return content.replace('src="iframe.js"', 'src="iframe.js?cb={{ site.uj.cache_breaker }}"');
+      }
     },
     {
       remote: '__/auth/iframe.js',
@@ -342,6 +345,11 @@ async function fetchFirebaseAuth() {
         // log: true,
       })
       .then((r) => {
+        // Apply replace function if it exists
+        if (file.replace && typeof file.replace === 'function') {
+          r = file.replace(r);
+        }
+
         // Write to file
         jetpack.write(finalPath,
           '---\n'

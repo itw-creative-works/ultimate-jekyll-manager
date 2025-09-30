@@ -26,7 +26,7 @@ social_signup:
         <!-- Logo -->
         <div class="text-center mb-3">
           <div class="avatar avatar-xl">
-            <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}"/>
+            <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }} Logo"/>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ social_signup:
             {% for provider in page.resolved.social_signup %}
               <button type="submit" class="btn btn-adaptive _btn-lg w-100 mb-3 d-flex align-items-center justify-content-center" data-provider="{{ provider.id }}" disabled>
                 <span class="avatar avatar-xs me-2">
-                  <img src="{{ provider.logo }}" alt="{{ provider.name }}" class="object-fit-contain"/>
+                  <img src="{{ provider.logo }}?cb={{ site.uj.cache_breaker }}" class="object-fit-contain" alt="{{ provider.name }} Logo"/>
                 </span>
                 <span class="button-text">Sign up with {{ provider.name }}</span>
               </button>

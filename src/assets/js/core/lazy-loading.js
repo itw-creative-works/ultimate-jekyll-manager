@@ -15,6 +15,13 @@ export default function (Manager, options) {
   // IntersectionObserver instance
   let observer = null;
 
+  // Helper function to add cache buster to URLs
+  function addCacheBuster(url) {
+    const urlObj = new URL(url, window.location.href);
+    urlObj.searchParams.set('cb', webManager.config.buildTime);
+    return urlObj.toString();
+  }
+
   // Wait for DOM to be ready
   webManager.dom().ready().then(() => {
     initLazyLoading();
@@ -131,6 +138,9 @@ export default function (Manager, options) {
   function loadSrc(element, value) {
     const tagName = element.tagName.toLowerCase();
 
+    // Add cache buster to URL
+    value = addCacheBuster(value);
+
     // For images, test load first
     if (tagName === 'img') {
       // Set a transparent placeholder to prevent broken image icon
@@ -184,6 +194,13 @@ export default function (Manager, options) {
   function loadSrcset(element, value) {
     const tagName = element.tagName.toLowerCase();
 
+    // Add cache buster to each URL in srcset
+    value = value.split(',').map(part => {
+      const [url, descriptor] = part.trim().split(/\s+/);
+      const busteredUrl = addCacheBuster(url);
+      return descriptor ? `${busteredUrl} ${descriptor}` : busteredUrl;
+    }).join(', ');
+
     if (tagName === 'img') {
       // Test load with srcset
       const tempImg = new Image();
@@ -220,6 +237,9 @@ export default function (Manager, options) {
   }
 
   function loadBackground(element, value) {
+    // Add cache buster to URL
+    value = addCacheBuster(value);
+
     // Test load background image
     const tempImg = new Image();
 
@@ -250,8 +270,11 @@ export default function (Manager, options) {
         return;
       }
 
+      // Add cache buster to script src
+      const busteredSrc = addCacheBuster(src);
+
       const scriptOptions = {
-        src,
+        src: busteredSrc,
         attributes,
         parent: element,
       };

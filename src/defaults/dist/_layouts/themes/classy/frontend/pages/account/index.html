@@ -107,7 +107,7 @@ badges:
       <!-- Left: Brand -->
       <div class="d-flex align-items-center">
         <span class="avatar avatar-md me-3">
-          <img src="{{ site.brand.images.brandmark }}" alt="{{ site.brand.name }}"/>
+          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}"/>
         </span>
         <h1 class="h5 mb-0 fw-semibold">{{ site.brand.name }} Account</h1>
       </div>
@@ -202,7 +202,7 @@ badges:
               <div id="avatar-container" class="me-3 position-relative">
                 <!-- Avatar always available from getUser() -->
                 <div class="avatar avatar-lg rounded-circle overflow-hidden border">
-                  <img src="{{ site.uj.placeholder.src }}" alt="Profile picture" class="object-fit-cover w-100 h-100" data-wm-bind="@attr src auth.user.photoURL"/>
+                  <img src="{{ site.uj.placeholder.src }}" data-wm-bind="@attr src auth.user.photoURL" class="object-fit-cover w-100 h-100" alt="{{ site.brand.name }} profile picture"/>
                 </div>
                 <!-- Active status indicator -->
                 <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white avatar avatar-2xs rounded-circle mb-2">
@@ -781,7 +781,7 @@ badges:
                         {% uj_icon method.icon, "fa-3xl" %}
                       {% endiftruthy %}
                       {% iftruthy method.logo %}
-                        <img src="{{ method.logo }}" alt="{{ method.name }}" class="object-fit-contain"/>
+                        <img src="{{ method.logo }}?cb={{ site.uj.cache_breaker }}" class="object-fit-contain" alt="{{ method.name }} Logo"/>
                       {% endiftruthy %}
                     </div>
                     <div>
@@ -876,7 +876,7 @@ badges:
                   <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3">
                     <div class="d-flex align-items-center">
                       <div class="d-flex align-items-center justify-content-center me-3 flex-shrink-0 fa fa-3xl">
-                        <img src="{{ connection.logo }}" alt="{{ connection.name }}" class="object-fit-contain"/>
+                        <img src="{{ connection.logo }}?cb={{ site.uj.cache_breaker }}" class="object-fit-contain" alt="{{ connection.name }} Logo"/>
                       </div>
                       <div>
                         <h6 class="mb-0">{{ connection.name }}</h6>
