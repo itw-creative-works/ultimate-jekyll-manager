@@ -172,6 +172,7 @@
 <![endif]-->
 
 <!-- CSS Bundles -->
+<!-- Note: media="print" onload="this.media='all'" does NOT improve performance -->
 <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
 {% iffile page-css-path %}
   <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-path }}?cb={{ site.uj.cache_breaker }}"/>

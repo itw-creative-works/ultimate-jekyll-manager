@@ -295,7 +295,7 @@ trusted_by:
               <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                 {% uj_icon feature.icon, "text-light fs-2" %}
               </div>
-              <h4 class="mb-3">{{ feature.title }}</h4>
+              <h3 class="h4 mb-3">{{ feature.title }}</h3>
               <p class="text-muted mb-0">{{ feature.description }}</p>
             </div>
           </div>
@@ -313,46 +313,46 @@ trusted_by:
     </div>
 
     {% if page.resolved.testimonials %}
-    <div id="homeTestimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
-      <div class="carousel-indicators">
-        {% for testimonial in page.resolved.testimonials %}
-          <button type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
-        {% endfor %}
-      </div>
+      <div id="homeTestimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
+        <div class="carousel-indicators">
+          {% for testimonial in page.resolved.testimonials %}
+            <button type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
+          {% endfor %}
+        </div>
 
-      <div class="carousel-inner">
-        {% for testimonial in page.resolved.testimonials %}
-          <div class="carousel-item {% if forloop.first %}active{% endif %}">
-            <div class="row justify-content-center">
-              <div class="col-md-8">
-                <div class="card border-0 shadow-sm bg-body-tertiary my-1 rounded-3">
-                  <div class="card-body p-5 text-center">
-                    <div class="d-flex justify-content-center mb-4">
-                      <div class="avatar avatar-xl rounded-circle bg-primary text-light d-flex align-items-center justify-content-center">
-                        <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+        <div class="carousel-inner">
+          {% for testimonial in page.resolved.testimonials %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <div class="row justify-content-center">
+                <div class="col-md-8">
+                  <div class="card border-0 shadow-sm bg-body-tertiary my-1 rounded-3">
+                    <div class="card-body p-5 text-center">
+                      <div class="d-flex justify-content-center mb-4">
+                        <div class="avatar avatar-xl rounded-circle bg-primary text-light d-flex align-items-center justify-content-center">
+                          <span class="fs-2 fw-bold">{{ testimonial.initial }}</span>
+                        </div>
                       </div>
+                      <blockquote class="mb-4">
+                        <p class="fs-4 fw-bold">"{{ testimonial.quote }}"
+                      </blockquote>
+                      <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                     </div>
-                    <blockquote class="mb-4">
-                      <p class="fs-4 fw-bold">"{{ testimonial.quote }}"
-                    </blockquote>
-                    <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        {% endfor %}
-      </div>
+          {% endfor %}
+        </div>
 
-      <button class="carousel-control-prev" type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
     {% endif %}
   </div>
 </section>

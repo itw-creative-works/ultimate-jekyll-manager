@@ -5,8 +5,21 @@ const argv = Manager.getArguments();
 const { series, watch } = require('gulp');
 const glob = require('glob').globSync;
 const path = require('path');
-const { execute } = require('node-powertools');
+const { execute, template } = require('node-powertools');
 const jetpack = require('fs-jetpack');
+
+// Templates
+const JSONP_TEMPLATE = `
+(function() {
+  // Create a global variable for the config
+  const config = { config };
+
+  // Assign to various global scopes for compatibility
+  if (typeof self !== 'undefined') self.UJ_BUILD_JSON = config;
+  if (typeof window !== 'undefined') window.UJ_BUILD_JSON = config;
+  if (typeof globalThis !== 'undefined') globalThis.UJ_BUILD_JSON = config;
+})();
+`.trim();
 
 // Load package
 const package = Manager.getPackage('main');
@@ -359,6 +372,11 @@ async function createBuildJSON() {
 
     // Write to file
     jetpack.write('_site/build.json', JSON.stringify(json, null, 2));
+
+    // Create JSONP version (used in service-worker.js)
+    jetpack.write('_site/build.js', template(JSONP_TEMPLATE, {
+      config: JSON.stringify(json, null, 2)
+    }));
 
     // Write to legacy file /@output/build/build.json
     // TODO: REMOVE WHEN THE SITE HAS BEEN ACTIVE FOR SOME TIME SO USERS ARE FORCED TO NEW BUILD.JSON

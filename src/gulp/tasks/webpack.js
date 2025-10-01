@@ -18,6 +18,9 @@ const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
+// Default config values
+const DEFAULT_WEBPACK_TARGET = 'es2015';
+
 // Settings
 const inputMain = [
   // Project entry point
@@ -81,171 +84,192 @@ const bundleNaming = {
   }
 };
 
-const settings = {
-  mode: Manager.actLikeProduction() ? 'production' : 'development',
-  // target: ['web', 'es5'],
-  target: ['web', 'es2015'],
-  devtool: Manager.actLikeProduction() ? 'source-map' : 'eval-source-map',
-  // devtool: false,
-  plugins: [
-    new StripDevBlocksPlugin(),
-    new ReplacePlugin(getTemplateReplaceOptions(), { type: 'template' }),
-    // new wp.IgnorePlugin({
-    //   resourceRegExp: /^\.\/locale$/,
-    //   contextRegExp: /moment$/,
-    // }),
-    // new wp.SourceMapDevToolPlugin({
-    //   filename: '[file].map',
-    //   test: new RegExp('\.[js|css|mjs].*'),
-    //   // exclude: /vendor/,
-    // }),
-    // new wp.DefinePlugin({
-    //   'process.env.UJ_BUILD_MODE': process.env.UJ_BUILD_MODE || 'true',
-    // })
-  ],
-  // ignoreWarnings: [
-  //   /Failed to parse source map/,
-  // ],
-  entry: {
-    // Entry is dynamically generated
-  },
-  resolve: {
-    alias: {
-      // For importing assets in "src/index.js"
-      '__main_assets__': path.resolve(rootPathPackage, 'dist/assets'),
-      '__project_assets__': path.resolve(process.cwd(), 'src/assets'),
-
-      // For importing the theme
-      '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
-    },
-    // Add module resolution paths for local web-manager
-    modules: [
-      // Local web-manager's node_modules (for when we're using "web-manager": "file:../web-manager")
-      path.resolve(rootPathPackage, '../web-manager/node_modules'),
-
-      // Ultimate jekyll manager's node_modules
-      path.resolve(rootPathPackage, 'node_modules'),
-
-      // Project's node_modules
-      path.resolve(process.cwd(), 'node_modules'),
-      'node_modules' // Default fallback
-    ],
-    // Fallbacks for Node.js modules that don't work in the browser
-    fallback: {
-      fs: false,
-      path: false,
-      crypto: false,
-      os: false,
-      util: false,
-      assert: false,
-      stream: false,
-      buffer: false,
-      process: false
-    }
-  },
-  output: {
-    // Set the path to the dist folder
-    path: path.resolve(process.cwd(), 'dist/assets/js'),
-
-    // Set the public path
-    publicPath: `${Manager.isServer() ? config.url : ''}/assets/js/`,
-
-    // https://github.com/webpack/webpack/issues/959
-    chunkFilename: (data) => {
-      const name = data.chunk.name;
-
-      // Check if this chunk should have a stable name
-      if (shouldHaveStableName(name)) {
-        return '[name].chunk.js';
-      }
-
-      // Otherwise, use hashed filename
-      return '[name].chunk.[chunkhash].js';
-    },
-    filename: (data) => {
-      const name = data.chunk.name;
-
-      // Check for special output paths
-      if (bundleNaming.specialPaths[name]) {
-        return bundleNaming.specialPaths[name];
-      }
-
-      // Check if this bundle should have a stable name
-      if (shouldHaveStableName(name)) {
-        return '[name].bundle.js';
-      }
-
-      // Everything else gets hashed
-      return '[name].bundle.[contenthash].js';
-    },
-  },
-  resolveLoader: {
-    modules: [
-      path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules'), // Path to your helper module's node_modules
-      path.resolve(process.cwd(), 'node_modules'), // Default project node_modules
-      'node_modules', // Fallback to global
-    ]
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            sourceMaps: true,
-            presets: [
-              require.resolve('@babel/preset-env', {
-                paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
-              })
-            ],
-            compact: Manager.isBuildMode(),
-          }
-        }
-      },
-      // {
-      //   test: /\.js$/,
-      //   include: /node_modules/,
-      //   use: ['source-map-loader'],
-      //   enforce: 'pre',
-      // }
-    ]
-  },
-  optimization: {
-    minimize: Manager.actLikeProduction(),
-    // splitChunks: {
-    //   chunks: 'all',
-    //   cacheGroups: {
-    //     defaultVendors: {
-    //       test: /[\\/]node_modules[\\/]/,
-    //       name: 'vendors',
-    //       chunks: 'all',
-    //       enforce: true,
-    //     },
-    //     default: {
-    //       minChunks: 2,
-    //       reuseExistingChunk: true,
-    //       enforce: true,
-    //     },
-    //   },
-    // },
-    // runtimeChunk: 'single',
-  },
-}
-
 // Helper function to determine if a bundle should have a stable name
 function shouldHaveStableName(name) {
   return bundleNaming.stable.some(pattern => pattern.test(name));
 }
 
+// Helper function to get webpack settings (called at runtime)
+function getSettings() {
+  // Load UJM config
+  const ujmConfig = Manager.getUJMConfig();
+
+  return {
+    mode: Manager.actLikeProduction() ? 'production' : 'development',
+    // Prevent lighthouse error in 2025 about Legacy JavaScript (Array.from polyfills)
+    // Can be configured via ultimate-jekyll-manager.json: webpack.target
+    target: [
+      'web',
+      ujmConfig?.webpack?.target === 'default'
+        ? DEFAULT_WEBPACK_TARGET
+        : (ujmConfig?.webpack?.target || DEFAULT_WEBPACK_TARGET)
+    ],
+    devtool: Manager.actLikeProduction() ? 'source-map' : 'eval-source-map',
+    // devtool: false,
+    plugins: [
+      new StripDevBlocksPlugin(),
+      new ReplacePlugin(getTemplateReplaceOptions(), { type: 'template' }),
+      // new wp.IgnorePlugin({
+      //   resourceRegExp: /^\.\/locale$/,
+      //   contextRegExp: /moment$/,
+      // }),
+      // new wp.SourceMapDevToolPlugin({
+      //   filename: '[file].map',
+      //   test: new RegExp('\.[js|css|mjs].*'),
+      //   // exclude: /vendor/,
+      // }),
+      // new wp.DefinePlugin({
+      //   'process.env.UJ_BUILD_MODE': process.env.UJ_BUILD_MODE || 'true',
+      // })
+    ],
+    // ignoreWarnings: [
+    //   /Failed to parse source map/,
+    // ],
+    entry: {
+      // Entry is dynamically generated
+    },
+    resolve: {
+      alias: {
+        // For importing assets in "src/index.js"
+        '__main_assets__': path.resolve(rootPathPackage, 'dist/assets'),
+        '__project_assets__': path.resolve(process.cwd(), 'src/assets'),
+
+        // For importing the theme
+        '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
+      },
+      // Add module resolution paths for local web-manager
+      modules: [
+        // Local web-manager's node_modules (for when we're using "web-manager": "file:../web-manager")
+        path.resolve(rootPathPackage, '../web-manager/node_modules'),
+
+        // Ultimate jekyll manager's node_modules
+        path.resolve(rootPathPackage, 'node_modules'),
+
+        // Project's node_modules
+        path.resolve(process.cwd(), 'node_modules'),
+        'node_modules' // Default fallback
+      ],
+      // Fallbacks for Node.js modules that don't work in the browser
+      fallback: {
+        fs: false,
+        path: false,
+        crypto: false,
+        os: false,
+        util: false,
+        assert: false,
+        stream: false,
+        buffer: false,
+        process: false
+      }
+    },
+    output: {
+      // Set the path to the dist folder
+      path: path.resolve(process.cwd(), 'dist/assets/js'),
+
+      // Set the public path
+      publicPath: `${Manager.isServer() ? config.url : ''}/assets/js/`,
+
+      // https://github.com/webpack/webpack/issues/959
+      chunkFilename: (data) => {
+        const name = data.chunk.name;
+
+        // Check if this chunk should have a stable name
+        if (shouldHaveStableName(name)) {
+          return '[name].chunk.js';
+        }
+
+        // Otherwise, use hashed filename
+        return '[name].chunk.[chunkhash].js';
+      },
+      filename: (data) => {
+        const name = data.chunk.name;
+
+        // Check for special output paths
+        if (bundleNaming.specialPaths[name]) {
+          return bundleNaming.specialPaths[name];
+        }
+
+        // Check if this bundle should have a stable name
+        if (shouldHaveStableName(name)) {
+          return '[name].bundle.js';
+        }
+
+        // Everything else gets hashed
+        return '[name].bundle.[contenthash].js';
+      },
+    },
+    resolveLoader: {
+      modules: [
+        path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules'), // Path to your helper module's node_modules
+        path.resolve(process.cwd(), 'node_modules'), // Default project node_modules
+        'node_modules', // Fallback to global
+      ]
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              sourceMaps: true,
+              presets: [
+                [require.resolve('@babel/preset-env', {
+                  paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
+                }), {
+                  exclude: [
+                    // Prevent lighthouse error in 2025 about Legacy JavaScript
+                    // 'es.array.from',
+                  ]
+                }]
+              ],
+              compact: Manager.isBuildMode(),
+            }
+          }
+        },
+        // {
+        //   test: /\.js$/,
+        //   include: /node_modules/,
+        //   use: ['source-map-loader'],
+        //   enforce: 'pre',
+        // }
+      ]
+    },
+    optimization: {
+      minimize: Manager.actLikeProduction(),
+      // splitChunks: {
+      //   chunks: 'all',
+      //   cacheGroups: {
+      //     defaultVendors: {
+      //       test: /[\\/]node_modules[\\/]/,
+      //       name: 'vendors',
+      //       chunks: 'all',
+      //       enforce: true,
+      //     },
+      //     default: {
+      //       minChunks: 2,
+      //       reuseExistingChunk: true,
+      //       enforce: true,
+      //     },
+      //   },
+      // },
+      // runtimeChunk: 'single',
+    },
+  };
+}
+
 // Task
 function webpack(complete) {
+  // Get settings (loads config at runtime)
+  const settings = getSettings();
+
   // Log
   logger.log('Starting...');
 
   // Log mode and devtools
   logger.log(`Mode: ${settings.mode}`);
+  logger.log(`Target: ${settings.target[1]}`);
   logger.log(`Devtool: ${settings.devtool}`);
 
   // Copy files
@@ -448,6 +472,7 @@ function copyFilesDirectly() {
 function getTemplateReplaceOptions() {
   // Load variables
   return {
+    serviceWorkerConfig: JSON.stringify(config, null, 2),
     firebaseVersion: version.clean(require('web-manager/package.json').dependencies.firebase),
   }
 }

@@ -132,6 +132,13 @@ Manager.getPackage = function (type) {
 }
 Manager.prototype.getPackage = Manager.getPackage;
 
+// getUJMConfig: requires and parses ultimate-jekyll-manager.json
+Manager.getUJMConfig = function () {
+  const configPath = path.join(process.cwd(), 'ultimate-jekyll-manager.json');
+  return JSON5.parse(jetpack.read(configPath));
+}
+Manager.prototype.getUJMConfig = Manager.getUJMConfig;
+
 // getRootPath: returns the root path of the project or package
 Manager.getRootPath = function (type) {
   return type === 'project'

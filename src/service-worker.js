@@ -1,8 +1,15 @@
 // Libraries
 const serviceWorker = self;
 
+// Import build config at the top level (synchronous)
+importScripts('/build.js');
+
+// ⚠️⚠️⚠️ CRITICAL: Setup global listeners BEFORE importing Firebase ⚠️⚠️⚠️
+// https://stackoverflow.com/questions/78270541/cant-catch-fcm-notificationclick-event-in-service-worker-using-firebase-messa
+setupGlobalHandlers();
+
 // Import Firebase libraries at the top level (before any async operations)
-// These must be imported synchronously at the beginning
+// ⚠️ importScripts MUST be called at top-level (synchronously) - it cannot be called inside functions or after async operations
 importScripts(
   'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-messaging-compat.js',
@@ -17,19 +24,22 @@ function Manager() {
   // Properties
   self.serviceWorker = null;
 
+  // Load config
+  self.config = serviceWorker.UJ_BUILD_JSON?.config || {};
+
   // Defaults
-  self.config = {};
-  self.app = 'default';
-  self.environment = 'production';
+  self.app = self.config?.brand?.id || 'default';
+  self.environment = self.config?.uj?.environment || 'production';
+  self.cache = {
+    breaker: self.config?.uj?.cache_breaker || new Date().getTime(),
+  };
+  self.cache.name = `${self.app}-${self.cache.breaker}`;
+
+  // Libraries
   self.libraries = {
     firebase: false,
     messaging: false,
     promoServer: false,
-    cachePolyfill: false,
-  };
-  self.cache = {
-    breaker: '',
-    name: ''
   };
 
   // Return
@@ -44,11 +54,11 @@ Manager.prototype.initialize = function () {
     // Properties
     self.serviceWorker = serviceWorker;
 
-    // Parse config file
-    self.parseConfiguration();
+    // Setup instance-specific message handlers
+    self.setupInstanceHandlers();
 
-    // Setup listeners
-    self.setupListeners();
+    // Initialize Firebase
+    self.initializeFirebase();
 
     // Update cache
     self.updateCache();
@@ -79,39 +89,102 @@ Manager.prototype.initialize = function () {
 //   };
 // });
 
-// Parse configuration
-Manager.prototype.parseConfiguration = function () {
+// Setup instance-specific message handlers
+Manager.prototype.setupInstanceHandlers = function () {
   const self = this;
 
-  try {
-    const params = new URLSearchParams(serviceWorker.location.search);
+  // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
+  // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
+  serviceWorker.addEventListener('message', (event) => {
+    // Get the data
+    const data = event.data || {};
 
-    // Just get cache breaker from URL
-    const cacheBreaker = params.get('cb') || Date.now().toString();
+    // Parse the data
+    const command = data.command || '';
+    const payload = data.payload || {};
 
-    // Initialize with defaults - config will come via postMessage
-    self.config = {
-      cb: cacheBreaker
-    };
-
-    self.cache.breaker = cacheBreaker;
-    self.cache.name = 'default-' + self.cache.breaker;
-
-    // These will be updated when config is received via postMessage
-    self.environment = 'production';
-    self.app = 'default';
+    // Quit if no command
+    if (!command) return;
 
     // Log
-    console.log('Initialized with cache breaker:', cacheBreaker);
-  } catch (e) {
-    console.error('Error parsing configuration', e);
-  }
+    console.log('message', command, payload, event);
+
+    // Handle commands
+    if (command === 'update-cache') {
+      const pages = payload.pages || [];
+      self.updateCache(pages)
+        .then(() => {
+          event.ports[0]?.postMessage({ status: 'success' });
+        })
+        .catch(error => {
+          event.ports[0]?.postMessage({ status: 'error', error: error.message });
+        });
+    }
+  });
+
+  // Log
+  console.log('Set up message handlers');
 }
 
-// Setup listeners
-Manager.prototype.setupListeners = function () {
+// Setup Firebase init
+Manager.prototype.initializeFirebase = function () {
   const self = this;
 
+  // Get Firebase config
+  const firebaseConfig = self.config?.web_manager?.firebase?.app?.config;
+
+  // Check if Firebase config is available
+  if (!firebaseConfig) {
+    console.log('Firebase config not available yet, skipping Firebase initialization');
+    return;
+  }
+
+  // Check if already initialized
+  if (self.libraries.firebase) {
+    console.log('Firebase already initialized');
+    return;
+  }
+
+  // Log
+  console.log('Initializing Firebase v%%% firebaseVersion %%%');
+
+  // Initialize app (libraries were already imported at the top)
+  firebase.initializeApp(firebaseConfig);
+
+  // Initialize messaging
+  self.libraries.messaging = firebase.messaging();
+
+  // Attach firebase to SWManager
+  self.libraries.firebase = firebase;
+}
+
+// Setup cache update
+Manager.prototype.updateCache = function (pages) {
+  const self = this;
+
+  // Set default pages to cache
+  const defaults = [
+    '/',
+    '/assets/css/main.bundle.css',
+    '/assets/js/main.bundle.js',
+  ];
+
+  // Ensure pages is an array
+  pages = pages || [];
+
+  // Merge with additional pages
+  const pagesToCache = [...new Set([...defaults, ...pages])];
+
+  // Open cache and add pages
+  return caches.open(self.cache.name)
+    .then(cache => cache.addAll(pagesToCache))
+    .then(() => console.log('Cached resources:', pagesToCache))
+    .catch(error => console.error('Failed to cache resources:', error));
+}
+
+// Helper: Setup global listeners
+// This is called at top-level before Firebase imports to ensure listeners are registered first
+function setupGlobalHandlers() {
   // Force service worker to use the latest version
   serviceWorker.addEventListener('install', (event) => {
     serviceWorker.skipWaiting();
@@ -122,9 +195,7 @@ Manager.prototype.setupListeners = function () {
   });
 
   // Handle clicks on notifications
-  // Open the URL of the notification
-  // ⚠️⚠️⚠️ THIS MUST BE PLACED BEFORE THE FIREBASE IMPORTS HANDLER ⚠️⚠️⚠️
-  // https://stackoverflow.com/questions/78270541/cant-catch-fcm-notificationclick-event-in-service-worker-using-firebase-messa
+  // ⚠️ MUST be registered before Firebase imports
   serviceWorker.addEventListener('notificationclick', (event) => {
     // Get the properties of the notification
     const notification = event.notification;
@@ -148,112 +219,6 @@ Manager.prototype.setupListeners = function () {
     // Close the notification
     notification.close();
   });
-
-  // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
-  // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
-  serviceWorker.addEventListener('message', (event) => {
-    // Get the data
-    const data = event.data || {};
-
-    // Parse the data
-    const command = data.command || '';
-    const payload = data.payload || {};
-
-    // Quit if no command
-    if (!command) return;
-
-    // Log
-    console.log('message', command, payload, event);
-
-    // Handle commands
-    if (command === 'update-config') {
-      // Update configuration from postMessage
-      self.config = Object.assign(self.config || {}, payload);
-
-      // Update properties based on new config
-      if (payload.app) {
-        self.app = payload.app;
-        self.cache.name = self.app + '-' + self.cache.breaker;
-      }
-      if (payload.environment) {
-        self.environment = payload.environment;
-      }
-      if (payload.firebase) {
-        // Re-initialize Firebase with new config if needed
-        if (!self.libraries.firebase && payload.firebase) {
-          self.initializeFirebase();
-        }
-      }
-
-      console.log('Updated configuration via postMessage:', self.config);
-
-      // Send success response if port is available
-      event.ports[0]?.postMessage({ status: 'success' });
-    } else if (command === 'update-cache') {
-      const pages = payload.pages || [];
-      self.updateCache(pages)
-        .then(() => {
-          event.ports[0]?.postMessage({ status: 'success' });
-        })
-        .catch(error => {
-          event.ports[0]?.postMessage({ status: 'error', error: error.message });
-        });
-    }
-  });
-
-  // Log
-  console.log('Set up listeners');
-}
-
-Manager.prototype.initializeFirebase = function () {
-  const self = this;
-
-  // Check if Firebase config is available
-  if (!self.config.firebase) {
-    console.log('Firebase config not available yet, skipping Firebase initialization');
-    return;
-  }
-
-  // Check if already initialized
-  if (self.libraries.firebase) {
-    console.log('Firebase already initialized');
-    return;
-  }
-
-  // Log
-  console.log('Initializing Firebase v%%% firebaseVersion %%%');
-
-  // Initialize app (libraries were already imported at the top)
-  firebase.initializeApp(self.config.firebase);
-
-  // Initialize messaging
-  self.libraries.messaging = firebase.messaging();
-
-  // Attach firebase to SWManager
-  self.libraries.firebase = firebase;
-}
-
-Manager.prototype.updateCache = function (pages) {
-  const self = this;
-
-  // Set default pages to cache
-  const defaults = [
-    '/',
-    '/assets/css/main.bundle.css',
-    '/assets/js/main.bundle.js',
-  ];
-
-  // Ensure pages is an array
-  pages = pages || [];
-
-  // Merge with additional pages
-  const pagesToCache = [...new Set([...defaults, ...pages])];
-
-  // Open cache and add pages
-  return caches.open(self.cache.name)
-    .then(cache => cache.addAll(pagesToCache))
-    .then(() => console.log('Cached resources:', pagesToCache))
-    .catch(error => console.error('Failed to cache resources:', error));
 }
 
 // Export

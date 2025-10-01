@@ -229,27 +229,27 @@ function handleFieldChange(event) {
 
 // Tracking functions
 function trackChatClick() {
-  gtag('event', 'contact_method_click', {
-    method: 'chat'
-  });
-  fbq('track', 'Contact', {
-    content_name: 'Chat'
-  });
-  ttq.track('ClickButton', {
-    content_name: 'Chat'
-  });
+  // gtag('event', 'contact_method_click', {
+  //   method: 'chat'
+  // });
+  // fbq('track', 'Contact', {
+  //   content_name: 'Chat'
+  // });
+  // ttq.track('ClickButton', {
+  //   content_name: 'Chat'
+  // });
 }
 
 function trackFormClick() {
-  gtag('event', 'contact_method_click', {
-    method: 'form'
-  });
-  fbq('track', 'Contact', {
-    content_name: 'Form'
-  });
-  ttq.track('ClickButton', {
-    content_name: 'Contact Form'
-  });
+  // gtag('event', 'contact_method_click', {
+  //   method: 'form'
+  // });
+  // fbq('track', 'Contact', {
+  //   content_name: 'Form'
+  // });
+  // ttq.track('ClickButton', {
+  //   content_name: 'Contact Form'
+  // });
 }
 
 function trackContactSpam() {

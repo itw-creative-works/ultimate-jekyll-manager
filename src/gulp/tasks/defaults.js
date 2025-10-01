@@ -9,6 +9,7 @@ const { minimatch } = require('minimatch');
 const { template } = require('node-powertools');
 const createTemplateTransform = require('./utils/template-transform');
 const argv = require('yargs').argv;
+const JSON5 = require('json5');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -56,6 +57,12 @@ const FILE_MAP = {
     name: (file) => file.name.replace('_.gitignore', '.gitignore'),
   },
 
+  // Config file with smart merging
+  'ultimate-jekyll-manager.json': {
+    overwrite: true,
+    merge: true,
+  },
+
   // Files to run templating on
   '.github/workflows/build.yml': {
     template: cleanVersions,
@@ -95,6 +102,41 @@ const delay = 250;
 
 // Index
 let index = -1;
+
+// Helper function to merge configs intelligently
+function mergeConfigs(existingConfig, newConfig) {
+  const merged = { ...newConfig };
+
+  // Always update version to new version
+  merged.version = newConfig.version;
+
+  // Recursively merge nested objects
+  function mergeNested(target, source, newDefaults) {
+    for (const key in newDefaults) {
+      if (Object.prototype.hasOwnProperty.call(newDefaults, key)) {
+        const newValue = newDefaults[key];
+        const existingValue = source[key];
+        const isNewDefault = newValue === 'default' || (typeof newValue === 'object' && newValue !== null);
+
+        if (typeof newValue === 'object' && newValue !== null && !Array.isArray(newValue)) {
+          // Handle nested objects
+          target[key] = target[key] || {};
+          mergeNested(target[key], existingValue || {}, newValue);
+        } else if (Object.prototype.hasOwnProperty.call(source, key) && existingValue !== 'default') {
+          // User has a custom value, keep it
+          target[key] = existingValue;
+        } else {
+          // User doesn't have this option or has 'default', use new default
+          target[key] = newValue;
+        }
+      }
+    }
+  }
+
+  mergeNested(merged, existingConfig, newConfig);
+
+  return merged;
+}
 
 // Main task
 function defaults(complete, changedFile) {
@@ -184,8 +226,30 @@ function customTransform() {
     // Check existence
     const exists = jetpack.exists(fullOutputPath);
 
+    // Handle config merging
+    if (options.merge && exists && !isBinaryFile) {
+      try {
+        const existingContent = jetpack.read(fullOutputPath);
+        const newContent = file.contents.toString();
+
+        const existingConfig = JSON5.parse(existingContent);
+        const newConfig = JSON5.parse(newContent);
+
+        // Merge configs, preserving user's non-default values
+        const mergedConfig = mergeConfigs(existingConfig, newConfig);
+
+        // Update file contents with merged config
+        file.contents = Buffer.from(JSON5.stringify(mergedConfig, null, 2));
+
+        logger.log(`Merged config file: ${relativePath}`);
+      } catch (error) {
+        logger.error(`Error merging config file ${relativePath}:`, error);
+        // Fall through to normal processing if merge fails
+      }
+    }
+
     // Skip if instructed
-    if (options.skip || (!options.overwrite && exists)) {
+    if (options.skip || (!options.overwrite && exists && !options.merge)) {
       logger.log(`Skipping file: ${relativePath}`);
       return callback();
     }
