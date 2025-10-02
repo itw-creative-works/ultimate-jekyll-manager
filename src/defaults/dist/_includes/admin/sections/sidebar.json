@@ -1,0 +1,62 @@
+{
+  logo: {
+    href: '/'
+  },
+  links: [
+    {
+      label: 'Dashboard',
+      href: '/admin/dashboard',
+      icon: 'gauge-high'
+    },
+    {
+      header: true,
+      label: 'Main Menu'
+    },
+    {
+      label: 'Users',
+      href: null,
+      icon: 'users',
+      dropdown: [
+        {
+          label: 'All Users',
+          href: '/admin/users',
+          icon: 'list'
+        },
+        {
+          label: 'Create New',
+          href: '/admin/users/new',
+          icon: 'plus'
+        }
+      ]
+    },
+    {
+      label: 'Notifications',
+      href: null,
+      icon: 'bell',
+      dropdown: [
+        {
+          label: 'All Notifications',
+          href: '/admin/notifications',
+          icon: 'list'
+        },
+        {
+          label: 'Create New',
+          href: '/admin/notifications/new',
+          icon: 'plus'
+        }
+      ]
+    },
+    // {
+    //   divider: true
+    // },
+    {
+      header: true,
+      label: 'Management Tools'
+    },
+    {
+      label: 'Firebase Explorer',
+      href: '/admin/firebase',
+      icon: 'fire'
+    },
+  ]
+}

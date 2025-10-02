@@ -34,9 +34,21 @@ const PAGE_IMPORT = `
   }
 `
 
+// Define bundle files separately for easier tracking
+const bundleFiles = [
+  // Main bundles
+  `${rootPathPackage}/dist/assets/css/bundles/*.scss`,
+
+  // Project bundles
+  'src/assets/css/bundles/*.scss',
+];
+
 // Glob
 const input = [
-  // Project entry point
+  // Bundle files (admin, and any future bundles)
+  ...bundleFiles,
+
+  // Project entry point (main.scss)
   'src/assets/css/main.scss',
 
   // Page-specific CSS
@@ -268,9 +280,26 @@ function sass(complete) {
       // Add bundle to the name
       file.basename += '.bundle';
 
-      // If its NOT basename === main.bundle, add pages/ before dirname
-      if (file.basename !== 'main.bundle') {
-        file.dirname = `pages/${file.dirname}`;
+      // Get list of expected bundle names from the bundle files glob
+      // These are files that should be in the root CSS directory
+      const bundleNames = glob(bundleFiles).map(f => path.basename(f, '.scss'));
+      bundleNames.push('main'); // main.scss is always a root bundle
+
+      // Check if this is a root-level bundle
+      const baseName = file.basename.replace('.bundle', '');
+      const isBundle = bundleNames.includes(baseName);
+
+      // Check
+      if (isBundle) {
+        // Root-level bundles (main, admin, or any future bundle in bundles/ directory)
+        // Keep in root directory
+        file.dirname = '.';
+      } else {
+        // All other files are page bundles
+        // Add pages/ prefix if not already there
+        if (!file.dirname.startsWith('pages/')) {
+          file.dirname = `pages/${file.dirname}`;
+        }
       }
 
       // Track the full output path

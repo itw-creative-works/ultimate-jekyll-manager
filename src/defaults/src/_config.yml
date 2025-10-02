@@ -64,6 +64,7 @@ web_manager:
       redirects:
         authenticated: "/account"
         unauthenticated: "/signup"
+      allowSubdomains: true
   firebase:
     app:
       enabled: true

@@ -2,6 +2,7 @@
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/cover
 
+### PAGE CONFIG ###
 benefits:
   - title: "Free Forever"
     description: "Start with our free plan and upgrade when you're ready"
@@ -41,6 +42,9 @@ social_signup:
 
         <!-- Sign Up Form -->
         <form id="signup-form" autocomplete="on" novalidate>
+          <!-- Hidden default submit button for Enter key -->
+          <button type="submit" class="d-none" data-provider="email" aria-hidden="true" tabindex="-1"></button>
+
           <!-- Social Signup (Optional) -->
           <div class="mb-4">
             {% for provider in page.resolved.social_signup %}

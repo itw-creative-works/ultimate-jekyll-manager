@@ -6,6 +6,7 @@ const through2 = require('through2');
 const path = require('path');
 const jetpack = require('fs-jetpack');
 const { template } = require('node-powertools');
+const JSON5 = require('json5');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -22,6 +23,9 @@ const INCLUDE_TEMPLATE = `
 
 // Glob
 const input = [
+  // Main JSON files
+  'dist/_includes/**/*.json',
+
   // Project JSON files
   'src/_includes/**/*.json',
 ];
@@ -42,21 +46,36 @@ function jsonToHtml(complete) {
         return callback(null, file);
       }
 
-      // Also write to _data directory for Jekyll to pick up
-      const relativePath = path.relative(file.base, file.path);
-      const dataPath = path.join(dataOutput, relativePath);
-      const dataDir = path.dirname(dataPath);
+      try {
+        // Parse JSON5 content
+        const json5Content = file.contents.toString();
+        const parsedData = JSON5.parse(json5Content);
 
-      // Ensure directory exists
-      jetpack.dir(dataDir);
+        // Convert to regular JSON (pretty printed for readability)
+        const regularJson = JSON.stringify(parsedData, null, 2);
 
-      // Write JSON file to _data
-      jetpack.write(dataPath, file.contents.toString());
+        // Also write to _data directory for Jekyll to pick up
+        const relativePath = path.relative(file.base, file.path);
+        const dataPath = path.join(dataOutput, relativePath);
+        const dataDir = path.dirname(dataPath);
 
-      // Track compiled files
-      compiled[dataPath] = true;
+        // Ensure directory exists
+        jetpack.dir(dataDir);
 
-      callback(null, file);
+        // Write regular JSON file to _data
+        jetpack.write(dataPath, regularJson);
+
+        // Track compiled files
+        compiled[dataPath] = true;
+
+        // Update file contents with regular JSON
+        file.contents = Buffer.from(regularJson);
+
+        callback(null, file);
+      } catch (err) {
+        logger.error(`Error parsing JSON5 file ${file.path}: ${err.message}`);
+        callback(err);
+      }
     }))
     .pipe(dest(dataOutput));
 

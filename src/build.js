@@ -65,21 +65,24 @@ Manager.prototype.getArguments = Manager.getArguments;
 Manager.reportBuildError = function (error, callback) {
   const { execute } = require('node-powertools');
   const logger = new (require('./lib/logger'))('build-error');
-  
+
   // Send notification using notifly
   const errorMessage = error.message || error.toString() || 'Unknown error';
   const errorPlugin = error.plugin || 'Build';
-  
-  execute(`notifly --title 'Build Error: ${errorPlugin}' --message '${errorMessage.replace(/'/g, "\\'")}' --appIcon '/Users/ian/claude-ai-icon.png' --timeout 3 --sound 'Sosumi'`);
-  
+
+  execute(`notifly --title 'Build Error: ${errorPlugin}' --message '${errorMessage.replace(/'/g, "\\'")}' --appIcon '/Users/ian/claude-ai-icon.png' --timeout 3 --sound 'Sosumi'`)
+    .catch((e) => {
+      logger.error('Failed to send notification', e);
+    });
+
   // Log the error
   logger.error(`[${errorPlugin}] ${errorMessage}`);
-  
+
   // If callback provided, call it with error
   if (callback) {
     return callback(error);
   }
-  
+
   // Otherwise return a function that calls the callback with error
   return (cb) => cb ? cb(error) : error;
 };

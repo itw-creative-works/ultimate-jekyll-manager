@@ -1,0 +1,86 @@
+---
+### ALL PAGES ###
+layout: core/root
+
+### THEME CONFIG ###
+theme:
+  # html:
+  #   class: ""
+  head:
+    content: |
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" media="print" onload="this.media='all'">
+  body:
+    class: "d-flex flex-column min-vh-100"
+  # main:
+  #   class: ""
+
+### WEB MANAGER CONFIG ###
+web_manager:
+  auth:
+    config:
+      policy: "authenticated"
+---
+
+<!-- Backend Layout: Sidebar + (Top Bar + Content) -->
+<div class="d-flex vh-100">
+  <!-- Sidebar Navigation (full height, controlled by page/layout front matter) -->
+  {% unless page.resolved.theme.sidebar.enabled == false %}
+    {% if page.canonical.path contains "/admin" %}
+      {%- include /admin/sections/sidebar.html -%}
+    {% else %}
+      {%- include /backend/sections/sidebar.html -%}
+    {% endif %}
+  {% endunless %}
+
+  <!-- Right Side: Top Bar + Main Content -->
+  <div class="d-flex flex-column flex-fill overflow-hidden">
+    <!-- Top Bar (controlled by page/layout front matter) -->
+    {% unless page.resolved.theme.topbar.enabled == false %}
+      {% if page.canonical.path contains "/admin" %}
+        {%- include /admin/sections/topbar.html -%}
+      {% else %}
+        {%- include /backend/sections/topbar.html -%}
+      {% endif %}
+    {% endunless %}
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-fill overflow-auto p-3 p-lg-4 {{ page.resolved.theme.main.class | liquify }}" aria-label="Main content">
+      {{ content | uj_content_format }}
+    </main>
+  </div>
+</div>
+
+<!-- Script to quickly handle user state -->
+<script type="text/javascript">
+  try {
+    (function() {
+      'use strict';
+      // Read and parse localStorage data
+      var managerData = localStorage.getItem('_manager');
+      var parsedData = managerData ? JSON.parse(managerData) : null;
+      var isLoggedIn = !!(parsedData && parsedData.auth && parsedData.auth.user && parsedData.auth.user.uid);
+
+      // Quit if NOT logged in
+      if (!isLoggedIn) {
+        return;
+      }
+
+      // Process binds
+      var $bindElements = document.querySelectorAll('[data-wm-bind]');
+
+      $bindElements.forEach(function($el) {
+        var bindValue = $el.getAttribute('data-wm-bind');
+
+        if (bindValue === '@show auth.user') {
+          // Show element when user is logged in
+          $el.removeAttribute('hidden');
+        } else if (bindValue === '@show !auth.user') {
+          // Hide element when user is logged in (show when not logged in)
+          $el.setAttribute('hidden', '');
+        }
+      });
+    }());
+  } catch (error) {
+    console.error('Error occurred while selecting elements:', error);
+  }
+</script>

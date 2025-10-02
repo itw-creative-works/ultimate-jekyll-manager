@@ -1,0 +1,213 @@
+<!-- Desktop Sidebar -->
+<aside class="sidebar d-none d-lg-flex flex-column flex-shrink-0 bg-body-tertiary">
+  <!-- Logo Section -->
+  {% capture logo_href %}{% assign temp_href = data.logo.href | default: site.brand.href | default: '/dashboard' %}{% if temp_href and temp_href != '' and temp_href != 'null' %}{{ temp_href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
+  {% capture logo_src %}{% if data.logo.src %}{{ data.logo.src }}{% else %}{{ site.brand.images.brandmark | default: null }}{% endif %}{% endcapture %}
+  {% capture logo_text %}{{ data.logo.text | default: site.brand.name | liquify }}{% endcapture %}
+
+  <div class="sidebar-logo d-flex align-items-center px-3 py-2 border-bottom">
+    <a href="{{ logo_href }}" class="d-flex align-items-center text-decoration-none text-body">
+      {% iftruthy logo_src %}
+        <div class="avatar avatar-md me-2">
+          <img src="{{ logo_src }}" alt="{{ logo_text }} Logo"/>
+        </div>
+      {% endiftruthy %}
+      {% iftruthy logo_text %}
+        <span class="fs-5 fw-semibold">{{ logo_text }}</span>
+      {% endiftruthy %}
+    </a>
+  </div>
+
+  <!-- Navigation Section -->
+  <div class="d-flex flex-column w-100 p-3 overflow-auto flex-fill">
+    <!-- Navigation Links -->
+    <ul class="list-unstyled ps-0">
+      {% for link in data.links %}
+        {% if link.divider %}
+          <!-- Divider -->
+          <li class="border-top my-3"></li>
+        {% elsif link.header %}
+          <!-- Section Header -->
+          <li class="mb-1">
+            <div class="px-3 pt-2 mt-4 text-muted small text-uppercase fw-semibold">
+              {{ link.label }}
+            </div>
+          </li>
+        {% elsif link.dropdown %}
+          <!-- Collapsible Dropdown -->
+          {% capture link_id %}sidebar-collapse-{{ forloop.index }}{% endcapture %}
+          <li class="mb-1">
+            <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="false">
+              <span class="d-inline-flex align-items-center">
+                {% if link.icon %}
+                  {% uj_icon link.icon, "fa-fw me-3" %}
+                {% endif %}
+                {{ link.label }}
+              </span>
+            </button>
+            <div class="collapse" id="{{ link_id }}">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                {% for child in link.dropdown %}
+                  {% if child.divider %}
+                    <li><hr class="dropdown-divider my-2"></li>
+                  {% else %}
+                    {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                    <li>
+                      {% iftruthy child.href %}
+                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}">
+                          {% if child.icon %}
+                            {% uj_icon child.icon, "fa-fw me-3" %}
+                          {% endif %}
+                          {{ child.label }}
+                          {% if child.badge %}
+                            <span class="badge bg-{{ child.badge.color | default: 'primary' }} ms-auto">{{ child.badge.text }}</span>
+                          {% endif %}
+                        </a>
+                      {% endiftruthy %}
+                      {% iffalsy child.href %}
+                        <button type="button" class="link-body-emphasis d-inline-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
+                          {% if child.icon %}
+                            {% uj_icon child.icon, "fa-fw me-3" %}
+                          {% endif %}
+                          {{ child.label }}
+                        </button>
+                      {% endiffalsy %}
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          </li>
+        {% else %}
+          <!-- Regular Nav Link -->
+          {% capture link_active %}{% urlmatches link.href, "active" %}{% endcapture %}
+          <li class="mb-1">
+            {% iftruthy link.href %}
+              <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}">
+                {% if link.icon %}
+                  {% uj_icon link.icon, "fa-fw me-3" %}
+                {% endif %}
+                {{ link.label }}
+                {% if link.badge %}
+                  <span class="badge bg-{{ link.badge.color | default: 'primary' }} ms-auto">{{ link.badge.text }}</span>
+                {% endif %}
+              </a>
+            {% endiftruthy %}
+            {% iffalsy link.href %}
+              <button type="button" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 border-0 bg-transparent w-100">
+                {% if link.icon %}
+                  {% uj_icon link.icon, "fa-fw me-3" %}
+                {% endif %}
+                {{ link.label }}
+              </button>
+            {% endiffalsy %}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+</aside>
+
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+  <div class="offcanvas-header border-bottom">
+    {% capture logo_href %}{% assign temp_href = data.logo.href | default: site.brand.href | default: '/dashboard' %}{% if temp_href and temp_href != '' and temp_href != 'null' %}{{ temp_href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
+    {% capture logo_src %}{% if data.logo.src %}{{ data.logo.src }}{% else %}{{ site.brand.images.brandmark | default: null }}{% endif %}{% endcapture %}
+    {% capture logo_text %}{{ data.logo.text | default: site.brand.name | liquify }}{% endcapture %}
+
+    <h5 class="offcanvas-title d-flex align-items-center" id="mobileSidebarLabel">
+      {% iftruthy logo_src %}
+        <div class="avatar avatar-md me-2">
+          <img src="{{ logo_src }}" alt="{{ logo_text }} Logo"/>
+        </div>
+      {% endiftruthy %}
+      {% iftruthy logo_text %}
+        <span>{{ logo_text }}</span>
+      {% endiftruthy %}
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-3">
+    <ul class="list-unstyled ps-0">
+      {% for link in data.links %}
+        {% if link.divider %}
+          <li class="border-top my-3"></li>
+        {% elsif link.header %}
+          <li class="mb-1">
+            <div class="px-3 pt-2 mt-4 text-muted small text-uppercase fw-semibold">
+              {{ link.label }}
+            </div>
+          </li>
+        {% elsif link.dropdown %}
+          {% capture link_id %}mobile-collapse-{{ forloop.index }}{% endcapture %}
+          <li class="mb-1">
+            <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="false">
+              <span class="d-inline-flex align-items-center">
+                {% if link.icon %}
+                  {% uj_icon link.icon, "fa-fw me-3" %}
+                {% endif %}
+                {{ link.label }}
+              </span>
+            </button>
+            <div class="collapse" id="{{ link_id }}">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                {% for child in link.dropdown %}
+                  {% if child.divider %}
+                    <li><hr class="dropdown-divider my-2"></li>
+                  {% else %}
+                    {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                    <li>
+                      {% iftruthy child.href %}
+                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}">
+                          {% if child.icon %}
+                            {% uj_icon child.icon, "fa-fw me-3" %}
+                          {% endif %}
+                          {{ child.label }}
+                          {% if child.badge %}
+                            <span class="badge bg-{{ child.badge.color | default: 'primary' }} ms-auto">{{ child.badge.text }}</span>
+                          {% endif %}
+                        </a>
+                      {% endiftruthy %}
+                      {% iffalsy child.href %}
+                        <button type="button" class="link-body-emphasis d-inline-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
+                          {% if child.icon %}
+                            {% uj_icon child.icon, "fa-fw me-3" %}
+                          {% endif %}
+                          {{ child.label }}
+                        </button>
+                      {% endiffalsy %}
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          </li>
+        {% else %}
+          {% capture link_active %}{% urlmatches link.href, "active" %}{% endcapture %}
+          <li class="mb-1">
+            {% iftruthy link.href %}
+              <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}">
+                {% if link.icon %}
+                  {% uj_icon link.icon, "fa-fw me-3" %}
+                {% endif %}
+                {{ link.label }}
+                {% if link.badge %}
+                  <span class="badge bg-{{ link.badge.color | default: 'primary' }} ms-auto">{{ link.badge.text }}</span>
+                {% endif %}
+              </a>
+            {% endiftruthy %}
+            {% iffalsy link.href %}
+              <button type="button" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 border-0 bg-transparent w-100">
+                {% if link.icon %}
+                  {% uj_icon link.icon, "fa-fw me-3" %}
+                {% endif %}
+                {{ link.label }}
+              </button>
+            {% endiffalsy %}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+</div>

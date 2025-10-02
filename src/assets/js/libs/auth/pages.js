@@ -18,6 +18,11 @@ export default function (Manager) {
     // Check for redirect result from OAuth providers
     await handleRedirectResult();
 
+    // Check subdomain auth restrictions and redirect if needed
+    if (checkSubdomainAuth()) {
+      return;
+    }
+
     // Update auth return URL in all auth-related links
     updateAuthReturnUrl();
 
@@ -206,6 +211,46 @@ export default function (Manager) {
     } catch (error) {
       console.error('Error signing out:', error);
     }
+  }
+
+  function checkSubdomainAuth() {
+    // Get the allowSubdomainAuth config value (defaults to true if not set)
+    const allowSubdomainAuth = webManager.config.auth?.config?.allowSubdomainAuth ?? true;
+
+    // Check if current hostname is a subdomain
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+
+    // If hostname has 3 or more parts (e.g., subdomain.site.com), it's a subdomain
+    // Skip localhost and IP addresses
+    const isSubdomain = parts.length >= 3 && !hostname.includes('localhost') && !/^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+
+    // Log relevant info
+    console.log('checkSubdomainAuth - hostname:', hostname, 'parts:', parts, 'isSubdomain:', isSubdomain, 'allowSubdomainAuth:', allowSubdomainAuth);
+
+    // If subdomain auth is allowed, no need to redirect regardless of current domain
+    if (allowSubdomainAuth) {
+      return false;
+    }
+
+    // If not a subdomain, no need to redirect
+    if (!isSubdomain) {
+      return false;
+    }
+
+    // Redirect to apex domain
+    const apexDomain = parts.slice(-2).join('.');
+    const currentUrl = new URL(window.location.href);
+    currentUrl.hostname = apexDomain;
+
+    // Log
+    console.log('Redirecting to apex domain for authentication:', currentUrl.href);
+
+    // Perform the redirect
+    window.location.href = currentUrl.href;
+
+    // Stop further execution
+    return true;
   }
 
   function updateAuthReturnUrl() {

@@ -31,7 +31,7 @@
             <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
               <span class="d-flex align-items-center">
                 <span class="position-relative d-inline-block">
-                  <span class="avatar avatar-sm rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden" style="display: inline-flex !important;">
+                  <span class="avatar avatar-sm rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden d-inline-flex">
                     <img src="{{ site.uj.placeholder.src }}" data-wm-bind="@attr src auth.user.photoURL" alt="{{ site.brand.name }} profile picture"/>
                   </span>
                   <!-- Active status indicator -->
@@ -65,18 +65,19 @@
 
               <!-- Dropdown items -->
               {% for child in action.dropdown %}
+                {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
+                {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                {% capture child_class %}dropdown-item d-flex align-items-center text-body {{ child_active }} {% if child.class %}{{ child.class }}{% endif %}{% endcapture %}
+                {% capture child_content %}
+                  {% if child.icon %}
+                    {% uj_icon child.icon, "fa-md me-3" %}
+                  {% endif %}
+                  <span>{{ child.label }}</span>
+                {% endcapture %}
+
                 {% if child.divider %}
-                  <li><hr class="dropdown-divider"/></li>
+                  <li><hr class="dropdown-divider" {{ child_attributes }}/></li>
                 {% else %}
-                  {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
-                  {% capture child_class %}dropdown-item d-flex align-items-center text-body {{ child_active }} {% if child.class %}{{ child.class }}{% endif %}{% endcapture %}
-                  {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
-                  {% capture child_content %}
-                    {% if child.icon %}
-                      {% uj_icon child.icon, "fa-md me-3" %}
-                    {% endif %}
-                    <span>{{ child.label }}</span>
-                  {% endcapture %}
                   <li>
                     {% iftruthy child.href %}
                       <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
@@ -182,7 +183,7 @@
                 <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
                   <span class="d-flex align-items-center">
                     <span class="position-relative d-inline-block">
-                      <span class="avatar avatar-md rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden" style="display: inline-flex !important;">
+                      <span class="avatar avatar-md rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden d-inline-flex">
                         <img src="{{ site.uj.placeholder.src }}" data-wm-bind="@attr src auth.user.photoURL" alt="{{ site.brand.name }} profile picture"/>
                       </span>
                       <!-- Active status indicator -->
@@ -215,18 +216,19 @@
                   </li>
                   <!-- Dropdown items -->
                   {% for child in action.dropdown %}
+                    {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
+                    {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                    {% capture child_class %}dropdown-item d-flex align-items-center text-body {{ child_active }} {% if child.class %}{{ child.class }}{% endif %}{% endcapture %}
+                    {% capture child_content %}
+                      {% if child.icon %}
+                        {% uj_icon child.icon, "fa-md me-3" %}
+                      {% endif %}
+                      <span>{{ child.label }}</span>
+                    {% endcapture %}
+
                     {% if child.divider %}
-                      <li><hr class="dropdown-divider"/></li>
+                      <li><hr class="dropdown-divider" {{ child_attributes }}/></li>
                     {% else %}
-                      {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
-                      {% capture child_class %}dropdown-item d-flex align-items-center text-body {{ child_active }} {% if child.class %}{{ child.class }}{% endif %}{% endcapture %}
-                      {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
-                      {% capture child_content %}
-                        {% if child.icon %}
-                          {% uj_icon child.icon, "fa-md me-3" %}
-                        {% endif %}
-                        <span>{{ child.label }}</span>
-                      {% endcapture %}
                       <li>
                         {% iftruthy child.href %}
                           <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>

@@ -173,7 +173,15 @@
 
 <!-- CSS Bundles -->
 <!-- Note: media="print" onload="this.media='all'" does NOT improve performance -->
-<link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+<!-- Fetch specific bundle if it's requested -->
+{% iftruthy page.resolved.theme.css.bundle %}
+  <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/{{ page.resolved.theme.css.bundle }}.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+{% endiftruthy %}
+<!-- Otherwise, fetch main bundle -->
+{% iffalsy page.resolved.theme.css.bundle %}
+  <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+{% endiffalsy %}
+<!-- Then, fetch any page specific bundles -->
 {% iffile page-css-path %}
   <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-path }}?cb={{ site.uj.cache_breaker }}"/>
 {% endiffile %}
