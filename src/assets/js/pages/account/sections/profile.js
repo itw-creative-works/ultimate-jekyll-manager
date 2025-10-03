@@ -74,7 +74,7 @@ function setupProfileForm() {
   formManager = new FormManager('#profile-form', {
     autoDisable: true,
     showSpinner: true,
-    allowMultipleSubmit: true,
+    allowMultipleSubmissions: true,
     submitButtonLoadingText: 'Saving...',
     initialState: 'loading' // Start in loading state until data loads
   });
@@ -164,28 +164,28 @@ async function updateUserProfile(data) {
 async function handleCopyUid() {
   const $uidInput = document.getElementById('uid-input');
   const $copyBtn = document.getElementById('copy-uid-btn');
-  
+
   if (!$uidInput || !$uidInput.value) return;
-  
+
   try {
     // Use webManager's clipboard utility
     await webManager.utilities().clipboardCopy($uidInput);
-    
+
     // Update button text temporarily
     const $text = $copyBtn.querySelector('.button-text');
     const originalText = $text.textContent;
-    
+
     $text.textContent = 'Copied!';
     $copyBtn.classList.remove('btn-outline-adaptive');
     $copyBtn.classList.add('btn-success');
-    
+
     // Reset after 2 seconds
     setTimeout(() => {
       $text.textContent = originalText;
       $copyBtn.classList.remove('btn-success');
       $copyBtn.classList.add('btn-outline-adaptive');
     }, 2000);
-    
+
   } catch (err) {
     console.error('Failed to copy UID:', err);
   }

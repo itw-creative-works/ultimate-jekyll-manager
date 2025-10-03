@@ -1,0 +1,200 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/iframe
+
+### REGULAR PAGES ###
+meta:
+  title: "Users - Admin"
+  description: "Manage system users"
+  breadcrumb: "All Users"
+---
+
+<!-- Page Header Actions -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <p class="text-muted mb-0">Manage and monitor all system users</p>
+      </div>
+      <div>
+        <button class="btn btn-outline-adaptive me-2" onclick="location.reload()">
+          {% uj_icon "rotate", "fa-md me-2" %}
+          Refresh
+        </button>
+        <a href="/admin/users/new" class="btn btn-adaptive">
+          {% uj_icon "plus", "fa-md me-2" %}
+          Add User
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" data-bs-toggle="tab" type="button">
+      All Users
+      <span class="badge bg-secondary ms-2">1,234</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      Active
+      <span class="badge bg-success ms-2">1,180</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      Inactive
+      <span class="badge bg-warning ms-2">45</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      Suspended
+      <span class="badge bg-danger ms-2">9</span>
+    </button>
+  </li>
+</ul>
+
+<!-- Search Bar -->
+<div class="row mb-3">
+  <div class="col-md-6">
+    <div class="input-group">
+      <span class="input-group-text">
+        {% uj_icon "magnifying-glass", "fa-sm" %}
+      </span>
+      <input type="text" class="form-control" placeholder="Search users by name, email, or ID...">
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="d-flex gap-2 justify-content-end">
+      <select class="form-select" style="width: auto;">
+        <option>Sort by: Date Created</option>
+        <option>Sort by: Name</option>
+        <option>Sort by: Last Active</option>
+        <option>Sort by: Role</option>
+      </select>
+      <button class="btn btn-outline-adaptive">
+        {% uj_icon "filter", "fa-md me-2" %}
+        Filters
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>
+              <input class="form-check-input" type="checkbox">
+            </th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Last Active</th>
+            <th>Date Joined</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in (1..10) %}
+          <tr>
+            <td>
+              <input class="form-check-input" type="checkbox">
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar avatar-sm me-3">
+                  <img src="https://ui-avatars.com/api/?name=User+{{ i }}&background=random" alt="User {{ i }}" class="rounded-circle">
+                </div>
+                <div>
+                  <div class="fw-semibold">User {{ i }}</div>
+                  <small class="text-muted">user{{ i }}@example.com</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if i == 1 %}
+                <span class="badge bg-primary">Admin</span>
+              {% elsif i == 2 or i == 3 %}
+                <span class="badge bg-info">Manager</span>
+              {% else %}
+                <span class="badge bg-secondary">User</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if i == 9 %}
+                <span class="badge bg-danger">Suspended</span>
+              {% elsif i == 8 %}
+                <span class="badge bg-warning">Inactive</span>
+              {% else %}
+                <span class="badge bg-success">Active</span>
+              {% endif %}
+            </td>
+            <td>2 hours ago</td>
+            <td>Jan {{ i }}, 2024</td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-link" type="button" data-bs-toggle="dropdown">
+                  {% uj_icon "ellipsis-vertical", "fa-lg" %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="#">
+                    {% uj_icon "eye", "fa-md me-2" %}
+                    View Profile
+                  </a></li>
+                  <li><a class="dropdown-item" href="#">
+                    {% uj_icon "pen", "fa-md me-2" %}
+                    Edit User
+                  </a></li>
+                  <li><a class="dropdown-item" href="#">
+                    {% uj_icon "envelope", "fa-md me-2" %}
+                    Send Message
+                  </a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#">
+                    {% uj_icon "ban", "fa-md me-2" %}
+                    Suspend User
+                  </a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <div>
+    Showing 1-10 of 1,234 users
+  </div>
+  <nav>
+    <ul class="pagination mb-0">
+      <li class="page-item disabled">
+        <a class="page-link" href="#">Previous</a>
+      </li>
+      <li class="page-item active">
+        <a class="page-link" href="#">1</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="#">2</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="#">3</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="#">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>

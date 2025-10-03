@@ -10,10 +10,10 @@ export default (Manager) => {
 
     // Initialize when DOM is ready
     await webManager.dom().ready();
-    
+
     setupNewsletterForm();
     setupSearch();
-    
+
     // Resolve after initialization
     return resolve();
   });
@@ -35,10 +35,8 @@ function setupNewsletterForm() {
     autoDisable: true,
     showSpinner: true,
     validateOnSubmit: true,
-    allowMultipleSubmit: false,
+    allowMultipleSubmissions: false,
     resetOnSuccess: true,
-    errorContainer: '.newsletter-error-alert',
-    successContainer: '.newsletter-success-alert',
     submitButtonLoadingText: 'Subscribing...',
     submitButtonSuccessText: 'Subscribed!',
     fieldErrorClass: 'is-invalid',
@@ -47,7 +45,6 @@ function setupNewsletterForm() {
 
   // Listen to FormManager events
   newsletterForm.addEventListener('submit', handleNewsletterSubmit);
-  newsletterForm.addEventListener('validate', handleNewsletterValidation);
 }
 
 // Setup blog search functionality
@@ -151,16 +148,6 @@ async function handleNewsletterSubmit(event) {
     webManager.sentry().captureException(new Error('Newsletter subscription failed', { cause: error }));
     newsletterForm.showError('An error occurred. Please try again.');
     newsletterForm.setFormState('ready');
-  }
-}
-
-// Handle newsletter validation
-function handleNewsletterValidation(event) {
-  const { data, errors } = event.detail;
-
-  // Validate email format
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.email = 'Please enter a valid email address';
   }
 }
 

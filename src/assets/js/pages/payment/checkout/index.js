@@ -124,8 +124,7 @@ function setupEventListeners() {
   formManager = new FormManager('#checkout-form', {
     autoDisable: true, // Enable automatic form disabling during submission
     showSpinner: true,
-    allowMultipleSubmit: false, // Prevent multiple submissions
-    errorContainer: '.form-error-message', // Use class to support multiple containers
+    allowMultipleSubmissions: false, // Prevent multiple submissions
     submitButtonLoadingText: 'Processing...'
   });
 
@@ -182,16 +181,16 @@ function setupEventListeners() {
   });
 
   // Switch account link (keep as is - not part of form)
-  const switchAccountLink = document.getElementById('switch-account');
-  if (switchAccountLink) {
+  const $switchAccountLink = document.getElementById('switch-account');
+  if ($switchAccountLink) {
     const currentUrl = encodeURIComponent(window.location.href);
-    switchAccountLink.href = `/signin?authSignout=true&authReturnUrl=${currentUrl}`;
+    $switchAccountLink.href = `/signin?authSignout=true&authReturnUrl=${currentUrl}`;
   }
 
   // Help button - opens Chatsy
-  const helpButton = document.getElementById('checkout-help-button');
-  if (helpButton) {
-    helpButton.addEventListener('click', (e) => {
+  const $helpButton = document.getElementById('checkout-help-button');
+  if ($helpButton) {
+    $helpButton.addEventListener('click', (e) => {
       e.preventDefault();
       chatsy.open();
     });

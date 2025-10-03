@@ -48,7 +48,7 @@ function setupResetApiKeyForm() {
   resetApiKeyFormManager = new FormManager('#reset-api-key-form', {
     autoDisable: true,
     showSpinner: true,
-    allowMultipleSubmit: false,
+    allowMultipleSubmissions: false,
     submitButtonLoadingText: 'Resetting...'
   });
 
@@ -93,7 +93,7 @@ async function handleCopyApiKey() {
     // Update button text temporarily
     const $text = $copyBtn.querySelector('.button-text');
     const originalText = $text.textContent;
-    
+
     $text.textContent = 'Copied!';
     $copyBtn.classList.remove('btn-outline-adaptive');
     $copyBtn.classList.add('btn-success');

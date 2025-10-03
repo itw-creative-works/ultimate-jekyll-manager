@@ -9,253 +9,90 @@ meta:
   breadcrumb: "Dashboard"
 ---
 
-<div class="container-fluid p-0">
-  <!-- Stats Cards Row -->
-  <div class="row g-3 mb-4">
-    <div class="col-lg-3 col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                {% uj_icon "users", "fa-2xl text-primary" %}
-              </div>
-            </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="text-muted mb-1">Total Users</h6>
-              <h3 class="mb-0">1,234</h3>
-              <small class="text-success">
-                {% uj_icon "arrow-up", "fa-sm" %}
-                12% from last month
-              </small>
+<!-- Stats Cards Row -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-3 col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+              {% uj_icon "users", "fa-2xl text-primary" %}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="rounded-circle bg-success bg-opacity-10 p-3">
-                {% uj_icon "dollar-sign", "fa-2xl text-success" %}
-              </div>
-            </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="text-muted mb-1">Revenue</h6>
-              <h3 class="mb-0">$45,678</h3>
-              <small class="text-success">
-                {% uj_icon "arrow-up", "fa-sm" %}
-                8% from last month
-              </small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="rounded-circle bg-info bg-opacity-10 p-3">
-                {% uj_icon "chart-line", "fa-2xl text-info" %}
-              </div>
-            </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="text-muted mb-1">Page Views</h6>
-              <h3 class="mb-0">89.3K</h3>
-              <small class="text-danger">
-                {% uj_icon "arrow-down", "fa-sm" %}
-                3% from last month
-              </small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="rounded-circle bg-warning bg-opacity-10 p-3">
-                {% uj_icon "clock", "fa-2xl text-warning" %}
-              </div>
-            </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="text-muted mb-1">Avg. Session</h6>
-              <h3 class="mb-0">3m 42s</h3>
-              <small class="text-success">
-                {% uj_icon "arrow-up", "fa-sm" %}
-                15% from last month
-              </small>
-            </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Total Users</h6>
+            <h3 class="mb-0">1,234</h3>
+            <small class="text-success">
+              {% uj_icon "arrow-up", "fa-sm" %}
+              12% from last month
+            </small>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Charts Row -->
-  <div class="row g-3 mb-4">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Traffic Overview</h5>
-          <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-adaptive active">Week</button>
-            <button type="button" class="btn btn-outline-adaptive">Month</button>
-            <button type="button" class="btn btn-outline-adaptive">Year</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
-            <div class="text-center text-muted">
-              {% uj_icon "chart-area", "fa-4x mb-3" %}
-              <p>Chart will be rendered here</p>
+  <div class="col-lg-3 col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-success bg-opacity-10 p-3">
+              {% uj_icon "dollar-sign", "fa-2xl text-success" %}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">Device Breakdown</h5>
-        </div>
-        <div class="card-body">
-          <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
-            <div class="text-center text-muted">
-              {% uj_icon "chart-pie", "fa-4x mb-3" %}
-              <p>Pie chart will be rendered here</p>
-            </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Revenue</h6>
+            <h3 class="mb-0">$45,678</h3>
+            <small class="text-success">
+              {% uj_icon "arrow-up", "fa-sm" %}
+              8% from last month
+            </small>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Recent Activity -->
-  <div class="row g-3">
-    <div class="col-lg-6">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Recent Orders</h5>
-          <a href="#" class="btn btn-sm btn-outline-adaptive">View All</a>
-        </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>#12345</td>
-                  <td>John Doe</td>
-                  <td>$250.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
-                <tr>
-                  <td>#12346</td>
-                  <td>Jane Smith</td>
-                  <td>$175.50</td>
-                  <td><span class="badge bg-warning">Processing</span></td>
-                </tr>
-                <tr>
-                  <td>#12347</td>
-                  <td>Bob Johnson</td>
-                  <td>$425.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
-                <tr>
-                  <td>#12348</td>
-                  <td>Alice Brown</td>
-                  <td>$90.00</td>
-                  <td><span class="badge bg-info">Shipped</span></td>
-                </tr>
-                <tr>
-                  <td>#12349</td>
-                  <td>Charlie Davis</td>
-                  <td>$320.00</td>
-                  <td><span class="badge bg-danger">Cancelled</span></td>
-                </tr>
-              </tbody>
-            </table>
+  <div class="col-lg-3 col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-info bg-opacity-10 p-3">
+              {% uj_icon "chart-line", "fa-2xl text-info" %}
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Page Views</h6>
+            <h3 class="mb-0">89.3K</h3>
+            <small class="text-danger">
+              {% uj_icon "arrow-down", "fa-sm" %}
+              3% from last month
+            </small>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="col-lg-6">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Recent Users</h5>
-          <a href="#" class="btn btn-sm btn-outline-adaptive">View All</a>
-        </div>
-        <div class="card-body p-0">
-          <div class="list-group list-group-flush">
-            <div class="list-group-item d-flex align-items-center">
-              <div class="avatar bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                {% uj_icon "user", "fa-lg text-primary" %}
-              </div>
-              <div class="flex-grow-1">
-                <h6 class="mb-0">Sarah Wilson</h6>
-                <small class="text-muted">sarah.wilson@example.com</small>
-              </div>
-              <small class="text-muted">2 mins ago</small>
+  <div class="col-lg-3 col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+              {% uj_icon "clock", "fa-2xl text-warning" %}
             </div>
-            <div class="list-group-item d-flex align-items-center">
-              <div class="avatar bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                {% uj_icon "user", "fa-lg text-success" %}
-              </div>
-              <div class="flex-grow-1">
-                <h6 class="mb-0">Michael Chen</h6>
-                <small class="text-muted">m.chen@example.com</small>
-              </div>
-              <small class="text-muted">15 mins ago</small>
-            </div>
-            <div class="list-group-item d-flex align-items-center">
-              <div class="avatar bg-info bg-opacity-10 rounded-circle p-2 me-3">
-                {% uj_icon "user", "fa-lg text-info" %}
-              </div>
-              <div class="flex-grow-1">
-                <h6 class="mb-0">Emma Thompson</h6>
-                <small class="text-muted">emma.t@example.com</small>
-              </div>
-              <small class="text-muted">1 hour ago</small>
-            </div>
-            <div class="list-group-item d-flex align-items-center">
-              <div class="avatar bg-warning bg-opacity-10 rounded-circle p-2 me-3">
-                {% uj_icon "user", "fa-lg text-warning" %}
-              </div>
-              <div class="flex-grow-1">
-                <h6 class="mb-0">David Lee</h6>
-                <small class="text-muted">david.lee@example.com</small>
-              </div>
-              <small class="text-muted">3 hours ago</small>
-            </div>
-            <div class="list-group-item d-flex align-items-center">
-              <div class="avatar bg-danger bg-opacity-10 rounded-circle p-2 me-3">
-                {% uj_icon "user", "fa-lg text-danger" %}
-              </div>
-              <div class="flex-grow-1">
-                <h6 class="mb-0">Lisa Martinez</h6>
-                <small class="text-muted">lisa.m@example.com</small>
-              </div>
-              <small class="text-muted">5 hours ago</small>
-            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Avg. Session</h6>
+            <h3 class="mb-0">3m 42s</h3>
+            <small class="text-success">
+              {% uj_icon "arrow-up", "fa-sm" %}
+              15% from last month
+            </small>
           </div>
         </div>
       </div>
@@ -263,4 +100,163 @@ meta:
   </div>
 </div>
 
-{{ content | uj_content_format }}
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Traffic Overview</h5>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-adaptive active">Week</button>
+          <button type="button" class="btn btn-outline-adaptive">Month</button>
+          <button type="button" class="btn btn-outline-adaptive">Year</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+          <div class="text-center text-muted">
+            {% uj_icon "chart-area", "fa-4x mb-3" %}
+            <p>Chart will be rendered here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Device Breakdown</h5>
+      </div>
+      <div class="card-body">
+        <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+          <div class="text-center text-muted">
+            {% uj_icon "chart-pie", "fa-4x mb-3" %}
+            <p>Pie chart will be rendered here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Orders</h5>
+        <a href="#" class="btn btn-sm btn-outline-adaptive">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#12345</td>
+                <td>John Doe</td>
+                <td>$250.00</td>
+                <td><span class="badge bg-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td>#12346</td>
+                <td>Jane Smith</td>
+                <td>$175.50</td>
+                <td><span class="badge bg-warning">Processing</span></td>
+              </tr>
+              <tr>
+                <td>#12347</td>
+                <td>Bob Johnson</td>
+                <td>$425.00</td>
+                <td><span class="badge bg-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td>#12348</td>
+                <td>Alice Brown</td>
+                <td>$90.00</td>
+                <td><span class="badge bg-info">Shipped</span></td>
+              </tr>
+              <tr>
+                <td>#12349</td>
+                <td>Charlie Davis</td>
+                <td>$320.00</td>
+                <td><span class="badge bg-danger">Cancelled</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Users</h5>
+        <a href="#" class="btn btn-sm btn-outline-adaptive">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          <div class="list-group-item d-flex align-items-center">
+            <div class="avatar bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+              {% uj_icon "user", "fa-lg text-primary" %}
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-0">Sarah Wilson</h6>
+              <small class="text-muted">sarah.wilson@example.com</small>
+            </div>
+            <small class="text-muted">2 mins ago</small>
+          </div>
+          <div class="list-group-item d-flex align-items-center">
+            <div class="avatar bg-success bg-opacity-10 rounded-circle p-2 me-3">
+              {% uj_icon "user", "fa-lg text-success" %}
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-0">Michael Chen</h6>
+              <small class="text-muted">m.chen@example.com</small>
+            </div>
+            <small class="text-muted">15 mins ago</small>
+          </div>
+          <div class="list-group-item d-flex align-items-center">
+            <div class="avatar bg-info bg-opacity-10 rounded-circle p-2 me-3">
+              {% uj_icon "user", "fa-lg text-info" %}
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-0">Emma Thompson</h6>
+              <small class="text-muted">emma.t@example.com</small>
+            </div>
+            <small class="text-muted">1 hour ago</small>
+          </div>
+          <div class="list-group-item d-flex align-items-center">
+            <div class="avatar bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+              {% uj_icon "user", "fa-lg text-warning" %}
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-0">David Lee</h6>
+              <small class="text-muted">david.lee@example.com</small>
+            </div>
+            <small class="text-muted">3 hours ago</small>
+          </div>
+          <div class="list-group-item d-flex align-items-center">
+            <div class="avatar bg-danger bg-opacity-10 rounded-circle p-2 me-3">
+              {% uj_icon "user", "fa-lg text-danger" %}
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-0">Lisa Martinez</h6>
+              <small class="text-muted">lisa.m@example.com</small>
+            </div>
+            <small class="text-muted">5 hours ago</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

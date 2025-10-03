@@ -11,10 +11,10 @@ export function updateAllUI() {
   document.getElementById('product-description').textContent = state.product.description;
 
   // Update selected plan name in billing cycle section
-  const selectedPlanName = document.getElementById('selected-plan-name');
-  if (selectedPlanName) {
+  const $selectedPlanName = document.getElementById('selected-plan-name');
+  if ($selectedPlanName) {
     console.log('Updating selected-plan-name to:', state.product.name);
-    selectedPlanName.textContent = state.product.name;
+    $selectedPlanName.textContent = state.product.name;
   } else {
     console.log('selected-plan-name element not found');
   }
@@ -29,12 +29,12 @@ export function updateAllUI() {
     document.getElementById('annually-price-lg').textContent = `$${annualMonthlyRate}`;
 
     // Update payment text based on selected billing cycle
-    const paymentText = document.getElementById('billing-cycle-payment-text');
-    if (paymentText) {
+    const $paymentText = document.getElementById('billing-cycle-payment-text');
+    if ($paymentText) {
       if (state.billingCycle === 'monthly') {
-        paymentText.textContent = `$${state.product.price_monthly.toFixed(2)} monthly`;
+        $paymentText.textContent = `$${state.product.price_monthly.toFixed(2)} monthly`;
       } else {
-        paymentText.textContent = `$${state.product.price_annually.toFixed(2)} annually`;
+        $paymentText.textContent = `$${state.product.price_annually.toFixed(2)} annually`;
       }
     }
 
@@ -44,9 +44,9 @@ export function updateAllUI() {
     const savingsPercent = Math.round(((monthlyAnnual - annuallyPrice) / monthlyAnnual) * 100);
 
     // Update savings badge text
-    const savingsBadge = document.getElementById('savings-badge');
-    if (savingsBadge) {
-      savingsBadge.textContent = `Save ${savingsPercent}%`;
+    const $savingsBadge = document.getElementById('savings-badge');
+    if ($savingsBadge) {
+      $savingsBadge.textContent = `Save ${savingsPercent}%`;
     }
 
     // Get current pricing
@@ -118,52 +118,52 @@ export function updateAllUI() {
 
 // Update billing cycle button visual states
 function updateBillingCycleButtons() {
-  const monthlyLabel = document.querySelector('label[for="monthly"]');
-  const annuallyLabel = document.querySelector('label[for="annually"]');
-  const monthlyCheckmark = monthlyLabel?.querySelector('span.rounded-circle');
-  const annuallyCheckmark = annuallyLabel?.querySelector('span.rounded-circle');
+  const $monthlyLabel = document.querySelector('label[for="monthly"]');
+  const $annuallyLabel = document.querySelector('label[for="annually"]');
+  const $monthlyCheckmark = $monthlyLabel?.querySelector('span.rounded-circle');
+  const $annuallyCheckmark = $annuallyLabel?.querySelector('span.rounded-circle');
 
-  if (monthlyLabel && annuallyLabel && monthlyCheckmark && annuallyCheckmark) {
+  if ($monthlyLabel && $annuallyLabel && $monthlyCheckmark && $annuallyCheckmark) {
     // Remove any existing selected state
-    monthlyLabel.classList.remove('billing-selected');
-    annuallyLabel.classList.remove('billing-selected');
+    $monthlyLabel.classList.remove('billing-selected');
+    $annuallyLabel.classList.remove('billing-selected');
 
     if (state.billingCycle === 'monthly') {
       // Monthly is selected
       document.getElementById('monthly').checked = true;
-      monthlyLabel.classList.add('billing-selected');
-      monthlyCheckmark.className = 'bg-primary text-light rounded-circle d-inline-flex align-items-center justify-content-center';
-      annuallyCheckmark.className = 'bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center';
+      $monthlyLabel.classList.add('billing-selected');
+      $monthlyCheckmark.className = 'bg-primary text-light rounded-circle d-inline-flex align-items-center justify-content-center';
+      $annuallyCheckmark.className = 'bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center';
     } else {
       // Annually is selected
       document.getElementById('annually').checked = true;
-      annuallyLabel.classList.add('billing-selected');
-      annuallyCheckmark.className = 'bg-primary text-light rounded-circle d-inline-flex align-items-center justify-content-center';
-      monthlyCheckmark.className = 'bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center';
+      $annuallyLabel.classList.add('billing-selected');
+      $annuallyCheckmark.className = 'bg-primary text-light rounded-circle d-inline-flex align-items-center justify-content-center';
+      $monthlyCheckmark.className = 'bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center';
     }
   }
 }
 
 // Update trial badge
 function updateTrialBadge() {
-  const trialBadge = document.getElementById('trial-badge');
-  const trialMessage = document.getElementById('trial-message');
+  const $trialBadge = document.getElementById('trial-badge');
+  const $trialMessage = document.getElementById('trial-message');
 
   if (state.hasFreeTrial) {
-    trialBadge.classList.remove('d-none');
-    trialMessage.textContent = `Start with a ${state.product.free_trial_days}-day free trial`;
+    $trialBadge.classList.remove('d-none');
+    $trialMessage.textContent = `Start with a ${state.product.free_trial_days}-day free trial`;
   } else {
-    trialBadge.classList.add('d-none');
+    $trialBadge.classList.add('d-none');
   }
 }
 
 // Update subscription terms text
 export function updateSubscriptionTerms() {
-  const termsDiv = document.getElementById('subscription-terms');
-  const termsText = document.getElementById('terms-text');
+  const $termsDiv = document.getElementById('subscription-terms');
+  const $termsText = document.getElementById('terms-text');
 
   if (!state.isSubscription) {
-    termsDiv.classList.add('d-none');
+    $termsDiv.classList.add('d-none');
     return;
   }
 
@@ -188,8 +188,8 @@ export function updateSubscriptionTerms() {
 
     const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annually';
 
-    termsText.textContent = `You won't be charged for your free trial. On ${formattedDate}, your ${periodText} subscription will start and you'll be charged $${discountedPrice.toFixed(2)} plus applicable tax. Cancel anytime before then.`;
-    termsDiv.classList.remove('d-none');
+    $termsText.textContent = `You won't be charged for your free trial. On ${formattedDate}, your ${periodText} subscription will start and you'll be charged $${discountedPrice.toFixed(2)} plus applicable tax. Cancel anytime before then.`;
+    $termsDiv.classList.remove('d-none');
   } else {
     // No trial - show regular subscription terms with renewal date
     const periodText = state.billingCycle === 'monthly' ? 'monthly' : 'annually';
@@ -212,8 +212,8 @@ export function updateSubscriptionTerms() {
       year: 'numeric'
     });
 
-    termsText.textContent = `Your ${periodText} subscription will start today and renew on ${formattedRenewalDate} for $${discountedPrice.toFixed(2)} plus applicable tax. Cancel anytime.`;
-    termsDiv.classList.remove('d-none');
+    $termsText.textContent = `Your ${periodText} subscription will start today and renew on ${formattedRenewalDate} for $${discountedPrice.toFixed(2)} plus applicable tax. Cancel anytime.`;
+    $termsDiv.classList.remove('d-none');
   }
 }
 
@@ -230,25 +230,25 @@ export function handleBillingCycleChange(newCycle = null) {
 
 // Show error message
 export function showError(message) {
-  const errorContainer = document.getElementById('checkout-error-container');
-  const errorMessage = document.getElementById('checkout-error-message');
-  const checkoutContent = document.getElementById('checkout-content');
+  const $errorContainer = document.getElementById('checkout-error-container');
+  const $errorMessage = document.getElementById('checkout-error-message');
+  const $checkoutContent = document.getElementById('checkout-content');
 
-  if (errorContainer && errorMessage && checkoutContent) {
-    errorMessage.textContent = message;
-    errorContainer.classList.remove('d-none');
-    checkoutContent.classList.add('d-none');
+  if ($errorContainer && $errorMessage && $checkoutContent) {
+    $errorMessage.textContent = message;
+    $errorContainer.classList.remove('d-none');
+    $checkoutContent.classList.add('d-none');
   }
 }
 
 // Hide preloader with animation
 export function hidePreloader() {
-  const preloader = document.getElementById('checkout-preloader');
-  if (preloader) {
-    preloader.style.opacity = '0';
-    preloader.style.transition = 'opacity 0.3s ease-out';
+  const $preloader = document.getElementById('checkout-preloader');
+  if ($preloader) {
+    $preloader.style.opacity = '0';
+    $preloader.style.transition = 'opacity 0.3s ease-out';
     setTimeout(() => {
-      preloader.remove();
+      $preloader.remove();
     }, 300);
   }
 }
@@ -266,16 +266,16 @@ export function updatePaymentButtonVisibility(paymentManager) {
 
   // Check each payment method and update button visibility
   buttonMappings.forEach(({ paymentMethod, buttonId }) => {
-    const button = document.getElementById(buttonId);
-    if (button) {
+    const $button = document.getElementById(buttonId);
+    if ($button) {
       const isAvailable = paymentManager.isPaymentMethodAvailable(paymentMethod);
 
       if (isAvailable) {
         // Show the button
-        button.classList.remove('d-none');
+        $button.classList.remove('d-none');
       } else {
         // Hide the button
-        button.classList.add('d-none');
+        $button.classList.add('d-none');
       }
     }
   });

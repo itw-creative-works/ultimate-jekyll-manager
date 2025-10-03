@@ -1,0 +1,279 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/iframe
+
+### REGULAR PAGES ###
+meta:
+  title: "Notifications - Admin"
+  description: "Manage system notifications and announcements"
+  breadcrumb: "All Notifications"
+---
+
+<!-- Page Header Actions -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <p class="text-muted mb-0">Manage push notifications, emails, and system announcements</p>
+      </div>
+      <div>
+        <a href="/admin/notifications/new" class="btn btn-adaptive">
+          {% uj_icon "plus", "fa-md me-2" %}
+          Create Notification
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+              {% uj_icon "paper-plane", "fa-lg text-primary" %}
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Sent Today</h6>
+            <h4 class="mb-0">1,842</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-success bg-opacity-10 p-2">
+              {% uj_icon "envelope-open", "fa-lg text-success" %}
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Open Rate</h6>
+            <h4 class="mb-0">68%</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-info bg-opacity-10 p-2">
+              {% uj_icon "mouse-pointer", "fa-lg text-info" %}
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Click Rate</h6>
+            <h4 class="mb-0">24%</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="rounded-circle bg-warning bg-opacity-10 p-2">
+              {% uj_icon "clock", "fa-lg text-warning" %}
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1">Scheduled</h6>
+            <h4 class="mb-0">12</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" data-bs-toggle="tab" type="button">
+      All
+      <span class="badge bg-secondary ms-2">245</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      Push
+      <span class="badge bg-primary ms-2">98</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      Email
+      <span class="badge bg-info ms-2">87</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      SMS
+      <span class="badge bg-success ms-2">34</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" type="button">
+      In-App
+      <span class="badge bg-warning ms-2">26</span>
+    </button>
+  </li>
+</ul>
+
+<!-- Notifications List -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="list-group list-group-flush">
+      {% assign types = "push,email,sms,in-app,email,push,sms,email,push,in-app" | split: "," %}
+      {% assign statuses = "sent,scheduled,draft,sent,sent,scheduled,sent,draft,sent,sent" | split: "," %}
+
+      {% for i in (1..10) %}
+      <div class="list-group-item">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="d-flex align-items-start">
+              <div class="me-3 mt-1">
+                {% if types[forloop.index0] == "push" %}
+                  <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+                    {% uj_icon "mobile", "fa-lg text-primary" %}
+                  </div>
+                {% elsif types[forloop.index0] == "email" %}
+                  <div class="rounded-circle bg-info bg-opacity-10 p-2">
+                    {% uj_icon "envelope", "fa-lg text-info" %}
+                  </div>
+                {% elsif types[forloop.index0] == "sms" %}
+                  <div class="rounded-circle bg-success bg-opacity-10 p-2">
+                    {% uj_icon "comment-sms", "fa-lg text-success" %}
+                  </div>
+                {% else %}
+                  <div class="rounded-circle bg-warning bg-opacity-10 p-2">
+                    {% uj_icon "bell", "fa-lg text-warning" %}
+                  </div>
+                {% endif %}
+              </div>
+              <div>
+                <h6 class="mb-1">
+                  {% if i == 1 %}
+                    Welcome New Users - January Campaign
+                  {% elsif i == 2 %}
+                    System Maintenance Notice
+                  {% elsif i == 3 %}
+                    Special Offer: 50% Discount
+                  {% elsif i == 4 %}
+                    Security Update Required
+                  {% elsif i == 5 %}
+                    Monthly Newsletter
+                  {% else %}
+                    Notification Title {{ i }}
+                  {% endif %}
+                </h6>
+                <p class="text-muted small mb-0">
+                  {% if i == 1 %}
+                    Welcome message sent to all new users who signed up this month
+                  {% elsif i == 2 %}
+                    Scheduled maintenance window notification
+                  {% else %}
+                    Brief description of the notification content...
+                  {% endif %}
+                </p>
+                <div class="mt-2">
+                  <span class="badge bg-{{ types[forloop.index0] == 'push' ? 'primary' : types[forloop.index0] == 'email' ? 'info' : types[forloop.index0] == 'sms' ? 'success' : 'warning' }} me-2">
+                    {{ types[forloop.index0] | upcase }}
+                  </span>
+                  {% if statuses[forloop.index0] == "sent" %}
+                    <span class="badge bg-success">Sent</span>
+                  {% elsif statuses[forloop.index0] == "scheduled" %}
+                    <span class="badge bg-warning">Scheduled</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Draft</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="row text-center">
+              <div class="col">
+                <small class="text-muted d-block">Recipients</small>
+                <span class="fw-semibold">{{ i | times: 234 }}</span>
+              </div>
+              <div class="col">
+                <small class="text-muted d-block">Opened</small>
+                <span class="fw-semibold">{{ i | times: 167 }}</span>
+              </div>
+              <div class="col">
+                <small class="text-muted d-block">Clicked</small>
+                <span class="fw-semibold">{{ i | times: 45 }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2 text-end">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-link" type="button" data-bs-toggle="dropdown">
+                {% uj_icon "ellipsis-vertical", "fa-lg" %}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#">
+                  {% uj_icon "eye", "fa-md me-2" %}
+                  View Details
+                </a></li>
+                <li><a class="dropdown-item" href="#">
+                  {% uj_icon "copy", "fa-md me-2" %}
+                  Duplicate
+                </a></li>
+                <li><a class="dropdown-item" href="#">
+                  {% uj_icon "pen", "fa-md me-2" %}
+                  Edit
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="#">
+                  {% uj_icon "trash", "fa-md me-2" %}
+                  Delete
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <div>
+    Showing 1-10 of 245 notifications
+  </div>
+  <nav>
+    <ul class="pagination mb-0">
+      <li class="page-item disabled">
+        <a class="page-link" href="#">Previous</a>
+      </li>
+      <li class="page-item active">
+        <a class="page-link" href="#">1</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="#">2</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="#">3</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="#">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>

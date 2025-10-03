@@ -1,0 +1,151 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/iframe
+
+### REGULAR PAGES ###
+meta:
+  title: "Create User - Admin"
+  description: "Create a new user account"
+  breadcrumb: "Create User"
+---
+
+<!-- Back Link -->
+<div class="mb-3">
+  <a href="/admin/users" class="text-decoration-none">
+    {% uj_icon "arrow-left", "fa-sm me-2" %}
+    Back to Users
+  </a>
+</div>
+
+<!-- Form Card -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">Create New User</h5>
+  </div>
+  <div class="card-body">
+    <form>
+      <!-- Basic Information -->
+      <h6 class="mb-3">Basic Information</h6>
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="firstName" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="lastName" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+          <input type="email" class="form-control" id="email" required>
+          <div class="form-text">This will be used for login</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="phone" class="form-label">Phone Number</label>
+          <input type="tel" class="form-control" id="phone">
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- Account Settings -->
+      <h6 class="mb-3">Account Settings</h6>
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+          <select class="form-select" id="role" required>
+            <option value="">Select a role...</option>
+            <option value="admin">Administrator</option>
+            <option value="manager">Manager</option>
+            <option value="user" selected>User</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select class="form-select" id="status">
+            <option value="active" selected>Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending Verification</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="password" required>
+            <button class="btn btn-outline-secondary" type="button">
+              {% uj_icon "eye", "fa-md" %}
+            </button>
+          </div>
+          <div class="form-text">Must be at least 8 characters</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" id="confirmPassword" required>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- Permissions -->
+      <h6 class="mb-3">Permissions</h6>
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="canViewDashboard" checked>
+            <label class="form-check-label" for="canViewDashboard">
+              Can view dashboard
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="canManageUsers">
+            <label class="form-check-label" for="canManageUsers">
+              Can manage other users
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="canViewReports" checked>
+            <label class="form-check-label" for="canViewReports">
+              Can view reports
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="canEditSettings">
+            <label class="form-check-label" for="canEditSettings">
+              Can edit system settings
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- Additional Options -->
+      <h6 class="mb-3">Additional Options</h6>
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="sendWelcome" checked>
+            <label class="form-check-label" for="sendWelcome">
+              Send welcome email to user
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="requirePasswordChange">
+            <label class="form-check-label" for="requirePasswordChange">
+              Require password change on first login
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-adaptive" onclick="history.back()">Cancel</button>
+        <button type="submit" class="btn btn-adaptive">
+          {% uj_icon "check", "fa-md me-2" %}
+          Create User
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

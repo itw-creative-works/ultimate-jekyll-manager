@@ -39,11 +39,11 @@ function initializeBootstrapComponents() {
   });
   
   // Show toast on button click
-  const toastTrigger = document.getElementById('liveToastBtn');
-  const toastLiveExample = document.getElementById('liveToast');
-  if (toastTrigger && toastLiveExample) {
-    toastTrigger.addEventListener('click', function () {
-      const toast = new bootstrap.Toast(toastLiveExample);
+  const $toastTrigger = document.getElementById('liveToastBtn');
+  const $toastLiveExample = document.getElementById('liveToast');
+  if ($toastTrigger && $toastLiveExample) {
+    $toastTrigger.addEventListener('click', function () {
+      const toast = new bootstrap.Toast($toastLiveExample);
       toast.show();
     });
   }

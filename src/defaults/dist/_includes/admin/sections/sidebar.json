@@ -46,19 +46,18 @@
         }
       ]
     },
-    // {
-    //   divider: true
-    // },
-    {
-      header: true,
-      label: 'Management Tools'
-    },
     {
       label: 'Firebase Explorer',
       href: '/admin/firebase',
       icon: 'fire'
     },
-
+    // {
+    //   divider: true
+    // },
+    // {
+    //   header: true,
+    //   label: 'Management Tools'
+    // },
     {
       header: true,
       label: 'External Tools'

@@ -299,7 +299,7 @@ function initializeSigninMethodForms() {
 
   if ($passwordForm && !signinMethodForms.has('password')) {
     const formManager = new FormManager($passwordForm, {
-      allowMultipleSubmit: false,
+      allowMultipleSubmissions: false,
       autoDisable: true,
       showSpinner: true,
       submitButtonSuccessText: 'Email Sent'

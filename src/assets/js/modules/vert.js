@@ -194,7 +194,7 @@ const createAdUnit = (config, $currentScript) => {
 
   // Set attributes and classes
   $vertUnit.className = 'uj-vert-unit';
-  $vertUnit.setAttribute('data-wm-bind', '@hide account.subscription.product !== "basic"');
+  $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product !== basic');
 
   // Create the ins element for AdSense
   const $ins = document.createElement('ins');

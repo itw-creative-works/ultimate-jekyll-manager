@@ -12,7 +12,7 @@ export default function (Manager, options) {
   const unauthenticated = config.redirects.unauthenticated;
 
   // Log policy
-  console.log('Auth policy:', policy, {
+  console.log('[Auth] policy:', policy, {
     authenticated,
     unauthenticated
   });
@@ -29,7 +29,7 @@ export default function (Manager, options) {
       const authSignout = url.searchParams.get('authSignout');
 
       // Log
-      console.log('Auth state changed:', state);
+      console.log('[Auth] state changed:', state);
 
       // Set user ID for analytics tracking
       setAnalyticsUserId(user);
@@ -53,7 +53,7 @@ export default function (Manager, options) {
         {
           // Log account age for debugging
           const ageInMinutes = Math.floor(accountAge / 1000 / 60);
-          console.log('Account age:', ageInMinutes, 'minutes');
+          console.log('[Auth] Account age:', ageInMinutes, 'minutes');
         }
         /* @dev-only:end */
 
@@ -89,7 +89,7 @@ export default function (Manager, options) {
       }
     });
   } catch (e) {
-    console.warn('Error setting up auth listener:', e);
+    console.warn('[Auth] Error setting up auth listener:', e);
 
     return;
   }
@@ -110,7 +110,7 @@ function redirect(url, returnUrl) {
   }
 
   // Log
-  console.log('Redirecting to:', newURL.href);
+  console.log('[Auth] Redirecting to:', newURL.href);
 
   // Quit on testing
   // return;
@@ -203,12 +203,12 @@ async function sendUserSignupMetadata(user, webManager) {
     });
 
     // Log
-    console.log('User metadata sent successfully:', response);
+    console.log('[Auth] User metadata sent successfully:', response);
 
     // Mark signup as sent (keep the marketing data for reference)
     webManager.storage().set('marketing.signupSent', true);
   } catch (error) {
-    console.error('Error sending user metadata:', error);
+    console.error('[Auth] Error sending user metadata:', error);
     // Don't throw - we don't want to block the signup flow
   }
 }

@@ -15,16 +15,16 @@ export class FormManager extends EventTarget {
       autoDisable: true, // Auto disable/enable form controls
       showSpinner: true, // Show spinner on submit buttons
       validateOnSubmit: true, // Validate before submission
-      allowMultipleSubmit: true, // Allow multiple submissions
+      allowMultipleSubmissions: true, // Allow multiple submissions
       resetOnSuccess: false, // Reset form after successful submission
-      errorContainer: null, // Selector for error container
-      successContainer: null, // Selector for success container
-      spinnerHTML: '<span class="spinner-border spinner-border-sm me-2"></span>',
+      spinnerHTML: '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>', // Spinner HTML
       submitButtonLoadingText: 'Processing...',
-      submitButtonSuccessText: null, // Text to show on button after successful submission (when allowMultipleSubmit: false)
+      submitButtonSuccessText: null, // Text to show on button after successful submission (when allowMultipleSubmissions: false)
       fieldErrorClass: 'is-invalid',
       fieldSuccessClass: 'is-valid',
       initialState: 'loading', // Initial state: loading, ready, submitting, submitted
+      toastPosition: 'top-center', // Toast position: top-center, top-end, bottom-center, bottom-end, middle-center
+      toastDuration: 5000, // Toast duration in milliseconds
       ...options
     };
 
@@ -98,6 +98,7 @@ export class FormManager extends EventTarget {
         }, 0);
       }
     } else {
+      // If custom initial state was provided, we're done initializing
       this.isInitializing = false;
     }
   }
@@ -140,7 +141,7 @@ export class FormManager extends EventTarget {
     e.preventDefault();
 
     // Check if already submitting
-    if (this.state.status === 'submitting' && !this.config.allowMultipleSubmit) {
+    if (this.state.status === 'submitting' && !this.config.allowMultipleSubmissions) {
       return;
     }
 
@@ -150,11 +151,23 @@ export class FormManager extends EventTarget {
     // Collect form data
     const formData = this.collectFormData();
 
+    /* @dev-only:start */
+    {
+      console.log(`[FormManager] Submit event triggered on ${this.form.id || 'form'}`, formData);
+    }
+    /* @dev-only:end */
+
     // Validate if enabled
     if (this.config.validateOnSubmit) {
       const validation = this.validate(formData);
       if (!validation.isValid) {
         this.showErrors(validation.errors);
+        // Show a summary notification for validation errors
+        const errorCount = Object.keys(validation.errors).length;
+        const message = errorCount === 1
+          ? 'Please correct the error below'
+          : `Please correct the ${errorCount} errors below`;
+        this.showNotification(message, 'danger');
         return;
       }
     }
@@ -183,8 +196,8 @@ export class FormManager extends EventTarget {
         // Default submission (can be overridden by listening to submit event)
         await this.defaultSubmitHandler(formData);
 
-        // Success - set state based on allowMultipleSubmit
-        if (this.config.allowMultipleSubmit) {
+        // Success - set state based on allowMultipleSubmissions
+        if (this.config.allowMultipleSubmissions) {
           this.setFormState('ready');
         } else {
           this.setFormState('submitted');
@@ -317,7 +330,7 @@ export class FormManager extends EventTarget {
         }
         this.hideSubmittingState();
         // Update button text if submitButtonSuccessText is configured
-        if (this.config.submitButtonSuccessText && !this.config.allowMultipleSubmit) {
+        if (this.config.submitButtonSuccessText && !this.config.allowMultipleSubmissions) {
           this.showSuccessButtonText();
         }
         break;
@@ -573,9 +586,20 @@ export class FormManager extends EventTarget {
     const errors = {};
     let isValid = true;
 
+    // Log
+    /* @dev-only:start */
+    {
+      console.log(`[FormManager] Validating form ${this.form.id || 'form'}`, data);
+    }
+    /* @dev-only:end */
+
     // Check required fields
     this.form.querySelectorAll('[required]').forEach(field => {
-      const value = data[field.name];
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
       if (!value || (typeof value === 'string' && !value.trim())) {
         errors[field.name] = `${this.getFieldLabel(field)} is required`;
         isValid = false;
@@ -584,7 +608,11 @@ export class FormManager extends EventTarget {
 
     // Check email fields
     this.form.querySelectorAll('input[type="email"]').forEach(field => {
-      const value = data[field.name];
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
       if (value && !this.isValidEmail(value)) {
         errors[field.name] = 'Please enter a valid email address';
         isValid = false;
@@ -593,10 +621,72 @@ export class FormManager extends EventTarget {
 
     // Check pattern validation
     this.form.querySelectorAll('[pattern]').forEach(field => {
-      const value = data[field.name];
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
       const pattern = new RegExp(field.pattern);
       if (value && !pattern.test(value)) {
         errors[field.name] = field.title || 'Invalid format';
+        isValid = false;
+      }
+    });
+
+    // Check minlength validation
+    this.form.querySelectorAll('[minlength]').forEach(field => {
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
+      const minLength = parseInt(field.minLength);
+      if (value && value.length < minLength) {
+        errors[field.name] = `${this.getFieldLabel(field)} must be at least ${minLength} characters`;
+        isValid = false;
+      }
+    });
+
+    // Check maxlength validation
+    this.form.querySelectorAll('[maxlength]').forEach(field => {
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
+      const maxLength = parseInt(field.maxLength);
+      if (value && value.length > maxLength) {
+        errors[field.name] = `${this.getFieldLabel(field)} must be no more than ${maxLength} characters`;
+        isValid = false;
+      }
+    });
+
+    // Check min validation for number inputs
+    this.form.querySelectorAll('input[type="number"][min]').forEach(field => {
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
+      const min = parseFloat(field.min);
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && numValue < min) {
+        errors[field.name] = `${this.getFieldLabel(field)} must be at least ${min}`;
+        isValid = false;
+      }
+    });
+
+    // Check max validation for number inputs
+    this.form.querySelectorAll('input[type="number"][max]').forEach(field => {
+      // Get value, handling nested fields with dot notation
+      const value = field.name.includes('.')
+        ? this.getNestedValue(data, field.name)
+        : data[field.name];
+
+      const max = parseFloat(field.max);
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && numValue > max) {
+        errors[field.name] = `${this.getFieldLabel(field)} must be no more than ${max}`;
         isValid = false;
       }
     });
@@ -608,8 +698,16 @@ export class FormManager extends EventTarget {
     });
     this.dispatchEvent(customValidation);
 
+    // Update isValid if custom validation added errors
     this.state.isValid = isValid;
     this.state.errors = errors;
+
+    // Log
+    /* @dev-only:start */
+    {
+      console.log(`[FormManager] Validation result for ${this.form.id || 'form'}`, { isValid, errors });
+    }
+    /* @dev-only:end */
 
     return { isValid, errors };
   }
@@ -674,14 +772,14 @@ export class FormManager extends EventTarget {
       firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    // Show in error containers if configured
-    if (this.config.errorContainer) {
-      const containers = document.querySelectorAll(this.config.errorContainer);
-      containers.forEach(container => {
-        const errorList = Object.values(errors).map(e => `<li>${e}</li>`).join('');
-        container.innerHTML = `<ul class="mb-0">${errorList}</ul>`;
-        container.classList.remove('d-none');
-      });
+    // If there are errors that couldn't be attached to fields, show them in a notification
+    const unattachedErrors = Object.entries(errors).filter(([fieldName]) => {
+      return !this.form.querySelector(`[name="${fieldName}"]`);
+    });
+
+    if (unattachedErrors.length > 0) {
+      const errorMessage = unattachedErrors.map(([_, error]) => error).join(', ');
+      this.showNotification(errorMessage, 'danger');
     }
   }
 
@@ -690,7 +788,7 @@ export class FormManager extends EventTarget {
    */
   showNotification(message, type = 'info') {
     const $notification = document.createElement('div');
-    $notification.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5`;
+    $notification.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5 animation-slide-down`;
     $notification.style.zIndex = '9999';
     $notification.innerHTML = `
       ${message}
@@ -718,53 +816,8 @@ export class FormManager extends EventTarget {
       console.error('FormManager Error:', message);
     }
 
-    if (this.config.errorContainer) {
-      // Support both single selector and class selector for multiple containers
-      const containers = document.querySelectorAll(this.config.errorContainer);
-
-      if (containers.length > 0) {
-        // Show error in all containers
-        containers.forEach(container => {
-          container.textContent = message;
-          container.classList.remove('d-none');
-        });
-
-        // Check if any error container is currently in view
-        let hasVisibleError = false;
-        containers.forEach(container => {
-          const rect = container.getBoundingClientRect();
-          if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-            hasVisibleError = true;
-          }
-        });
-
-        // If no error is visible, scroll to the nearest one
-        if (!hasVisibleError && containers.length > 0) {
-          let nearestContainer = null;
-          let nearestDistance = Infinity;
-
-          containers.forEach(container => {
-            const rect = container.getBoundingClientRect();
-            const distance = Math.abs(rect.top + rect.height / 2 - window.innerHeight / 2);
-
-            if (distance < nearestDistance) {
-              nearestDistance = distance;
-              nearestContainer = container;
-            }
-          });
-
-          if (nearestContainer) {
-            nearestContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }
-      } else {
-        // Fallback to notification if container not found
-        this.showNotification(message, 'danger');
-      }
-    } else {
-      // Fallback to notification if no error container configured
-      this.showNotification(message, 'danger');
-    }
+    // Always use notification system
+    this.showNotification(message, 'danger');
   }
 
   /**
@@ -778,15 +831,6 @@ export class FormManager extends EventTarget {
 
     // Remove error messages
     this.form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-
-    // Hide error containers
-    if (this.config.errorContainer) {
-      const containers = document.querySelectorAll(this.config.errorContainer);
-      containers.forEach(container => {
-        container.classList.add('d-none');
-        container.textContent = '';
-      });
-    }
   }
 
   /**
@@ -807,34 +851,14 @@ export class FormManager extends EventTarget {
     if (this.state.errors && field.name) {
       delete this.state.errors[field.name];
     }
-
-    // If no more errors, hide error container
-    if (Object.keys(this.state.errors || {}).length === 0 && this.config.errorContainer) {
-      const containers = document.querySelectorAll(this.config.errorContainer);
-      containers.forEach(container => {
-        container.classList.add('d-none');
-        container.textContent = '';
-      });
-    }
   }
 
   /**
    * Show success message
    */
   showSuccess(message) {
-    if (this.config.successContainer) {
-      const container = document.querySelector(this.config.successContainer);
-      if (container) {
-        container.textContent = message;
-        container.classList.remove('d-none');
-      } else {
-        // Fallback to notification if container not found
-        this.showNotification(message, 'success');
-      }
-    } else {
-      // Fallback to notification if no success container configured
-      this.showNotification(message, 'success');
-    }
+    // Always use notification system
+    this.showNotification(message, 'success');
   }
 
   /**
@@ -864,6 +888,13 @@ export class FormManager extends EventTarget {
         field.value = value;
       }
 
+      // Update internal state data with nested field support
+      if (fieldName.includes('.')) {
+        this.setNestedValue(this.state.data, fieldName, value);
+      } else {
+        this.state.data[fieldName] = value;
+      }
+
       // Trigger change event
       field.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -873,7 +904,10 @@ export class FormManager extends EventTarget {
    * Get field value from state data
    */
   getValue(fieldName) {
-    return this.state.data[fieldName];
+    // Handle nested fields with dot notation
+    return fieldName.includes('.')
+      ? this.getNestedValue(this.state.data, fieldName)
+      : this.state.data[fieldName];
   }
 
   /**

@@ -54,9 +54,8 @@ export default function (Manager) {
   // Initialize signin form
   function initializeSigninForm() {
     formManager = new FormManager('#signin-form', {
-      errorContainer: '.auth-error-alert',
       submitButtonLoadingText: 'Signing in...',
-      allowMultipleSubmit: false,
+      allowMultipleSubmissions: false,
       validateOnSubmit: false, // We'll handle validation manually
       fieldErrorClass: 'is-invalid',
       fieldSuccessClass: 'is-valid'
@@ -86,9 +85,8 @@ export default function (Manager) {
   // Initialize signup form
   function initializeSignupForm() {
     formManager = new FormManager('#signup-form', {
-      errorContainer: '.auth-error-alert',
       submitButtonLoadingText: 'Creating account...',
-      allowMultipleSubmit: false,
+      allowMultipleSubmissions: false,
       validateOnSubmit: false, // We'll handle validation manually
       fieldErrorClass: 'is-invalid',
       fieldSuccessClass: 'is-valid'
@@ -118,11 +116,9 @@ export default function (Manager) {
   // Initialize reset form
   function initializeResetForm() {
     formManager = new FormManager('#reset-form', {
-      errorContainer: '.auth-error-alert',
-      successContainer: '.auth-success-alert',
       submitButtonLoadingText: 'Sending...',
       submitButtonSuccessText: 'Email Sent!',
-      allowMultipleSubmit: false,
+      allowMultipleSubmissions: false,
       validateOnSubmit: true,
       fieldErrorClass: 'is-invalid',
       fieldSuccessClass: 'is-valid'
@@ -290,10 +286,10 @@ export default function (Manager) {
     console.log('Signup FormManager data:', formData);
 
     // Try to get values directly from the input fields as a fallback
-    const emailInput = document.querySelector('#signup-form input[name="email"]');
-    const passwordInput = document.querySelector('#signup-form input[name="password"]');
-    const emailFromInput = emailInput ? emailInput.value : '';
-    const passwordFromInput = passwordInput ? passwordInput.value : '';
+    const $emailInput = document.querySelector('#signup-form input[name="email"]');
+    const $passwordInput = document.querySelector('#signup-form input[name="password"]');
+    const emailFromInput = $emailInput ? $emailInput.value : '';
+    const passwordFromInput = $passwordInput ? $passwordInput.value : '';
 
     const email = formData.email?.trim() || emailFromInput?.trim() || '';
     const password = formData.password || passwordFromInput || '';
@@ -393,10 +389,10 @@ export default function (Manager) {
     console.log('Signin FormManager data:', formData);
 
     // Try to get values directly from the input fields as a fallback
-    const emailInput = document.querySelector('#signin-form input[name="email"]');
-    const passwordInput = document.querySelector('#signin-form input[name="password"]');
-    const emailFromInput = emailInput ? emailInput.value : '';
-    const passwordFromInput = passwordInput ? passwordInput.value : '';
+    const $emailInput = document.querySelector('#signin-form input[name="email"]');
+    const $passwordInput = document.querySelector('#signin-form input[name="password"]');
+    const emailFromInput = $emailInput ? $emailInput.value : '';
+    const passwordFromInput = $passwordInput ? $passwordInput.value : '';
 
     const email = formData.email?.trim() || emailFromInput?.trim() || '';
     const password = formData.password || passwordFromInput || '';
@@ -470,8 +466,8 @@ export default function (Manager) {
     console.log('FormManager data:', formData);
 
     // Try to get email directly from the input field as a fallback
-    const emailInput = document.querySelector('#reset-form input[name="email"]');
-    const emailFromInput = emailInput ? emailInput.value : '';
+    const $emailInput = document.querySelector('#reset-form input[name="email"]');
+    const emailFromInput = $emailInput ? $emailInput.value : '';
     console.log('Email from input directly:', emailFromInput);
 
     const email = formData.email?.trim() || emailFromInput?.trim() || '';

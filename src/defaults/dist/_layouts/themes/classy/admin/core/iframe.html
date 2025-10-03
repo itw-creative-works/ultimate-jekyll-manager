@@ -5,7 +5,7 @@ layout: core/root
 ### THEME CONFIG ###
 theme:
   body:
-    class: "m-0"
+    class: "m-0 p-0 overflow-y-auto"
 
 ### WEB MANAGER CONFIG ###
 web_manager:
@@ -18,22 +18,14 @@ web_manager:
     enabled: false
 ---
 
-<style>
-  /* Iframe-specific styles for content-only pages */
-  body {
-    padding: 1rem;
-    overflow-y: auto;
-  }
+<!-- Main Content -->
+<main id="main-content" class="p-0 {{ page.resolved.theme.main.class | liquify }}" aria-label="Main content">
+  <div class="container-fluid p-0">
+    {{ content | uj_content_format }}
+  </div>
+</main>
 
-  @media (min-width: 992px) {
-    body {
-      padding: 1.5rem;
-    }
-  }
-</style>
-
-{{ content | uj_content_format }}
-
+<!-- Notify parent frame about navigation -->
 <script type="text/javascript">
   // Notify parent frame about navigation
   document.addEventListener('DOMContentLoaded', function() {

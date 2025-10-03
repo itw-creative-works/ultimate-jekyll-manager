@@ -31,16 +31,16 @@ export function calculatePrices() {
   }
 
   // Handle trial discount
-  const trialDiscountRow = document.getElementById('trial-discount-row');
+  const $trialDiscountRow = document.getElementById('trial-discount-row');
   if (state.hasFreeTrial && state.isSubscription) {
     // Show trial discount (full discounted amount)
-    trialDiscountRow.classList.remove('d-none');
+    $trialDiscountRow.classList.remove('d-none');
     document.getElementById('trial-discount-amount').textContent = discountedTotal.toFixed(2);
     state.total = 0; // Free trial means $0 due today
     document.getElementById('total-price').textContent = '$0.00';
   } else {
     // Hide trial discount
-    trialDiscountRow.classList.add('d-none');
+    $trialDiscountRow.classList.add('d-none');
     state.total = discountedTotal;
     document.getElementById('total-price').textContent = `$${discountedTotal.toFixed(2)}`;
   }

@@ -297,7 +297,7 @@ function setupMobileEmailForms() {
       autoDisable: true,
       showSpinner: true,
       validateOnSubmit: true,
-      allowMultipleSubmit: false,
+      allowMultipleSubmissions: false,
       submitButtonLoadingText: 'Sending...',
       submitButtonSuccessText: 'Sent!',
       fieldErrorClass: 'is-invalid',
@@ -313,20 +313,20 @@ function setupMobileEmailForms() {
 // Handle mobile email form submission
 async function handleMobileEmailSubmit(event, platform) {
   event.preventDefault();
-  
+
   const formData = event.detail.data;
   const email = formData.email;
   const formManager = mobileEmailForms[platform];
-  
+
   console.log('Mobile email form submitted:', {
     platform: platform,
     email: email
   });
-  
+
   try {
     // Get API endpoint
     const apiEndpoint = webManager.getApiUrl() + '/backend-manager';
-    
+
     // Send request using wonderful-fetch
     await fetch(apiEndpoint, {
       method: 'POST',
@@ -340,7 +340,7 @@ async function handleMobileEmailSubmit(event, platform) {
       response: 'json',
       timeout: 30000
     });
-    
+
     // Handle successful response
     formManager.showSuccess('Success! Please check your email for the download link.');
     formManager.setFormState('submitted');

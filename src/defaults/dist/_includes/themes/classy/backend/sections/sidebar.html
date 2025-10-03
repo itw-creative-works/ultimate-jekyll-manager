@@ -107,9 +107,18 @@
         {% endif %}
       {% endfor %}
     </ul>
+
+    <!-- Bottom Section -->
+    {% if data.bottom %}
+      <div class="mt-auto px-0">
+        {% if data.bottom.ad.enabled %}
+          <!-- Sidebar Ad -->
+          {% include /modules/adunits/adsense.html type="in-article" %}
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </aside>
-
 
 <!-- Mobile Offcanvas Sidebar -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
@@ -130,8 +139,8 @@
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="offcanvas-body p-3">
-    <ul class="list-unstyled ps-0">
+  <div class="offcanvas-body d-flex flex-column p-3">
+    <ul class="list-unstyled ps-0 flex-fill">
       {% for link in data.links %}
         {% if link.divider %}
           <li class="border-top my-3"></li>
@@ -213,5 +222,15 @@
         {% endif %}
       {% endfor %}
     </ul>
+
+    <!-- Bottom Section -->
+    {% if data.bottom %}
+      <div class="mt-auto pt-3">
+        {% if data.bottom.ad.enabled %}
+          <!-- Mobile Sidebar Ad -->
+          {% include /modules/adunits/adsense.html type="in-article" %}
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </div>

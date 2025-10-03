@@ -37,17 +37,17 @@ const config = {
 
 // Setup billing toggle functionality
 function setupBillingToggle() {
-  const billingRadios = document.querySelectorAll(config.selectors.billingRadios);
-  const amountElements = document.querySelectorAll(config.selectors.amountElements);
-  const billingInfoElements = document.querySelectorAll(config.selectors.billingInfoElements);
-  const pricePerUnitElements = document.querySelectorAll(config.selectors.pricePerUnitElements);
+  const $billingRadios = document.querySelectorAll(config.selectors.billingRadios);
+  const $amountElements = document.querySelectorAll(config.selectors.amountElements);
+  const $billingInfoElements = document.querySelectorAll(config.selectors.billingInfoElements);
+  const $pricePerUnitElements = document.querySelectorAll(config.selectors.pricePerUnitElements);
 
   // Debug log to check if elements are found
-  console.log('Amount elements found:', amountElements.length);
-  console.log('Billing info elements found:', billingInfoElements.length);
-  console.log('Price per unit elements found:', pricePerUnitElements.length);
+  console.log('Amount elements found:', $amountElements.length);
+  console.log('Billing info elements found:', $billingInfoElements.length);
+  console.log('Price per unit elements found:', $pricePerUnitElements.length);
 
-  billingRadios.forEach(radio => {
+  $billingRadios.forEach(radio => {
     radio.addEventListener('change', function() {
       const billingType = this.dataset.billing;
       console.log('Billing type changed to:', billingType);
@@ -56,14 +56,14 @@ function setupBillingToggle() {
       updateToggleButtons(this);
 
       trackPricingToggle(billingType);
-      updatePricing(billingType, amountElements, billingInfoElements, pricePerUnitElements);
+      updatePricing(billingType, $amountElements, $billingInfoElements, $pricePerUnitElements);
     });
   });
 
   // Initialize toggle button styling on page load
-  const checkedRadio = document.querySelector(`${config.selectors.billingRadios}:checked`);
-  if (checkedRadio) {
-    updateToggleButtons(checkedRadio);
+  const $checkedRadio = document.querySelector(`${config.selectors.billingRadios}:checked`);
+  if ($checkedRadio) {
+    updateToggleButtons($checkedRadio);
   }
 }
 
@@ -136,9 +136,9 @@ function updatePricing(billingType, amountElements, billingInfoElements, pricePe
 // Setup plan button click handlers
 function setupPlanButtons() {
   // Select all buttons with data-plan-id attribute
-  const planButtons = document.querySelectorAll('button[data-plan-id]');
+  const $planButtons = document.querySelectorAll('button[data-plan-id]');
 
-  planButtons.forEach(button => {
+  $planButtons.forEach(button => {
     button.addEventListener('click', function() {
       handlePlanSelection(this);
     });

@@ -1,0 +1,282 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/iframe
+
+### REGULAR PAGES ###
+meta:
+  title: "Firebase Explorer - Admin"
+  description: "Explore and manage Firebase data"
+  breadcrumb: "Firebase Explorer"
+---
+
+<!-- Page Header -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <p class="text-muted mb-0">Browse and manage your Firebase Firestore database</p>
+      </div>
+      <div>
+        <button class="btn btn-outline-adaptive me-2" onclick="location.reload()">
+          {% uj_icon "rotate", "fa-md me-2" %}
+          Refresh
+        </button>
+        <button class="btn btn-adaptive">
+          {% uj_icon "plus", "fa-md me-2" %}
+          New Document
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Collections Tree -->
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">Collections</h6>
+      </div>
+      <div class="card-body p-2">
+        <div class="nav flex-column">
+          <a href="#" class="nav-link active px-2 py-1">
+            {% uj_icon "folder", "fa-sm me-2" %}
+            users
+            <span class="badge bg-secondary ms-auto">1,234</span>
+          </a>
+          <a href="#" class="nav-link px-2 py-1">
+            {% uj_icon "folder", "fa-sm me-2" %}
+            products
+            <span class="badge bg-secondary ms-auto">456</span>
+          </a>
+          <a href="#" class="nav-link px-2 py-1">
+            {% uj_icon "folder", "fa-sm me-2" %}
+            orders
+            <span class="badge bg-secondary ms-auto">789</span>
+          </a>
+          <a href="#" class="nav-link px-2 py-1">
+            {% uj_icon "folder", "fa-sm me-2" %}
+            settings
+            <span class="badge bg-secondary ms-auto">12</span>
+          </a>
+          <a href="#" class="nav-link px-2 py-1">
+            {% uj_icon "folder", "fa-sm me-2" %}
+            analytics
+            <span class="badge bg-secondary ms-auto">3,456</span>
+          </a>
+          <a href="#" class="nav-link px-2 py-1">
+            {% uj_icon "folder", "fa-sm me-2" %}
+            notifications
+            <span class="badge bg-secondary ms-auto">245</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Query Builder -->
+    <div class="card mt-3">
+      <div class="card-header">
+        <h6 class="mb-0">Query Builder</h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label small">Where</label>
+          <select class="form-select form-select-sm">
+            <option>Select field...</option>
+            <option>email</option>
+            <option>name</option>
+            <option>createdAt</option>
+            <option>role</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <select class="form-select form-select-sm">
+            <option>==</option>
+            <option>!=</option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+            <option>&gt;=</option>
+            <option>&lt;=</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <input type="text" class="form-control form-control-sm" placeholder="Value">
+        </div>
+        <button class="btn btn-sm btn-adaptive w-100">
+          {% uj_icon "magnifying-glass", "fa-sm me-2" %}
+          Run Query
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents View -->
+  <div class="col-md-9">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0">
+              {% uj_icon "folder-open", "fa-sm me-2" %}
+              users
+            </h6>
+          </div>
+          <div class="d-flex gap-2">
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <span class="input-group-text">
+                {% uj_icon "magnifying-glass", "fa-sm" %}
+              </span>
+              <input type="text" class="form-control" placeholder="Search documents...">
+            </div>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-adaptive active">
+                {% uj_icon "table", "fa-sm" %}
+              </button>
+              <button class="btn btn-outline-adaptive">
+                {% uj_icon "list", "fa-sm" %}
+              </button>
+              <button class="btn btn-outline-adaptive">
+                {% uj_icon "code", "fa-sm" %}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 30px;">
+                  <input class="form-check-input" type="checkbox">
+                </th>
+                <th>Document ID</th>
+                <th>email</th>
+                <th>name</th>
+                <th>role</th>
+                <th>createdAt</th>
+                <th style="width: 50px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in (1..15) %}
+              <tr>
+                <td>
+                  <input class="form-check-input" type="checkbox">
+                </td>
+                <td class="font-monospace small">
+                  {% if i < 10 %}usr00{{ i }}{% else %}usr0{{ i }}{% endif %}abc123xyz
+                </td>
+                <td>user{{ i }}@example.com</td>
+                <td>User {{ i }}</td>
+                <td>
+                  {% if i == 1 %}
+                    <span class="badge bg-primary">admin</span>
+                  {% elsif i < 4 %}
+                    <span class="badge bg-info">manager</span>
+                  {% else %}
+                    <span class="badge bg-secondary">user</span>
+                  {% endif %}
+                </td>
+                <td class="text-muted small">2024-01-{{ i | modulo: 28 | plus: 1 }}</td>
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown">
+                      {% uj_icon "ellipsis-vertical", "fa-sm" %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li><a class="dropdown-item small" href="#">
+                        {% uj_icon "eye", "fa-sm me-2" %}
+                        View
+                      </a></li>
+                      <li><a class="dropdown-item small" href="#">
+                        {% uj_icon "pen", "fa-sm me-2" %}
+                        Edit
+                      </a></li>
+                      <li><a class="dropdown-item small" href="#">
+                        {% uj_icon "copy", "fa-sm me-2" %}
+                        Duplicate
+                      </a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item small text-danger" href="#">
+                        {% uj_icon "trash", "fa-sm me-2" %}
+                        Delete
+                      </a></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <div class="small text-muted">
+            Showing 1-15 of 1,234 documents
+          </div>
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item disabled">
+                <a class="page-link" href="#">Previous</a>
+              </li>
+              <li class="page-item active">
+                <a class="page-link" href="#">1</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">2</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">3</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Detail Modal (Hidden by default) -->
+    <div class="card mt-3" style="display: none;">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Document: usr001abc123xyz</h6>
+          <button class="btn-close"></button>
+        </div>
+      </div>
+      <div class="card-body">
+        <pre class="bg-light p-3 rounded"><code>{
+  "id": "usr001abc123xyz",
+  "email": "user1@example.com",
+  "name": "User 1",
+  "role": "admin",
+  "createdAt": "2024-01-01T10:00:00Z",
+  "lastLogin": "2024-01-15T14:30:00Z",
+  "profile": {
+    "avatar": "https://example.com/avatar.jpg",
+    "bio": "System administrator",
+    "location": "San Francisco, CA"
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Bar -->
+<div class="mt-3">
+  <div class="alert alert-info mb-0">
+    <div class="d-flex align-items-center">
+      {% uj_icon "circle-info", "fa-sm me-2" %}
+      <small>
+        <strong>Project:</strong> my-firebase-project |
+        <strong>Environment:</strong> Production |
+        <strong>Region:</strong> us-central1 |
+        <strong>Last Sync:</strong> 2 minutes ago
+      </small>
+    </div>
+  </div>
+</div>

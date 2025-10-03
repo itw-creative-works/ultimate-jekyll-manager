@@ -29,10 +29,8 @@ function setupForm() {
     autoDisable: true,
     showSpinner: true,
     validateOnSubmit: true,
-    allowMultipleSubmit: false,
+    allowMultipleSubmissions: false,
     resetOnSuccess: true,
-    errorContainer: '.contact-error-alert',
-    successContainer: '.contact-success-alert',
     submitButtonLoadingText: 'Sending...',
     submitButtonSuccessText: 'Message Sent!',
     fieldErrorClass: 'is-invalid',
@@ -41,7 +39,6 @@ function setupForm() {
 
   // Listen to FormManager events
   formManager.addEventListener('submit', handleFormSubmit);
-  formManager.addEventListener('validate', handleValidation);
   formManager.addEventListener('change', handleFieldChange);
 
   // Setup smooth scroll to form
@@ -182,35 +179,6 @@ async function handleFormSubmit(event) {
 
     formManager.showError(errorMessage);
     formManager.setFormState('ready');
-  }
-}
-
-// Handle custom validation
-function handleValidation(event) {
-  const { data, errors } = event.detail;
-
-  // Validate email format
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.email = 'Please enter a valid email address';
-  }
-
-  // Validate message length
-  if (data.message && data.message.trim().length < 10) {
-    errors.message = 'Message must be at least 10 characters long';
-  }
-
-  // Validate first and last name length
-  if (data.first_name && data.first_name.trim().length < 2) {
-    errors.first_name = 'First name must be at least 2 characters';
-  }
-
-  if (data.last_name && data.last_name.trim().length < 2) {
-    errors.last_name = 'Last name must be at least 2 characters';
-  }
-
-  // Check if subject is selected
-  if (!data.subject || data.subject === '') {
-    errors.subject = 'Please select a subject';
   }
 }
 
