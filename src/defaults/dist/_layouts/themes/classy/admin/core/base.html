@@ -6,6 +6,16 @@ layout: themes/classy/backend/core/base
 theme:
   css:
     bundle: "classy"
+
+### WEB MANAGER CONFIG ###
+web_manager:
+  auth:
+    config:
+      policy: "authenticated"
+  cookieConsent:
+    enabled: false
+  chatsy:
+    enabled: false
 ---
 
 {{ content | uj_content_format }}

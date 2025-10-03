@@ -52,9 +52,10 @@
                     <li><hr class="dropdown-divider my-2"></li>
                   {% else %}
                     {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                    {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     <li>
                       {% iftruthy child.href %}
-                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}">
+                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-fw me-3" %}
                           {% endif %}
@@ -81,9 +82,10 @@
         {% else %}
           <!-- Regular Nav Link -->
           {% capture link_active %}{% urlmatches link.href, "active" %}{% endcapture %}
+          {% capture link_attributes %}{% if link.attributes %}{% for attr in link.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
           <li class="mb-1">
             {% iftruthy link.href %}
-              <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}">
+              <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}" {{ link_attributes }}>
                 {% if link.icon %}
                   {% uj_icon link.icon, "fa-fw me-3" %}
                 {% endif %}
@@ -157,9 +159,10 @@
                     <li><hr class="dropdown-divider my-2"></li>
                   {% else %}
                     {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                    {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     <li>
                       {% iftruthy child.href %}
-                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}">
+                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-fw me-3" %}
                           {% endif %}
@@ -185,9 +188,10 @@
           </li>
         {% else %}
           {% capture link_active %}{% urlmatches link.href, "active" %}{% endcapture %}
+          {% capture link_attributes %}{% if link.attributes %}{% for attr in link.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
           <li class="mb-1">
             {% iftruthy link.href %}
-              <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}">
+              <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}" {{ link_attributes }}>
                 {% if link.icon %}
                   {% uj_icon link.icon, "fa-fw me-3" %}
                 {% endif %}

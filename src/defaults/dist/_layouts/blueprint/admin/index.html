@@ -6,8 +6,13 @@ layout: themes/classy/admin/core/minimal
 theme:
   header:
     title:
-      content: "Dashboard"
-      icon: "gauge-high"
+      content: '<span id="admin-page-title">Dashboard</span>'
+      icon: "shield-halved"
+    breadcrumbs:
+      items:
+        - label: "Admin"
+          href: "/admin"
+        - label: '<span id="admin-page-breadcrumb">Dashboard</span>'
 
 ### REGULAR PAGES ###
 meta:
@@ -16,3 +21,397 @@ meta:
   breadcrumb: "Admin"
 ---
 
+<div class="admin-iframe-container w-100 overflow-hidden">
+  <iframe id="admin-content-frame"
+          src="{{ '/admin/dashboard' | relative_url }}"
+          class="w-100 h-100 border-0 d-block"
+          title="Admin Content">
+  </iframe>
+</div>
+
+<script type="text/javascript">
+  // Dynamically calculate iframe height to fill remaining space
+  document.addEventListener('DOMContentLoaded', function() {
+    function resizeIframe() {
+      const container = document.querySelector('.admin-iframe-container');
+      const pageHeader = document.querySelector('.page-header');
+      const mainContent = document.querySelector('#main-content');
+
+      if (!container) {
+        return;
+      }
+
+      // Get the actual position of the iframe container
+      const containerRect = container.getBoundingClientRect();
+      const topPosition = containerRect.top + window.scrollY;
+
+      // Account for:
+      // - Current position from top
+      // - Main content padding bottom (p-3 = 1rem, p-lg-4 = 1.5rem on lg screens)
+      const mainPadding = mainContent ? parseInt(window.getComputedStyle(mainContent).paddingBottom) : 0;
+
+      // Calculate available height
+      const availableHeight = window.innerHeight - topPosition - mainPadding;
+
+      container.style.height = availableHeight + 'px';
+    }
+
+    // Initial resize after a small delay to ensure layout is complete
+    setTimeout(resizeIframe, 50);
+
+    // Resize on window resize
+    window.addEventListener('resize', resizeIframe);
+  });
+</script>
+
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+    const iframe = document.getElementById('admin-content-frame');
+    const sidebar = document.querySelector('.sidebar');
+
+    // Track the last clicked external URL to maintain active state
+    let lastClickedExternalUrl = null;
+
+    // Function to update sidebar active state based on iframe URL
+    function updateSidebarActive(iframeUrl) {
+      if (!sidebar) {
+        console.log('[Admin] No sidebar found');
+        return;
+      }
+
+      console.log('[Admin] Updating sidebar active state for URL:', iframeUrl);
+
+      // Parse the URL to get the path
+      let iframePath;
+      try {
+        const url = new URL(iframeUrl);
+        iframePath = url.pathname;
+        console.log('[Admin] Iframe path:', iframePath);
+      } catch (e) {
+        console.error('[Admin] Error parsing iframe URL:', e);
+        return;
+      }
+
+      // Find ALL links in the sidebar (not just nav-link or dropdown-item)
+      const allLinks = sidebar.querySelectorAll('a[href]');
+      console.log('[Admin] === REMOVING ACTIVE CLASSES ===');
+      console.log('[Admin] Found', allLinks.length, 'total links in sidebar');
+
+      // Log and remove active from each link
+      allLinks.forEach((link, index) => {
+        const hadActive = link.classList.contains('active');
+        if (hadActive) {
+          console.log(`[Admin] Link ${index}: Removing 'active' from:`, link.href, 'Classes before:', link.className);
+        }
+        link.classList.remove('active');
+      });
+
+      // Also remove active from all nav-items
+      const allNavItems = sidebar.querySelectorAll('.nav-item');
+      allNavItems.forEach(item => {
+        if (item.classList.contains('active')) {
+          console.log('[Admin] Removing active from nav-item');
+        }
+        item.classList.remove('active');
+      });
+
+      console.log('[Admin] === SEARCHING FOR MATCHING LINK ===');
+      console.log('[Admin] Looking for path:', iframePath);
+
+      // Find and activate matching link
+      let matchFound = false;
+      allLinks.forEach((link, index) => {
+        const linkHref = link.getAttribute('href');
+
+        console.log(`[Admin] Link ${index}:`, {
+          href: linkHref,
+          className: link.className,
+          textContent: link.textContent.trim()
+        });
+
+        if (!linkHref) {
+          console.log(`[Admin] Link ${index}: No href, skipping`);
+          return;
+        }
+
+        // Normalize paths for comparison (remove trailing slashes)
+        const normalizedLinkPath = linkHref.replace(/\/$/, '');
+        const normalizedIframePath = iframePath.replace(/\/$/, '');
+
+        console.log(`[Admin] Link ${index} comparison:`, {
+          iframePath: normalizedIframePath,
+          linkPath: normalizedLinkPath,
+          exactMatch: normalizedIframePath === normalizedLinkPath,
+          startsWithMatch: normalizedIframePath.startsWith(normalizedLinkPath + '/')
+        });
+
+        // Check for exact match
+        if (normalizedIframePath === normalizedLinkPath) {
+          console.log(`[Admin] === EXACT MATCH FOUND! ===`);
+          console.log(`[Admin] Link ${index}: Adding 'active' to:`, linkHref);
+          console.log(`[Admin] Link element:`, link);
+          console.log(`[Admin] Classes before adding active:`, link.className);
+
+          link.classList.add('active');
+
+          console.log(`[Admin] Classes after adding active:`, link.className);
+          console.log(`[Admin] classList contains 'active'?`, link.classList.contains('active'));
+          matchFound = true;
+
+          // Also activate parent nav-item if it's a nested link
+          const parentNavItem = link.closest('.nav-item');
+          if (parentNavItem) {
+            console.log('[Admin] Also activating parent nav-item');
+            parentNavItem.classList.add('active');
+          }
+
+          // If it's a dropdown item, also activate the parent dropdown toggle
+          const parentDropdown = link.closest('.dropdown');
+          if (parentDropdown) {
+            const dropdownToggle = parentDropdown.querySelector('.nav-link');
+            if (dropdownToggle) {
+              console.log('[Admin] Also activating parent dropdown toggle');
+              dropdownToggle.classList.add('active');
+            }
+          }
+        }
+      });
+
+      if (!matchFound) {
+        console.log('[Admin] === NO MATCH FOUND ===');
+        console.log('[Admin] No matching sidebar link found for path:', iframePath);
+      } else {
+        console.log('[Admin] === ACTIVE STATE UPDATE COMPLETE ===');
+      }
+
+      // Final verification
+      console.log('[Admin] === FINAL VERIFICATION ===');
+      const activeLinks = sidebar.querySelectorAll('a.active');
+      console.log('[Admin] Links with active class:', activeLinks.length);
+      activeLinks.forEach(link => {
+        console.log('[Admin] Active link:', link.href, 'Classes:', link.className);
+      });
+    }
+
+    // Listen for iframe load events
+    iframe.addEventListener('load', function() {
+      console.log('[Admin] Iframe loaded, checking URL...');
+
+      try {
+        // Try to get the actual URL (will fail for cross-origin)
+        const iframeUrl = iframe.contentWindow.location.href;
+        console.log('[Admin] Successfully got iframe URL (same-origin):', iframeUrl);
+        updateSidebarActive(iframeUrl);
+      } catch (e) {
+        // Cross-origin restriction - external site or different domain
+        console.log('[Admin] Cross-origin detected, likely an external site');
+
+        // Update header for external site
+        const breadcrumbEl = document.getElementById('admin-page-breadcrumb');
+        const titleEl = document.getElementById('admin-page-title');
+
+        if (lastClickedExternalUrl) {
+          // Try to extract a reasonable name from the URL
+          try {
+            const url = new URL(lastClickedExternalUrl);
+            const siteName = url.hostname.replace('www.', '').split('.')[0];
+            const formattedName = siteName.charAt(0).toUpperCase() + siteName.slice(1);
+
+            if (breadcrumbEl) breadcrumbEl.textContent = formattedName;
+            if (titleEl) titleEl.textContent = formattedName;
+            console.log('[Admin] Set external site name:', formattedName);
+          } catch (e) {
+            if (breadcrumbEl) breadcrumbEl.textContent = 'External';
+            if (titleEl) titleEl.textContent = 'External';
+          }
+        }
+
+        // Use the last clicked external URL if available
+        const urlToMatch = lastClickedExternalUrl || iframe.src;
+        console.log('[Admin] Using URL for sidebar matching:', urlToMatch);
+
+        // Clear all active states first
+        const allLinks = sidebar.querySelectorAll('a[href]');
+        allLinks.forEach(link => {
+          link.classList.remove('active');
+        });
+
+        // Find and activate the matching external link
+        if (urlToMatch) {
+          allLinks.forEach(link => {
+            const linkHref = link.getAttribute('href');
+
+            // Match against the tracked external URL
+            if (linkHref && linkHref === urlToMatch) {
+              console.log('[Admin] Activating external link in sidebar:', linkHref);
+              link.classList.add('active');
+
+              // Also activate parent elements if nested
+              const parentNavItem = link.closest('.nav-item');
+              if (parentNavItem) {
+                parentNavItem.classList.add('active');
+              }
+
+              // If it's in a dropdown, activate the parent toggle
+              const parentDropdown = link.closest('.dropdown');
+              if (parentDropdown) {
+                const dropdownToggle = parentDropdown.querySelector('.nav-link');
+                if (dropdownToggle) {
+                  dropdownToggle.classList.add('active');
+                }
+              }
+            }
+          });
+        }
+      }
+    });
+
+    // Create a centralized link handler
+    function handleSidebarLink(e) {
+      const link = e.currentTarget;
+      const href = link.getAttribute('href');
+      const target = link.getAttribute('target');
+
+      if (!href) return;
+
+      // Analyze link type
+      const isExternalLink = href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//');
+      const isAdminLink = !isExternalLink && (href.includes('/admin') || href.includes('admin'));
+
+      console.log('[Admin] Link clicked:', {
+        href: href,
+        isExternal: isExternalLink,
+        isAdmin: isAdminLink,
+        target: target
+      });
+
+      // Determine action based on link type and target
+      let action = 'parent'; // default
+
+      if (isAdminLink) {
+        action = 'iframe';
+      } else if (isExternalLink) {
+        if (target === '_self') {
+          action = 'iframe';
+        } else if (target === '_blank') {
+          action = 'new-tab';
+        } else if (target === '_parent' || !target) {
+          action = 'parent';
+        }
+      } else {
+        // Internal non-admin links
+        action = 'parent';
+      }
+
+      console.log('[Admin] Action determined:', action);
+
+      // Execute action
+      switch (action) {
+        case 'iframe':
+          e.preventDefault();
+          e.stopPropagation();
+
+          console.log('[Admin] Loading in iframe:', href);
+
+          // Track if this is an external URL
+          if (isExternalLink) {
+            lastClickedExternalUrl = href;
+            console.log('[Admin] Tracking external URL click:', lastClickedExternalUrl);
+          } else {
+            lastClickedExternalUrl = null;
+          }
+
+          iframe.src = href;
+
+          // Update active state
+          updateSidebarActive(href);
+
+          // Close any open dropdowns
+          const openDropdowns = sidebar.querySelectorAll('.dropdown-menu.show');
+          openDropdowns.forEach(dropdown => {
+            dropdown.classList.remove('show');
+            const toggle = dropdown.previousElementSibling;
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+          });
+
+          // Collapse mobile sidebar if open
+          const sidebarCollapse = sidebar.querySelector('.collapse.show');
+          if (sidebarCollapse && window.innerWidth < 768) {
+            sidebarCollapse.classList.remove('show');
+          }
+
+          break;
+
+        case 'new-tab':
+          // Let default behavior handle it
+          console.log('[Admin] Opening in new tab:', href);
+          break;
+
+        case 'parent':
+          // Let default behavior handle it
+          console.log('[Admin] Navigating parent window to:', href);
+          break;
+      }
+    }
+
+    // Set up sidebar link handlers
+    if (sidebar) {
+      const sidebarLinks = sidebar.querySelectorAll('a[href]');
+      console.log('[Admin] Setting up handlers for', sidebarLinks.length, 'sidebar links');
+
+      sidebarLinks.forEach(link => {
+        // Remove any existing click handlers by cloning
+        const newLink = link.cloneNode(true);
+        link.parentNode.replaceChild(newLink, link);
+
+        // Add our handler
+        newLink.addEventListener('click', handleSidebarLink, true);
+      });
+
+      console.log('[Admin] Sidebar link handlers configured');
+    } else {
+      console.log('[Admin] No sidebar found');
+    }
+
+    // Initial active state
+    updateSidebarActive(iframe.src);
+
+    // Listen for messages from iframe
+    window.addEventListener('message', function(e) {
+      console.log('[Admin] Received message:', e.data);
+
+      // Ignore messages without our prefix
+      if (!e.data || typeof e.data.command !== 'string' || !e.data.command.startsWith('uj:admin:')) {
+        console.log('[Admin] Ignoring message - not our prefix');
+        return;
+      }
+
+      // Handle iframe navigation messages
+      if (e.data.command === 'uj:admin:iframe-navigation' && e.data.payload) {
+        console.log('[Admin] Processing iframe navigation message with payload:', e.data.payload);
+        updateSidebarActive(e.data.payload.url);
+
+        // Update page title and breadcrumb if meta info is provided
+        if (e.data.payload.meta) {
+          const meta = e.data.payload.meta;
+          console.log('[Admin] Updating page header with meta:', meta);
+
+          // Update the breadcrumb text
+          const breadcrumbEl = document.getElementById('admin-page-breadcrumb');
+          if (breadcrumbEl && meta.breadcrumb) {
+            breadcrumbEl.textContent = meta.breadcrumb;
+            console.log('[Admin] Updated breadcrumb to:', meta.breadcrumb);
+          }
+
+          // Optionally also update the title if you want
+          const titleEl = document.getElementById('admin-page-title');
+          if (titleEl && meta.breadcrumb) {
+            // Use breadcrumb for title too, or use meta.title if you prefer
+            titleEl.textContent = meta.breadcrumb;
+            console.log('[Admin] Updated title to:', meta.breadcrumb);
+          }
+        }
+      }
+    });
+  });
+</script>

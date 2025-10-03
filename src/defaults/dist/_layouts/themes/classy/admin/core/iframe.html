@@ -1,0 +1,70 @@
+---
+### ALL PAGES ###
+layout: core/root
+
+### THEME CONFIG ###
+theme:
+  body:
+    class: "m-0"
+
+### WEB MANAGER CONFIG ###
+web_manager:
+  auth:
+    config:
+      policy: "authenticated"
+  cookieConsent:
+    enabled: false
+  chatsy:
+    enabled: false
+---
+
+<style>
+  /* Iframe-specific styles for content-only pages */
+  body {
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  @media (min-width: 992px) {
+    body {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+{{ content | uj_content_format }}
+
+<script type="text/javascript">
+  // Notify parent frame about navigation
+  document.addEventListener('DOMContentLoaded', function() {
+    // If we're not in an iframe, exit early
+    if (window.parent === window) {
+      return;
+    }
+
+    try {
+      // Send current URL to parent
+      window.parent.postMessage({
+        command: 'uj:admin:iframe-navigation',
+        payload: {
+          // URL stuff for setting the href/active link in the sidebar
+          url: window.location.href,
+          host: window.location.host,
+          pathname: window.location.pathname,
+
+          // Configuration object from the iframe
+          config: window.Configuration,
+
+          // Meta information from the iframe
+          meta: {
+            title: "{{ page.resolved.meta.title | liquify | escape }}",
+            description: "{{ page.resolved.meta.description | liquify | escape }}",
+            breadcrumb: "{{ page.resolved.meta.breadcrumb | liquify | escape }}",
+          },
+        }
+      }, '*');
+    } catch (e) {
+      console.error('Could not communicate with parent frame:', e);
+    }
+  });
+</script>
