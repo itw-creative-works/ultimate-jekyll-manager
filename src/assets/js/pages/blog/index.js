@@ -39,8 +39,6 @@ function setupNewsletterForm() {
     resetOnSuccess: true,
     submitButtonLoadingText: 'Subscribing...',
     submitButtonSuccessText: 'Subscribed!',
-    fieldErrorClass: 'is-invalid',
-    fieldSuccessClass: 'is-valid'
   });
 
   // Listen to FormManager events

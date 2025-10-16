@@ -44,9 +44,15 @@ async function initializeNotificationCreator() {
   // Initialize UI elements
   initializeUI();
 
+  // Show loading spinner on user counts initially
+  showUserCountLoading();
+
   // Setup auth listener
   webManager.auth().listen({ account: false }, async (state) => {
     console.log('Auth state for notification creator:', state);
+
+    // Show loading spinner while fetching
+    showUserCountLoading();
 
     // Fetch initial user stats
     await fetchUserStats();
@@ -83,6 +89,11 @@ function initializeUI() {
   // Title character counter
   const $titleInput = document.querySelector('input[name="notification.title"]');
   if ($titleInput) {
+    // Set default value in dev mode
+    if (webManager.isDevelopment()) {
+      $titleInput.value = 'Test Notification Title';
+    }
+
     $titleInput.addEventListener('input', (e) => {
       const length = e.target.value.length;
       const $titleCount = document.querySelector('#title-char-count');
@@ -96,6 +107,11 @@ function initializeUI() {
   // Body character counter
   const $bodyInput = document.querySelector('textarea[name="notification.body"]');
   if ($bodyInput) {
+    // Set default value in dev mode
+    if (webManager.isDevelopment()) {
+      $bodyInput.value = 'This is a test notification body message for development.';
+    }
+
     $bodyInput.addEventListener('input', (e) => {
       const length = e.target.value.length;
       const $bodyCount = document.querySelector('#body-char-count');
@@ -168,10 +184,8 @@ function handleFormChange(event) {
 
 // Handle form submission
 async function handleSubmit(event) {
-  const formData = formManager.getData();
-
-  // Log
-  console.log('Submitting notification with data:', formData);
+  // Get data from event detail if available, otherwise from formManager
+  const formData = event.detail?.data || formManager.getData();
 
   try {
     // Transform data for API
@@ -182,6 +196,7 @@ async function handleSubmit(event) {
       available: { total: stats.totalUsers },
       filtered: { total: stats.filteredUsers }
     };
+
 
     // Call API
     const response = await sendNotification(payload);
@@ -201,30 +216,40 @@ async function handleSubmit(event) {
 
 // Transform data for API
 function transformDataForAPI(formData) {
+  console.log('[Debug] transformDataForAPI called');
+  console.log('[Debug] formData received:', formData);
+  console.log('[Debug] formData.notification:', formData.notification);
+
   const now = new Date();
   const notification = formData.notification || {};
+
+  console.log('[Debug] notification object:', notification);
+  console.log('[Debug] notification.clickAction:', notification.clickAction);
+  console.log('[Debug] typeof notification:', typeof notification);
+  console.log('[Debug] Object.keys(notification):', Object.keys(notification));
 
   // Generate ID
   const id = now.getTime();
 
   // Build click action URL with tracking
-  const clickActionUrl = new URL('https://promo-server.itwcreativeworks.com/redirect/notification');
-  clickActionUrl.searchParams.set('id', id);
-  clickActionUrl.searchParams.set('type', 'notification');
-  clickActionUrl.searchParams.set('url', notification.clickAction);
+  const redirectUrl = new URL('https://promo-server.itwcreativeworks.com/redirect/notification');
+  redirectUrl.searchParams.set('id', id);
+  redirectUrl.searchParams.set('type', 'notification');
+
+  // Make sure we have the actual clickAction value
+  const clickActionValue = notification.clickAction || '';
+  console.log('[Debug] clickActionValue to be set in URL:', clickActionValue);
+  redirectUrl.searchParams.set('url', clickActionValue);
 
   return {
     id: id,
     notification: {
-      icon: notification.icon,
-      title: notification.title,
-      body: notification.body,
-      clickAction: clickActionUrl.toString()
+      icon: notification.icon || '',
+      title: notification.title || '',
+      body: notification.body || '',
+      clickAction: redirectUrl.toString()
     },
-    created: {
-      timestamp: now.toISOString(),
-      timestampUNIX: Math.round(now.getTime() / 1000)
-    },
+    created: now.toISOString(),
     channels: formData.channels || {},
     audience: formData.audience || {},
     schedule: formData.schedule || {}
@@ -266,7 +291,7 @@ async function fetchUserStats() {
     });
 
     // Extract user count from response
-    const total = response?.['notifications.total'] || 0;
+    const total = response?.notifications?.total || 0;
     stats.totalUsers = total;
     stats.filteredUsers = total; // Initially all users
 
@@ -284,7 +309,17 @@ async function fetchUserStats() {
 function updateUserCount() {
   const $countElements = document.querySelectorAll('.notification-user-count');
   $countElements.forEach(el => {
-    el.textContent = `${stats.filteredUsers.toLocaleString()} / ${stats.totalUsers.toLocaleString()}`;
+    // Remove loading spinner and show the count
+    el.innerHTML = `${stats.filteredUsers.toLocaleString()} / ${stats.totalUsers.toLocaleString()}`;
+  });
+}
+
+// Show loading spinner on user count elements
+function showUserCountLoading() {
+  const $countElements = document.querySelectorAll('.notification-user-count');
+  $countElements.forEach(el => {
+    // Add spinner with loading text
+    el.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Loading...';
   });
 }
 
@@ -512,6 +547,7 @@ function clearAutoSubmitCountdown() {
 // Get API functions URL
 function getAPIFunctionsUrl() {
   // Get functions URL from webManager and add the endpoint
+  //@TODO remove this when fixed api url
   return `${webManager.getFunctionsUrl('prod')}/bm_api`;
 }
 

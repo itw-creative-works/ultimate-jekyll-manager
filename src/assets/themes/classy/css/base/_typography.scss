@@ -122,17 +122,6 @@ h6, .h6 {
   line-height: 1.6;
 }
 
-// ============================================
-// Text Effects
-// ============================================
-// Note: .text-gradient is defined in Core CSS (buttons.scss)
-// Only defining theme-specific gradient here
-.text-gradient-aurora {
-  background: $classy-gradient-aurora;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 
 // ============================================
@@ -200,13 +189,3 @@ blockquote {
   font-style: italic;
 }
 
-// ============================================
-// Adaptive Text
-// ============================================
-.text-adaptive {
-  @extend .text-light;
-}
-
-[data-bs-theme="dark"] .text-adaptive {
-  @extend .text-dark;
-}

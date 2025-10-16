@@ -33,8 +33,6 @@ function setupForm() {
     resetOnSuccess: true,
     submitButtonLoadingText: 'Sending...',
     submitButtonSuccessText: 'Message Sent!',
-    fieldErrorClass: 'is-invalid',
-    fieldSuccessClass: 'is-valid'
   });
 
   // Listen to FormManager events

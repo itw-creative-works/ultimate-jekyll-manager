@@ -18,17 +18,16 @@ theme:
 
 <!-- Critical inline CSS to prevent FOUC on cover pages -->
 <style>
-  /* Apply centering styles only while page is loading */
-  html[data-page-loading] main.d-flex {
+  main.d-flex {
     display: flex !important;
     min-height: calc(100vh);
   }
 
-  html[data-page-loading] main.d-flex.align-items-center {
+  main.d-flex.align-items-center {
     align-items: center !important;
   }
 
-  html[data-page-loading] main.d-flex.justify-content-center {
+  main.d-flex.justify-content-center {
     justify-content: center !important;
   }
 </style>

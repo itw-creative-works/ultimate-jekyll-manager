@@ -189,7 +189,7 @@ meta:
                   {% endif %}
                 </p>
                 <div class="mt-2">
-                  <span class="badge bg-{{ types[forloop.index0] == 'push' ? 'primary' : types[forloop.index0] == 'email' ? 'info' : types[forloop.index0] == 'sms' ? 'success' : 'warning' }} me-2">
+                  <span class="badge bg-{% if types[forloop.index0] == 'push' %}primary{% elsif types[forloop.index0] == 'email' %}info{% elsif types[forloop.index0] == 'sms' %}success{% else %}warning{% endif %} me-2">
                     {{ types[forloop.index0] | upcase }}
                   </span>
                   {% if statuses[forloop.index0] == "sent" %}

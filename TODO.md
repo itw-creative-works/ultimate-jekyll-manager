@@ -3,6 +3,13 @@ NEW TODO
 - service working failing to load scripts??
 - test SW on live site (and lighthouse)
 - cloudflare 1y cache on js and css (it's CB anyway so this will never matter)
+- LOGIN NOT WORKING: email and password says its wrong, google just takes you back to the signin page and nothing happens
+- FIx formmanager .getData() it keeps returning an empty object, make it work flawlessyly
+- It keeps testing whether there is a "." every time it reads or writes. just call the getNested and setNested functions and then check for the DOT inside those functions
+- form manager should NOT submit if the button that was clicked is disabled (class or attribute)
+
+REVIEW page
+- Make a rewarded review page. When the user lands there, it explains that they COULD win $25 Amazon giftcard for writing a reivew. They upload the screenshot then it sends them to a fake countdown page where 3 winners are picked every week. So it conts down and tells them to refresht he page. At the end of the week it picks 3 random winners but it should never axtually pick anyone and just tell them to try again next week. But it should look legit.
 
 Make an admin dashboard backend
 
@@ -16,6 +23,8 @@ Admin dashboard backend pages
   * It iwll creat the product in firestore
   * Create the product in stripe, paypal, etc
 
+
+MIGRATIONS
 
 TEST:
 <br>
@@ -101,15 +110,15 @@ facebook-pixel --> meta-pixel
 
 Manager.properties.global, and other Manager.properties (IN UJ TOO!)
 
-IMP
-- src/defaults/dist/_includes/modules/adunits/fallback.html SCRIPT IS PROBABLY MESSED UP
-  - MOVE IT TO A SEPARETE MODULE!
+Notification firestore structure/schema has changed a bit
+
+user:sign-up fetch request has new structure including context
+
+---------
 
 
-INCLUDE THIS in css build process
-- src/defaults/dist/_includes/master/assets/css/defaults.css
-- src/defaults/dist/_includes/master/assets/css/cookieconsent.css
-- social buttons too?? or make our own??
+
+
 
 THINGS TO ADD
 - auto cached translations
@@ -137,6 +146,8 @@ Terms of service
 - https://sentry.io/terms/
 - https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#the-github-terms-of-service
 - https://help.instagram.com/termsofuse
+- https://discord.com/terms
+- Update arbitration: https://www.equifax.com/terms/
 
 prechat-btn
 - should have width and height set to 0px INLINE so it doesnt appear HUGE when loading

@@ -16,8 +16,8 @@
 @use 'core/initialize' as *;
 @use 'core/utilities' as *;
 @use 'core/animations' as *;
-@use 'core/buttons' as *;
 @use 'core/alert' as *;
+@use 'core/exit-popup' as *;
 
 // Import page-specific styles
 @use '_page-specific' as *;

@@ -10,6 +10,21 @@ export default function (Manager, options) {
     }, 16);
   };
 
+  // Attach click listener to prevent clicks on disabled elements
+  document.addEventListener('click', (e) => {
+    const $target = e.target;
+    if ($target.closest('*[disabled], *.disabled, :disabled')) {
+      // Log disabled click attempt
+      console.log('Click prevented (disabled):', $target);
+
+      // Prevent all actions
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      return false;
+    }
+  }, { capture: true });
+
   // Check if the window is already loaded
   if (document.readyState === 'complete') {
     // Already loaded, remove immediately

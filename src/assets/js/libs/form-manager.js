@@ -81,6 +81,27 @@ export class FormManager extends EventTarget {
     // Attach event listeners
     this.attachEventListeners();
 
+    // Handle page show event (when navigating back from OAuth redirect or other navigation)
+    window.addEventListener('pageshow', (event) => {
+      // Check if page was restored from cache (persisted)
+
+      // Log
+      console.log('[FormManager] pageshow event', event);
+
+      // Quit if not persisted
+      if (!event.persisted) {
+        return;
+      }
+
+      // Log
+      console.log('[FormManager] Page restored from cache, resetting form to ready state');
+
+      // Reset form to ready state if it was in submitting state
+      if (this.state.status === 'submitting') {
+        this.setFormState('ready');
+      }
+    });
+
     // Only auto-transition to ready if initialState wasn't explicitly set
     // (meaning it's using the default 'loading' value)
     if (!this.hasCustomInitialState) {
@@ -151,16 +172,29 @@ export class FormManager extends EventTarget {
     // Collect form data
     const formData = this.collectFormData();
 
+    // Build the submit event detail
+    const submitEvent = new CustomEvent('submit', {
+      detail: {
+        data: formData,
+        form: this.form,
+        submitButton: this.clickedSubmitButton
+      },
+      cancelable: true
+    });
+
     /* @dev-only:start */
     {
-      console.log(`[FormManager] Submit event triggered on ${this.form.id || 'form'}`, formData);
+      console.log(`[FormManager] Submit event triggered on ${this.form.id}`, formData, submitEvent.detail.submitButton);
     }
     /* @dev-only:end */
 
     // Validate if enabled
+    console.log('-----1');
     if (this.config.validateOnSubmit) {
+    console.log('-----2');
       const validation = this.validate(formData);
       if (!validation.isValid) {
+    console.log('-----3');
         this.showErrors(validation.errors);
         // Show a summary notification for validation errors
         const errorCount = Object.keys(validation.errors).length;
@@ -176,15 +210,6 @@ export class FormManager extends EventTarget {
     this.setFormState('submitting');
 
     // Emit submit event with the clicked submit button
-    const submitEvent = new CustomEvent('submit', {
-      detail: {
-        data: formData,
-        form: this.form,
-        submitButton: this.clickedSubmitButton
-      },
-      cancelable: true
-    });
-
     this.dispatchEvent(submitEvent);
 
     // Reset clicked button after dispatching event
@@ -489,6 +514,7 @@ export class FormManager extends EventTarget {
   collectFormData() {
     const formData = new FormData(this.form);
     const data = {};
+
 
     // Convert FormData to plain object with support for dot notation
     for (const [key, value] of formData.entries()) {
@@ -808,6 +834,7 @@ export class FormManager extends EventTarget {
   showError(messageOrError) {
     // Handle Error objects and strings
     let message;
+
     if (messageOrError instanceof Error) {
       message = messageOrError.message;
       console.error('FormManager Error:', messageOrError);

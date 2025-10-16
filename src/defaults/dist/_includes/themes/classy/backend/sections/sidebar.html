@@ -40,7 +40,7 @@
             <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="false">
               <span class="d-inline-flex align-items-center">
                 {% if link.icon %}
-                  {% uj_icon link.icon, "fa-fw me-3" %}
+                  {% uj_icon link.icon, "fa-xl me-3" %}
                 {% endif %}
                 {{ link.label }}
               </span>
@@ -57,7 +57,7 @@
                       {% iftruthy child.href %}
                         <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
                           {% if child.icon %}
-                            {% uj_icon child.icon, "fa-fw me-3" %}
+                            {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
                           {{ child.label }}
                           {% if child.badge %}
@@ -68,7 +68,7 @@
                       {% iffalsy child.href %}
                         <button type="button" class="link-body-emphasis d-inline-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
                           {% if child.icon %}
-                            {% uj_icon child.icon, "fa-fw me-3" %}
+                            {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
                           {{ child.label }}
                         </button>
@@ -87,7 +87,7 @@
             {% iftruthy link.href %}
               <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}" {{ link_attributes }}>
                 {% if link.icon %}
-                  {% uj_icon link.icon, "fa-fw me-3" %}
+                  {% uj_icon link.icon, "fa-xl me-3" %}
                 {% endif %}
                 {{ link.label }}
                 {% if link.badge %}
@@ -98,7 +98,7 @@
             {% iffalsy link.href %}
               <button type="button" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 border-0 bg-transparent w-100">
                 {% if link.icon %}
-                  {% uj_icon link.icon, "fa-fw me-3" %}
+                  {% uj_icon link.icon, "fa-xl me-3" %}
                 {% endif %}
                 {{ link.label }}
               </button>
@@ -156,7 +156,7 @@
             <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="false">
               <span class="d-inline-flex align-items-center">
                 {% if link.icon %}
-                  {% uj_icon link.icon, "fa-fw me-3" %}
+                  {% uj_icon link.icon, "fa-xl me-3" %}
                 {% endif %}
                 {{ link.label }}
               </span>
@@ -173,7 +173,7 @@
                       {% iftruthy child.href %}
                         <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
                           {% if child.icon %}
-                            {% uj_icon child.icon, "fa-fw me-3" %}
+                            {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
                           {{ child.label }}
                           {% if child.badge %}
@@ -184,7 +184,7 @@
                       {% iffalsy child.href %}
                         <button type="button" class="link-body-emphasis d-inline-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
                           {% if child.icon %}
-                            {% uj_icon child.icon, "fa-fw me-3" %}
+                            {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
                           {{ child.label }}
                         </button>
@@ -202,7 +202,7 @@
             {% iftruthy link.href %}
               <a href="{{ link.href }}" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 {{ link_active }}" {{ link_attributes }}>
                 {% if link.icon %}
-                  {% uj_icon link.icon, "fa-fw me-3" %}
+                  {% uj_icon link.icon, "fa-xl me-3" %}
                 {% endif %}
                 {{ link.label }}
                 {% if link.badge %}
@@ -213,7 +213,7 @@
             {% iffalsy link.href %}
               <button type="button" class="link-body-emphasis d-flex align-items-center text-decoration-none rounded py-2 px-3 border-0 bg-transparent w-100">
                 {% if link.icon %}
-                  {% uj_icon link.icon, "fa-fw me-3" %}
+                  {% uj_icon link.icon, "fa-xl me-3" %}
                 {% endif %}
                 {{ link.label }}
               </button>

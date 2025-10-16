@@ -9,11 +9,24 @@ export default function (Manager) {
   // Form manager instance
   let formManager = null;
 
+  // Shared FormManager configuration
+  const formManagerConfig = {
+    allowMultipleSubmissions: false,
+    validateOnSubmit: true,
+  };
+
+  // Check query string for popup parameter
+  const url = new URL(window.location.href);
+  const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== window.top;
+
   // Handle DOM ready
   webManager.dom().ready()
   .then(async () => {
     // Check for authSignout parameter first
     await handleAuthSignout(webManager);
+
+    // Initialize the appropriate form based on the page (needs to be done early for error handling)
+    initializePageForm();
 
     // Check for redirect result from OAuth providers
     await handleRedirectResult();
@@ -28,9 +41,6 @@ export default function (Manager) {
 
     // Setup password visibility toggle
     setupPasswordToggle();
-
-    // Initialize the appropriate form based on the page
-    initializePageForm();
   });
 
   // Initialize the form based on current page
@@ -54,11 +64,8 @@ export default function (Manager) {
   // Initialize signin form
   function initializeSigninForm() {
     formManager = new FormManager('#signin-form', {
-      submitButtonLoadingText: 'Signing in...',
-      allowMultipleSubmissions: false,
-      validateOnSubmit: false, // We'll handle validation manually
-      fieldErrorClass: 'is-invalid',
-      fieldSuccessClass: 'is-valid'
+      ...formManagerConfig,
+      submitButtonLoadingText: 'Signing in...'
     });
 
     // Handle form submission
@@ -66,17 +73,34 @@ export default function (Manager) {
       // Prevent FormManager's default submit handler
       e.preventDefault();
 
-      const { submitButton } = e.detail;
+      const { submitButton, data } = e.detail;
       const provider = submitButton?.getAttribute('data-provider');
+
+      // Only validate for email provider
+      if (provider === 'email') {
+        const validation = formManager.validate(data);
+        if (!validation.isValid) {
+          formManager.showErrors(validation.errors);
+          formManager.setFormState('ready');
+          return;
+        }
+      }
 
       try {
         if (provider === 'email') {
-          await handleEmailSignin();
+          // Pass the already collected data to avoid re-collecting from disabled fields
+          await handleEmailSignin(data);
         } else if (provider) {
           await signInWithProvider(provider, 'signin');
         }
       } catch (error) {
-        // Don't call setFormState here - handleEmailSignin already handles it
+        // Set form back to ready state
+        formManager.setFormState('ready');
+
+        // Show the error to the user
+        formManager.showError(error.message || 'An error occurred during sign in');
+
+        // Log for debugging
         console.error('Signin error:', error);
       }
     });
@@ -85,11 +109,8 @@ export default function (Manager) {
   // Initialize signup form
   function initializeSignupForm() {
     formManager = new FormManager('#signup-form', {
-      submitButtonLoadingText: 'Creating account...',
-      allowMultipleSubmissions: false,
-      validateOnSubmit: false, // We'll handle validation manually
-      fieldErrorClass: 'is-invalid',
-      fieldSuccessClass: 'is-valid'
+      ...formManagerConfig,
+      submitButtonLoadingText: 'Creating account...'
     });
 
     // Handle form submission
@@ -97,17 +118,34 @@ export default function (Manager) {
       // Prevent FormManager's default submit handler
       e.preventDefault();
 
-      const { submitButton } = e.detail;
+      const { submitButton, data } = e.detail;
       const provider = submitButton?.getAttribute('data-provider');
+
+      // Only validate for email provider
+      if (provider === 'email') {
+        const validation = formManager.validate(data);
+        if (!validation.isValid) {
+          formManager.showErrors(validation.errors);
+          formManager.setFormState('ready');
+          return;
+        }
+      }
 
       try {
         if (provider === 'email') {
-          await handleEmailSignup();
+          // Pass the already collected data to avoid re-collecting from disabled fields
+          await handleEmailSignup(data);
         } else if (provider) {
           await signInWithProvider(provider, 'signup');
         }
       } catch (error) {
-        // Don't call setFormState here - handleEmailSignup already handles it
+        // Set form back to ready state
+        formManager.setFormState('ready');
+
+        // Show the error to the user
+        formManager.showError(error.message || 'An error occurred during sign up');
+
+        // Log for debugging
         console.error('Signup error:', error);
       }
     });
@@ -116,12 +154,9 @@ export default function (Manager) {
   // Initialize reset form
   function initializeResetForm() {
     formManager = new FormManager('#reset-form', {
+      ...formManagerConfig,
       submitButtonLoadingText: 'Sending...',
-      submitButtonSuccessText: 'Email Sent!',
-      allowMultipleSubmissions: false,
-      validateOnSubmit: true,
-      fieldErrorClass: 'is-invalid',
-      fieldSuccessClass: 'is-valid'
+      submitButtonSuccessText: 'Email Sent!'
     });
 
     // Handle form submission
@@ -129,10 +164,19 @@ export default function (Manager) {
       // Prevent FormManager's default submit handler
       e.preventDefault();
 
+      const { data } = e.detail;
+
       try {
-        await handlePasswordReset();
+        // Pass the already collected data to avoid re-collecting from disabled fields
+        await handlePasswordReset(data);
       } catch (error) {
-        // Don't call setFormState here - handlePasswordReset already handles it
+        // Set form back to ready state
+        formManager.setFormState('ready');
+
+        // Show the error to the user
+        formManager.showError(error.message || 'An error occurred during password reset');
+
+        // Log for debugging
         console.error('Reset error:', error);
       }
     });
@@ -147,22 +191,34 @@ export default function (Manager) {
       // Check for redirect result
       const result = await getRedirectResult(auth);
 
-      if (result && result.user) {
-        console.log('Successfully authenticated via redirect:', result.user.email);
+      // Log results for debugging
+      console.log('Redirect result:', result);
 
-        // Determine the provider from the result
-        const providerId = result.providerId || result.user.providerData?.[0]?.providerId || 'unknown';
+      // If no result, just return
+      if (!result || !result.user) {
+        return;
+      }
 
-        // Track based on whether this is a new user
-        const isNewUser = result.additionalUserInfo?.isNewUser;
-        const pagePath = document.documentElement.getAttribute('data-page-path');
-        const isSignupPage = pagePath === '/signup';
+      console.log('Successfully authenticated via redirect:', result.user.email);
 
-        if (isNewUser || isSignupPage) {
-          trackSignup(providerId, result.user);
-        } else {
-          trackLogin(providerId, result.user);
-        }
+      // Determine the provider from the result
+      const providerId = result.providerId || result.user.providerData?.[0]?.providerId || 'unknown';
+
+      // Track based on whether this is a new user
+      const isNewUser = result.additionalUserInfo?.isNewUser;
+      const pagePath = document.documentElement.getAttribute('data-page-path');
+      const isSignupPage = pagePath === '/signup';
+
+      if (isNewUser || isSignupPage) {
+        trackSignup(providerId, result.user);
+        // Show success message
+        formManager.showSuccess('Account created successfully!');
+        formManager.setFormState('submitted');
+      } else {
+        trackLogin(providerId, result.user);
+        // Show success message
+        formManager.showSuccess('Successfully signed in!');
+        formManager.setFormState('submitted');
       }
     } catch (error) {
       // Only capture unexpected errors to Sentry
@@ -172,17 +228,13 @@ export default function (Manager) {
 
       // Handle specific OAuth errors
       if (error.code === 'auth/account-exists-with-different-credential') {
-        if (formManager) {
-          formManager.showError('An account already exists with the same email address but different sign-in credentials. Try signing in with a different provider.');
-        }
+        formManager.showError('An account already exists with the same email address but different sign-in credentials. Try signing in with a different provider.');
       } else if (error.code === 'auth/popup-blocked') {
-        if (formManager) {
-          formManager.showError('Popup was blocked. Please allow popups for this site and try again.');
-        }
+        formManager.showError('Popup was blocked. Please allow popups for this site and try again.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        formManager.showError('This sign-in method is not enabled.');
       } else if (error.code && error.code !== 'auth/cancelled-popup-request') {
-        if (formManager) {
-          formManager.showError(`Authentication error: ${error.message}`);
-        }
+        formManager.showError(`Authentication error: ${error.message}`);
       }
     }
   }
@@ -280,67 +332,35 @@ export default function (Manager) {
     return userCredential;
   }
 
-  async function handleEmailSignup() {
-    // Get form data from FormManager
-    const formData = formManager.getData();
-    console.log('Signup FormManager data:', formData);
+  async function handleEmailSignup(formData) {
+    // Use the form data passed from the submit event (already validated)
 
-    // Try to get values directly from the input fields as a fallback
-    const $emailInput = document.querySelector('#signup-form input[name="email"]');
-    const $passwordInput = document.querySelector('#signup-form input[name="password"]');
-    const emailFromInput = $emailInput ? $emailInput.value : '';
-    const passwordFromInput = $passwordInput ? $passwordInput.value : '';
+    // Sanitize email by trimming
+    const email = formData.email?.trim() || '';
+    const password = formData.password || '';
 
-    const email = formData.email?.trim() || emailFromInput?.trim() || '';
-    const password = formData.password || passwordFromInput || '';
+    // Import Firebase auth functions
+    const { getAuth, createUserWithEmailAndPassword } = await import('@firebase/auth');
 
-    console.log('Email value:', email, 'Password value:', password);
-
-    // Validate required fields for email signup
-    const errors = {};
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!formManager.isValidEmail(email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-    if (!password) {
-      errors.password = 'Password is required';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-
-    // If validation fails, show errors and return
-    if (Object.keys(errors).length > 0) {
-      formManager.setFormState('ready');
-      formManager.showErrors(errors);
-      return;
-    }
-
+    // Get auth instance and create user
+    const auth = getAuth();
 
     try {
-      // Import Firebase auth functions
-      const { getAuth, createUserWithEmailAndPassword } = await import('@firebase/auth');
-
-      // Get auth instance and create user
-      const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
       // Track signup
       trackSignup('email', userCredential.user);
 
+      // Show success message
+      formManager.showSuccess('Account created successfully!');
+
       // FormManager will handle the success state
       formManager.setFormState('submitted');
     } catch (error) {
-      // Only capture unexpected errors to Sentry (not user errors)
-      if (!isUserError(error.code)) {
-        webManager.sentry().captureException(new Error('Signup error', { cause: error }));
-      }
-
       // Handle Firebase-specific errors
       if (error.code === 'auth/email-already-in-use') {
         // Try to sign in with the same credentials
         try {
-          // Log
           console.log('Email already in use, attempting to sign in instead:', email);
 
           const userCredential = await attemptEmailSignIn(email, password);
@@ -348,145 +368,59 @@ export default function (Manager) {
           // Track this as a login instead of signup
           trackLogin('email', userCredential.user);
 
+          // Show success message
+          formManager.showSuccess('Successfully signed in!');
+
           // Set success state
           formManager.setFormState('submitted');
           return;
         } catch (signInError) {
-          // Only capture unexpected errors to Sentry
-          if (!isUserError(signInError.code)) {
-            webManager.sentry().captureException(new Error('Signin error during signup flow', { cause: signInError }));
-          }
-
-          // If sign in fails, set back to ready and show error
-          formManager.setFormState('ready');
-          formManager.showError('An account with this email already exists');
-          return;
+          // Throw error for outer catch to handle
+          throw new Error('An account with this email already exists');
         }
       }
 
-      // Set form back to ready state for other errors
-      formManager.setFormState('ready');
-
-      // Handle other Firebase-specific errors
-      let errorMessage = 'An error occurred. Please try again.';
-
-      if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password is too weak. Please choose a stronger password';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      // Show error using FormManager
-      formManager.showError(errorMessage);
+      // Re-throw the error to be handled by the form handler
+      throw error;
     }
   }
 
-  async function handleEmailSignin() {
-    // Get form data from FormManager
-    const formData = formManager.getData();
-    console.log('Signin FormManager data:', formData);
+  async function handleEmailSignin(formData) {
+    // Use the form data passed from the submit event (already validated)
 
-    // Try to get values directly from the input fields as a fallback
-    const $emailInput = document.querySelector('#signin-form input[name="email"]');
-    const $passwordInput = document.querySelector('#signin-form input[name="password"]');
-    const emailFromInput = $emailInput ? $emailInput.value : '';
-    const passwordFromInput = $passwordInput ? $passwordInput.value : '';
+    // Sanitize email by trimming
+    const email = formData.email?.trim() || '';
+    const password = formData.password || '';
 
-    const email = formData.email?.trim() || emailFromInput?.trim() || '';
-    const password = formData.password || passwordFromInput || '';
+    // Log
+    console.log('Attempting email sign-in for:', email);
 
-    console.log('Email value:', email, 'Password value:', password);
+    // Sign in with email and password
+    const userCredential = await attemptEmailSignIn(email, password);
 
-    // Validate required fields for email signin
-    const errors = {};
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!formManager.isValidEmail(email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-    if (!password) {
-      errors.password = 'Password is required';
-    }
+    // Track login
+    trackLogin('email', userCredential.user);
 
-    // If validation fails, show errors and return
-    if (Object.keys(errors).length > 0) {
-      formManager.setFormState('ready');
-      formManager.showErrors(errors);
-      return;
-    }
+    // Show success message
+    formManager.showSuccess('Successfully signed in!');
 
-
-    try {
-      // Sign in with email and password
-      const userCredential = await attemptEmailSignIn(email, password);
-
-      // Track login
-      trackLogin('email', userCredential.user);
-
-      // FormManager will handle the success state
-      formManager.setFormState('submitted');
-    } catch (error) {
-      // Only capture unexpected errors to Sentry (not user errors)
-      if (!isUserError(error.code)) {
-        webManager.sentry().captureException(new Error('Login error', { cause: error }));
-      }
-
-      // Set form back to ready state
-      formManager.setFormState('ready');
-
-      // Handle Firebase-specific errors
-      let errorMessage = 'An error occurred. Please try again.';
-
-      if (error.code === 'auth/invalid-credential') {
-        errorMessage = 'Invalid email or password. Please check your credentials and try again';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address';
-      } else if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email address';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password. Please try again';
-      } else if (error.code === 'auth/user-disabled') {
-        errorMessage = 'This account has been disabled';
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many failed attempts. Please try again later';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      // Show error using FormManager
-      formManager.showError(errorMessage);
-    }
+    // FormManager will handle the success state
+    formManager.setFormState('submitted');
   }
 
-  async function handlePasswordReset() {
-    // Get form data from FormManager (already validated)
-    const formData = formManager.getData();
-    console.log('FormManager data:', formData);
+  async function handlePasswordReset(formData) {
+    // Use the form data passed from the submit event (already validated)
 
-    // Try to get email directly from the input field as a fallback
-    const $emailInput = document.querySelector('#reset-form input[name="email"]');
-    const emailFromInput = $emailInput ? $emailInput.value : '';
-    console.log('Email from input directly:', emailFromInput);
+    // Sanitize email by trimming
+    const email = formData.email?.trim() || '';
 
-    const email = formData.email?.trim() || emailFromInput?.trim() || '';
-    console.log('Final email value:', email);
+    // Import Firebase auth functions
+    const { getAuth, sendPasswordResetEmail } = await import('@firebase/auth');
 
-    if (!email) {
-      formManager.setFormState('ready');
-      formManager.showError('Please enter your email address');
-      return;
-    }
-
+    // Get auth instance
+    const auth = getAuth();
 
     try {
-      // Import Firebase auth functions
-      const { getAuth, sendPasswordResetEmail } = await import('@firebase/auth');
-
-      // Get auth instance
-      const auth = getAuth();
-
       // Send password reset email
       await sendPasswordResetEmail(auth, email);
 
@@ -499,11 +433,6 @@ export default function (Manager) {
       // Set form to submitted state
       formManager.setFormState('submitted');
     } catch (error) {
-      // Only capture unexpected errors to Sentry (not user errors)
-      if (!isUserError(error.code)) {
-        webManager.sentry().captureException(new Error('Password reset error', { cause: error }));
-      }
-
       // Handle Firebase-specific errors
       if (error.code === 'auth/user-not-found') {
         // For security, we don't reveal if the user exists
@@ -514,28 +443,13 @@ export default function (Manager) {
         return;
       }
 
-      // Set form back to ready state for other errors
-      formManager.setFormState('ready');
-
-      // Handle other Firebase-specific errors
-      let errorMessage = 'An error occurred. Please try again.';
-
-      if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address';
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many requests. Please try again later';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      // Show error using FormManager
-      formManager.showError(errorMessage);
+      // Re-throw the error to be handled by the form handler
+      throw error;
     }
   }
 
 
   async function signInWithProvider(providerName, action = 'signin') {
-
     try {
       // Import Firebase auth functions and providers
       const {
@@ -549,6 +463,7 @@ export default function (Manager) {
       } = await import('@firebase/auth');
 
       const auth = getAuth();
+
       let provider;
 
       // Create provider based on provider name
@@ -569,39 +484,64 @@ export default function (Manager) {
           throw new Error(`Unsupported provider: ${providerName}`);
       }
 
-      try {
-        // Try popup first for better UX
-        const result = await signInWithPopup(auth, provider);
-        console.log('Successfully authenticated via popup:', result.user.email);
+      // Show warning in dev mode when using redirect
+      if (webManager.isDevelopment() && !useAuthPopup) {
+        webManager.utilities().showNotification(
+          'OAuth redirect may fail in development. Use localhost:4000 or add ?authPopup=true to the URL',
+          {
+            type: 'warning',
+            timeout: 10000 // Show for 10 seconds
+          }
+        );
 
-        // Track based on whether this is a new user
-        const isNewUser = result.additionalUserInfo?.isNewUser;
-        if (isNewUser || action === 'signup') {
-          trackSignup(providerName, result.user);
-        } else {
-          trackLogin(providerName, result.user);
-        }
+        // Wait
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
-        // Set form to submitted state
-        if (formManager) {
+      // Use popup if query parameter is set, otherwise use redirect
+      if (useAuthPopup) {
+        try {
+          // Try popup
+          const result = await signInWithPopup(auth, provider);
+          console.log('Successfully authenticated via popup:', result.user.email);
+
+          // Track based on whether this is a new user
+          const isNewUser = result.additionalUserInfo?.isNewUser;
+          if (isNewUser || action === 'signup') {
+            trackSignup(providerName, result.user);
+            // Show success message
+            formManager.showSuccess('Account created successfully!');
+          } else {
+            trackLogin(providerName, result.user);
+            // Show success message
+            formManager.showSuccess('Successfully signed in!');
+          }
+
+          // Set form to submitted state
           formManager.setFormState('submitted');
-        }
-      } catch (popupError) {
-        // Check if popup was blocked or failed
-        if (popupError.code === 'auth/popup-blocked' ||
-            popupError.code === 'auth/popup-closed-by-user' ||
-            popupError.code === 'auth/cancelled-popup-request') {
+        } catch (popupError) {
+          // Check if popup was blocked or failed
+          if (popupError.code === 'auth/popup-blocked' ||
+              popupError.code === 'auth/popup-closed-by-user' ||
+              popupError.code === 'auth/cancelled-popup-request') {
 
-          console.log('Popup failed, falling back to redirect:', popupError.code);
+            console.log('Popup failed, falling back to redirect:', popupError.code);
 
-          // Fallback to redirect
-          await signInWithRedirect(auth, provider);
-          // Note: This will redirect the user away from the page
-          // The handleRedirectResult function will handle the result when they return
-        } else {
-          // Re-throw other errors
-          throw popupError;
+            // Fallback to redirect
+            await signInWithRedirect(auth, provider);
+            // Note: This will redirect the user away from the page
+            // The handleRedirectResult function will handle the result when they return
+          } else {
+            // Re-throw other errors
+            throw popupError;
+          }
         }
+      } else {
+        // Use redirect by default
+        console.log('Using redirect for authentication');
+        await signInWithRedirect(auth, provider);
+        // Note: This will redirect the user away from the page
+        // The handleRedirectResult function will handle the result when they return
       }
     } catch (error) {
       // Only capture unexpected errors to Sentry
@@ -633,7 +573,9 @@ export default function (Manager) {
         const $inputGroup = $button.closest('.input-group');
         const $passwordInput = $inputGroup.querySelector('input');
 
-        if (!$passwordInput) return;
+        if (!$passwordInput) {
+          return;
+        }
 
         // Toggle the input type
         const currentType = $passwordInput.type;
@@ -644,14 +586,16 @@ export default function (Manager) {
         const $showIcon = $button.querySelector('.uj-password-show');
         const $hideIcon = $button.querySelector('.uj-password-hide');
 
-        if ($showIcon && $hideIcon) {
-          if (newType === 'text') {
-            $showIcon.classList.add('d-none');
-            $hideIcon.classList.remove('d-none');
-          } else {
-            $showIcon.classList.remove('d-none');
-            $hideIcon.classList.add('d-none');
-          }
+        if (!$showIcon || !$hideIcon) {
+          return;
+        }
+
+        if (newType === 'text') {
+          $showIcon.classList.add('d-none');
+          $hideIcon.classList.remove('d-none');
+        } else {
+          $showIcon.classList.remove('d-none');
+          $hideIcon.classList.add('d-none');
         }
       });
     });

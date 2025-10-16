@@ -174,7 +174,7 @@ async function sendUserSignupMetadata(user, webManager) {
     const utmData = webManager.storage().get('marketing.utm', null);
     const signupSent = webManager.storage().get('marketing.signupSent', false);
 
-    // Only proceed if we have some marketing data to send
+    // Only proceed if we haven't sent signup metadata yet
     if (signupSent) {
       return;
     }
@@ -187,6 +187,7 @@ async function sendUserSignupMetadata(user, webManager) {
       // New structure
       affiliateData: affiliateData || {},
       utmData: utmData || {},
+      context: webManager.utilities().getContext(),
     };
 
     // Get server API URL

@@ -39,6 +39,19 @@ src/assets/themes = Theme scss and js files that are can be picked and used by t
 DO NOT USE `bg-light`, `bg-dark`, `text-light`, or `text-dark`. We support BOTH light and dark mode, so instead use `bg-body`, `bg-body-secondary`, `bg-body-tertiary`, `text-body` and for buttons you can use `btn-adaptive` or `btn-outline-adaptive`.
 These classes adapt to light and dark mode automatically.
 
+## Libraries
+I have some library preferences that I want you to follow:
+
+### WebManager
+We use a custom library called `web-manager` to manage various aspects of the site. Please make yourself familiar with it by reviewing it: `/Users/ian/Developer/Repositories/ITW-Creative-Works/web-manager/src`
+It offers various ultities like webManager.auth(), webManager.utilities(), webManager.sentry(), webManager.dom(). You should be using these utilities instead of writing your own code all the time.
+
+## FormManager
+We use a custom library called `form-manager` to manage forms on the site. Please make yourself familiar with it by reviewing it: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/assets/js/libs/form-manager.js`
+* A good example of how to use it is the contact page
+  * HTML: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/defaults/dist/_layouts/themes/classy/frontend/pages/contact.html`
+  * JS: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/assets/js/pages/contact/index.js`
+
 ## Audits
 I may ask you to help me fix problems identified by the AUDIT TASK (@src/gulp/tasks/audit.js)
 * In that case, please LOOK AT THE AUDIT FILES (Which I will provide the location to) and help me fix the issues ONE BY ONE.

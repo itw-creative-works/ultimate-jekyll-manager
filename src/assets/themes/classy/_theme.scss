@@ -46,6 +46,7 @@ $border-radius-pill: 50rem;
 @import 'css/base/variables';
 
 // Import base styles
+@import 'css/base/animations';
 @import 'css/base/backgrounds';
 @import 'css/base/borders';
 @import 'css/base/soft-colors';
@@ -69,6 +70,7 @@ $border-radius-pill: 50rem;
 @import 'css/components/links';
 @import 'css/components/logo-scroll';
 @import 'css/components/spinners';
+@import 'css/components/text';
 
 // Global theme improvements
 body {

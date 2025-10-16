@@ -300,8 +300,6 @@ function setupMobileEmailForms() {
       allowMultipleSubmissions: false,
       submitButtonLoadingText: 'Sending...',
       submitButtonSuccessText: 'Sent!',
-      fieldErrorClass: 'is-invalid',
-      fieldSuccessClass: 'is-valid'
     });
 
     formManager.addEventListener('submit', (e) => handleMobileEmailSubmit(e, platform));

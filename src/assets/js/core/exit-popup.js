@@ -7,7 +7,7 @@ export default function (Manager, options) {
   const config = webManager.config.exitPopup.config;
 
   // Storage key for tracking last shown time
-  const STORAGE_KEY = 'exitPopup.lastShown';
+  const STORAGE_KEY = 'exitPopup.timestamp';
 
   // Check if we should show the popup based on timeout
   const lastShown = webManager.storage().get(STORAGE_KEY, 0);
@@ -23,24 +23,44 @@ export default function (Manager, options) {
     setupMouseLeaveDetection();
   });
 
+  // Make this available on window object in DEV mode for testing
+  /* @dev-only:start */
+  {
+    window.showExitPopup = showExitPopup;
+  }
+  /* @dev-only:end */
+
   function updateModalContent($modal) {
     // Update title
-    const $title = $modal.querySelector('.modal-title');
+    const $title = $modal.querySelector('.modal-exit-title');
     if ($title && config.title) {
       $title.textContent = config.title;
     }
 
-    // Update message
-    const $message = $modal.querySelector('.modal-body p');
+    // Update main message
+    const $message = $modal.querySelector('.modal-exit-message');
     if ($message && config.message) {
       $message.textContent = config.message;
     }
 
-    // Update button
-    const $button = $modal.querySelector('.modal-footer .btn-primary');
+    // Update offer title
+    const $offerTitleText = $modal.querySelector('.modal-exit-offer-title-text');
+    if ($offerTitleText && config.offerTitle) {
+      $offerTitleText.textContent = config.offerTitle;
+    }
+
+    // Update offer description
+    const $offerDesc = $modal.querySelector('.modal-exit-offer-description');
+    if ($offerDesc && config.offerDescription) {
+      $offerDesc.textContent = config.offerDescription;
+    }
+
+    // Update main button
+    const $button = $modal.querySelector('.modal-exit-button');
+    const $buttonText = $modal.querySelector('.modal-exit-button-text');
     if ($button && config.okButton) {
-      if (config.okButton.text) {
-        $button.textContent = config.okButton.text;
+      if ($buttonText && config.okButton.text) {
+        $buttonText.textContent = config.okButton.text;
       }
       if (config.okButton.link) {
         // Add UTM parameters to track exit popup conversions
@@ -50,6 +70,12 @@ export default function (Manager, options) {
         url.searchParams.set('utm_campaign', window.location.pathname);
         $button.href = url.toString();
       }
+    }
+
+    // Update "Maybe later" link text if configured
+    const $dismissLink = $modal.querySelector('.modal-exit-dismiss');
+    if ($dismissLink && config.dismissText) {
+      $dismissLink.textContent = config.dismissText;
     }
 
     // Remove hidden attribute to make modal available
@@ -116,17 +142,29 @@ export default function (Manager, options) {
     try {
       modal.show();
 
+      // Add fade class after modal is shown to avoid conflicts with animation-slide-up
+      $modalElement.addEventListener('shown.bs.modal', () => {
+        $modalElement.classList.add('fade');
+      }, { once: true });
+
       // Track exit popup shown
       trackExitPopupShown();
 
-      // Track button clicks on the exit popup
-      const $button = $modalElement.querySelector('.modal-footer .btn');
+      // Track button clicks on the exit popup (main CTA button)
+      const $button = $modalElement.querySelector('.modal-exit-button');
       if ($button && !$button.hasAttribute('data-exit-popup-tracked')) {
         $button.setAttribute('data-exit-popup-tracked', 'true');
         $button.addEventListener('click', () => {
           trackExitPopupClick();
         });
       }
+
+      // Remove focus from any focused element before hiding to prevent aria-hidden warning
+      $modalElement.addEventListener('hide.bs.modal', () => {
+        if (document.activeElement && $modalElement.contains(document.activeElement)) {
+          document.activeElement.blur();
+        }
+      }, { once: true });
 
       // Track modal dismiss
       $modalElement.addEventListener('hidden.bs.modal', () => {

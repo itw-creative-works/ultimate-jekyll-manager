@@ -34,7 +34,7 @@ theme:
         {% unless page.resolved.theme.header.title.enabled == false %}
           <h1 class="fs-3 fw-semibold mb-2 d-flex align-items-center {{ page.resolved.theme.header.title.class }}">
             {% if page.resolved.theme.header.title.icon %}
-              {% uj_icon page.resolved.theme.header.title.icon, "fa-2xl me-2" %}
+              {% uj_icon page.resolved.theme.header.title.icon, "me-2" %}
             {% endif %}
             {{- page.resolved.theme.header.title.content | default: page.resolved.meta.title | liquify -}}
           </h1>

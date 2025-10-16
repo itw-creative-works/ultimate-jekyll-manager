@@ -126,6 +126,11 @@ async function updateManager() {
   const isUpToDate = version.is(installedVersion, '>=', latestVersion);
   const levelDifference = version.levelDifference(installedVersion, latestVersion);
 
+  // Check if installedVersion is truthy or throw error
+  if (!installedVersion) {
+    throw new Error(`No installed version of ${package.name} found in devDependencies.`);
+  }
+
   // Log
   logVersionCheck(package.name, installedVersion, latestVersion, isUpToDate);
 
@@ -294,9 +299,14 @@ async function createCname() {
 
 // Fetch firebase-auth files
 async function fetchFirebaseAuth() {
-  const app = config.web_manager.firebase.app || {};
-  const projectId = app.projectId || 'ultimate-jekyll';
-  const base = `https://${projectId}.firebaseapp.com`;
+  const app = config.web_manager.firebase.app.config || {};
+  const base = `https://${app.projectId}.firebaseapp.com`;
+
+  // Throw error if no project ID
+  if (!app.projectId) {
+    throw new Error('No Firebase project ID found in config.web_manager.firebase.app.config.projectId');
+  }
+
   const files = [
     {
       remote: '__/auth/handler',
