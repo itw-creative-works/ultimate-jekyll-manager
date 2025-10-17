@@ -7,7 +7,7 @@ asset_path: blog/post
 theme:
   post:
     image:
-      class: "img-fluid rounded-3 w-100 my-4"
+      class: "img-fluid rounded-3 w-100 my-5"
 
 ### WEB MANAGER CONFIG ###
 web_manager:
@@ -144,24 +144,28 @@ web_manager:
 </section>
 
 <!-- Newsletter -->
-<section>
+<section class="py-0">
   <div class="container">
-    <div class="row justify-content-center mb-3 py-lg-8 py-6">
+    <div class="row justify-content-center">
       <div class="col-xl-8 col-lg-8 col-md-12 col-12" data-lazy="@class animation-slide-up">
-        <div class="text-center mb-5">
-          <h2 class="h2 fw-bold">Sign up for our Newsletter</h2>
-          <p class="mb-0 lead">
-            Join our newsletter and get resources, curated content, and inspiration delivered straight to your inbox.
-          </p>
+        <div class="card">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <h2 class="h2 fw-bold">Sign up for our Newsletter</h2>
+              <p class="mb-0 lead">
+                Join our newsletter and get resources, curated content, and inspiration delivered straight to your inbox.
+              </p>
+            </div>
+            <form class="row px-md-8 mx-md-8 gx-2 needs-validation" action="{{ site.url }}/email-subscription">
+              <div class="col">
+                <input type="email" name="email" class="form-control" placeholder="jonsnow@gmail.com" autocomplete="email" required>
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <form class="row px-md-8 mx-md-8 gx-2 needs-validation" action="{{ site.url }}/email-subscription">
-          <div class="col">
-            <input type="email" name="email" class="form-control" placeholder="jonsnow@gmail.com" required>
-          </div>
-          <div class="col-auto">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
       </div>
     </div>
   </div>

@@ -5,14 +5,14 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 ### PAGE CONFIG ###
 # Hero Section
 hero:
-  tagline: "Empower Your Business Growth Today"
-  headline: "The #1 Platform"
-  headline_accent: "for Business Success"
-  description: "Transform your business with powerful tools, expert guidance, and proven strategies. Join thousands of successful companies today."
+  tagline: "Introducing {{ site.brand.name }}"
+  headline: "The #1 Platform for"
+  headline_accent: "Business Success"
+  description: "AI automation for modern businesses made simple."
   primary_button:
     text: "Get Started Free"
     icon: "rocket"
-    href: "/signup"
+    href: "/dashboard"
   secondary_button:
     text: "Explore Solutions"
     icon: "book-open"
@@ -61,13 +61,14 @@ trusted_by:
 
 # Product Demo Section
 product_demo:
-  headline: "See {{ site.brand.name }} in Action"
+  superheadline: "{% uj_icon 'desktop' %} Demo"
+  headline: "See {{ site.brand.name }} in"
+  headline_accent: "Action"
   subheadline: "Explore powerful features that help you succeed"
   tabs:
     - id: "dashboard"
       label: "Dashboard"
-      # video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/sample-demo-1.webm"
-      video: "https://xguihxuzqibwxjnimxev.supabase.co/storage/v1/object/public/videos/marketing/website/supabase-rls.webm"
+      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/16x9/sample-demo-1.webm"
       features:
         - "Easy Setup"
         - "Powerful Tools"
@@ -76,7 +77,7 @@ product_demo:
         - "Simple Interface"
     - id: "analytics"
       label: "Analytics"
-      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/sample-demo-2.webm"
+      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/16x9/sample-demo-2.webm"
       features:
         - "Advanced Analytics"
         - "Custom Reports"
@@ -85,7 +86,7 @@ product_demo:
         - "Team Collaboration"
     - id: "security"
       label: "Security"
-      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/sample-demo-3.webm"
+      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/16x9/sample-demo-3.webm"
       features:
         - "Enterprise Security"
         - "Access Control"
@@ -95,22 +96,26 @@ product_demo:
 
 # Alternating Features Section
 alternating_features:
-  headline: "What Makes {{ site.brand.name }} Different"
+  superheadline: "{% uj_icon 'sparkles' %} Features"
+  headline: "What Makes {{ site.brand.name }}"
+  headline_accent: "Different"
   subheadline: "Powerful features designed to accelerate your success"
   items:
-    - title: "Direct integration"
-      description: "Connect YouTube, Drive, or Dropbox. Your agent automatically detects new uploads, finds the best moments, and creates ready-to-share clips."
-      image: "https://via.placeholder.com/600x400/FF6B6B/FFFFFF?text=Integration"
-    - title: "Amplify Every Post"
-      description: "Our AI finds the moments that resonate most with your audience, turning every upload into a high-impact, shareable clip."
-      image: "https://via.placeholder.com/600x400/4ECDC4/FFFFFF?text=Analytics"
+    - title: "Seamless Integration"
+      description: "Connect with your existing tools and platforms effortlessly. Our system automatically syncs data and streamlines your workflow for maximum efficiency."
+      image: "https://cdn.itwcreativeworks.com/assets/sample/images/demos/1x1/sample-demo-1.svg"
+    - title: "Data-Driven Insights"
+      description: "Make informed decisions with real-time analytics and actionable insights that help you understand what matters most to your business."
+      image: "https://cdn.itwcreativeworks.com/assets/sample/images/demos/1x1/sample-demo-2.svg"
     - title: "Smart Automation"
-      description: "Set it and forget it. Our intelligent system works 24/7 to process your content and deliver results automatically."
-      image: "https://via.placeholder.com/600x400/95E1D3/FFFFFF?text=Automation"
+      description: "Focus on what matters while our intelligent platform handles routine tasks automatically, working 24/7 to keep your business running smoothly."
+      image: "https://cdn.itwcreativeworks.com/assets/sample/images/demos/1x1/sample-demo-3.svg"
 
 # Features Section
 features:
-  headline: "Why Choose {{ site.brand.name }}?"
+  superheadline: "{% uj_icon 'star' %} Benefits"
+  headline: "Why {{ site.brand.name }} is"
+  headline_accent: "Different"
   subheadline: "Everything you need to accelerate your business growth"
   items:
     - title: "Expert Support"
@@ -128,6 +133,7 @@ features:
 
 # Testimonials Section
 testimonials:
+  superheadline: "{% uj_icon 'comments' %} Testimonials"
   headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
   items:
     - quote: "This platform transformed my business. The support is incredible!"
@@ -171,7 +177,9 @@ stats:
 
 # CTA Section
 cta:
-  headline: "Ready to Transform Your Business?"
+  superheadline: "{% uj_icon 'rocket' %} Get Started"
+  headline: "Ready to Transform your"
+  headline_accent: "Business?"
   description: "Join thousands of successful companies who have already accelerated their growth with {{ site.brand.name }}"
   primary_button:
     text: "Start Today"
@@ -279,7 +287,7 @@ cta:
 {% endcomment %}
 
 <!-- Hero Section -->
-<section class="section-full-width bg-gradient-rainbow gradient-animated text-light overflow-hidden position-relative min-vh-90 d-flex align-items-center">
+<section class="section-nearly-full-width bg-gradient-rainbow gradient-animated text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center rounded-bottom-4 shadow-lg">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-10 text-center py-5">
@@ -288,7 +296,7 @@ cta:
 
           <h1 class="h1 fw-900 mb-4">
             {{ page.resolved.hero.headline }}<br>
-            {{ page.resolved.hero.headline_accent }}
+            <span class="text-accent">{{ page.resolved.hero.headline_accent }}</span>
           </h1>
 
           <p class="fs-4 mb-4 opacity-80">
@@ -312,7 +320,7 @@ cta:
 </section>
 
 <!-- Trusted By Section -->
-<section class="overflow-hidden py-5">
+<section class="overflow-hidden pt-7">
   <div class="container-fluid px-0">
     <div class="text-center mb-4" data-lazy="@class animation-slide-up">
       <h3 class="fs-4">{{ page.resolved.trusted_by.headline }}</h3>
@@ -334,7 +342,14 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-2">{{ page.resolved.product_demo.headline }}</h2>
+      {% iftruthy page.resolved.product_demo.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.product_demo.superheadline }}</span>
+      {% endiftruthy %}
+
+      <h2 class="h2 mb-2">
+        {{ page.resolved.product_demo.headline }}
+        <span class="text-accent">{{ page.resolved.product_demo.headline_accent }}</span>
+      </h2>
       <p class="fs-5 text-muted">{{ page.resolved.product_demo.subheadline }}</p>
     </div>
 
@@ -381,7 +396,7 @@ cta:
           </div>
 
           <!-- Video Player -->
-          <div class="card border-0 shadow-lg rounded">
+          <div class="card border-gradient-rainbow shadow-lg rounded">
             <div class="ratio ratio-16x9">
               {% uj_video tab.video, class="w-100 d-block object-fit-cover rounded border-0", style="", controls="false", loop="true", autoplay="true", playsinline="true", muted="true", preload="metadata" %}
             </div>
@@ -396,7 +411,13 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-2">{{ page.resolved.alternating_features.headline }}</h2>
+      {% iftruthy page.resolved.alternating_features.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.alternating_features.superheadline }}</span>
+      {% endiftruthy %}
+      <h2 class="h2 mb-2">
+        {{ page.resolved.alternating_features.headline }}
+        <span class="text-accent">{{ page.resolved.alternating_features.headline_accent }}</span>
+      </h2>
       <p class="fs-5 text-muted">{{ page.resolved.alternating_features.subheadline }}</p>
     </div>
 
@@ -415,7 +436,7 @@ cta:
       <!-- Common content -->
       {% capture image_content %}
         <div class="card border-0 shadow-sm ratio ratio-4x3">
-          <img data-lazy="src" data-src="{{ item.image }}" alt="{{ item.title }}" class="w-100 h-100 object-fit-cover">
+          {% uj_image item.image, class="w-100 h-100 object-fit-cover rounded", style="", alt=item.title %}
         </div>
       {% endcapture %}
 
@@ -424,11 +445,11 @@ cta:
         <p class="fs-5 text-muted mb-0">{{ item.description }}</p>
       {% endcapture %}
 
-      <div class="row align-items-center g-5 {% unless forloop.last %} mb-5 pb-5 {% endunless %}" data-lazy="@class animation-slide-up">
-        <div class="{{ image_col_class }}">
+      <div class="row align-items-center g-5 {% unless forloop.last %} mb-5 pb-5 {% endunless %}">
+        <div class="{{ image_col_class }}" data-lazy="@class animation-slide-up">
           {{ image_content }}
         </div>
-        <div class="{{ text_col_class }}">
+        <div class="{{ text_col_class }}" data-lazy="@class animation-slide-up">
           {{ text_content }}
         </div>
       </div>
@@ -440,8 +461,12 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      {% iftruthy page.resolved.features.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.features.superheadline }}</span>
+      {% endiftruthy %}
       <h2 class="h2 mb-3">
         {{ page.resolved.features.headline }}
+        <span class="text-accent">{{ page.resolved.features.headline_accent }}</span>
       </h2>
       <p class="fs-5 text-muted">{{ page.resolved.features.subheadline }}</p>
     </div>
@@ -468,6 +493,9 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      {% iftruthy page.resolved.testimonials.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.testimonials.superheadline }}</span>
+      {% endiftruthy %}
       <h2 class="h2 mb-3">{{ page.resolved.testimonials.headline }}</h2>
     </div>
 
@@ -549,8 +577,12 @@ cta:
     <div class="rounded-4 p-5 bg-primary bg-gradient text-light text-center" data-lazy="@class animation-slide-up">
       <div class="row justify-content-center">
         <div class="col-lg-8">
+          {% iftruthy page.resolved.cta.superheadline %}
+            <span class="badge text-light p-2 mb-1 fw-semibold text-uppercase small" style="background-color: rgba(255, 255, 255, 0.2);">{{ page.resolved.cta.superheadline }}</span>
+          {% endiftruthy %}
           <h2 class="h2 mb-4">
             {{ page.resolved.cta.headline }}
+            <span class="text-accent">{{ page.resolved.cta.headline_accent }}</span>
           </h2>
           <p class="fs-5 mb-4 opacity-90">
             {{ page.resolved.cta.description }}

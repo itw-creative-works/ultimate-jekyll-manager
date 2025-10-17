@@ -8,11 +8,12 @@
         {% capture logo_src %}{% if data.logo.src %}{{ data.logo.src }}{% else %}{{ site.brand.images.brandmark | default: null }}{% endif %}{% endcapture %}
         {% capture logo_text %}{{ data.logo.text | default: site.brand.name | liquify }}{% endcapture %}
         {% capture logo_description %}{{ data.logo.description | default: site.brand.description | liquify }}{% endcapture %}
+        {% capture logo_class %}{{ data.logo.class }}{% endcapture %}
 
         <div class="h5 mb-3">
           <a class="d-flex align-items-center text-decoration-none text-body" href="{{ logo_href }}">
             {% if logo_src and logo_src != '' and logo_src != 'null' %}
-              <div class="avatar avatar-md me-2">
+              <div class="avatar avatar-md me-2 {{ logo_class }}">
                 <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ logo_src }}" alt="{{ logo_text }} Logo"/>
               </div>
             {% endif %}

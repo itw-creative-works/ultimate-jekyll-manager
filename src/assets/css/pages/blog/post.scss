@@ -1,0 +1,27 @@
+/*
+ * Blog Post Page Styles
+ * Styles specific to individual blog post pages
+ */
+
+// Article content styles
+article .blog-post-content {
+  // Increase spacing above headings within article content
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 2.5rem;
+  }
+
+  // .uj-vert-unit {
+  //   margin-top: 2.5rem;
+  //   margin-bottom: 2.5rem;
+  // }
+
+  // First heading shouldn't have extra top margin
+  // > :first-child {
+  //   margin-top: 0;
+  // }
+}

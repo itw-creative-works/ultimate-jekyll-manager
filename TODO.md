@@ -25,11 +25,16 @@ ok now were working on THIS PAGE. first, do our main checks like
 * that there are no named items that could be arrays, etc
 * all sections in HTML have a frontmatter section that controls the content
 * all sections are standardized like have a heading, subheading, items, etc. dont add these if they dont make sense, but ensure that if there is HTML content hardcoded that it is converted to frontmatter content
-* ONLY HERO section should have an accent gradient in the heading, other ssections should NOT have this
+* ONLY HERO section should have an accent gradient in the heading, other ssections should NOT have this. However, other sections can have text-accent which is the cursive/brutalism accent. FOr this, only the LAST WORD should be accented and if the last word is the BRAND, it sholuld be reworded so the last word is NOT the brand name
 
 
 *** LEFT OFF ON PRICING
 
+FIX SIGNIN/SINGUP FORM
+
+https://192.168.86.69:4000/payment/checkout?product=premium&_test_trialEligible=true&_test_appId=dev&_test_cardProcessor=stripe
+
+filter-adaptive-inverse
 
 REVIEW page
 - Make a rewarded review page. When the user lands there, it explains that they COULD win $25 Amazon giftcard for writing a reivew. They upload the screenshot then it sends them to a fake countdown page where 3 winners are picked every week. So it conts down and tells them to refresht he page. At the end of the week it picks 3 random winners but it should never axtually pick anyone and just tell them to try again next week. But it should look legit.
