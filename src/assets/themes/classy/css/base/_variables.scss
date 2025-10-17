@@ -42,6 +42,12 @@ $classy-off-white: #FAFBFC;
 $classy-cream: #FFF9F5;
 
 // ============================================
+// Background Colors (Bootstrap Defaults)
+// ============================================
+$classy-bg-light: #ffffff;  // Bootstrap's default light mode background
+$classy-bg-dark: #212529;   // Bootstrap's default dark mode background
+
+// ============================================
 // Gradient Definitions
 // ============================================
 $classy-gradient-primary: linear-gradient(135deg, $classy-primary 0%, $classy-accent 100%);
@@ -49,6 +55,7 @@ $classy-gradient-dark: linear-gradient(135deg, $classy-dark 0%, $classy-dark-800
 $classy-gradient-light: linear-gradient(135deg, $classy-white 0%, $classy-off-white 100%);
 $classy-gradient-sunset: linear-gradient(135deg, #FF6B6B 0%, #FFB84D 100%);
 $classy-gradient-aurora: linear-gradient(135deg, #5B47FB 0%, #00D4FF 50%, #FF6B6B 100%);
+$classy-gradient-rainbow: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
 
 // ============================================
 // Typography Scale

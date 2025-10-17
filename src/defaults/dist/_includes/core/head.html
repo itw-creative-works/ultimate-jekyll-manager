@@ -24,7 +24,11 @@
   {% assign page-robots = "noindex" %}
 {%- endif -%}
 
-{% capture page-css-path %}/assets/css/pages{{ page.canonical.path }}/index.bundle.css{% endcapture %}
+{% if page.canonical.path == "/" %}
+  {% capture page-css-path %}/assets/css/pages/index.bundle.css{% endcapture %}
+{% else %}
+  {% capture page-css-path %}/assets/css/pages{{ page.canonical.path }}/index.bundle.css{% endcapture %}
+{% endif %}
 
 <!-- Assign Default Dynamic Variables -->
 {% assign page-title = page.resolved.meta.title | liquify %}

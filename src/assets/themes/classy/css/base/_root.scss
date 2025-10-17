@@ -1,0 +1,17 @@
+// Classy Theme Root Overrides
+// Override Bootstrap CSS custom properties (CSS variables)
+
+// ============================================
+// Light Mode (Default)
+// ============================================
+:root,
+[data-bs-theme="light"] {
+  --bs-body-bg: #{$classy-bg-light};
+}
+
+// ============================================
+// Dark Mode
+// ============================================
+[data-bs-theme="dark"] {
+  --bs-body-bg: #{$classy-bg-dark};
+}

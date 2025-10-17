@@ -3,128 +3,132 @@
 layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### PAGE CONFIG ###
-# Top-level configuration for price per unit calculation
-price_per_unit:
-  enabled: true
-  feature_id: "credits"  # Which feature to calculate price per unit for
-  label: "credit"  # What to call the unit (e.g., "credit", "user", "GB")
+# Pricing Section
+pricing:
+  price_per_unit:
+    enabled: true
+    feature_id: "credits"  # Which feature to calculate price per unit for
+    label: "credit"  # What to call the unit (e.g., "credit", "user", "GB")
+  plans:
+    - id: "basic"
+      name: Basic
+      tagline: "best for getting started"
+      url: "/download"  # URL for free plan signup
+      pricing:
+        monthly: 0
+        annually: 0
+      features:
+        - id: "credits"
+          name: "Credits"
+          value: 1
+          icon: "sparkles"
+        - id: "exports"
+          name: "Exports"
+          value: "Watermarked"
+          icon: "download"
 
-plans:
-  - id: "basic"
-    name: Basic
-    tagline: "best for getting started"
-    url: "/download"  # URL for free plan signup
-    pricing:
-      monthly: 0
-      annually: 0
-    features:
-      - id: "credits"
-        name: "Credits"
-        value: 1
-        icon: "sparkles"
-      - id: "exports"
-        name: "Exports"
-        value: "Watermarked"
-        icon: "download"
+    - id: "starter"
+      name: Starter
+      tagline: "best for individuals"
+      pricing:
+        monthly: 28
+        annually: 276  # Total annual price (~20% off monthly)
+      features:
+        - id: "credits"
+          name: "Credits"
+          value: 10
+          icon: "sparkles"
+        - id: "exports"
+          name: "Exports"
+          value: "Unlimited"
+          icon: "download"
+        - id: "api_access"
+          name: "API Access"
+          value: "Full"
+          icon: "code"
+        - id: "priority_support"
+          name: "Priority Support"
+          value: "24/7"
+          icon: "headset"
 
-  - id: "starter"
-    name: Starter
-    tagline: "best for individuals"
-    pricing:
-      monthly: 28
-      annually: 276  # Total annual price (~20% off monthly)
-    features:
-      - id: "credits"
-        name: "Credits"
-        value: 10
-        icon: "sparkles"
-      - id: "exports"
-        name: "Exports"
-        value: "Unlimited"
-        icon: "download"
-      - id: "api_access"
-        name: "API Access"
-        value: "Full"
-        icon: "code"
-      - id: "priority_support"
-        name: "Priority Support"
-        value: "24/7"
-        icon: "headset"
+    - id: "pro"
+      name: Pro
+      tagline: "best for small businesses"
+      popular: true
+      pricing:
+        monthly: 50
+        annually: 504  # Total annual price (~16% off monthly)
+      features:
+        - id: "credits"
+          name: "Credits"
+          value: 40
+          icon: "sparkles"
+        - id: "exports"
+          name: "Exports"
+          value: "Unlimited"
+          icon: "download"
 
-  - id: "pro"
-    name: Pro
-    tagline: "best for small businesses"
-    popular: true
-    pricing:
-      monthly: 50
-      annually: 504  # Total annual price (~16% off monthly)
-    features:
-      - id: "credits"
-        name: "Credits"
-        value: 40
-        icon: "sparkles"
-      - id: "exports"
-        name: "Exports"
-        value: "Unlimited"
-        icon: "download"
-
-  - id: "max"
-    name: Max
-    tagline: "best for growing businesses"
-    pricing:
-      monthly: 100
-      annually: 960  # Total annual price (20% off monthly)
-    features:
-      - id: "credits"
-        name: "Credits"
-        value: 100
-        icon: "sparkles"
-      - id: "exports"
-        name: "Exports"
-        value: "Unlimited"
-        icon: "download"
-      - id: "team_collaboration"
-        name: "Team Collaboration"
-        value: "Included"
-        icon: "users"
-      - id: "custom_branding"
-        name: "Custom Branding"
-        value: "Available"
-        icon: "palette"
+    - id: "max"
+      name: Max
+      tagline: "best for growing businesses"
+      pricing:
+        monthly: 100
+        annually: 960  # Total annual price (20% off monthly)
+      features:
+        - id: "credits"
+          name: "Credits"
+          value: 100
+          icon: "sparkles"
+        - id: "exports"
+          name: "Exports"
+          value: "Unlimited"
+          icon: "download"
+        - id: "team_collaboration"
+          name: "Team Collaboration"
+          value: "Included"
+          icon: "users"
+        - id: "custom_branding"
+          name: "Custom Branding"
+          value: "Available"
+          icon: "palette"
 
 testimonials:
-  - initial: "j"
-    quote: "Holy f***! This thing is kinda insane"
-    author: "theone98"
-    source: "Discord"
-  - initial: "g"
-    quote: "Looks really good, huge potential!"
-    author: "ohnojonsnow"
-    source: "Discord"
-  - initial: "t"
-    quote: "The service helped me, thanks!"
-    author: "stormtrooper59"
-    source: "Discord"
-  - initial: "b"
-    quote: "Great. will recommend to friends"
-    author: "breaksignals"
-    source: "Discord"
+  headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
+  items:
+    - quote: "This platform transformed my business. The support is incredible!"
+      author: "Sarah Johnson"
+      role: "CEO"
+      company: "TechStart Inc"
+      initial: "S"
+    - quote: "Best investment I've made. Achieved more here than with any consultant."
+      author: "Michael Chen"
+      role: "Founder"
+      company: "DataFlow"
+      initial: "M"
+    - quote: "The community support made all the difference in our growth journey."
+      author: "Emily Davis"
+      role: "Director"
+      company: "Creative Studio"
+      initial: "E"
 
 faqs:
-  # - question: "Is {{ site.brand.name }} AI included with my existing {{ site.brand.name }} Studio plan?"
-  #   answer: "No, {{ site.brand.name }} AI and {{ site.brand.name }} Studio function as separate products with individual pricing plans. If you were an active lifetime deal holder of {{ site.brand.name }} Studio and had purchased it before August 15, 2023, you'll qualify for free {{ site.brand.name }} AI credits. These will be phased in gradually, and you'll be notified via email when they become available. As for other {{ site.brand.name }} Studio subscribers, we're actively exploring ways to offer some benefits to help you get started on {{ site.brand.name }} AI. Stay tuned for more announcements.<br><br>PS: This is available exclusively to users who have purchased their {{ site.brand.name }} accounts from {{ site.brand.name }}."
-  # - question: "What happens after I cancel my subscription?"
-  #   answer: "After canceling your subscription, you'll continue to have access to your plan features until the end of your current billing period. Once the period ends, your account will be downgraded to the free plan."
-  # - question: "What should I do if I run out of my quotas mid-month?"
-  #   answer: "If you run out of quotas mid-month, you can upgrade to a higher plan or wait until your quotas reset at the beginning of your next billing cycle."
-  # - question: "Will my exports, generation & iStock credits roll-over into the next month or billing cycle?"
-  #   answer: "No, unused credits and quotas do not roll over to the next billing cycle. Your quotas reset at the beginning of each new billing period."
-  - question: "Can I cancel at anytime?"
-    answer: "Yes. You can cancel anytime, no questions asked. However, we would highly appreciate if you are able to give us some feedback so we can improve."
-  - question: "Is there a free trial?"
-    answer: "Yes. Yes there is a 14 day free trial of the paid plans. You can cancel your subscription at any time during the trial period for a full refund."
-  - question: "What is your refund policy?"
-    answer: "We offer a 14 day free trial of the premium plans. You can cancel any time during your trial for a full refund. After the trial period, you can cancel and you may receive a prorated refund for the remaining time on your subscription."
+  headline: "FAQs"
+  subheadline: "Everything you need to know about the product and billing. Can't find the answer you're looking for? Please chat to our friendly team."
+  items:
+    # - question: "Is {{ site.brand.name }} AI included with my existing {{ site.brand.name }} Studio plan?"
+    #   answer: "No, {{ site.brand.name }} AI and {{ site.brand.name }} Studio function as separate products with individual pricing plans. If you were an active lifetime deal holder of {{ site.brand.name }} Studio and had purchased it before August 15, 2023, you'll qualify for free {{ site.brand.name }} AI credits. These will be phased in gradually, and you'll be notified via email when they become available. As for other {{ site.brand.name }} Studio subscribers, we're actively exploring ways to offer some benefits to help you get started on {{ site.brand.name }} AI. Stay tuned for more announcements.<br><br>PS: This is available exclusively to users who have purchased their {{ site.brand.name }} accounts from {{ site.brand.name }}."
+    # - question: "What happens after I cancel my subscription?"
+    #   answer: "After canceling your subscription, you'll continue to have access to your plan features until the end of your current billing period. Once the period ends, your account will be downgraded to the free plan."
+    # - question: "What should I do if I run out of my quotas mid-month?"
+    #   answer: "If you run out of quotas mid-month, you can upgrade to a higher plan or wait until your quotas reset at the beginning of your next billing cycle."
+    # - question: "Will my exports, generation & iStock credits roll-over into the next month or billing cycle?"
+    #   answer: "No, unused credits and quotas do not roll over to the next billing cycle. Your quotas reset at the beginning of each new billing period."
+    - question: "Can I cancel at anytime?"
+      answer: "Yes. You can cancel anytime, no questions asked. However, we would highly appreciate if you are able to give us some feedback so we can improve."
+    - question: "Is there a free trial?"
+      answer: "Yes. Yes there is a 14 day free trial of the paid plans. You can cancel your subscription at any time during the trial period for a full refund."
+    - question: "What is your refund policy?"
+      answer: "We offer a 14 day free trial of the premium plans. You can cancel any time during your trial for a full refund. After the trial period, you can cancel and you may receive a prorated refund for the remaining time on your subscription."
 ---
 
 <!-- Promo Banner -->
@@ -191,7 +195,7 @@ faqs:
           </div>
         </div>
 
-        {% assign plan_count = page.resolved.plans | size %}
+        {% assign plan_count = page.resolved.pricing.plans | size %}
 
         <!-- Determine column classes based on number of plans -->
         {% if plan_count == 1 %}
@@ -210,7 +214,7 @@ faqs:
         {% endif %}
 
         <div class="row g-4 mb-5 justify-content-center">
-          {% for plan in page.resolved.plans %}
+          {% for plan in page.resolved.pricing.plans %}
             {% if plan.popular %}
               {% assign border_classes = "border-gradient-rainbow border-3" %}
             {% else %}
@@ -244,15 +248,15 @@ faqs:
                     {% endif %}
 
                     <!-- Price per unit or placeholder text -->
-                    {% if page.resolved.price_per_unit.enabled %}
+                    {% if page.resolved.pricing.price_per_unit.enabled %}
                       {% if plan.pricing.monthly > 0 %}
                         {% for feature in plan.features %}
-                          {% if feature.id == page.resolved.price_per_unit.feature_id %}
+                          {% if feature.id == page.resolved.pricing.price_per_unit.feature_id %}
                             {% assign monthly_price_per_unit = plan.pricing.monthly | times: 1.0 | divided_by: feature.value | round: 2 %}
                             {% assign annual_monthly_price = plan.pricing.annually | divided_by: 12.0 %}
                             {% assign annual_price_per_unit = annual_monthly_price | divided_by: feature.value | round: 2 %}
                             <p class="text-muted small mb-4">
-                              <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.price_per_unit.label }}
+                              <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.pricing.price_per_unit.label }}
                             </p>
                           {% endif %}
                         {% endfor %}
@@ -266,7 +270,8 @@ faqs:
                     <div class="d-grid mb-3">
                       {% if plan.id == "basic" %}
                         <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-md fw-semibold px-2 fs-5">
-                          Get started for free
+                          <!-- Get started for free -->
+                          Get Started
                         </a>
                       {% else %}
                         {% if plan.popular %}
@@ -277,7 +282,8 @@ faqs:
                         {% assign btn_style = "btn-primary" %}
                         <button class="btn {{ btn_style }} btn-md fw-semibold px-2 fs-5" data-plan-id="{{ plan.id }}">
                           <!-- Try {{ plan.name }} for 14 days -->
-                          Try free for 14 days
+                          <!-- Try free for 14 days -->
+                          Get Free Trial
                         </button>
                       {% endif %}
                     </div>
@@ -381,7 +387,7 @@ faqs:
                 <button class="btn btn-primary btn-lg" data-plan-id="enterprise">
                   {% uj_icon "envelope", "fa-lg me-2" %}
                   <span class="button-text">
-                    Contact us
+                    Contact Us
                   </span>
                 </button>
               </div>
@@ -413,7 +419,7 @@ faqs:
 
   {% assign all_feature_ids = "" | split: "," %}
   {% assign all_features = "" | split: "," %}
-  {% for plan in page.resolved.plans %}
+  {% for plan in page.resolved.pricing.plans %}
     {% for feature in plan.features %}
       {% unless all_feature_ids contains feature.id %}
         {% assign all_feature_ids = all_feature_ids | push: feature.id %}
@@ -429,7 +435,7 @@ faqs:
         <thead>
           <tr>
             <th scope="col">Feature</th>
-            {% for plan in page.resolved.plans %}
+            {% for plan in page.resolved.pricing.plans %}
               <th scope="col">{{ plan.name }}</th>
             {% endfor %}
           </tr>
@@ -438,7 +444,7 @@ faqs:
           {% for feature_def in all_features %}
             <tr>
               <th scope="row">{{ feature_def.name }}</th>
-              {% for plan in page.resolved.plans %}
+              {% for plan in page.resolved.pricing.plans %}
                 <td>
                   {% assign has_feature = false %}
                   {% assign feature_value = nil %}
@@ -454,7 +460,7 @@ faqs:
                   {% endfor %}
 
                   {% unless has_feature %}
-                    {% for check_plan in page.resolved.plans %}
+                    {% for check_plan in page.resolved.pricing.plans %}
                       {% if check_plan.id == plan.id %}
                         {% break %}
                       {% endif %}
@@ -593,19 +599,19 @@ faqs:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
+      <h2 class="h2 mb-3">{{ page.resolved.testimonials.headline }}</h2>
     </div>
 
-    {% if page.resolved.testimonials %}
+    {% if page.resolved.testimonials.items %}
       <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
         <div class="carousel-indicators">
-          {% for testimonial in page.resolved.testimonials %}
+          {% for testimonial in page.resolved.testimonials.items %}
             <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
           {% endfor %}
         </div>
 
         <div class="carousel-inner">
-          {% for testimonial in page.resolved.testimonials %}
+          {% for testimonial in page.resolved.testimonials.items %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -619,7 +625,7 @@ faqs:
                       <blockquote class="mb-4">
                         <p class="fs-4 fw-bold">"{{ testimonial.quote }}"</p>
                       </blockquote>
-                      <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.source }}</p>
+                      <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                     </div>
                   </div>
                 </div>
@@ -646,16 +652,16 @@ faqs:
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+        <div class="text-center mb-4" data-lazy="@class animation-slide-up">
           <h2 class="h2 mb-3">
-            Want to<br>
-            <span class="">know more?</span>
+            {{ page.resolved.faqs.headline }}
           </h2>
+          <p class="fs-5 text-muted mb-0">{{ page.resolved.faqs.subheadline }}</p>
         </div>
 
-        {% if page.resolved.faqs %}
+        {% if page.resolved.faqs.items %}
           <div class="accordion" id="faqAccordion" data-lazy="@class animation-slide-up">
-            {% for faq in page.resolved.faqs %}
+            {% for faq in page.resolved.faqs.items %}
               <div class="accordion-item border-0 mb-3">
                 <h2 class="accordion-header">
                   <button class="accordion-button bg-body-tertiary collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">

@@ -45,6 +45,9 @@ $border-radius-pill: 50rem;
 // Import base variables
 @import 'css/base/variables';
 
+// Import root overrides (CSS custom properties)
+@import 'css/base/root';
+
 // Import base styles
 @import 'css/base/animations';
 @import 'css/base/backgrounds';
@@ -77,27 +80,4 @@ body {
   font-family: $font-family-sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-// CRITICAL: Force all elements with badges to allow overflow
-// This is the nuclear option but ensures badges are never clipped
-body * {
-  &:has(> .badge) {
-    overflow: visible !important;
-  }
-}
-
-// Make sure text is readable
-h1, h2, h3, h4, h5, h6 {
-  font-weight: $headings-font-weight;
-  letter-spacing: -0.02em;
-}
-
-// Improve link appearance
-a {
-  transition: all 0.2s ease;
-
-  &:hover {
-    text-decoration: none;
-  }
 }

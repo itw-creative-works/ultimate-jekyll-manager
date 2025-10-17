@@ -306,6 +306,13 @@
   &:hover {
     color: white !important;
   }
+
+  &.active,
+  &:active {
+    background: $dark !important;
+    border-color: $dark !important;
+    color: white !important;
+  }
 }
 
 [data-bs-theme="dark"] .btn-outline-adaptive {
@@ -313,6 +320,13 @@
   color: var(--bs-body-color) !important;
 
   &:hover {
+    color: $dark !important;
+  }
+
+  &.active,
+  &:active {
+    background: $light !important;
+    border-color: $light !important;
     color: $dark !important;
   }
 }

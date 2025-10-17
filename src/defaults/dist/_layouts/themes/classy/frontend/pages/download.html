@@ -3,64 +3,132 @@
 layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### PAGE CONFIG ###
-platforms:
-  - id: "windows"
-    name: "Windows"
-    icon: "windows"
-    description: "Windows 10+"
-    types:
-      - type: "universal"
-        name: "Windows Installer"
-        icon: "download"
-  - id: "mac"
-    name: "macOS"
-    icon: "apple"
-    description: "macOS 10.15+ (Apple Silicon & Intel)"
-    types:
-      - type: "universal"
-        name: "macOS Installer"
-        icon: "download"
-  - id: "linux"
-    name: "Linux"
-    icon: "linux"
-    description: "Ubuntu 18.04+"
-    types:
-      - type: "debian"
-        name: "Debian Package"
-        icon: "download"
-      - type: "snap"
-        name: "Snap Package"
-        icon: "download"
-  - id: "android"
-    name: "Android"
-    icon: "android"
-    description: "Android 8.0+"
-    types:
-      - type: "universal"
-        name: "APK Download"
-        icon: "download"
-  - id: "ios"
-    name: "iOS"
-    icon: "apple"
-    description: "iOS 13+"
-    types:
-      - type: "universal"
-        name: "Download from App Store"
-        icon: "apple"
+# Hero Section
+hero:
+  headline: "Download"
+  headline_accent: "{{ site.brand.name }}"
+  description: "Get {{ site.brand.name }} for your platform and start building amazing things today"
 
+# Downloads Section
+downloads:
+  loading:
+    headline: "Detecting Platform"
+    description: "Determining your operating system..."
+    button_text: "Please Wait"
+  coming_soon_mobile:
+    headline: "Coming Soon to Mobile"
+    description: "Enter your email below and we'll send you the desktop version download link."
+  not_available:
+    headline: "Not Available Yet"
+    description: "{{ site.brand.name }} is not currently available for {{ platform.name }}. Please choose another platform."
+  platforms:
+    - id: "windows"
+      name: "Windows"
+      icon: "windows"
+      description: "Windows 10+"
+      types:
+        - type: "universal"
+          name: "Windows Installer"
+          icon: "download"
+    - id: "mac"
+      name: "macOS"
+      icon: "apple"
+      description: "macOS 10.15+ (Apple Silicon & Intel)"
+      types:
+        - type: "universal"
+          name: "macOS Installer"
+          icon: "download"
+    - id: "linux"
+      name: "Linux"
+      icon: "linux"
+      description: "Ubuntu 18.04+"
+      types:
+        - type: "debian"
+          name: "Debian Package"
+          icon: "download"
+        - type: "snap"
+          name: "Snap Package"
+          icon: "download"
+    - id: "android"
+      name: "Android"
+      icon: "android"
+      description: "Android 8.0+"
+      types:
+        - type: "universal"
+          name: "APK Download"
+          icon: "download"
+    - id: "ios"
+      name: "iOS"
+      icon: "apple"
+      description: "iOS 13+"
+      types:
+        - type: "universal"
+          name: "Download from App Store"
+          icon: "apple"
+
+# Features Section
 features:
-  - title: "Lightning Fast"
-    description: "Install in seconds and start using immediately"
-    icon: "bolt"
-  - title: "Cross-Platform"
-    description: "Seamlessly sync across all your devices"
-    icon: "sync"
-  - title: "Auto-Update"
-    description: "Always get the latest features automatically"
-    icon: "cloud-arrow-down"
-  - title: "Secure"
-    description: "Enterprise-grade security built-in"
-    icon: "shield-check"
+  headline: "Why Download {{ site.brand.name }}?"
+  items:
+    - title: "Lightning Fast"
+      description: "Install in seconds and start using immediately"
+      icon: "bolt"
+    - title: "Cross-Platform"
+      description: "Seamlessly sync across all your devices"
+      icon: "sync"
+    - title: "Auto-Update"
+      description: "Always get the latest features automatically"
+      icon: "cloud-arrow-down"
+    - title: "Secure"
+      description: "Enterprise-grade security built-in"
+      icon: "shield-check"
+
+# System Requirements Section
+system_requirements:
+  headline: "System Requirements"
+  desktop:
+    label: "Desktop"
+    icon: "desktop"
+    items:
+      - text: "2GB RAM minimum"
+        icon: "check"
+      - text: "500MB free disk space"
+        icon: "check"
+  mobile:
+    label: "Mobile"
+    icon: "mobile"
+    items:
+      - text: "100MB free storage"
+        icon: "check"
+      - text: "Internet connection required"
+        icon: "check"
+
+# FAQ Section
+faqs:
+  headline: "FAQs"
+  subheadline: "Everything you need to know about downloading and installing. Can't find the answer you're looking for? Please chat to our friendly team."
+  items:
+    - question: "Is {{ site.brand.name }} free to download?"
+      answer: "Yes! {{ site.brand.name }} is completely free to download and use. We offer premium features for power users, but the core functionality is always free."
+    - question: "How do I update {{ site.brand.name }}?"
+      answer: "{{ site.brand.name }} automatically checks for updates and will notify you when a new version is available. You can also manually check for updates in the app settings."
+    - question: "Can I use {{ site.brand.name }} on multiple devices?"
+      answer: "Absolutely! Your {{ site.brand.name }} account works across all platforms. Download the app on all your devices and your data will sync automatically."
+    - question: "Is my data secure?"
+      answer: "Yes. We use enterprise-grade encryption to protect your data both in transit and at rest. Your privacy and security are our top priorities."
+
+# CTA Section
+cta:
+  headline: "Need help getting started?"
+  description: "Our support team is here 24/7 to help you with installation and setup"
+  primary_button:
+    text: "Contact Support"
+    icon: "headset"
+    href: "/contact"
+  secondary_button:
+    text: "View Docs"
+    icon: "book"
+    href: "#docs"
 ---
 
 <!-- Hero Section -->
@@ -69,11 +137,11 @@ features:
     <div class="row justify-content-center text-center">
       <div class="col-lg-10" data-lazy="@class animation-slide-up">
         <h1 class="h1 mb-3">
-          Download
-          <span class="text-gradient-rainbow">{{ site.brand.name }}</span>
+          {{ page.resolved.hero.headline }}
+          <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
         <p class="fs-5 text-muted mb-0">
-          Get {{ site.brand.name }} for your platform and start building amazing things today
+          {{ page.resolved.hero.description }}
         </p>
       </div>
     </div>
@@ -86,8 +154,28 @@ features:
     <!-- Platform Selector -->
     <div class="row justify-content-center mb-5">
       <div class="col-12">
-        <div class="d-flex flex-wrap justify-content-center gap-3" id="platform-selector" data-lazy="@class animation-slide-up">
-          {% for platform in page.resolved.platforms %}
+        <div class="d-flex flex-wrap justify-content-center gap-3" data-lazy="@class animation-slide-up">
+          <ul class="nav nav-pills gap-3 border-0" id="platform-selector" role="tablist">
+          <!-- Loading tab (shown by default until platform is detected) -->
+          <li class="nav-item d-none" role="presentation" data-platform="loading">
+            <button
+              class="btn btn-outline-adaptive btn-lg active d-flex align-items-center justify-content-center"
+              id="loading-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#loading-pane"
+              type="button"
+              role="tab"
+              aria-controls="loading-pane"
+              aria-selected="true"
+            >
+              <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              Detecting...
+            </button>
+          </li>
+
+          {% for platform in page.resolved.downloads.platforms %}
             {% assign has_download = false %}
             {% for type in platform.types %}
               {% assign config_url = site.download[platform.id][type.type] %}
@@ -97,47 +185,65 @@ features:
               {% endiftruthy %}
             {% endfor %}
 
-            <button
-              class="btn btn-outline-adaptive btn-lg platform-btn d-flex align-items-center justify-content-center"
-              data-platform="{{ platform.id }}"
-              data-has-download="{% if has_download %}true{% else %}false{% endif %}"
-              disabled
-            >
-              {% uj_icon platform.icon, "fa-3xl me-2" %}
-              {{ platform.name }}
-            </button>
+            <li class="nav-item" role="presentation">
+              <button
+                class="btn btn-outline-adaptive btn-lg platform-btn d-flex align-items-center justify-content-center"
+                id="{{ platform.id }}-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#{{ platform.id }}-pane"
+                data-platform="{{ platform.id }}"
+                data-has-download="{% if has_download %}true{% else %}false{% endif %}"
+                type="button"
+                role="tab"
+                aria-controls="{{ platform.id }}-pane"
+                aria-selected="false"
+                disabled
+              >
+                {% uj_icon platform.icon, "fa-3xl me-2" %}
+                {{ platform.name }}
+              </button>
+            </li>
           {% endfor %}
+          </ul>
         </div>
       </div>
     </div>
 
     <!-- Download Buttons -->
     <div class="row justify-content-center">
-      <!-- Loading Platform Card -->
-      <div class="col-lg-10 platform-downloads" data-platform="loading">
-        <div class="card border-0 shadow-lg bg-body-tertiary animation-fade-in">
-          <div class="card-body p-5 text-center">
-            <div class="mb-4">
-              <div class="avatar avatar-2xl rounded-circle bg-primary d-inline-flex align-items-center justify-content-center">
-                <div class="spinner-border text-light" role="status">
-                  <span class="visually-hidden">Loading...</span>
+      <div class="col-lg-10">
+        <div class="tab-content">
+          <!-- Loading Platform Card -->
+          <div
+            class="tab-pane fade show active"
+            id="loading-pane"
+            role="tabpanel"
+            aria-labelledby="loading-tab"
+            tabindex="0"
+          >
+            <div class="card border-0 shadow-lg bg-body-tertiary">
+              <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                  <div class="avatar avatar-2xl rounded-circle bg-primary d-inline-flex align-items-center justify-content-center">
+                    <div class="spinner-border text-light" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                </div>
+                <h2 class="h2 mb-1">{{ page.resolved.downloads.loading.headline }}</h2>
+                <p class="text-muted fs-5 mb-4">{{ page.resolved.downloads.loading.description }}</p>
+
+                <div class="d-flex flex-column gap-3">
+                  <button type="button" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center" disabled>
+                    {% uj_icon "download", "fa-3xl me-2" %}
+                    {{ page.resolved.downloads.loading.button_text }}
+                  </button>
                 </div>
               </div>
             </div>
-            <h2 class="h2 mb-1">Detecting Platform</h2>
-            <p class="text-muted fs-5 mb-4">Determining your operating system...</p>
-
-            <div class="d-flex flex-column gap-3">
-              <button type="button" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center" disabled>
-                {% uj_icon "download", "fa-3xl me-2" %}
-                Please Wait
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
 
-      {% for platform in page.resolved.platforms %}
+          {% for platform in page.resolved.downloads.platforms %}
         {% assign has_download = false %}
         {% for type in platform.types %}
           {% assign config_url = site.download[platform.id][type.type] %}
@@ -147,13 +253,16 @@ features:
           {% endiftruthy %}
         {% endfor %}
 
-        <div
-          class="col-lg-10 platform-downloads"
-          data-platform="{{ platform.id }}"
-          data-has-download="{% if has_download %}true{% else %}false{% endif %}"
-          hidden
-        >
-          <div class="card border-0 shadow-lg bg-body-tertiary animation-fade-in">
+          <div
+            class="tab-pane fade"
+            id="{{ platform.id }}-pane"
+            role="tabpanel"
+            aria-labelledby="{{ platform.id }}-tab"
+            tabindex="0"
+            data-platform="{{ platform.id }}"
+            data-has-download="{% if has_download %}true{% else %}false{% endif %}"
+          >
+            <div class="card border-0 shadow-lg bg-body-tertiary">
             <div class="card-body p-5 text-center">
               <div class="mb-4">
                 <div class="avatar avatar-2xl rounded-circle bg-primary d-inline-flex align-items-center justify-content-center">
@@ -168,16 +277,16 @@ features:
                   <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
                     {% uj_icon "mobile", "fs-4 me-3" %}
                     <div class="text-start">
-                      <h6 class="mb-0">Coming Soon to Mobile</h6>
-                      <small>Enter your email below and we'll send you the desktop version download link.</small>
+                      <h6 class="mb-0">{{ page.resolved.downloads.coming_soon_mobile.headline }}</h6>
+                      <small>{{ page.resolved.downloads.coming_soon_mobile.description }}</small>
                     </div>
                   </div>
                 {% else %}
                   <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
                     {% uj_icon "triangle-exclamation", "fs-4 me-3" %}
                     <div class="text-start">
-                      <h6 class="mb-0">Not Available Yet</h6>
-                      <small>{{ site.brand.name }} is not currently available for {{ platform.name }}. Please choose another platform.</small>
+                      <h6 class="mb-0">{{ page.resolved.downloads.not_available.headline }}</h6>
+                      <small>{{ page.resolved.downloads.not_available.description }}</small>
                     </div>
                   </div>
                 {% endif %}
@@ -251,8 +360,10 @@ features:
               {% endif %}
             </div>
           </div>
+          </div>
+          {% endfor %}
         </div>
-      {% endfor %}
+      </div>
     </div>
   </div>
 </section>
@@ -262,12 +373,12 @@ features:
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       <h2 class="h2 mb-3">
-        Why Download <span class="">{{ site.brand.name }}</span>?
+        {{ page.resolved.features.headline }}
       </h2>
     </div>
 
     <div class="row g-4 justify-content-center">
-      {% for feature in page.resolved.features %}
+      {% for feature in page.resolved.features.items %}
         <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
           <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
             <div class="card-body p-4">
@@ -292,39 +403,41 @@ features:
         <div class="card border-0 shadow-sm bg-body-tertiary">
           <div class="card-body p-5">
             <h2 class="h2 mb-4 text-center">
-              System <span class="">Requirements</span>
+              {{ page.resolved.system_requirements.headline }}
             </h2>
 
             <div class="row g-4">
               <div class="col-md-6">
                 <h5 class="d-flex align-items-center mb-3">
-                  {% uj_icon "desktop", "fa-2xl me-2" %}
-                  Desktop
+                  {% uj_icon page.resolved.system_requirements.desktop.icon, "fa-2xl me-2" %}
+                  {{ page.resolved.system_requirements.desktop.label }}
                 </h5>
                 <ul class="list-unstyled text-muted">
-                  {% for platform in page.resolved.platforms %}
+                  {% for platform in page.resolved.downloads.platforms %}
                     {% if platform.id == 'windows' or platform.id == 'mac' or platform.id == 'linux' %}
                       <li class="mb-2">{% uj_icon "check", "text-success me-2" %} {{ platform.description }}</li>
                     {% endif %}
                   {% endfor %}
-                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %} 2GB RAM minimum</li>
-                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %} 500MB free disk space</li>
+                  {% for req in page.resolved.system_requirements.desktop.items %}
+                    <li class="mb-2">{% uj_icon req.icon, "text-success me-2" %} {{ req.text }}</li>
+                  {% endfor %}
                 </ul>
               </div>
 
               <div class="col-md-6">
                 <h5 class="d-flex align-items-center mb-3">
-                  {% uj_icon "mobile", "fa-2xl me-2" %}
-                  Mobile
+                  {% uj_icon page.resolved.system_requirements.mobile.icon, "fa-2xl me-2" %}
+                  {{ page.resolved.system_requirements.mobile.label }}
                 </h5>
                 <ul class="list-unstyled text-muted">
-                  {% for platform in page.resolved.platforms %}
+                  {% for platform in page.resolved.downloads.platforms %}
                     {% if platform.id == 'ios' or platform.id == 'android' %}
                       <li class="mb-2">{% uj_icon "check", "text-success me-2" %} {{ platform.description }}</li>
                     {% endif %}
                   {% endfor %}
-                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %} 100MB free storage</li>
-                  <li class="mb-2">{% uj_icon "check", "text-success me-2" %} Internet connection required</li>
+                  {% for req in page.resolved.system_requirements.mobile.items %}
+                    <li class="mb-2">{% uj_icon req.icon, "text-success me-2" %} {{ req.text }}</li>
+                  {% endfor %}
                 </ul>
               </div>
             </div>
@@ -340,64 +453,28 @@ features:
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+        <div class="text-center mb-4" data-lazy="@class animation-slide-up">
           <h2 class="h2 mb-3">
-            Frequently Asked <span class="">Questions</span>
+            {{ page.resolved.faqs.headline }}
           </h2>
+          <p class="fs-5 text-muted mb-0">{{ page.resolved.faqs.subheadline }}</p>
         </div>
 
         <div class="accordion" id="downloadFaqAccordion" data-lazy="@class animation-slide-up">
-          <div class="accordion-item border-0 mb-3">
-            <h2 class="accordion-header">
-              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1">
-                <span class="fw-semibold">Is {{ site.brand.name }} free to download?</span>
-              </button>
-            </h2>
-            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
-              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
-                Yes! {{ site.brand.name }} is completely free to download and use. We offer premium features for power users, but the core functionality is always free.
+          {% for faq in page.resolved.faqs.items %}
+            <div class="accordion-item border-0 mb-3">
+              <h2 class="accordion-header">
+                <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
+                  <span class="fw-semibold">{{ faq.question }}</span>
+                </button>
+              </h2>
+              <div id="faq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
+                <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                  {{ faq.answer }}
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="accordion-item border-0 mb-3">
-            <h2 class="accordion-header">
-              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
-                <span class="fw-semibold">How do I update {{ site.brand.name }}?</span>
-              </button>
-            </h2>
-            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
-              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
-                {{ site.brand.name }} automatically checks for updates and will notify you when a new version is available. You can also manually check for updates in the app settings.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item border-0 mb-3">
-            <h2 class="accordion-header">
-              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
-                <span class="fw-semibold">Can I use {{ site.brand.name }} on multiple devices?</span>
-              </button>
-            </h2>
-            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
-              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
-                Absolutely! Your {{ site.brand.name }} account works across all platforms. Download the app on all your devices and your data will sync automatically.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item border-0 mb-3">
-            <h2 class="accordion-header">
-              <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
-                <span class="fw-semibold">Is my data secure?</span>
-              </button>
-            </h2>
-            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
-              <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
-                Yes. We use enterprise-grade encryption to protect your data both in transit and at rest. Your privacy and security are our top priorities.
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -411,19 +488,19 @@ features:
       <div class="row align-items-center py-4">
         <div class="col-lg-8 text-light text-center text-lg-start">
           <h2 class="h2 lh-sm mb-4">
-            Need help getting started?
+            {{ page.resolved.cta.headline }}
           </h2>
           <p class="fs-5 text-muted mb-4">
-            Our support team is here 24/7 to help you with installation and setup
+            {{ page.resolved.cta.description }}
           </p>
           <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-            <a href="/contact" class="btn btn-adaptive btn-lg px-5 py-3">
-              {% uj_icon "headset", "me-2" %}
-              Contact Support
+            <a href="{{ page.resolved.cta.primary_button.href }}" class="btn btn-adaptive btn-lg px-5 py-3">
+              {% uj_icon page.resolved.cta.primary_button.icon, "me-2" %}
+              {{ page.resolved.cta.primary_button.text }}
             </a>
-            <a href="#docs" class="btn btn-outline-adaptive btn-lg px-5 py-3">
-              {% uj_icon "book", "me-2" %}
-              View Docs
+            <a href="{{ page.resolved.cta.secondary_button.href }}" class="btn btn-outline-adaptive btn-lg px-5 py-3">
+              {% uj_icon page.resolved.cta.secondary_button.icon, "me-2" %}
+              {{ page.resolved.cta.secondary_button.text }}
             </a>
           </div>
         </div>

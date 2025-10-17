@@ -14,7 +14,6 @@ export default (Manager) => {
     await webManager.dom().ready();
 
     setupPlatformDetection();
-    setupPlatformSwitcher();
     setupDownloadTracking();
     setupCopyButtons();
     setupMobileEmailForms();
@@ -49,20 +48,19 @@ function setupPlatformDetection() {
 
   // Show loading state initially, then switch to detected platform
   setTimeout(() => {
-    // Hide loading card
-    const $loadingCard = document.querySelector('.platform-downloads[data-platform="loading"]');
-    if ($loadingCard) {
-      $loadingCard.setAttribute('hidden', '');
-    }
-
     // Enable all platform buttons
-    const platformButtons = document.querySelectorAll(config.selectors.platformButtons);
-    platformButtons.forEach(button => {
-      button.disabled = false;
+    const $platformButtons = document.querySelectorAll('.platform-btn');
+    $platformButtons.forEach($btn => {
+      $btn.disabled = false;
     });
 
-    // Show detected platform
-    showPlatform(detectedPlatform);
+    // Activate the detected platform tab using Bootstrap's tab API
+    const $detectedTab = document.querySelector(`#${detectedPlatform}-tab`);
+    if ($detectedTab) {
+      const tab = new bootstrap.Tab($detectedTab);
+      tab.show();
+    }
+
     // trackPlatformDetection(detectedPlatform);
   }, 800);
 }
@@ -95,74 +93,8 @@ function detectPlatform() {
   return 'windows';
 }
 
-// Setup platform switcher button handlers
-function setupPlatformSwitcher() {
-  const platformButtons = document.querySelectorAll(config.selectors.platformButtons);
-
-  platformButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const platformId = this.dataset.platform;
-      showPlatform(platformId);
-
-      // Scroll to the platform downloads section
-      const $platformDownload = document.querySelector(`.platform-downloads[data-platform="${platformId}"]`);
-      if ($platformDownload) {
-        $platformDownload.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-
-      // trackPlatformSwitch(platformId);
-    });
-  });
-}
-
-// Show downloads for selected platform
-function showPlatform(platformId) {
-  const platformDownloads = document.querySelectorAll(config.selectors.platformDownloads);
-  const platformButtons = document.querySelectorAll(config.selectors.platformButtons);
-
-  console.log('Attempting to show platform:', platformId);
-  console.log('Available platform downloads:', Array.from(platformDownloads).map(el => el.dataset.platform));
-  console.log('Available platform buttons:', Array.from(platformButtons).map(btn => btn.dataset.platform));
-
-  let foundPlatform = false;
-
-  platformDownloads.forEach(el => {
-    if (el.dataset.platform === platformId) {
-      el.removeAttribute('hidden');
-      foundPlatform = true;
-    } else {
-      el.setAttribute('hidden', '');
-    }
-  });
-
-  platformButtons.forEach(btn => {
-    if (btn.dataset.platform === platformId) {
-      btn.classList.remove('btn-outline-adaptive');
-      btn.classList.add('btn-primary');
-    } else {
-      btn.classList.remove('btn-primary');
-      btn.classList.add('btn-outline-adaptive');
-    }
-  });
-
-  if (!foundPlatform) {
-    console.warn('Platform not found:', platformId, '- falling back to first available platform');
-    const firstDownload = platformDownloads[0];
-    const firstButton = platformButtons[0];
-
-    if (firstDownload) {
-      firstDownload.removeAttribute('hidden');
-      console.log('Showing fallback platform:', firstDownload.dataset.platform);
-    }
-
-    if (firstButton) {
-      firstButton.classList.remove('btn-outline-adaptive');
-      firstButton.classList.add('btn-primary');
-    }
-  } else {
-    console.log('Successfully showing platform:', platformId);
-  }
-}
+// Bootstrap's tab component handles all tab switching automatically via data-bs-toggle="tab"
+// No manual switcher needed!
 
 // Setup download button tracking
 function setupDownloadTracking() {

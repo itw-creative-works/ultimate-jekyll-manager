@@ -2,14 +2,10 @@
 NEW TODO
 - service working failing to load scripts??
 - test SW on live site (and lighthouse)
-- cloudflare 1y cache on js and css (it's CB anyway so this will never matter)
 - LOGIN NOT WORKING: email and password says its wrong, google just takes you back to the signin page and nothing happens
 - FIx formmanager .getData() it keeps returning an empty object, make it work flawlessyly
 - It keeps testing whether there is a "." every time it reads or writes. just call the getNested and setNested functions and then check for the DOT inside those functions
 - form manager should NOT submit if the button that was clicked is disabled (class or attribute)
-
-REVIEW page
-- Make a rewarded review page. When the user lands there, it explains that they COULD win $25 Amazon giftcard for writing a reivew. They upload the screenshot then it sends them to a fake countdown page where 3 winners are picked every week. So it conts down and tells them to refresht he page. At the end of the week it picks 3 random winners but it should never axtually pick anyone and just tell them to try again next week. But it should look legit.
 
 Make an admin dashboard backend
 
@@ -22,6 +18,23 @@ Admin dashboard backend pages
   * Can put in monthly and annual price and ID etc
   * It iwll creat the product in firestore
   * Create the product in stripe, paypal, etc
+
+
+ok now were working on THIS PAGE. first, do our main checks like
+* ensuring the frontmatter sections appear in the same order as in the html
+* that there are no named items that could be arrays, etc
+* all sections in HTML have a frontmatter section that controls the content
+* all sections are standardized like have a heading, subheading, items, etc. dont add these if they dont make sense, but ensure that if there is HTML content hardcoded that it is converted to frontmatter content
+* ONLY HERO section should have an accent gradient in the heading, other ssections should NOT have this
+
+
+ok now actually we have a new way of putting videos
+
+/Users/ian/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools/lib/tags/video.rb
+
+
+REVIEW page
+- Make a rewarded review page. When the user lands there, it explains that they COULD win $25 Amazon giftcard for writing a reivew. They upload the screenshot then it sends them to a fake countdown page where 3 winners are picked every week. So it conts down and tells them to refresht he page. At the end of the week it picks 3 random winners but it should never axtually pick anyone and just tell them to try again next week. But it should look legit.
 
 
 MIGRATIONS

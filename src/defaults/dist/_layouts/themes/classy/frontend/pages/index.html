@@ -9,110 +9,39 @@ hero:
   headline: "The #1 Platform"
   headline_accent: "for Business Success"
   description: "Transform your business with powerful tools, expert guidance, and proven strategies. Join thousands of successful companies today."
-  cta_primary:
+  primary_button:
     text: "Get Started Free"
     icon: "rocket"
     href: "/signup"
-  cta_secondary:
+  secondary_button:
     text: "Explore Solutions"
     icon: "book-open"
     href: "/pricing"
-
-# Features
-features:
-  - title: "Expert Support"
-    description: "Get guidance from industry professionals with years of real-world experience"
-    icon: "graduation-cap"
-  - title: "Flexible Solutions"
-    description: "Scale at your own pace with 24/7 access to all platform features"
-    icon: "clock"
-  - title: "Supportive Community"
-    description: "Join thousands of businesses in our vibrant and helpful network"
-    icon: "users"
-  - title: "Certification"
-    description: "Earn recognized credentials to boost your business credibility"
-    icon: "certificate"
-
-# Stats Section
-stats:
-  users:
-    number: "50,000+"
-    label: "Active Users"
-    sublabel: "From 120+ Countries"
-    icon: "users"
-  items:
-    number: "200+"
-    label: "Solutions"
-    sublabel: "Industry-Leading"
-    icon: "book"
-  rating:
-    number: "4.9"
-    label: "Average Rating"
-    icon: "star"
-  success:
-    number: "98%"
-    label: "Success Rate"
-    sublabel: "Business Growth"
-    icon: "certificate"
-  # Cards shown in hero section
-  hero_cards:
-    card1:
-      number: "50K+"
+  cards:
+    - number: "50K+"
       label: "Active Users"
       icon: "users"
-    card2:
-      number: "98%"
+      color: "primary"
+      height: "200px"
+    - number: "98%"
       label: "Success Rate"
       icon: "certificate"
-    card3:
-      number: "200+"
+      color: "success"
+      height: "150px"
+    - number: "200+"
       label: "Solutions"
       icon: "book"
-    card4:
-      number: "4.9/5"
+      color: "warning"
+      height: "150px"
+    - number: "4.9/5"
       label: "Average Rating"
       icon: "star"
+      color: "info"
+      height: "200px"
   badge:
     title: "Industry Leader"
     subtitle: "2024 Award"
     icon: "trophy"
-
-# Testimonials
-testimonials:
-  - quote: "This platform transformed my business. The support is incredible!"
-    author: "Sarah Johnson"
-    role: "CEO"
-    company: "TechStart Inc"
-    initial: "S"
-  - quote: "Best investment I've made. Achieved more here than with any consultant."
-    author: "Michael Chen"
-    role: "Founder"
-    company: "DataFlow"
-    initial: "M"
-  - quote: "The community support made all the difference in our growth journey."
-    author: "Emily Davis"
-    role: "Director"
-    company: "Creative Studio"
-    initial: "E"
-
-# CTA Section
-cta:
-  headline: "Ready to Transform Your Business?"
-  description: "Join thousands of successful companies who have already accelerated their growth with"
-  primary_button:
-    text: "Start Today"
-    icon: "rocket"
-    href: "/signup"
-  secondary_button:
-    text: "Talk to an Expert"
-    icon: "comments"
-    href: "/contact"
-
-# Section Headings
-sections:
-  features:
-    headline: "Why Choose"
-    subheadline: "Everything you need to accelerate your business growth"
 
 # Trusted By Section
 trusted_by:
@@ -129,6 +58,129 @@ trusted_by:
     - name: "shopify"
     - name: "stripe"
     # - name: "uber"
+
+# Product Demo Section
+product_demo:
+  headline: "See {{ site.brand.name }} in Action"
+  subheadline: "Explore powerful features that help you succeed"
+  tabs:
+    - id: "dashboard"
+      label: "Dashboard"
+      # video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/sample-demo-1.webm"
+      video: "https://xguihxuzqibwxjnimxev.supabase.co/storage/v1/object/public/videos/marketing/website/supabase-rls.webm"
+      features:
+        - "Easy Setup"
+        - "Powerful Tools"
+        - "Fast Performance"
+        - "Real-time Updates"
+        - "Simple Interface"
+    - id: "analytics"
+      label: "Analytics"
+      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/sample-demo-2.webm"
+      features:
+        - "Advanced Analytics"
+        - "Custom Reports"
+        - "Data Insights"
+        - "Export Options"
+        - "Team Collaboration"
+    - id: "security"
+      label: "Security"
+      video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/sample-demo-3.webm"
+      features:
+        - "Enterprise Security"
+        - "Access Control"
+        - "Audit Trails"
+        - "Compliance Tools"
+        - "Data Protection"
+
+# Alternating Features Section
+alternating_features:
+  headline: "What Makes {{ site.brand.name }} Different"
+  subheadline: "Powerful features designed to accelerate your success"
+  items:
+    - title: "Direct integration"
+      description: "Connect YouTube, Drive, or Dropbox. Your agent automatically detects new uploads, finds the best moments, and creates ready-to-share clips."
+      image: "https://via.placeholder.com/600x400/FF6B6B/FFFFFF?text=Integration"
+    - title: "Amplify Every Post"
+      description: "Our AI finds the moments that resonate most with your audience, turning every upload into a high-impact, shareable clip."
+      image: "https://via.placeholder.com/600x400/4ECDC4/FFFFFF?text=Analytics"
+    - title: "Smart Automation"
+      description: "Set it and forget it. Our intelligent system works 24/7 to process your content and deliver results automatically."
+      image: "https://via.placeholder.com/600x400/95E1D3/FFFFFF?text=Automation"
+
+# Features Section
+features:
+  headline: "Why Choose {{ site.brand.name }}?"
+  subheadline: "Everything you need to accelerate your business growth"
+  items:
+    - title: "Expert Support"
+      description: "Get guidance from industry professionals with years of real-world experience"
+      icon: "graduation-cap"
+    - title: "Flexible Solutions"
+      description: "Scale at your own pace with 24/7 access to all platform features"
+      icon: "clock"
+    - title: "Supportive Community"
+      description: "Join thousands of businesses in our vibrant and helpful network"
+      icon: "users"
+    - title: "Certification"
+      description: "Earn recognized credentials to boost your business credibility"
+      icon: "certificate"
+
+# Testimonials Section
+testimonials:
+  headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
+  items:
+    - quote: "This platform transformed my business. The support is incredible!"
+      author: "Sarah Johnson"
+      role: "CEO"
+      company: "TechStart Inc"
+      initial: "S"
+    - quote: "Best investment I've made. Achieved more here than with any consultant."
+      author: "Michael Chen"
+      role: "Founder"
+      company: "DataFlow"
+      initial: "M"
+    - quote: "The community support made all the difference in our growth journey."
+      author: "Emily Davis"
+      role: "Director"
+      company: "Creative Studio"
+      initial: "E"
+
+# Stats Section
+stats:
+  - number: "50,000+"
+    label: "Active Users"
+    sublabel: "From 120+ Countries"
+    icon: "users"
+    color: "primary"
+  - number: "200+"
+    label: "Solutions"
+    sublabel: "Industry-Leading"
+    icon: "book"
+    color: "success"
+  - number: "4.9"
+    label: "Average Rating"
+    icon: "star"
+    color: "warning"
+    show_stars: true
+  - number: "98%"
+    label: "Success Rate"
+    sublabel: "Business Growth"
+    icon: "certificate"
+    color: "info"
+
+# CTA Section
+cta:
+  headline: "Ready to Transform Your Business?"
+  description: "Join thousands of successful companies who have already accelerated their growth with {{ site.brand.name }}"
+  primary_button:
+    text: "Start Today"
+    icon: "rocket"
+    href: "/signup"
+  secondary_button:
+    text: "Talk to an Expert"
+    icon: "comments"
+    href: "/contact"
 ---
 
 {% comment %}
@@ -152,7 +204,7 @@ trusted_by:
           </p>
 
           <ul class="list-unstyled mb-4">
-            {% for feature in page.resolved.features limit: 3 %}
+            {% for feature in page.resolved.features.items limit: 3 %}
               <li class="d-flex align-items-center mb-3">
                 {% uj_icon "check-circle", "text-success fs-5 me-3" %}
                 <span class="fs-6">{{ feature.title }}</span>
@@ -161,13 +213,13 @@ trusted_by:
           </ul>
 
           <div class="d-flex flex-column flex-sm-row gap-3">
-            <a href="{{ page.resolved.hero.cta_primary.href }}" class="btn btn-primary btn-lg px-4 py-3">
-              {% uj_icon page.resolved.hero.cta_primary.icon, "me-2" %}
-              {{ page.resolved.hero.cta_primary.text }}
+            <a href="{{ page.resolved.hero.primary_button.href }}" class="btn btn-primary btn-lg px-4 py-3">
+              {% uj_icon page.resolved.hero.primary_button.icon, "me-2" %}
+              {{ page.resolved.hero.primary_button.text }}
             </a>
-            <a href="{{ page.resolved.hero.cta_secondary.href }}" class="btn btn-outline-adaptive btn-lg px-4 py-3">
-              {% uj_icon page.resolved.hero.cta_secondary.icon, "me-2" %}
-              {{ page.resolved.hero.cta_secondary.text }}
+            <a href="{{ page.resolved.hero.secondary_button.href }}" class="btn btn-outline-adaptive btn-lg px-4 py-3">
+              {% uj_icon page.resolved.hero.secondary_button.icon, "me-2" %}
+              {{ page.resolved.hero.secondary_button.text }}
             </a>
           </div>
         </div>
@@ -177,34 +229,34 @@ trusted_by:
         <div class="position-relative" data-lazy="@class animation-slide-up">
           <div class="row g-4">
             <div class="col-6">
-              <div class="bg-primary rounded-4 p-4 text-light text-center" style="height: 200px;">
+              <div class="bg-{{ page.resolved.hero.cards[0].color }} rounded-4 p-4 text-light text-center" style="height: {{ page.resolved.hero.cards[0].height }};">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon page.resolved.stats.hero_cards.card1.icon, "display-4 mb-3 text-light" %}
-                  <h3 class="mb-1">{{ page.resolved.stats.hero_cards.card1.number }}</h3>
-                  <p class="mb-0">{{ page.resolved.stats.hero_cards.card1.label }}</p>
+                  {% uj_icon page.resolved.hero.cards[0].icon, "display-4 mb-3 text-light" %}
+                  <h3 class="mb-1">{{ page.resolved.hero.cards[0].number }}</h3>
+                  <p class="mb-0">{{ page.resolved.hero.cards[0].label }}</p>
                 </div>
               </div>
-              <div class="bg-success rounded-4 p-4 text-light text-center mt-4" style="height: 150px;">
+              <div class="bg-{{ page.resolved.hero.cards[1].color }} rounded-4 p-4 text-light text-center mt-4" style="height: {{ page.resolved.hero.cards[1].height }};">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon page.resolved.stats.hero_cards.card2.icon, "fs-1 mb-2 text-light" %}
-                  <h3 class="h4 mb-1">{{ page.resolved.stats.hero_cards.card2.number }}</h3>
-                  <p class="mb-0 small">{{ page.resolved.stats.hero_cards.card2.label }}</p>
+                  {% uj_icon page.resolved.hero.cards[1].icon, "fs-1 mb-2 text-light" %}
+                  <h3 class="h4 mb-1">{{ page.resolved.hero.cards[1].number }}</h3>
+                  <p class="mb-0 small">{{ page.resolved.hero.cards[1].label }}</p>
                 </div>
               </div>
             </div>
             <div class="col-6 d-flex flex-column">
-              <div class="bg-warning rounded-4 p-4 text-light text-center mb-4" style="height: 150px;">
+              <div class="bg-{{ page.resolved.hero.cards[2].color }} rounded-4 p-4 text-light text-center mb-4" style="height: {{ page.resolved.hero.cards[2].height }};">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon page.resolved.stats.hero_cards.card3.icon, "fs-1 mb-2 text-light" %}
-                  <h3 class="h4 mb-1">{{ page.resolved.stats.hero_cards.card3.number }}</h3>
-                  <p class="mb-0 small">{{ page.resolved.stats.hero_cards.card3.label }}</p>
+                  {% uj_icon page.resolved.hero.cards[2].icon, "fs-1 mb-2 text-light" %}
+                  <h3 class="h4 mb-1">{{ page.resolved.hero.cards[2].number }}</h3>
+                  <p class="mb-0 small">{{ page.resolved.hero.cards[2].label }}</p>
                 </div>
               </div>
-              <div class="bg-info rounded-4 p-4 text-light text-center" style="height: 200px;">
+              <div class="bg-{{ page.resolved.hero.cards[3].color }} rounded-4 p-4 text-light text-center" style="height: {{ page.resolved.hero.cards[3].height }};">
                 <div class="d-flex flex-column justify-content-center h-100">
-                  {% uj_icon page.resolved.stats.hero_cards.card4.icon, "display-4 mb-3 text-light" %}
-                  <h3 class="mb-1">{{ page.resolved.stats.hero_cards.card4.number }}</h3>
-                  <p class="mb-0">{{ page.resolved.stats.hero_cards.card4.label }}</p>
+                  {% uj_icon page.resolved.hero.cards[3].icon, "display-4 mb-3 text-light" %}
+                  <h3 class="mb-1">{{ page.resolved.hero.cards[3].number }}</h3>
+                  <p class="mb-0">{{ page.resolved.hero.cards[3].label }}</p>
                 </div>
               </div>
             </div>
@@ -212,10 +264,10 @@ trusted_by:
 
           <div class="position-absolute top-0 end-0 bg-body-tertiary rounded-4 p-3 shadow-lg" style="transform: translate(20px, -20px);">
             <div class="d-flex align-items-center">
-              {% uj_icon page.resolved.stats.badge.icon, "text-warning fs-4 me-2" %}
+              {% uj_icon page.resolved.hero.badge.icon, "text-warning fs-4 me-2" %}
               <div>
-                <div class="small">{{ page.resolved.stats.badge.title }}</div>
-                <div class="text-muted small">{{ page.resolved.stats.badge.subtitle }}</div>
+                <div class="small">{{ page.resolved.hero.badge.title }}</div>
+                <div class="text-muted small">{{ page.resolved.hero.badge.subtitle }}</div>
               </div>
             </div>
           </div>
@@ -227,7 +279,7 @@ trusted_by:
 {% endcomment %}
 
 <!-- Hero Section -->
-<section class="section-full-width bg-gradient-rainbow gradient-animated text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center">
+<section class="section-full-width bg-gradient-rainbow gradient-animated text-light overflow-hidden position-relative min-vh-90 d-flex align-items-center">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-10 text-center py-5">
@@ -244,13 +296,13 @@ trusted_by:
           </p>
 
           <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-            <a href="{{ page.resolved.hero.cta_primary.href }}" class="btn btn-light btn-lg px-5 py-3">
-              {% uj_icon page.resolved.hero.cta_primary.icon, "me-2" %}
-              {{ page.resolved.hero.cta_primary.text }}
+            <a href="{{ page.resolved.hero.primary_button.href }}" class="btn btn-light btn-lg px-5 py-3">
+              {% uj_icon page.resolved.hero.primary_button.icon, "me-2" %}
+              {{ page.resolved.hero.primary_button.text }}
             </a>
-            <a href="{{ page.resolved.hero.cta_secondary.href }}" class="btn btn-outline-light btn-lg px-5 py-3">
-              {% uj_icon page.resolved.hero.cta_secondary.icon, "me-2" %}
-              {{ page.resolved.hero.cta_secondary.text }}
+            <a href="{{ page.resolved.hero.secondary_button.href }}" class="btn btn-outline-light btn-lg px-5 py-3">
+              {% uj_icon page.resolved.hero.secondary_button.icon, "me-2" %}
+              {{ page.resolved.hero.secondary_button.text }}
             </a>
           </div>
         </div>
@@ -260,7 +312,7 @@ trusted_by:
 </section>
 
 <!-- Trusted By Section -->
-<section class="overflow-hidden">
+<section class="overflow-hidden py-5">
   <div class="container-fluid px-0">
     <div class="text-center mb-4" data-lazy="@class animation-slide-up">
       <h3 class="fs-4">{{ page.resolved.trusted_by.headline }}</h3>
@@ -278,18 +330,124 @@ trusted_by:
   </div>
 </section>
 
+<!-- Product Demo Section -->
+<section>
+  <div class="container">
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 mb-2">{{ page.resolved.product_demo.headline }}</h2>
+      <p class="fs-5 text-muted">{{ page.resolved.product_demo.subheadline }}</p>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div class="d-flex flex-wrap justify-content-center gap-3 mb-4" data-lazy="@class animation-slide-up">
+      <ul class="nav nav-pills gap-3 border-0" role="tablist">
+        {% for tab in page.resolved.product_demo.tabs %}
+          <li class="nav-item" role="presentation">
+            <button
+              class="btn btn-lg btn-outline-adaptive {% if forloop.first %}active{% endif %}"
+              id="{{ tab.id }}-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#{{ tab.id }}-pane"
+              type="button"
+              role="tab"
+              aria-controls="{{ tab.id }}-pane"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            >
+              {{ tab.label }}
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" data-lazy="@class animation-slide-up">
+      {% for tab in page.resolved.product_demo.tabs %}
+        <div
+          class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+          id="{{ tab.id }}-pane"
+          role="tabpanel"
+          aria-labelledby="{{ tab.id }}-tab"
+          tabindex="0"
+        >
+          <!-- Feature Checkmarks -->
+          <div class="d-flex flex-wrap justify-content-center gap-3 gap-md-4 mb-4">
+            {% for feature in tab.features %}
+              <div class="d-flex align-items-center">
+                {% uj_icon "check", "text-success me-2" %}
+                <span class="text-body">{{ feature }}</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Video Player -->
+          <div class="card border-0 shadow-lg rounded">
+            <div class="ratio ratio-16x9">
+              {% uj_video tab.video, class="w-100 d-block object-fit-cover rounded border-0", style="", controls="false", loop="true", autoplay="true", playsinline="true", muted="true", preload="metadata" %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Alternating Features Section -->
+<section>
+  <div class="container">
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      <h2 class="h2 mb-2">{{ page.resolved.alternating_features.headline }}</h2>
+      <p class="fs-5 text-muted">{{ page.resolved.alternating_features.subheadline }}</p>
+    </div>
+
+    {% for item in page.resolved.alternating_features.items %}
+      {% assign is_even = forloop.index | modulo: 2 %}
+
+      <!-- Set classes based on position -->
+      {% if is_even == 0 %}
+        {% assign image_col_class = "col-lg-6 order-lg-2" %}
+        {% assign text_col_class = "col-lg-6 order-lg-1 pe-lg-5" %}
+      {% else %}
+        {% assign image_col_class = "col-lg-6" %}
+        {% assign text_col_class = "col-lg-6 ps-lg-5" %}
+      {% endif %}
+
+      <!-- Common content -->
+      {% capture image_content %}
+        <div class="card border-0 shadow-sm ratio ratio-4x3">
+          <img data-lazy="src" data-src="{{ item.image }}" alt="{{ item.title }}" class="w-100 h-100 object-fit-cover">
+        </div>
+      {% endcapture %}
+
+      {% capture text_content %}
+        <h3 class="h2 mb-4">{{ item.title }}</h3>
+        <p class="fs-5 text-muted mb-0">{{ item.description }}</p>
+      {% endcapture %}
+
+      <div class="row align-items-center g-5 {% unless forloop.last %} mb-5 pb-5 {% endunless %}" data-lazy="@class animation-slide-up">
+        <div class="{{ image_col_class }}">
+          {{ image_content }}
+        </div>
+        <div class="{{ text_col_class }}">
+          {{ text_content }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
 <!-- Features Section -->
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       <h2 class="h2 mb-3">
-        {{ page.resolved.sections.features.headline }} <span class="text-gradient-rainbow">{{ site.brand.name }}</span>?
+        {{ page.resolved.features.headline }}
       </h2>
-      <p class="fs-5 text-muted">{{ page.resolved.sections.features.subheadline }}</p>
+      <p class="fs-5 text-muted">{{ page.resolved.features.subheadline }}</p>
     </div>
 
     <div class="row g-4">
-      {% for feature in page.resolved.features %}
+      {% for feature in page.resolved.features.items %}
         <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
           <div class="card h-100 border-0 shadow-sm text-center rounded-3 bg-body-tertiary">
             <div class="card-body p-4">
@@ -310,19 +468,19 @@ trusted_by:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-3">People {% uj_icon "heart", "text-danger" %} {{ site.brand.name }}</h2>
+      <h2 class="h2 mb-3">{{ page.resolved.testimonials.headline }}</h2>
     </div>
 
-    {% if page.resolved.testimonials %}
+    {% if page.resolved.testimonials.items %}
       <div id="homeTestimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-lazy="@class animation-slide-up">
         <div class="carousel-indicators">
-          {% for testimonial in page.resolved.testimonials %}
+          {% for testimonial in page.resolved.testimonials.items %}
             <button type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide-to="{{ forloop.index0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.index }}"></button>
           {% endfor %}
         </div>
 
         <div class="carousel-inner">
-          {% for testimonial in page.resolved.testimonials %}
+          {% for testimonial in page.resolved.testimonials.items %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -334,7 +492,7 @@ trusted_by:
                         </div>
                       </div>
                       <blockquote class="mb-4">
-                        <p class="fs-4 fw-bold">"{{ testimonial.quote }}"
+                        <p class="fs-4 fw-bold">"{{ testimonial.quote }}"</p>
                       </blockquote>
                       <p class="text-muted fs-5 mb-0">{{ testimonial.author }}, {{ testimonial.role }} at {{ testimonial.company }}</p>
                     </div>
@@ -362,42 +520,25 @@ trusted_by:
 <section>
   <div class="container">
     <div class="row text-center g-4">
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.users.icon, "text-primary display-4" %}
+      {% for stat in page.resolved.stats %}
+        <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+          <div class="mb-3">
+            {% uj_icon stat.icon, "text-{{ stat.color }} display-4" %}
+          </div>
+          <h3 class="display-5 fw-bold mb-2">{{ stat.number }}</h3>
+          {% iftruthy stat.show_stars %}
+            <div class="mb-0">
+              {% for i in (1..5) %}
+                {% uj_icon "star", "text-{{ stat.color }}" %}
+              {% endfor %}
+            </div>
+          {% endiftruthy %}
+          <p class="text-muted mb-0">{{ stat.label }}</p>
+          {% iftruthy stat.sublabel %}
+            <p class="small text-muted">{{ stat.sublabel }}</p>
+          {% endiftruthy %}
         </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.users.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.users.label }}</p>
-        <p class="small text-muted">{{ page.resolved.stats.users.sublabel }}</p>
-      </div>
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.items.icon, "text-success display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.items.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.items.label }}</p>
-        <p class="small text-muted">{{ page.resolved.stats.items.sublabel }}</p>
-      </div>
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.rating.icon, "text-warning display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.rating.number }}</h3>
-        <div class="mb-0">
-          {% for i in (1..5) %}
-            {% uj_icon "star", "text-warning" %}
-          {% endfor %}
-        </div>
-        <p class="text-muted mb-0">{{ page.resolved.stats.rating.label }}</p>
-      </div>
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.success.icon, "text-info display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.success.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.success.label }}</p>
-        <p class="small text-muted">{{ page.resolved.stats.success.sublabel }}</p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -412,7 +553,7 @@ trusted_by:
             {{ page.resolved.cta.headline }}
           </h2>
           <p class="fs-5 mb-4 opacity-90">
-            {{ page.resolved.cta.description }} {{ site.brand.name }}
+            {{ page.resolved.cta.description }}
           </p>
           <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
             <a href="{{ page.resolved.cta.primary_button.href }}" class="btn btn-light btn-lg px-5 py-3">
