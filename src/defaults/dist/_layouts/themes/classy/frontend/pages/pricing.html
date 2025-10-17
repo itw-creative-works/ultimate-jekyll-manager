@@ -218,7 +218,7 @@ faqs:
             {% if plan.popular %}
               {% assign border_classes = "border-gradient-rainbow border-3" %}
             {% else %}
-              {% assign border_classes = "border" %}
+              {% assign border_classes = "" %}
             {% endif %}
 
             <div class="{{ col_classes }}">
@@ -379,7 +379,7 @@ faqs:
 
         <div class="row g-4 mt-3 justify-content-center">
           <div class="col-12 col-md-8 col-lg-6">
-            <div class="card bg-body-tertiary border-0" data-lazy="@class animation-slide-up">
+            <div class="card border-0" data-lazy="@class animation-slide-up">
               <div class="card-body p-4 text-center">
                 <h3 class="h2 mb-3">Enterprise</h3>
                 <h4 class="mb-4">Custom pricing</h4>
@@ -615,7 +615,7 @@ faqs:
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               <div class="row justify-content-center">
                 <div class="col-md-8">
-                  <div class="card border-0 shadow-sm bg-body-tertiary my-1">
+                  <div class="card border-0 shadow-sm my-1">
                     <div class="card-body p-5 text-center">
                       <div class="d-flex justify-content-center mb-4">
                         <div class="avatar avatar-xl rounded-circle bg-primary text-light d-flex align-items-center justify-content-center">
@@ -635,11 +635,11 @@ faqs:
         </div>
 
         <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="carousel-control-prev-icon rounded-circle p-3" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="carousel-control-next-icon rounded-circle p-3" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
         </button>
       </div>
@@ -664,12 +664,12 @@ faqs:
             {% for faq in page.resolved.faqs.items %}
               <div class="accordion-item border-0 mb-3">
                 <h2 class="accordion-header">
-                  <button class="accordion-button bg-body-tertiary collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
+                  <button class="accordion-button collapsed py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
                     <span class="fw-semibold">{{ faq.question }}</span>
                   </button>
                 </h2>
                 <div id="faq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                  <div class="accordion-body bg-body-tertiary text-muted">
+                  <div class="accordion-body text-muted">
                     {{ faq.answer }}
                   </div>
                 </div>

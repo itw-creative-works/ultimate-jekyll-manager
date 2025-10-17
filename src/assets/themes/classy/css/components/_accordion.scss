@@ -4,6 +4,21 @@
 // ============================================
 // Accordion Base Styles
 // ============================================
+.accordion-item {
+  background-color: var(--bs-secondary-bg);
+}
+
+.accordion-button {
+  background-color: var(--bs-secondary-bg);
+
+  &:not(.collapsed) {
+    background-color: var(--bs-secondary-bg);
+  }
+}
+
+.accordion-body {
+  background-color: var(--bs-secondary-bg);
+}
 
 // Light mode icons
 .accordion-button::after {

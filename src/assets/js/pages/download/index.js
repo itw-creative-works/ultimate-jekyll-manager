@@ -36,8 +36,8 @@ export default (Manager) => {
 const config = {
   selectors: {
     platformButtons: '.platform-btn',
-    platformDownloads: '.platform-downloads',
-    downloadButtons: '.platform-downloads .btn-primary:not([type="submit"])'
+    platformDownloads: '[data-platform]',
+    downloadButtons: '.tab-pane[data-platform] .btn-primary:not([type="submit"])'
   }
 };
 
@@ -98,12 +98,12 @@ function detectPlatform() {
 
 // Setup download button tracking
 function setupDownloadTracking() {
-  const downloadButtons = document.querySelectorAll(config.selectors.downloadButtons);
+  const $downloadButtons = document.querySelectorAll(config.selectors.downloadButtons);
 
-  downloadButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      const platformCard = this.closest('.platform-downloads');
-      const platformId = platformCard ? platformCard.dataset.platform : 'unknown';
+  $downloadButtons.forEach($button => {
+    $button.addEventListener('click', function() {
+      const $platformPane = this.closest('[data-platform]');
+      const platformId = $platformPane ? $platformPane.dataset.platform : 'unknown';
       const downloadName = this.textContent.trim();
       const downloadUrl = this.getAttribute('href');
 

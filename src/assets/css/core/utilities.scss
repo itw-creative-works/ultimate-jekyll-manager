@@ -47,18 +47,27 @@ button *, a * {
 // Adaptive Theming
 // ============================================
 
+// Mixin for SVG color inheritance
+@mixin svg-currentcolor {
+  svg {
+    fill: currentColor;
+    path, g, polygon, rect, circle { fill: currentColor; }
+  }
+}
+
 // Filter adaptive - automatically uses theme body color
 .filter-adaptive {
-  // Set the color context to body color
   color: var(--bs-body-color);
+  @include svg-currentcolor;
+}
 
-  svg {
-    // Make SVG fill use currentColor (inherits from parent color)
-    fill: currentColor;
+// Filter adaptive inverse - dark in light mode, light in dark mode
+.filter-adaptive-inverse {
+  color: var(--bs-dark);
+  @include svg-currentcolor;
 
-    path, g, polygon, rect, circle {
-      fill: currentColor;
-    }
+  [data-bs-theme="dark"] & {
+    color: var(--bs-light);
   }
 }
 

@@ -262,7 +262,7 @@ cta:
             </div>
           </div>
 
-          <div class="position-absolute top-0 end-0 bg-body-tertiary rounded-4 p-3 shadow-lg" style="transform: translate(20px, -20px);">
+          <div class="position-absolute top-0 end-0 rounded-4 p-3 shadow-lg" style="transform: translate(20px, -20px);">
             <div class="d-flex align-items-center">
               {% uj_icon page.resolved.hero.badge.icon, "text-warning fs-4 me-2" %}
               <div>
@@ -449,7 +449,7 @@ cta:
     <div class="row g-4">
       {% for feature in page.resolved.features.items %}
         <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-          <div class="card h-100 border-0 shadow-sm text-center rounded-3 bg-body-tertiary">
+          <div class="card h-100 border-0 shadow-sm text-center rounded-3">
             <div class="card-body p-4">
               <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                 {% uj_icon feature.icon, "text-light fs-2" %}
@@ -484,7 +484,7 @@ cta:
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               <div class="row justify-content-center">
                 <div class="col-md-8">
-                  <div class="card border-0 shadow-sm bg-body-tertiary my-1 rounded-3">
+                  <div class="card border-0 shadow-sm my-1 rounded-3">
                     <div class="card-body p-5 text-center">
                       <div class="d-flex justify-content-center mb-4">
                         <div class="avatar avatar-xl rounded-circle bg-primary text-light d-flex align-items-center justify-content-center">
@@ -504,11 +504,11 @@ cta:
         </div>
 
         <button class="carousel-control-prev" type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="carousel-control-prev-icon rounded-circle p-3" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#homeTestimonialCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon bg-body-tertiary rounded-circle p-3" aria-hidden="true"></span>
+          <span class="carousel-control-next-icon rounded-circle p-3" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
         </button>
       </div>

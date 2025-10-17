@@ -28,9 +28,7 @@ ok now were working on THIS PAGE. first, do our main checks like
 * ONLY HERO section should have an accent gradient in the heading, other ssections should NOT have this
 
 
-ok now actually we have a new way of putting videos
-
-/Users/ian/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools/lib/tags/video.rb
+*** LEFT OFF ON PRICING
 
 
 REVIEW page

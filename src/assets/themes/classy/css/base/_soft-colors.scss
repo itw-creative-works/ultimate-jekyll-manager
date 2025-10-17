@@ -1,19 +1,6 @@
 // Classy Soft Color Utilities
 // Transparent color variations for all Bootstrap theme colors
-
-// ============================================
-// Theme Color Map
-// ============================================
-$theme-colors: (
-  "primary": var(--bs-primary),
-  "secondary": var(--bs-secondary),
-  "success": var(--bs-success),
-  "info": var(--bs-info),
-  "warning": var(--bs-warning),
-  "danger": var(--bs-danger),
-  "light": var(--bs-light),
-  "dark": var(--bs-dark)
-);
+// Uses Bootstrap's $theme-colors map which is available via config
 
 // ============================================
 // Soft Color Generation Loop

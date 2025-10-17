@@ -1,19 +1,6 @@
 // Classy Avatar Components
 // Circular profile images with responsive sizing
-
-// ============================================
-// Avatar Size Configuration
-// ============================================
-$avatar-sizes: (
-  null: 3rem,    // default
-  2xs: 0.5rem,
-  xs: 1.5rem,
-  sm: 2rem,
-  md: 2.5rem,
-  lg: 3.5rem,
-  xl: 5rem,
-  2xl: 7.5rem
-);
+// Uses $avatar-sizes map from config
 
 // ============================================
 // Base Avatar Styles

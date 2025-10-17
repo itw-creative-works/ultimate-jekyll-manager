@@ -1,13 +1,12 @@
 // Classy Extended Spacing
 // Additional spacing utilities beyond Bootstrap's defaults
+// Uses Bootstrap's $spacer variable which is available via config
 
 // ============================================
 // Extended Padding Classes
 // ============================================
-$spacer: 1rem;
-
-@for $i from 6 through 8 {
-  $size: if($i == 6, 4, if($i == 7, 4.5, 5));
+@for $i from 6 through 10 {
+  $size: if($i == 6, 4, if($i == 7, 5, if($i == 8, 6, if($i == 9, 8, 10))));
 
   .p-#{$i} { padding: $spacer * $size !important; }
   .pt-#{$i} { padding-top: $spacer * $size !important; }

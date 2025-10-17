@@ -108,7 +108,7 @@ story:
               {% assign is_odd = forloop.index | modulo: 2 %}
               {% if is_odd == 1 %}
                 <div class="col-md-5 text-md-end mb-3 mb-md-0">
-                  <div class="bg-body-tertiary rounded-3 p-4 shadow-sm h-100">
+                  <div class="rounded-3 p-4 shadow-sm h-100">
                     <div class="bg-primary text-light avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                       <span class="fw-bold fs-4">{{ item.year }}</span>
                     </div>
@@ -126,7 +126,7 @@ story:
                   <div class="border-start border-primary border-3 h-100"></div>
                 </div>
                 <div class="col-md-5 mb-3 mb-md-0">
-                  <div class="bg-body-tertiary rounded-3 p-4 shadow-sm h-100">
+                  <div class="rounded-3 p-4 shadow-sm h-100">
                     <div class="bg-primary text-light avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                       <span class="fw-bold fs-4">{{ item.year }}</span>
                     </div>
@@ -223,7 +223,7 @@ story:
     <div class="row g-4">
       {% for value in page.resolved.values %}
         <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-          <div class="card h-100 border-0 shadow-sm text-center rounded-3 bg-body-tertiary">
+          <div class="card h-100 border-0 shadow-sm text-center rounded-3">
             <div class="card-body p-4">
               <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                 {% uj_icon value.icon, "text-light fs-2" %}

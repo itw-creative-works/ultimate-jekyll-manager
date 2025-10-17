@@ -27,7 +27,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
     <!-- Search Section -->
     <div class="row justify-content-center mb-5">
       <div class="col-lg-8" data-lazy="@class animation-slide-up">
-        <div class="card bg-body-tertiary rounded-4 border-0 p-4">
+        <div class="card rounded-4 border-0 p-4">
           <form action="{{ site.url }}/search/cse" target="_blank">
             <div class="input-group input-group-lg">
               <input
@@ -50,13 +50,11 @@ layout: themes/[ site.theme.id ]/frontend/core/base
     <div class="row g-4 mb-4">
       {% for post in paginator.posts %}
         <div class="col-xl-4 col-lg-6 col-md-12" data-lazy="@class animation-slide-up">
-          <article class="card h-100 shadow-sm border-0 bg-body-tertiary">
+          <article class="card h-100 shadow-sm border-0">
             <!-- Image -->
-            <div class="p-3 pb-0">
-              <a href="{{ site.url }}{{ post.url }}" class="text-decoration-none">
-                {%- uj_post post.post.id, "image-tag", class="img-fluid object-fit-cover blog-post-card-image rounded-3" -%}
-              </a>
-            </div>
+            <a href="{{ site.url }}{{ post.url }}" class="text-decoration-none d-block p-3 pb-0">
+              {%- uj_post post.post.id, "image-tag", class="img-fluid object-fit-cover blog-post-card-image rounded-3" -%}
+            </a>
 
             <!-- Card Body -->
             <div class="card-body d-flex flex-column">

@@ -81,7 +81,7 @@ faqs:
 
       {% for method in page.resolved.contact_methods %}
         <div class="{{ col_classes }}">
-          <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center" data-lazy="@class animation-slide-up">
+          <div class="card h-100 border-0 shadow-sm text-center" data-lazy="@class animation-slide-up">
             <div class="card-body p-4">
               <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                 {% uj_icon method.icon, "text-light fs-2" %}
@@ -102,7 +102,7 @@ faqs:
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="card border-0 shadow-lg bg-body-tertiary" data-lazy="@class animation-slide-up">
+        <div class="card border-0 shadow-lg" data-lazy="@class animation-slide-up">
           <div class="card-body p-5">
             <div class="text-center mb-4">
               <h2 class="h3 mb-3">Send us a Message</h2>
@@ -281,12 +281,12 @@ faqs:
             {% for faq in page.resolved.faqs %}
               <div class="accordion-item border-0 mb-3" data-lazy="@class animation-slide-up">
                 <h2 class="accordion-header">
-                  <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaq{{ forloop.index }}" aria-expanded="false" aria-controls="contactFaq{{ forloop.index }}">
+                  <button class="accordion-button collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaq{{ forloop.index }}" aria-expanded="false" aria-controls="contactFaq{{ forloop.index }}">
                     <span class="fw-semibold">{{ faq.question }}</span>
                   </button>
                 </h2>
                 <div id="contactFaq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#contactFaqAccordion">
-                  <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                  <div class="accordion-body text-muted shadow-sm">
                     {{ faq.answer }}
                   </div>
                 </div>

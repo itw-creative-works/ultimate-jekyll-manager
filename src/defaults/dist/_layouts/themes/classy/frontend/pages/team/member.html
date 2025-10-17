@@ -73,7 +73,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
         <div class="row g-4">
           {% iftruthy page.member.location %}
             <div class="col-md-6">
-              <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
+              <div class="card h-100 border-0 shadow-sm text-center">
                 <div class="card-body p-4">
                   <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                     {% uj_icon "map-marker-alt", "text-light fs-2" %}
@@ -87,7 +87,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 
           {% iftruthy page.member.joined %}
             <div class="col-md-6">
-              <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
+              <div class="card h-100 border-0 shadow-sm text-center">
                 <div class="card-body p-4">
                   <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                     {% uj_icon "calendar", "text-light fs-2" %}
@@ -101,7 +101,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 
           {% iftruthy page.member.skills %}
             <div class="col-md-6">
-              <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
+              <div class="card h-100 border-0 shadow-sm text-center">
                 <div class="card-body p-4">
                   <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                     {% uj_icon "briefcase", "text-light fs-2" %}
@@ -115,7 +115,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 
           {% iftruthy page.member.hobbies %}
             <div class="col-md-6">
-              <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
+              <div class="card h-100 border-0 shadow-sm text-center">
                 <div class="card-body p-4">
                   <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                     {% uj_icon "heart", "text-light fs-2" %}
@@ -137,7 +137,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <div class="card border-0 shadow-sm bg-body-tertiary">
+        <div class="card border-0 shadow-sm">
           <div class="card-body p-5">
             {%- capture member_name -%}{%- uj_member page.member.id, "name" -%}{%- endcapture -%}
             {%- assign first_name = member_name | split: ' ' | first -%}

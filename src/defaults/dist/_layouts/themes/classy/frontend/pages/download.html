@@ -221,7 +221,7 @@ cta:
             aria-labelledby="loading-tab"
             tabindex="0"
           >
-            <div class="card border-0 shadow-lg bg-body-tertiary">
+            <div class="card border-0 shadow-lg">
               <div class="card-body p-5 text-center">
                 <div class="mb-4">
                   <div class="avatar avatar-2xl rounded-circle bg-primary d-inline-flex align-items-center justify-content-center">
@@ -262,7 +262,7 @@ cta:
             data-platform="{{ platform.id }}"
             data-has-download="{% if has_download %}true{% else %}false{% endif %}"
           >
-            <div class="card border-0 shadow-lg bg-body-tertiary">
+            <div class="card border-0 shadow-lg">
             <div class="card-body p-5 text-center">
               <div class="mb-4">
                 <div class="avatar avatar-2xl rounded-circle bg-primary d-inline-flex align-items-center justify-content-center">
@@ -380,7 +380,7 @@ cta:
     <div class="row g-4 justify-content-center">
       {% for feature in page.resolved.features.items %}
         <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-          <div class="card h-100 border-0 shadow-sm bg-body-tertiary text-center">
+          <div class="card h-100 border-0 shadow-sm text-center">
             <div class="card-body p-4">
               <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
                 {% uj_icon feature.icon, "text-light fs-2" %}
@@ -400,7 +400,7 @@ cta:
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10" data-lazy="@class animation-slide-up">
-        <div class="card border-0 shadow-sm bg-body-tertiary">
+        <div class="card border-0 shadow-sm">
           <div class="card-body p-5">
             <h2 class="h2 mb-4 text-center">
               {{ page.resolved.system_requirements.headline }}
@@ -464,12 +464,12 @@ cta:
           {% for faq in page.resolved.faqs.items %}
             <div class="accordion-item border-0 mb-3">
               <h2 class="accordion-header">
-                <button class="accordion-button bg-body-tertiary collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
+                <button class="accordion-button collapsed py-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.index }}" aria-expanded="false" aria-controls="faq{{ forloop.index }}">
                   <span class="fw-semibold">{{ faq.question }}</span>
                 </button>
               </h2>
               <div id="faq{{ forloop.index }}" class="accordion-collapse collapse" data-bs-parent="#downloadFaqAccordion">
-                <div class="accordion-body text-muted bg-body-tertiary shadow-sm">
+                <div class="accordion-body text-muted shadow-sm">
                   {{ faq.answer }}
                 </div>
               </div>
@@ -539,7 +539,7 @@ cta:
               <h6 class="mb-0">1. Open your Downloads folder</h6>
               <small class="text-muted">Find the <strong>Downloads</strong> folder on your computer</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2">
                 <div class="folder-icon animation-flex position-relative d-flex align-items-center justify-content-center">
                   {% uj_icon "download", "display-4" %}
@@ -554,7 +554,7 @@ cta:
               <h6 class="mb-0">2. Double-click {{ site.brand.name }}-Setup.exe</h6>
               <small class="text-muted">Click <strong>"Yes"</strong> if Windows asks for permission</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2 position-relative">
                 <div class="file-to-click bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
                   <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="brandmark" alt="{{ site.brand.name }} Logo"/>
@@ -575,7 +575,7 @@ cta:
               <h6 class="mb-0">3. Follow the installation setup</h6>
               <small class="text-muted">Click <strong>"Next"</strong> through the steps and accept the terms</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="wizard-window card border-2 rounded-3 shadow overflow-hidden">
                 <div class="wizard-header bg-primary text-light d-flex align-items-center px-2 small fw-bold">
                   {{ site.brand.name }} Setup
@@ -595,7 +595,7 @@ cta:
               <h6 class="mb-0">4. Launch the app</h6>
               <small class="text-muted">Find {{ site.brand.name }} in your <strong>Start Menu</strong> or <strong>Desktop</strong> shortcut</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2">
                 <div class="app-icon animation-flex bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
                   <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="brandmark" alt="{{ site.brand.name }} Logo"/>
@@ -613,7 +613,7 @@ cta:
               <h6 class="mb-0">1. Open your Downloads folder</h6>
               <small class="text-muted">Find the <strong>Downloads</strong> folder on your Mac</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2">
                 <div class="folder-icon animation-flex position-relative d-flex align-items-center justify-content-center">
                   {% uj_icon "download", "display-4" %}
@@ -628,7 +628,7 @@ cta:
               <h6 class="mb-0">2. Double-click {{ site.brand.name }}.dmg</h6>
               <small class="text-muted">This will mount the disk image</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2 position-relative">
                 <div class="file-to-click bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
                   <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="brandmark" alt="{{ site.brand.name }} Logo"/>
@@ -649,7 +649,7 @@ cta:
               <h6 class="mb-0">3. Drag {{ site.brand.name }} to Applications folder</h6>
               <small class="text-muted">This installs the app for all users</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex gap-5 align-items-center position-relative">
                 <div class="d-flex flex-column align-items-center gap-2 position-relative">
                   <div class="file-to-click bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
@@ -686,7 +686,7 @@ cta:
               <h6 class="mb-0">4. Launch the app</h6>
               <small class="text-muted">Find {{ site.brand.name }} in your <strong>Applications</strong> folder or use <strong>Spotlight</strong></small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2">
                 <div class="app-icon animation-flex bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
                   <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="brandmark" alt="{{ site.brand.name }} Logo"/>
@@ -704,7 +704,7 @@ cta:
               <h6 class="mb-0">1. Open Terminal</h6>
               <small class="text-muted">Press <strong>Ctrl+Alt+T</strong></small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2">
                 <div class="app-icon animation-flex bg-dark text-light rounded-3 d-flex align-items-center justify-content-center">
                   {% uj_icon "terminal", "display-4" %}
@@ -719,7 +719,7 @@ cta:
               <h6 class="mb-0">2. Navigate to Downloads</h6>
               <small class="text-muted">Run the command below</small>
             </div>
-            <div class="bg-body border border-2 rounded-4 p-4 overflow-hidden position-relative">
+            <div class="bg-body-tertiary rounded-4 p-4 overflow-hidden position-relative">
               <div class="input-group">
                 <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-1" value="cd ~/Downloads" readonly>
                 <button type="button" class="btn btn-outline-adaptive copy-command-btn">
@@ -735,7 +735,7 @@ cta:
               <h6 class="mb-0">3. Install the package</h6>
               <small class="text-muted">Run the appropriate command for your distribution</small>
             </div>
-            <div class="bg-body border border-2 rounded-4 p-4 overflow-hidden position-relative">
+            <div class="bg-body-tertiary rounded-4 p-4 overflow-hidden position-relative">
               <div class="mb-3">
                 <small class="text-muted d-block mb-2 fw-bold">For Debian/Ubuntu:</small>
                 <div class="input-group">
@@ -764,7 +764,7 @@ cta:
               <h6 class="mb-0">4. Launch the app</h6>
               <small class="text-muted">Find {{ site.brand.name }} in your <strong>Applications</strong> menu</small>
             </div>
-            <div class="instruction-step-container bg-body border border-2 rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
+            <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
               <div class="d-flex flex-column align-items-center gap-2">
                 <div class="app-icon animation-flex bg-white border border-primary border-3 rounded-3 d-flex align-items-center justify-content-center">
                   <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="brandmark" alt="{{ site.brand.name }} Logo"/>
