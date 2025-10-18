@@ -100,6 +100,8 @@ alternating_features:
   headline: "What Makes {{ site.brand.name }}"
   headline_accent: "Different"
   subheadline: "Powerful features designed to accelerate your success"
+  image_ratio: "4x3" # Options: 1x1, 4x3, 16x9, 21x9
+  image_object_position: "center" # Options: center, top, bottom, left, right
   items:
     - title: "Seamless Integration"
       description: "Connect with your existing tools and platforms effortlessly. Our system automatically syncs data and streamlines your workflow for maximum efficiency."
@@ -287,7 +289,7 @@ cta:
 {% endcomment %}
 
 <!-- Hero Section -->
-<section class="section-nearly-full-width bg-gradient-rainbow gradient-animated text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center rounded-bottom-4 shadow-lg">
+<section class="section-breakout-x section-breakout-x-nearly-lg section-breakout-top bg-gradient-rainbow gradient-animated gradient-grain text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center rounded-bottom-4 shadow-lg">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-10 text-center py-5">
@@ -408,7 +410,7 @@ cta:
 </section>
 
 <!-- Alternating Features Section -->
-<section>
+<section class="section-breakout-x section-breakout-x-nearly-lg bg-body-secondary rounded">
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       {% iftruthy page.resolved.alternating_features.superheadline %}
@@ -435,8 +437,10 @@ cta:
 
       <!-- Common content -->
       {% capture image_content %}
-        <div class="card border-0 shadow-sm ratio ratio-4x3">
-          {% uj_image item.image, class="w-100 h-100 object-fit-cover rounded", style="", alt=item.title %}
+        {% assign ratio = page.resolved.alternating_features.image_ratio | default: "4x3" %}
+        {% assign object_position = page.resolved.alternating_features.image_object_position | default: "center" %}
+        <div class="card border-0 shadow-sm ratio ratio-{{ ratio }}">
+          {% uj_image item.image, class="w-100 h-100 object-fit-cover rounded", style="object-position: {{ object_position }};", alt=item.title %}
         </div>
       {% endcapture %}
 
