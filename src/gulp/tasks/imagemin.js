@@ -12,8 +12,8 @@ const GitHubCache = require('./utils/github-cache');
 const rootPathProject = Manager.getRootPath('project');
 
 // Settings
-const CACHE_DIR = '.temp/imagemin';
-const CACHE_BRANCH = 'uj-imagemin';
+const CACHE_DIR = '.temp/cache/imagemin';
+const CACHE_BRANCH = 'cache-uj-imagemin';
 
 // Variables
 let githubCache;
@@ -50,6 +50,7 @@ async function imagemin(complete) {
 
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // Track timing
   const startTime = Date.now();

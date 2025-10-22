@@ -5,12 +5,22 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 ### PAGE CONFIG ###
 # Hero Section
 hero:
-  headline: "Download"
-  headline_accent: "{{ site.brand.name }}"
-  description: "Get {{ site.brand.name }} for your platform and start building amazing things today"
+  headline: "Download {{ site.brand.name }}"
+  headline_accent: "Today"
+  description: "Get {{ site.brand.name }} for your platform and start building amazing things"
 
 # Downloads Section
 downloads:
+  superheadline: "{% uj_icon 'download' %} Download"
+  headline: "Available on Every"
+  headline_accent: "Platform"
+  subheadline: "Choose your platform below to get started"
+  supported_platforms:
+    - "Windows"
+    - "macOS"
+    - "Linux"
+    - "Android"
+    - "iOS"
   loading:
     headline: "Detecting Platform"
     description: "Determining your operating system..."
@@ -68,7 +78,10 @@ downloads:
 
 # Features Section
 features:
-  headline: "Why Download {{ site.brand.name }}?"
+  superheadline: "{% uj_icon 'star' %} Benefits"
+  headline: "Why You Should"
+  headline_accent: "Download"
+  subheadline: "Everything you need to succeed, built right in"
   items:
     - title: "Lightning Fast"
       description: "Install in seconds and start using immediately"
@@ -85,7 +98,10 @@ features:
 
 # System Requirements Section
 system_requirements:
-  headline: "System Requirements"
+  superheadline: "{% uj_icon 'server' %} Requirements"
+  headline: "System"
+  headline_accent: "Requirements"
+  subheadline: "Make sure your device meets these minimum requirements"
   desktop:
     label: "Desktop"
     icon: "desktop"
@@ -105,7 +121,9 @@ system_requirements:
 
 # FAQ Section
 faqs:
-  headline: "FAQs"
+  superheadline: "{% uj_icon 'circle-question' %} FAQs"
+  headline: "Frequently Asked"
+  headline_accent: "Questions"
   subheadline: "Everything you need to know about downloading and installing. Can't find the answer you're looking for? Please chat to our friendly team."
   items:
     - question: "Is {{ site.brand.name }} free to download?"
@@ -119,8 +137,10 @@ faqs:
 
 # CTA Section
 cta:
-  headline: "Need help getting started?"
-  description: "Our support team is here 24/7 to help you with installation and setup"
+  superheadline: "{% uj_icon 'headset' %} Support"
+  headline: "Need help getting"
+  headline_accent: "started?"
+  subheadline: "Our support team is here 24/7 to help you with installation and setup"
   primary_button:
     text: "Contact Support"
     icon: "headset"
@@ -149,8 +169,23 @@ cta:
 </section>
 
 <!-- Downloads Section -->
-<section>
+<section class="pt-0">
   <div class="container">
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      {% iftruthy page.resolved.downloads.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.downloads.superheadline }}</span>
+      {% endiftruthy %}
+      <h2 class="h2 mb-2">
+        {{ page.resolved.downloads.headline }}
+        {% iftruthy page.resolved.downloads.headline_accent %}
+          <span class="text-accent">{{ page.resolved.downloads.headline_accent }}</span>
+        {% endiftruthy %}
+      </h2>
+      {% iftruthy page.resolved.downloads.subheadline %}
+        <p class="fs-5 text-muted mb-4">{{ page.resolved.downloads.subheadline }}</p>
+      {% endiftruthy %}
+    </div>
+
     <!-- Platform Selector -->
     <div class="row justify-content-center mb-5">
       <div class="col-12">
@@ -372,9 +407,18 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-3">
+      {% iftruthy page.resolved.features.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.features.superheadline }}</span>
+      {% endiftruthy %}
+      <h2 class="h2 mb-2">
         {{ page.resolved.features.headline }}
+        {% iftruthy page.resolved.features.headline_accent %}
+          <span class="text-accent">{{ page.resolved.features.headline_accent }}</span>
+        {% endiftruthy %}
       </h2>
+      {% iftruthy page.resolved.features.subheadline %}
+        <p class="fs-5 text-muted">{{ page.resolved.features.subheadline }}</p>
+      {% endiftruthy %}
     </div>
 
     <div class="row g-4 justify-content-center">
@@ -402,9 +446,20 @@ cta:
       <div class="col-lg-10" data-lazy="@class animation-slide-up">
         <div class="card border-0 shadow-sm">
           <div class="card-body p-5">
-            <h2 class="h2 mb-4 text-center">
-              {{ page.resolved.system_requirements.headline }}
-            </h2>
+            <div class="text-center mb-4">
+              {% iftruthy page.resolved.system_requirements.superheadline %}
+                <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.system_requirements.superheadline }}</span>
+              {% endiftruthy %}
+              <h2 class="h2 mb-2">
+                {{ page.resolved.system_requirements.headline }}
+                {% iftruthy page.resolved.system_requirements.headline_accent %}
+                  <span class="text-accent">{{ page.resolved.system_requirements.headline_accent }}</span>
+                {% endiftruthy %}
+              </h2>
+              {% iftruthy page.resolved.system_requirements.subheadline %}
+                <p class="fs-5 text-muted">{{ page.resolved.system_requirements.subheadline }}</p>
+              {% endiftruthy %}
+            </div>
 
             <div class="row g-4">
               <div class="col-md-6">
@@ -454,10 +509,18 @@ cta:
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="text-center mb-4" data-lazy="@class animation-slide-up">
-          <h2 class="h2 mb-3">
+          {% iftruthy page.resolved.faqs.superheadline %}
+            <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.faqs.superheadline }}</span>
+          {% endiftruthy %}
+          <h2 class="h2 mb-2">
             {{ page.resolved.faqs.headline }}
+            {% iftruthy page.resolved.faqs.headline_accent %}
+              <span class="text-accent">{{ page.resolved.faqs.headline_accent }}</span>
+            {% endiftruthy %}
           </h2>
-          <p class="fs-5 text-muted mb-0">{{ page.resolved.faqs.subheadline }}</p>
+          {% iftruthy page.resolved.faqs.subheadline %}
+            <p class="fs-5 text-muted mb-0">{{ page.resolved.faqs.subheadline }}</p>
+          {% endiftruthy %}
         </div>
 
         <div class="accordion" id="downloadFaqAccordion" data-lazy="@class animation-slide-up">
@@ -487,12 +550,20 @@ cta:
     <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient" data-lazy="@class animation-slide-up">
       <div class="row align-items-center py-4">
         <div class="col-lg-8 text-light text-center text-lg-start">
-          <h2 class="h2 lh-sm mb-4">
+          {% iftruthy page.resolved.cta.superheadline %}
+            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.cta.superheadline }}</span>
+          {% endiftruthy %}
+          <h2 class="h2 lh-sm mb-2">
             {{ page.resolved.cta.headline }}
+            {% iftruthy page.resolved.cta.headline_accent %}
+              <span class="text-accent">{{ page.resolved.cta.headline_accent }}</span>
+            {% endiftruthy %}
           </h2>
-          <p class="fs-5 text-muted mb-4">
-            {{ page.resolved.cta.description }}
-          </p>
+          {% iftruthy page.resolved.cta.subheadline %}
+            <p class="fs-5 mb-4 opacity-90">
+              {{ page.resolved.cta.subheadline }}
+            </p>
+          {% endiftruthy %}
           <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
             <a href="{{ page.resolved.cta.primary_button.href }}" class="btn btn-adaptive btn-lg px-5 py-3">
               {% uj_icon page.resolved.cta.primary_button.icon, "me-2" %}

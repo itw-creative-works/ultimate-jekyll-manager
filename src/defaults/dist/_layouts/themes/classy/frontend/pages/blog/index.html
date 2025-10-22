@@ -3,6 +3,24 @@
 layout: themes/[ site.theme.id ]/frontend/core/base
 
 ### PAGE CONFIG ###
+# Hero Section
+hero:
+  headline: "The {{ site.brand.name }}"
+  headline_accent: "Blog"
+  subheadline: "Discover insights, tutorials, and news from our team"
+
+# Newsletter CTA Section
+newsletter_cta:
+  superheadline: "{% uj_icon 'envelope' %} Newsletter"
+  headline: "Never Miss a"
+  headline_accent: "Post"
+  subheadline: "Get the latest insights delivered straight to your inbox. No spam, unsubscribe anytime."
+  button:
+    text: "Subscribe"
+  form:
+    placeholder: "Enter your email"
+    success_message: "Thank you for subscribing! Check your email to confirm."
+    error_message: "Something went wrong. Please try again."
 ---
 
 <!-- Hero Section -->
@@ -11,18 +29,20 @@ layout: themes/[ site.theme.id ]/frontend/core/base
     <div class="row justify-content-center text-center">
       <div class="col-lg-10" data-lazy="@class animation-slide-up">
         <h1 class="h1 mb-3">
-          {{ site.brand.name }} <span class="text-gradient-rainbow">Blog</span>
+          {{ page.resolved.hero.headline }} <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
-        <p class="fs-5 text-muted mb-0">
-          Discover insights, tutorials, and news from our team
-        </p>
+        {% iftruthy page.resolved.hero.subheadline %}
+          <p class="fs-5 text-muted mb-0">
+            {{ page.resolved.hero.subheadline }}
+          </p>
+        {% endiftruthy %}
       </div>
     </div>
   </div>
 </section>
 
 <!-- Blog Posts Section -->
-<section>
+<section class="pt-4">
   <div class="container">
     <!-- Search Section -->
     <div class="row justify-content-center mb-5">
@@ -213,13 +233,20 @@ layout: themes/[ site.theme.id ]/frontend/core/base
     <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient">
       <div class="row align-items-center py-4">
         <div class="col-lg-6 text-light">
-          <h2 class="h2 mb-3">
-            Never miss a <strong>post</strong>
+          {% iftruthy page.resolved.newsletter_cta.superheadline %}
+            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.newsletter_cta.superheadline }}</span>
+          {% endiftruthy %}
+          <h2 class="h2 mb-2">
+            {{ page.resolved.newsletter_cta.headline }}
+            {% iftruthy page.resolved.newsletter_cta.headline_accent %}
+              <span class="text-accent">{{ page.resolved.newsletter_cta.headline_accent }}</span>
+            {% endiftruthy %}
           </h2>
-          <p class="fs-5 text-muted mb-4">
-            Get the latest insights delivered straight to your inbox.
-            No spam, unsubscribe anytime.
-          </p>
+          {% iftruthy page.resolved.newsletter_cta.subheadline %}
+            <p class="fs-5 mb-4 opacity-90">
+              {{ page.resolved.newsletter_cta.subheadline }}
+            </p>
+          {% endiftruthy %}
         </div>
         <div class="col-lg-6">
           <!-- Newsletter Form -->
@@ -229,7 +256,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
                 <input
                   type="email"
                   class="form-control form-control-lg"
-                  placeholder="Enter your email"
+                  placeholder="{{ page.resolved.newsletter_cta.form.placeholder }}"
                   name="email"
                   required
                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
@@ -241,7 +268,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
               </div>
               <div class="col-md-4">
                 <button type="submit" class="btn btn-adaptive btn-lg px-4 w-100">
-                  Subscribe
+                  {{ page.resolved.newsletter_cta.button.text }}
                   <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </span>
@@ -252,11 +279,11 @@ layout: themes/[ site.theme.id ]/frontend/core/base
             <!-- Success/Error Messages -->
             <div class="newsletter-success-alert alert alert-success mt-3 d-none" role="alert">
               {% uj_icon "check-circle", "me-2" %}
-              Thank you for subscribing! Check your email to confirm.
+              {{ page.resolved.newsletter_cta.form.success_message }}
             </div>
             <div class="newsletter-error-alert alert alert-danger mt-3 d-none" role="alert">
               {% uj_icon "exclamation-circle", "me-2" %}
-              <span class="error-message">Something went wrong. Please try again.</span>
+              <span class="error-message">{{ page.resolved.newsletter_cta.form.error_message }}</span>
             </div>
           </form>
         </div>

@@ -9,9 +9,11 @@ const spellchecker = require('spellchecker');
 const cheerio = require('cheerio');
 const { HtmlValidate } = require('html-validate');
 const { XMLParser } = require('fast-xml-parser');
-const chromeLauncher = require('chrome-launcher');
-const lighthouse = require('lighthouse').default || require('lighthouse');
 const { execute } = require('node-powertools');
+
+// Lazy-loaded libraries (only loaded when needed)
+let chromeLauncher = null;
+let lighthouse = null;
 
 // Utils
 const collectTextNodes = require('./utils/collectTextNodes');
@@ -33,35 +35,55 @@ const input = [
 const output = '';
 const delay = 250;
 
+// Batch size for processing files (configurable via env var)
+// Set to 0 or 'false' to disable batching and process all files at once (original behavior)
+const BATCH_SIZE = (() => {
+  const envValue = process.env.UJ_AUDIT_BATCH_SIZE;
+
+  if (!envValue || envValue === 'false' || envValue === '0') {
+    return Infinity; // Process all files at once (original behavior)
+  }
+
+  return parseInt(envValue, 10);
+})();
+
 // Task
 async function audit(complete) {
   // Log
   logger.log('Starting...');
+  logger.log(`Batch size: ${BATCH_SIZE === Infinity ? 'disabled (processing all files at once)' : `${BATCH_SIZE} files per batch`}`);
+  Manager.logMemory(logger, 'Audit Start');
 
   // Quit if NOT in build mode and UJ_AUDIT_FORCE is not true
-  if (!Manager.isBuildMode() && process.env.UJ_AUDIT_FORCE !== 'true') {
-    logger.log('Skipping audit in development mode');
+  // if (!Manager.isBuildMode() && process.env.UJ_AUDIT_FORCE !== 'true') {
+  //   logger.log('Skipping audit in development mode');
+  //   return complete();
+  // }
+
+  // For now, only run when forced
+  if (process.env.UJ_AUDIT_FORCE !== 'true') {
+    logger.log('Skipping audit (UJ_AUDIT_FORCE not set to true)');
     return complete();
   }
 
   // Perform HTML/XML audit
   await processAudit();
 
-  // Real quick, lets check if were in build mode and IF NOT then we run minifyHtml
-  if (!Manager.isBuildMode()) {
+  // Perform Lighthouse audit if URL is provided
+  if (process.env.UJ_AUDIT_LIGHTHOUSE_URL) {
+    // This helps us pass Lighthouse audits in development mode
     const minifyHtml = require('./minifyHtml');
     await new Promise((resolve) => {
       minifyHtml(resolve);
     });
-  }
 
-  // Perform Lighthouse audit if URL is provided
-  if (process.env.UJ_AUDIT_LIGHTHOUSE_URL) {
+    // Run Lighthouse audit
     await runLighthouseAudit();
   }
 
   // Log
   logger.log('Finished!');
+  Manager.logMemory(logger, 'Audit Complete');
 
   // Exit process if UJ_AUDIT_AUTOEXIT is set
   if (process.env.UJ_AUDIT_AUTOEXIT === 'true') {
@@ -228,6 +250,7 @@ async function validateSpelling(file, content) {
 }
 
 async function processAudit() {
+  logger.log('📂 Finding files to audit...');
   const htmlFiles = glob(input, {
     nodir: true,
     ignore: [
@@ -239,9 +262,14 @@ async function processAudit() {
     ]
   });
 
-  // Run validations in parallel
-  const results = await Promise.all(
-    htmlFiles.map(async (file) => {
+  logger.log(`📊 Found ${htmlFiles.length} files to audit`);
+  Manager.logMemory(logger, 'Before Processing');
+
+  // Process files in batches to avoid memory issues
+  const results = await Manager.processBatches(
+    htmlFiles,
+    BATCH_SIZE,
+    async (file) => {
       const content = jetpack.read(file);
 
       // Run format and spellcheck in parallel
@@ -255,8 +283,11 @@ async function processAudit() {
         formatValidation,
         spellingValidation
       };
-    })
+    },
+    logger
   );
+
+  Manager.logMemory(logger, 'After Processing');
 
   // Log results
   const summary = {
@@ -333,6 +364,10 @@ function format(messages) {
 // Lighthouse audit functionality
 async function runLighthouseAudit() {
   logger.log('📊 Starting Lighthouse audit...');
+
+  // Lazy load Lighthouse dependencies (only when actually running audit)
+  chromeLauncher = require('chrome-launcher');
+  lighthouse = require('lighthouse').default || require('lighthouse');
 
   let serverStarted = false;
   let auditUrl = null;

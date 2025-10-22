@@ -16,6 +16,29 @@
   &:focus {
     box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
   }
+
+  // // Slot machine hover effect
+  // // Works on direct text nodes when wrapped in any inline element
+  // > * {
+  //   position: relative;
+  //   display: inline-block;
+  //   transition: transform 0.3s ease;
+
+  //   // Create duplicate text below using the same content
+  //   &::before {
+  //     content: attr(data-hover);
+  //     position: absolute;
+  //     top: 100%;
+  //     left: 0;
+  //     width: max-content;
+  //     transform: translate3d(0, 0, 0);
+  //   }
+  // }
+
+  // // On hover, slide the content upward
+  // &:hover > * {
+  //   transform: translateY(-100%);
+  // }
 }
 
 // ============================================

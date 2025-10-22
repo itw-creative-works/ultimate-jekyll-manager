@@ -115,7 +115,7 @@ npx uj imagemin
 The imagemin task will:
 - Process images from `src/assets/images/**/*.{jpg,jpeg,png}`
 - Generate multiple sizes (1024px, 425px) and WebP formats
-- Cache processed images in `uj-imagemin` branch (when using GitHub cache)
+- Cache processed images in `cache-imagemin` branch (when using GitHub cache)
 - Skip already processed images on subsequent runs
 
 <!-- Developing -->

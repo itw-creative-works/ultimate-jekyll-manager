@@ -32,6 +32,7 @@ async function developmentRebuild(complete) {
 
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // Skip first run
   if (index === 0 && false) {

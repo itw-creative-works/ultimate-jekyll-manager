@@ -85,6 +85,7 @@ const ENABLE_PURGECSS = Manager.isBuildMode() || process.env.UJ_PURGECSS === 'tr
 function sass(complete) {
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // Generate pages scss
   generatePageScss();

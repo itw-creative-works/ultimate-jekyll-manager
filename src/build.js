@@ -199,6 +199,59 @@ Manager.require = function (path) {
 };
 Manager.prototype.require = Manager.require;
 
+// Memory monitoring utility
+Manager.getMemoryUsage = function () {
+  const used = process.memoryUsage();
+  return {
+    rss: Math.round(used.rss / 1024 / 1024),
+    heapTotal: Math.round(used.heapTotal / 1024 / 1024),
+    heapUsed: Math.round(used.heapUsed / 1024 / 1024),
+    external: Math.round(used.external / 1024 / 1024),
+  };
+};
+Manager.prototype.getMemoryUsage = Manager.getMemoryUsage;
+
+Manager.logMemory = function (logger, label) {
+  const mem = Manager.getMemoryUsage();
+  logger.log(`[Memory ${label}] RSS: ${mem.rss}MB | Heap Used: ${mem.heapUsed}MB / ${mem.heapTotal}MB | External: ${mem.external}MB`);
+};
+Manager.prototype.logMemory = Manager.logMemory;
+
+// Process array in batches to avoid memory issues
+Manager.processBatches = async function (items, batchSize, processFn, logger) {
+  const results = [];
+
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchNum = Math.floor(i / batchSize) + 1;
+    const totalBatches = Math.ceil(items.length / batchSize);
+
+    if (logger) {
+      logger.log(`Processing batch ${batchNum}/${totalBatches} (${batch.length} items)...`);
+      Manager.logMemory(logger, `Before Batch ${batchNum}`);
+    }
+
+    const batchResults = await Promise.all(batch.map(processFn));
+    results.push(...batchResults);
+
+    if (logger) {
+      Manager.logMemory(logger, `After Batch ${batchNum}`);
+    }
+
+    // Force garbage collection if available (requires --expose-gc flag)
+    if (global.gc) {
+      global.gc();
+      if (logger) {
+        logger.log(`Forced garbage collection after batch ${batchNum}`);
+        Manager.logMemory(logger, `After GC`);
+      }
+    }
+  }
+
+  return results;
+};
+Manager.prototype.processBatches = Manager.processBatches;
+
 // // Task Tracking System (uses global tracking)
 // Manager.prototype.taskStart = function (taskName) {
 //   const logger = this.logger('task-tracker');

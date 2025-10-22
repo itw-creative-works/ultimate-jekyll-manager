@@ -39,7 +39,8 @@ const directoriesToExpand = [
 // Preprocessing task
 async function preprocess(complete) {
   try {
-    logger.log('Starting preprocessing...');
+    logger.log('Starting...');
+    Manager.logMemory(logger, 'Start');
 
     // Step 1: Process template variables
     await processTemplates();
@@ -48,10 +49,10 @@ async function preprocess(complete) {
     // NOTE: NO POINT BECAUSE NESTED FILES (/pages/auth/signup.html) WOULD STILL BE IN a subfolder (/auth)
     // await moveDirectoryFilesUp();
 
-    logger.log('Preprocessing finished!');
+    logger.log('Preprocessing!');
     return complete();
   } catch (error) {
-    logger.error('Error during preprocessing:', error);
+    logger.error('Error:', error);
     return complete();
   }
 }

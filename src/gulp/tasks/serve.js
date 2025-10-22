@@ -21,6 +21,7 @@ let externalUrl;
 module.exports = async function serve(complete) {
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // BrowserSync settings
   const settings = {
@@ -197,6 +198,9 @@ async function processRequestMiddleware(req, res, next) {
     logger.log(`Serving ${pathname}`);
   }
 
+  // Run middleware:request hook to allow custom URL rewriting
+  await hook('middleware:request', { req, res, pathname });
+
   // Process the post request
   if (pathname.match(/\/_process/)) {
     const qsUrl = url.searchParams.get('url');
@@ -264,9 +268,14 @@ async function processRequestMiddleware(req, res, next) {
   }
 
   // Check if the URL is missing a trailing slash and does not have an extension
-  if (!pathname.endsWith('/') && !path.extname(pathname)) {
+  // console.log('---URL 1', req.url);
+  if (
+    (!pathname.endsWith('/') || pathname.endsWith('/blog/'))
+    && !path.extname(pathname)
+  ) {
     // Get the new URL
-    const newURL = `${pathname}.html`;
+    const strippedPath = pathname.replace(/\/$/, '');
+    const newURL = `${strippedPath}.html`;
 
     // Log
     // logger.log(`Rewriting ${pathname} to ${newURL}`);
@@ -274,6 +283,7 @@ async function processRequestMiddleware(req, res, next) {
     // Rewrite it to serve the .html extension
     req.url = newURL;
   }
+  // console.log('---URL 2', req.url);
 
   // Special LOCAL case: Rewrite /blog to blog.html since Jekyll fucks it up locally (probably due to pagination)
   // Disaboed because we moved it to the jekyll task
@@ -291,6 +301,9 @@ async function processRequestMiddleware(req, res, next) {
     logger.log(`File not found: ${req.url}. Serving 404.html instead.`);
     req.url = '/404.html';
   }
+
+  // LOG REQUEST
+  // logger.log(`Serving file: ${req.url}`);
 
   // Continue
   return next();
@@ -322,4 +335,38 @@ function receiveRequestBody(req) {
       }
     });
   });
+}
+
+// Run hooks
+async function hook(file, context) {
+  // Full path
+  const fullPath = path.join(process.cwd(), 'hooks', `${file}.js`);
+
+  // Check if it exists
+  if (!jetpack.exists(fullPath)) {
+    // Silently skip if hook doesn't exist (it's optional)
+    return;
+  }
+
+  // Log
+  // logger.log(`Running hook: ${fullPath}`);
+
+  // Load hook
+  let hookFn;
+  try {
+    // Clear the cache to allow live reloading of hooks during development
+    delete require.cache[require.resolve(fullPath)];
+
+    // Load the hook
+    hookFn = require(fullPath);
+  } catch (e) {
+    throw new Error(`Error loading hook: ${fullPath} ${e.stack}`);
+  }
+
+  // Execute hook
+  try {
+    return await hookFn(context);
+  } catch (e) {
+    throw new Error(`Error running hook: ${fullPath} ${e.stack}`);
+  }
 }

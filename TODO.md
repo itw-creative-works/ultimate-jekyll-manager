@@ -20,21 +20,54 @@ Admin dashboard backend pages
   * Create the product in stripe, paypal, etc
 
 
-ok now were working on THIS PAGE. first, do our main checks like
+ok now were working on THIS PAGE to ensure standardization accross all pages in terms of section layout, language, and structure. first, do our main checks like
 * ensuring the frontmatter sections appear in the same order as in the html
 * that there are no named items that could be arrays, etc
 * all sections in HTML have a frontmatter section that controls the content
 * all sections are standardized like have a heading, subheading, items, etc. dont add these if they dont make sense, but ensure that if there is HTML content hardcoded that it is converted to frontmatter content
 * ONLY HERO section should have an accent gradient in the heading, other ssections should NOT have this. However, other sections can have text-accent which is the cursive/brutalism accent. FOr this, only the LAST WORD should be accented and if the last word is the BRAND, it sholuld be reworded so the last word is NOT the brand name
+* main sections and CTA's should have a superheadline, headline, and subheadline. if any of these are missing, add them to the frontmatter and make the HTML conditional so it only appears if there is content for it
+* superheading should be ONE WORD if possible and should have an icon
+* superheading should NOT be all caps, regular case
 
-
-*** LEFT OFF ON PRICING
+MAKE COMPONENTS? ASK CLAUDE HOW AND IF ITS POSSIBLE
 
 FIX SIGNIN/SINGUP FORM
 
 https://192.168.86.69:4000/payment/checkout?product=premium&_test_trialEligible=true&_test_appId=dev&_test_cardProcessor=stripe
 
 filter-adaptive-inverse
+
+CLAUDE FOR CONSUMIN PROJECT OLD VERSION
+# Identity
+This is a jekyll site that is "consuming" a jekyll template project called Ultimate Jekyll--a collection of components that can be used to build a Jekyll site quickly and efficiently.
+
+## UJ Documentation
+You should have a full understanding of Ultimate Jekyll before editing this project, which can be found at: node_modules/ultimate-jekyll-manager/CLAUDE.md
+
+## Notes
+Ultimate Jekyll expects this project to be in the following structure:
+/src = Editable files that are compiled to /dist by Ultimate Jekyll
+/dist = Compiled files that are copied to _site by Ultimate Jekyll (DO NOT EDIT THESE FILES)
+/_site = Compiled files that are served by Jekyll (DO NOT EDIT THESE FILES)
+
+Other files you should NOT edit:
+Gemfile = This is managed by Ultimate Jekyll and should not be edited by the user.
+
+Other important folders:
+src/pages = This is where we create pages
+src/redirects = This is where we create redirects
+
+CSS and JS files:
+src/assets/css/pages = This is where we create page-specific stylesheets (src/assets/css/pages/terms/index.scss will load with site.com/terms)
+src/assets/js/pages = This is where we create page-specific JavaScript files (src/assets/js/pages/terms/index.js will load with site.com/terms)
+src/assets/css/pages/index.scss = Stylesheet for the homepage (site.com/)
+src/assets/js/pages/index.js = JavaScript for the homepage (site.com/)
+
+src/assets/css/main.scss = Main stylesheet for the site (all pages will load this file)
+src/assets/js/main.js = Main JavaScript file for the site (all pages will load this file)
+
+
 
 REVIEW page
 - Make a rewarded review page. When the user lands there, it explains that they COULD win $25 Amazon giftcard for writing a reivew. They upload the screenshot then it sends them to a fake countdown page where 3 winners are picked every week. So it conts down and tells them to refresht he page. At the end of the week it picks 3 random winners but it should never axtually pick anyone and just tell them to try again next week. But it should look legit.

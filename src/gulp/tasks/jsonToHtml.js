@@ -38,6 +38,7 @@ const compiled = {};
 function jsonToHtml(complete) {
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // First, copy JSON files to _data directory
   const jsonCopy = src(input)

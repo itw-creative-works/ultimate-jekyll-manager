@@ -30,7 +30,8 @@ function minifyHtmlTask(complete) {
   }
 
   // Log
-  logger.log('Starting HTML minification...');
+  logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // Configure minify options
   const options = {
@@ -51,6 +52,9 @@ function minifyHtmlTask(complete) {
   return src(input)
     .pipe(through2.obj(async function(file, enc, callback) {
       if (file.isBuffer()) {
+        // Log
+        logger.log(`Minifying: ${file.relative}`);
+
         try {
           let htmlContent = file.contents.toString();
 
@@ -112,7 +116,7 @@ function minifyHtmlTask(complete) {
     .pipe(dest(output))
     .on('finish', () => {
       // Log
-      logger.log('Finished HTML minification!');
+      logger.log('Finished!');
 
       // Complete
       return complete();

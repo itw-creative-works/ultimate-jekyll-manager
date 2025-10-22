@@ -42,6 +42,9 @@ const input = [
   // Include plugin so we can live-reload it
   `${rootPathPackage}/../jekyll-uj-powertools/**/*`,
 
+  // Project hooks
+  `${rootPathProject}/hooks/**/*.js`,
+
   // Files to exclude
   '!dist/.jekyll-cache/**',
   '!dist/.jekyll-metadata',
@@ -63,6 +66,7 @@ async function jekyll(complete) {
   try {
     // Log
     logger.log('Starting...');
+    Manager.logMemory(logger, 'Start');
 
     // Increment index
     index++;
@@ -93,6 +97,7 @@ async function jekyll(complete) {
         Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
       ].join(','),
       '--incremental',
+      Manager.isBuildMode() ? ' --profile' : '',
       // '--disable-disk-cache',
     ]
 

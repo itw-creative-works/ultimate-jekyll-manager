@@ -14,6 +14,7 @@ const rootPathProject = Manager.getRootPath('project');
 module.exports = async function setup(complete) {
   // Log
   logger.log('Starting setup...');
+  Manager.logMemory(logger, 'Start');
 
   // Run clean and setup
   await require('../../commands/clean.js')();

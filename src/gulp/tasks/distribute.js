@@ -43,6 +43,7 @@ function distribute() {
 
     // Log
     logger.log('Starting...');
+    Manager.logMemory(logger, 'Start');
 
     // Complete
     return src(input, {

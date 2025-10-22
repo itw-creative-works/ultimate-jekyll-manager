@@ -6,7 +6,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 # Hero Section
 hero:
   headline: "About"
-  headline_accent: "{{ site.brand.name }}"
+  headline_accent: "Us"
   description: "Learn about the people, mission, and values driving {{ site.brand.name }} forward"
 
 # Mission & Vision
@@ -20,42 +20,13 @@ vision:
   description: "To become the world's most trusted platform for business transformation, where innovation meets simplicity and everyone can achieve their full potential."
   icon: "lightbulb"
 
-# Company Values
-values:
-  - title: "Innovation First"
-    description: "We push boundaries and challenge the status quo to create breakthrough solutions that transform how businesses operate"
-    icon: "rocket"
-  - title: "Customer Obsessed"
-    description: "Everything we do is focused on delivering exceptional value to our customers. Their success is our success"
-    icon: "heart"
-  - title: "Team Excellence"
-    description: "We hire the best talent and create an environment where everyone can thrive, learn, and make an impact"
-    icon: "users"
-  - title: "Transparent Culture"
-    description: "We believe in open communication, honest feedback, and shared decision-making at every level"
-    icon: "magnifying-glass"
-
-# Company Stats
-stats:
-  founded:
-    number: "2017"
-    label: "Founded"
-    icon: "calendar"
-  team_size:
-    number: "50+"
-    label: "Team Members"
-    icon: "users"
-  customers:
-    number: "1M+"
-    label: "Happy Customers"
-    icon: "smile"
-  countries:
-    number: "120+"
-    label: "Countries"
-    icon: "globe"
-
-# Story Timeline
+# Story Timeline Section
 story:
+  superheadline: "{% uj_icon 'clock-rotate-left' %} History"
+  headline: "Follow our"
+  headline_accent: "Journey"
+  subheadline: "From humble beginnings to industry leaders"
+  items:
   - year: "2017"
     title: "The Beginning"
     description: "{{ site.brand.name }} was founded with a vision to revolutionize the industry"
@@ -71,6 +42,57 @@ story:
   - year: "{{ site.uj.date.year }}"
     title: "The Future"
     description: "Continuing to push boundaries and build the future of business technology"
+
+# Company Stats
+stats:
+  superheadline: "{% uj_icon 'chart-line' %} Numbers"
+  headline: "Measuring our"
+  headline_accent: "Impact"
+  subheadline: "The milestones that define our growth"
+  items:
+  - number: "2017"
+    label: "Founded"
+    icon: "calendar"
+  - number: "50+"
+    label: "Team Members"
+    icon: "users"
+  - number: "1M+"
+    label: "Happy Customers"
+    icon: "smile"
+  - number: "120+"
+    label: "Countries"
+    icon: "globe"
+
+# Company Values Section
+values:
+  superheadline: "{% uj_icon 'compass' %} Principles"
+  headline: "Our Core"
+  headline_accent: "Values"
+  subheadline: "The principles that guide everything we do"
+  items:
+  - title: "Innovation First"
+    description: "We push boundaries and challenge the status quo to create breakthrough solutions that transform how businesses operate"
+    icon: "rocket"
+  - title: "Customer Obsessed"
+    description: "Everything we do is focused on delivering exceptional value to our customers. Their success is our success"
+    icon: "heart"
+  - title: "Team Excellence"
+    description: "We hire the best talent and create an environment where everyone can thrive, learn, and make an impact"
+    icon: "users"
+  - title: "Transparent Culture"
+    description: "We believe in open communication, honest feedback, and shared decision-making at every level"
+    icon: "magnifying-glass"
+
+# Team CTA Section
+team_cta:
+  superheadline: "{% uj_icon 'handshake' %} People"
+  headline: "Meet Our Amazing"
+  headline_accent: "Team"
+  subheadline: "Get to know the passionate individuals behind {{ site.brand.name }} who work every day to make your experience exceptional"
+  button:
+    text: "Meet the Team"
+    icon: "arrow-right"
+    href: "/team"
 ---
 
 <!-- Hero Section -->
@@ -91,19 +113,24 @@ story:
 </section>
 
 <!-- Story Section -->
-<section>
+<section class="pt-0">
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-3">
-        Our <span class="">Journey</span>
+      {% iftruthy page.resolved.story.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.story.superheadline }}</span>
+      {% endiftruthy %}
+      <h2 class="h2 mb-2">
+        {{ page.resolved.story.headline }} <span class="text-accent">{{ page.resolved.story.headline_accent }}</span>
       </h2>
-      <p class="fs-5 text-muted">From humble beginnings to industry leaders</p>
+      {% iftruthy page.resolved.story.subheadline %}
+        <p class="fs-5 text-muted">{{ page.resolved.story.subheadline }}</p>
+      {% endiftruthy %}
     </div>
 
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="position-relative">
-          {% for item in page.resolved.story %}
+          {% for item in page.resolved.story.items %}
             <div class="row mb-5" data-lazy="@class animation-slide-up">
               {% assign is_odd = forloop.index | modulo: 2 %}
               {% if is_odd == 1 %}
@@ -177,35 +204,31 @@ story:
 <!-- Stats Section -->
 <section>
   <div class="container">
+    <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+      {% iftruthy page.resolved.stats.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.stats.superheadline }}</span>
+      {% endiftruthy %}
+      <h2 class="h2 mb-2">
+        {{ page.resolved.stats.headline }}
+        {% iftruthy page.resolved.stats.headline_accent %}
+          <span class="text-accent">{{ page.resolved.stats.headline_accent }}</span>
+        {% endiftruthy %}
+      </h2>
+      {% iftruthy page.resolved.stats.subheadline %}
+        <p class="fs-5 text-muted">{{ page.resolved.stats.subheadline }}</p>
+      {% endiftruthy %}
+    </div>
+
     <div class="row text-center g-4">
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.founded.icon, "text-primary display-4" %}
+      {% for stat in page.resolved.stats.items %}
+        <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
+          <div class="mb-3">
+            {% uj_icon stat.icon, "text-primary display-4" %}
+          </div>
+          <h3 class="display-5 fw-bold mb-2">{{ stat.number }}</h3>
+          <p class="text-muted mb-0">{{ stat.label }}</p>
         </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.founded.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.founded.label }}</p>
-      </div>
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.team_size.icon, "text-success display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.team_size.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.team_size.label }}</p>
-      </div>
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.customers.icon, "text-warning display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.customers.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.customers.label }}</p>
-      </div>
-      <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-        <div class="mb-3">
-          {% uj_icon page.resolved.stats.countries.icon, "text-info display-4" %}
-        </div>
-        <h3 class="display-5 fw-bold mb-2">{{ page.resolved.stats.countries.number }}</h3>
-        <p class="text-muted mb-0">{{ page.resolved.stats.countries.label }}</p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -214,14 +237,19 @@ story:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      <h2 class="h2 mb-3">
-        Our <span class="">Core Values</span>
+      {% iftruthy page.resolved.values.superheadline %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.values.superheadline }}</span>
+      {% endiftruthy %}
+      <h2 class="h2 mb-2">
+        {{ page.resolved.values.headline }} <span class="text-accent">{{ page.resolved.values.headline_accent }}</span>
       </h2>
-      <p class="fs-5 text-muted">The principles that guide everything we do</p>
+      {% iftruthy page.resolved.values.subheadline %}
+        <p class="fs-5 text-muted">{{ page.resolved.values.subheadline }}</p>
+      {% endiftruthy %}
     </div>
 
     <div class="row g-4">
-      {% for value in page.resolved.values %}
+      {% for value in page.resolved.values.items %}
         <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
           <div class="card h-100 border-0 shadow-sm text-center rounded-3">
             <div class="card-body p-4">
@@ -244,18 +272,20 @@ story:
     <div class="rounded-4 p-5 bg-primary bg-gradient text-light text-center" data-lazy="@class animation-slide-up">
       <div class="row justify-content-center">
         <div class="col-lg-8">
-          <div class="mb-4">
-            {% uj_icon "users", "display-4 mb-3" %}
-          </div>
-          <h2 class="h2 mb-4">
-            Meet Our <span class="text-light">Amazing Team</span>
+          {% iftruthy page.resolved.team_cta.superheadline %}
+            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.team_cta.superheadline }}</span>
+          {% endiftruthy %}
+          <h2 class="h2 mb-2">
+            {{ page.resolved.team_cta.headline }} <span class="text-accent">{{ page.resolved.team_cta.headline_accent }}</span>
           </h2>
-          <p class="fs-5 mb-4 opacity-90">
-            Get to know the passionate individuals behind {{ site.brand.name }} who work every day to make your experience exceptional
-          </p>
-          <a href="/team" class="btn btn-light btn-lg px-5 py-3">
-            {% uj_icon "arrow-right", "me-2" %}
-            Meet the Team
+          {% iftruthy page.resolved.team_cta.subheadline %}
+            <p class="fs-5 mb-4 opacity-90">
+              {{ page.resolved.team_cta.subheadline }}
+            </p>
+          {% endiftruthy %}
+          <a href="{{ page.resolved.team_cta.button.href }}" class="btn btn-light btn-lg px-5 py-3">
+            {% uj_icon page.resolved.team_cta.button.icon, "me-2" %}
+            {{ page.resolved.team_cta.button.text }}
           </a>
         </div>
       </div>

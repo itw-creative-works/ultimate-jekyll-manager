@@ -2,6 +2,11 @@
 ### ALL PAGES ###
 layout: themes/[ site.theme.id ]/frontend/core/base
 
+#### THEME CONFIG ####
+theme:
+  main:
+    class: "pt-0"
+
 ### PAGE CONFIG ###
 # Hero Section
 hero:
@@ -68,6 +73,7 @@ product_demo:
   tabs:
     - id: "dashboard"
       label: "Dashboard"
+      icon: "gauge-high"
       video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/16x9/sample-demo-1.webm"
       features:
         - "Easy Setup"
@@ -77,6 +83,7 @@ product_demo:
         - "Simple Interface"
     - id: "analytics"
       label: "Analytics"
+      icon: "chart-line"
       video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/16x9/sample-demo-2.webm"
       features:
         - "Advanced Analytics"
@@ -86,6 +93,7 @@ product_demo:
         - "Team Collaboration"
     - id: "security"
       label: "Security"
+      icon: "shield-halved"
       video: "https://cdn.itwcreativeworks.com/assets/sample/videos/demos/16x9/sample-demo-3.webm"
       features:
         - "Enterprise Security"
@@ -115,28 +123,30 @@ alternating_features:
 
 # Features Section
 features:
-  superheadline: "{% uj_icon 'star' %} Benefits"
-  headline: "Why {{ site.brand.name }} is"
-  headline_accent: "Different"
-  subheadline: "Everything you need to accelerate your business growth"
+  superheadline: "{% uj_icon 'check-circle' %} Features"
+  headline: "Design made"
+  headline_accent: "simple"
+  subheadline: "Get unlimited design requests delivered fast with our streamlined process."
+  cta_button:
+    text: "Get Started"
+    icon: "rocket"
+    href: "/dashboard"
   items:
-    - title: "Expert Support"
-      description: "Get guidance from industry professionals with years of real-world experience"
-      icon: "graduation-cap"
-    - title: "Flexible Solutions"
-      description: "Scale at your own pace with 24/7 access to all platform features"
-      icon: "clock"
-    - title: "Supportive Community"
-      description: "Join thousands of businesses in our vibrant and helpful network"
-      icon: "users"
-    - title: "Certification"
-      description: "Earn recognized credentials to boost your business credibility"
-      icon: "certificate"
+    - title: "Subscribe"
+      description: "Choose your plan and submit unlimited design requests."
+      icon: "rotate"
+    - title: "Receive"
+      description: "Get your designs delivered in as fast as two business days."
+      icon: "bolt"
+    - title: "Revise"
+      description: "Request unlimited revisions until it's perfect."
+      icon: "thumbs-up"
 
 # Testimonials Section
 testimonials:
   superheadline: "{% uj_icon 'comments' %} Testimonials"
   headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
+  subheadline: "Hear from real people who have transformed their business with us"
   items:
     - quote: "This platform transformed my business. The support is incredible!"
       author: "Sarah Johnson"
@@ -179,7 +189,7 @@ stats:
 
 # CTA Section
 cta:
-  superheadline: "{% uj_icon 'rocket' %} Get Started"
+  superheadline: "{% uj_icon 'rocket' %} Launch"
   headline: "Ready to Transform your"
   headline_accent: "Business?"
   description: "Join thousands of successful companies who have already accelerated their growth with {{ site.brand.name }}"
@@ -289,7 +299,7 @@ cta:
 {% endcomment %}
 
 <!-- Hero Section -->
-<section class="section-breakout-x section-breakout-x-nearly-lg section-breakout-top bg-gradient-rainbow gradient-animated gradient-grain text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center rounded-bottom-4 shadow-lg">
+<section class="bg-gradient-rainbow gradient-animated gradient-grain text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center rounded-bottom-4 shadow-lg">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-10 text-center py-5">
@@ -345,7 +355,7 @@ cta:
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       {% iftruthy page.resolved.product_demo.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.product_demo.superheadline }}</span>
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.product_demo.superheadline }}</span>
       {% endiftruthy %}
 
       <h2 class="h2 mb-2">
@@ -356,12 +366,12 @@ cta:
     </div>
 
     <!-- Tab Buttons -->
-    <div class="d-flex flex-wrap justify-content-center gap-3 mb-4" data-lazy="@class animation-slide-up">
-      <ul class="nav nav-pills gap-3 border-0" role="tablist">
+    <div class="d-flex flex-wrap justify-content-center gap-2 gap-sm-3 mb-4" data-lazy="@class animation-slide-up">
+      <ul class="nav nav-pills gap-2 gap-sm-3 border-0 w-100 justify-content-center" role="tablist">
         {% for tab in page.resolved.product_demo.tabs %}
-          <li class="nav-item" role="presentation">
+          <li class="nav-item flex-fill flex-sm-grow-0" role="presentation" style="max-width: 200px;">
             <button
-              class="btn btn-lg btn-outline-adaptive {% if forloop.first %}active{% endif %}"
+              class="btn btn-lg btn-outline-adaptive w-100 {% if forloop.first %}active{% endif %}"
               id="{{ tab.id }}-tab"
               data-bs-toggle="tab"
               data-bs-target="#{{ tab.id }}-pane"
@@ -370,6 +380,9 @@ cta:
               aria-controls="{{ tab.id }}-pane"
               aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
             >
+              {% iftruthy tab.icon %}
+                {% uj_icon tab.icon, "me-2" %}
+              {% endiftruthy %}
               {{ tab.label }}
             </button>
           </li>
@@ -410,11 +423,11 @@ cta:
 </section>
 
 <!-- Alternating Features Section -->
-<section class="section-breakout-x section-breakout-x-nearly-lg bg-body-secondary rounded">
+<section class="bg-body-secondary rounded-4">
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       {% iftruthy page.resolved.alternating_features.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.alternating_features.superheadline }}</span>
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.alternating_features.superheadline }}</span>
       {% endiftruthy %}
       <h2 class="h2 mb-2">
         {{ page.resolved.alternating_features.headline }}
@@ -449,7 +462,7 @@ cta:
         <p class="fs-5 text-muted mb-0">{{ item.description }}</p>
       {% endcapture %}
 
-      <div class="row align-items-center g-5 {% unless forloop.last %} mb-5 pb-5 {% endunless %}">
+      <div class="row align-items-center g-3 g-lg-5 {% unless forloop.last %} mb-5 pb-5 {% endunless %}">
         <div class="{{ image_col_class }}" data-lazy="@class animation-slide-up">
           {{ image_content }}
         </div>
@@ -466,30 +479,43 @@ cta:
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       {% iftruthy page.resolved.features.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.features.superheadline }}</span>
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.features.superheadline }}</span>
       {% endiftruthy %}
-      <h2 class="h2 mb-3">
+      <h2 class="h2 mb-2">
         {{ page.resolved.features.headline }}
-        <span class="text-accent">{{ page.resolved.features.headline_accent }}</span>
+        {% iftruthy page.resolved.features.headline_accent %}
+          <span class="text-accent">{{ page.resolved.features.headline_accent }}</span>
+        {% endiftruthy %}
       </h2>
-      <p class="fs-5 text-muted">{{ page.resolved.features.subheadline }}</p>
+      {% iftruthy page.resolved.features.subheadline %}
+        <p class="fs-5 text-muted">{{ page.resolved.features.subheadline }}</p>
+      {% endiftruthy %}
     </div>
 
     <div class="row g-4">
       {% for feature in page.resolved.features.items %}
-        <div class="col-lg-3 col-md-6" data-lazy="@class animation-slide-up">
-          <div class="card h-100 border-0 shadow-sm text-center rounded-3">
-            <div class="card-body p-4">
-              <div class="bg-primary avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                {% uj_icon feature.icon, "text-light fs-2" %}
-              </div>
-              <h3 class="h4 mb-3">{{ feature.title }}</h3>
-              <p class="text-muted mb-0">{{ feature.description }}</p>
+        <div class="col-lg-4 col-md-6" data-lazy="@class animation-slide-up">
+          <div class="text-center">
+            <div class="mb-4">
+              {% uj_icon feature.icon, "display-4" %}
             </div>
+            <h3 class="h3 mb-3 fw-bold">{{ feature.title }}</h3>
+            <p class="text-muted mb-0">{{ feature.description }}</p>
           </div>
         </div>
       {% endfor %}
     </div>
+
+    {% iftruthy page.resolved.features.cta_button %}
+      <div class="text-center mt-5" data-lazy="@class animation-slide-up">
+        <a href="{{ page.resolved.features.cta_button.href }}" class="btn btn-primary btn-lg px-5 py-3">
+          {% iftruthy page.resolved.features.cta_button.icon %}
+            {% uj_icon page.resolved.features.cta_button.icon, "me-2" %}
+          {% endiftruthy %}
+          {{ page.resolved.features.cta_button.text }}
+        </a>
+      </div>
+    {% endiftruthy %}
   </div>
 </section>
 
@@ -498,9 +524,12 @@ cta:
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
       {% iftruthy page.resolved.testimonials.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold text-uppercase small">{{ page.resolved.testimonials.superheadline }}</span>
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.testimonials.superheadline }}</span>
       {% endiftruthy %}
-      <h2 class="h2 mb-3">{{ page.resolved.testimonials.headline }}</h2>
+      <h2 class="h2 mb-2">{{ page.resolved.testimonials.headline }}</h2>
+      {% iftruthy page.resolved.testimonials.subheadline %}
+        <p class="fs-5 text-muted">{{ page.resolved.testimonials.subheadline }}</p>
+      {% endiftruthy %}
     </div>
 
     {% if page.resolved.testimonials.items %}
@@ -582,7 +611,7 @@ cta:
       <div class="row justify-content-center">
         <div class="col-lg-8">
           {% iftruthy page.resolved.cta.superheadline %}
-            <span class="badge text-light p-2 mb-1 fw-semibold text-uppercase small" style="background-color: rgba(255, 255, 255, 0.2);">{{ page.resolved.cta.superheadline }}</span>
+            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.cta.superheadline }}</span>
           {% endiftruthy %}
           <h2 class="h2 mb-4">
             {{ page.resolved.cta.headline }}

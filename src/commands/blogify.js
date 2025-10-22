@@ -106,18 +106,18 @@ function getRandomElement(array) {
 function getRandomCategories() {
   // Determine how many categories (1-3)
   const numCategories = 1 + Math.floor(Math.random() * 3);
-  
+
   // Copy array to avoid modifying original
   const availableCategories = [...blogCategories];
   const selectedCategories = [];
-  
+
   // Select random categories without duplicates
   for (let i = 0; i < numCategories && availableCategories.length > 0; i++) {
     const index = Math.floor(Math.random() * availableCategories.length);
     selectedCategories.push(availableCategories[index]);
     availableCategories.splice(index, 1); // Remove selected to avoid duplicates
   }
-  
+
   return selectedCategories;
 }
 
@@ -297,7 +297,7 @@ module.exports = async function (options) {
     // Generate random description
     const wordCount = 10 + Math.floor(Math.random() * 11); // 10-20 words
     const randomWords = getRandomWords(wordCount);
-    
+
     // Generate random categories (1-3 from 5 possible)
     const postCategories = getRandomCategories();
 

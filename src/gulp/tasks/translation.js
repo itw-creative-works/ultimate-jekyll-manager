@@ -24,12 +24,12 @@ const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
 // Check if BEM env variable is set
-// get cached translations JSON (only once per run, so keep track of how many times this has run) from branch uj-translation
+// get cached translations JSON (only once per run, so keep track of how many times this has run) from branch cache-translation
 // loop thru all html and md pages in pages/ dir (main and project)
   // SKIP files in _translations dir
 // if there is no translation (or translation is too old), send to AI @ itw
 // save the translation into the cache (file path, date) and write the file to _translations/{code}/{original file path + name}
-// push the updated translation JSON to the branch uj-translation
+// push the updated translation JSON to the branch cache-translation
 
 // Settings
 const AI = {
@@ -37,11 +37,11 @@ const AI = {
   inputCost: 0.40, // $0.40 per 1M tokens
   outputCost: 1.60, // $1.60 per 1M tokens
 }
-const CACHE_DIR = '.temp/translation';
-const CACHE_BRANCH = 'uj-translation';
+const CACHE_DIR = '.temp/cache/translation';
+const CACHE_BRANCH = 'cache-uj-translation';
 const RECHECK_DAYS = 0;
 // const LOUD = false;
-const LOUD = Manager.isServer() || process.env.UJ_LOUD_LOGS === 'true';
+const LOUD = process.env.UJ_LOUD_LOGS === 'true';
 const CONTROL = 'UJ-TRANSLATION-CONTROL';
 const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ku', 'yi', 'ji', 'ckb', 'dv', 'arc', 'aii', 'syr'];
 
@@ -93,6 +93,7 @@ async function translation(complete) {
 
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // Quit if NOT in build mode and UJ_TRANSLATION_FORCE is not true
   if (!Manager.isBuildMode() && process.env.UJ_TRANSLATION_FORCE !== 'true') {
@@ -161,7 +162,7 @@ async function processTranslation() {
   const enabled = config?.translation?.enabled !== false;
   const languages = config?.translation?.languages || [];
   const updatedFiles = new Set();
-  
+
   // Track timing
   const startTime = Date.now();
 
@@ -231,6 +232,10 @@ async function processTranslation() {
     processedFiles: []
   };
 
+  // Calculate total tasks for progress tracking
+  const totalTasks = allFiles.length * languages.length;
+  let completedTasks = 0;
+
   for (const filePath of allFiles) {
     // Get relative path and original HTML
     const relativePath = filePath.replace(/^_site[\\/]/, '');
@@ -278,8 +283,13 @@ async function processTranslation() {
           : path.join('_site', lang, relativePath);
         const logTag = `[${lang}] ${relativePath}`;
 
+        // Increment and calculate progress
+        completedTasks++;
+        const progress = `${completedTasks}/${totalTasks}`;
+        const percentage = ((completedTasks / totalTasks) * 100).toFixed(1);
+
         // Log
-        logger.log(`🌐 Started: ${logTag}`);
+        logger.log(`🌐 Started [${progress} - ${percentage}%]: ${logTag}`);
 
         // Skip if the file is not in the meta or if it has no text nodes
         let translated = null;
@@ -312,7 +322,7 @@ async function processTranslation() {
           && jetpack.exists(cachePath)
         ) {
           translated = jetpack.read(cachePath);
-          logger.log(`📦 Success: ${logTag} - Using cache`);
+          logger.log(`📦 Success [${progress} - ${percentage}%]: ${logTag} - Using cache`);
           stats.fromCache++;
           stats.cachedFiles.push(logTag);
         } else {
@@ -321,7 +331,7 @@ async function processTranslation() {
 
             // Log
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            logger.log(`✅ Success: ${logTag} - Translated (Elapsed time: ${elapsedTime}s)`);
+            logger.log(`✅ Success [${progress} - ${percentage}%]: ${logTag} - Translated (Elapsed time: ${elapsedTime}s)`);
 
             // Set translated result
             translated = result;
@@ -339,7 +349,7 @@ async function processTranslation() {
             stats.processedFiles.push(logTag);
           } catch (e) {
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            logger.error(`❌ Failed: ${logTag} — ${e.message} (Elapsed time: ${elapsedTime}s)`);
+            logger.error(`❌ Failed [${progress} - ${percentage}%]: ${logTag} — ${e.message} (Elapsed time: ${elapsedTime}s)`);
 
             // Set translated result
             translated = bodyText;
@@ -509,7 +519,7 @@ async function processTranslation() {
   const elapsedMs = endTime - startTime;
   const elapsedSeconds = Math.floor(elapsedMs / 1000);
   const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-  const elapsedFormatted = elapsedMinutes > 0 
+  const elapsedFormatted = elapsedMinutes > 0
     ? `${elapsedMinutes}m ${elapsedSeconds % 60}s`
     : `${elapsedSeconds}s`;
 
@@ -521,13 +531,13 @@ async function processTranslation() {
   // Log detailed statistics
   logger.log('\n📊 Translation Statistics:');
   logger.log('═══════════════════════════════════════');
-  
+
   // Timing
   logger.log('⏱️  Timing:');
   logger.log(`   Start time:      ${new Date(startTime).toLocaleTimeString()}`);
   logger.log(`   End time:        ${new Date(endTime).toLocaleTimeString()}`);
   logger.log(`   Total elapsed:   ${elapsedFormatted}`);
-  
+
   // File processing stats
   logger.log('\n📁 File Processing:');
   logger.log(`   Total processed:     ${stats.totalProcessed}`);
@@ -550,13 +560,13 @@ async function processTranslation() {
     logger.log(`   Output cost:         $${outputCost.toFixed(4)}`);
     logger.log(`   Total cost:          $${totalCost.toFixed(4)}`);
   }
-  
+
   logger.log('═══════════════════════════════════════\n');
 
   // Push updated translation cache back to cache branch
   if (githubCache && githubCache.hasCredentials()) {
     logger.log(`📊 Updating translation cache README with latest statistics...`);
-    
+
     // Collect all cache files to push
     const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
 

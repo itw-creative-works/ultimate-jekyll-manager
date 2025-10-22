@@ -145,7 +145,8 @@ function defaults(complete, changedFile) {
 
   // Log
   logger.log('Starting...');
-  
+  Manager.logMemory(logger, 'Start');
+
   // Use changedFile if provided, otherwise use all inputs
   const filesToProcess = changedFile ? [changedFile] : input;
   logger.log('input', filesToProcess)

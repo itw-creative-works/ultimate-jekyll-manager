@@ -68,6 +68,9 @@ node_modules/
 # Jekyll
 /_site
 
+# MCP
+.playwright-mcp
+
 # Custom
 /dist
 /.temp

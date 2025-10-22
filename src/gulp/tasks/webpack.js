@@ -266,6 +266,7 @@ function webpack(complete) {
 
   // Log
   logger.log('Starting...');
+  Manager.logMemory(logger, 'Start');
 
   // Log mode and devtools
   logger.log(`Mode: ${settings.mode}`);

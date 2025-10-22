@@ -6,6 +6,7 @@ const jetpack = require('fs-jetpack');
 const crypto = require('crypto');
 const { Octokit } = require('@octokit/rest');
 const AdmZip = require('adm-zip');
+const { execute } = require('node-powertools');
 
 class GitHubCache {
   constructor(options = {}) {
@@ -21,16 +22,39 @@ class GitHubCache {
 
   // Initialize GitHub API client
   async init() {
+    // Ensure GH_TOKEN is set
     if (!process.env.GH_TOKEN) {
       throw new Error('GH_TOKEN environment variable not set');
     }
-    
+
+    // Auto-detect repository if not set
     if (!process.env.GITHUB_REPOSITORY) {
-      throw new Error('GITHUB_REPOSITORY environment variable not set');
+      try {
+        const result = await execute('git remote get-url origin', { log: false });
+
+        // Parse GitHub repository from remote URL
+        // Supports: https://github.com/owner/repo.git, git@github.com:owner/repo.git
+        const match = result.match(/github\.com[:/]([^/]+\/[^.\s]+)/);
+
+        if (match) {
+          process.env.GITHUB_REPOSITORY = match[1];
+          this.logger.log(`📦 Auto-detected repository from git remote: ${process.env.GITHUB_REPOSITORY}`);
+        }
+      } catch (e) {
+        // Ignore errors from git command
+        this.logger.warn(`⚠️ Could not auto-detect repository from git remote: ${e.message}`);
+      }
     }
 
+    // Final check
+    if (!process.env.GITHUB_REPOSITORY) {
+      throw new Error('GITHUB_REPOSITORY environment variable not set and could not auto-detect from git remote');
+    }
+
+    // Set owner and repo
     [this.owner, this.repo] = process.env.GITHUB_REPOSITORY.split('/');
-    
+
+    // Initialize Octokit
     if (!this.octokit) {
       this.octokit = new Octokit({
         auth: process.env.GH_TOKEN,
@@ -42,22 +66,22 @@ class GitHubCache {
 
   // Check if credentials are available
   hasCredentials() {
-    return !!(process.env.GH_TOKEN && process.env.GITHUB_REPOSITORY);
+    return !!process.env.GH_TOKEN;
   }
 
   // Fetch cache branch from GitHub
   async fetchBranch() {
     await this.init();
-    
+
     this.logger.log(`📥 Fetching cache from branch '${this.branchName}'`);
 
     // Check if the branch exists
     let branchExists = false;
     try {
-      await this.octokit.repos.getBranch({ 
-        owner: this.owner, 
-        repo: this.repo, 
-        branch: this.branchName 
+      await this.octokit.repos.getBranch({
+        owner: this.owner,
+        repo: this.repo,
+        branch: this.branchName
       });
       branchExists = true;
     } catch (e) {
@@ -81,15 +105,15 @@ class GitHubCache {
     const extractDir = path.dirname(this.cacheDir);
 
     jetpack.write(zipPath, Buffer.from(zipBallArchive.data));
-    
+
     const zip = new AdmZip(zipPath);
     zip.extractAllTo(extractDir, true);
 
     // Find extracted root folder
-    const extractedRoot = jetpack.list(extractDir).find(name => 
+    const extractedRoot = jetpack.list(extractDir).find(name =>
       name.startsWith(`${this.owner}-${this.repo}-`)
     );
-    
+
     if (!extractedRoot) {
       throw new Error('Could not find extracted archive root folder');
     }
@@ -105,30 +129,30 @@ class GitHubCache {
 
     // Clean up
     jetpack.remove(zipPath);
-    
+
     // Log what was fetched
     const fetchedFiles = jetpack.find(targetPath, { matching: '**/*', files: true, directories: false });
     this.logger.log(`✅ Fetched cache from branch '${this.branchName}' (${fetchedFiles.length} files total)`);
-    
+
     return true;
   }
 
   // Push files to cache branch with automatic orphan detection
   async pushBranch(updatedFiles, options = {}) {
     await this.init();
-    
+
     // Git is required
     this.requireGitCommands();
 
     // Convert Set to array if needed
     let files = Array.isArray(updatedFiles) ? updatedFiles : [...updatedFiles];
-    
+
     // Auto-add metadata file if it exists and not already included
     const metaPath = path.join(this.cacheDir, 'meta.json');
     if (jetpack.exists(metaPath) && !files.includes(metaPath)) {
       files.push(metaPath);
     }
-    
+
     // Handle orphan detection if validFiles provided
     let forceRecreate = options.forceRecreate || false;
     if (options.validFiles) {
@@ -143,11 +167,11 @@ class GitHubCache {
         }
       }
     }
-    
+
     this.logger.log(`📤 Pushing ${files.length} file(s) to cache branch '${this.branchName}'`);
 
     // Generate README if stats provided
-    const readme = options.stats ? this.generateReadme(options.stats) : 
+    const readme = options.stats ? this.generateReadme(options.stats) :
                    options.branchReadme || this.generateDefaultReadme();
 
     // If forceRecreate is true, we'll handle it in uploadFilesViaGit
@@ -160,7 +184,7 @@ class GitHubCache {
       // Normal update
       await this.ensureBranchExists(readme);
       const uploadedCount = await this.uploadFilesViaGit(files, false, readme);
-      
+
       if (uploadedCount > 0) {
         this.logger.log(`🎉 Pushed ${uploadedCount} file(s) to cache branch`);
       }
@@ -196,7 +220,7 @@ class GitHubCache {
       let source;
       let retries = 5;
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-      
+
       while (retries > 0) {
         try {
           const result = await this.octokit.git.getRef({
@@ -255,12 +279,12 @@ class GitHubCache {
   // Ensure branch exists, create if needed
   async ensureBranchExists(readmeContent) {
     let branchExists = false;
-    
+
     try {
-      await this.octokit.repos.getBranch({ 
-        owner: this.owner, 
-        repo: this.repo, 
-        branch: this.branchName 
+      await this.octokit.repos.getBranch({
+        owner: this.owner,
+        repo: this.repo,
+        branch: this.branchName
       });
       branchExists = true;
     } catch (e) {
@@ -321,7 +345,7 @@ class GitHubCache {
   // Load metadata file
   loadMetadata(metaPath) {
     let meta = {};
-    
+
     if (jetpack.exists(metaPath)) {
       try {
         meta = jetpack.read(metaPath, 'json');
@@ -329,7 +353,7 @@ class GitHubCache {
         this.logger.warn('⚠️ Metadata file corrupted - starting fresh');
       }
     }
-    
+
     return meta;
   }
 
@@ -337,14 +361,14 @@ class GitHubCache {
   saveMetadata(metaPath, meta) {
     jetpack.write(metaPath, meta);
   }
-  
+
   // Clean deleted files from metadata
   cleanDeletedFromMetadata(meta, currentFiles, rootPath) {
-    const currentFilesSet = new Set(currentFiles.map(f => 
+    const currentFilesSet = new Set(currentFiles.map(f =>
       path.relative(rootPath, f)
     ));
     let removedCount = 0;
-    
+
     Object.keys(meta).forEach(key => {
       if (!currentFilesSet.has(key)) {
         delete meta[key];
@@ -352,7 +376,7 @@ class GitHubCache {
         removedCount++;
       }
     });
-    
+
     return removedCount;
   }
 
@@ -370,13 +394,13 @@ class GitHubCache {
   // Upload files using git commands (much faster for multiple files)
   async uploadFilesViaGit(files, forceRecreate = false, readme = null) {
     const { execSync } = require('child_process');
-    
+
     this.logger.log(`🚀 Using fast git upload for ${files.length} files`);
-    
+
     try {
       // Work directly in the cache directory
       const gitDir = path.join(this.cacheDir, '.git');
-      
+
       if (forceRecreate) {
         // For force recreate, remove git dir and init fresh
         this.logger.log(`🆕 Initializing fresh repository in ${this.cacheDir}...`);
@@ -387,19 +411,19 @@ class GitHubCache {
       } else if (!jetpack.exists(gitDir)) {
         // If no git dir exists, clone the branch
         this.logger.log(`📥 Initializing git in cache directory...`);
-        
+
         // Save current files temporarily
         const tempBackup = path.join(path.dirname(this.cacheDir), `${path.basename(this.cacheDir)}-backup-${Date.now()}`);
         if (jetpack.exists(this.cacheDir)) {
           jetpack.move(this.cacheDir, tempBackup);
         }
-        
+
         // Clone the branch
         execSync(
           `git clone --depth 1 --branch ${this.branchName} https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git "${this.cacheDir}"`,
           { stdio: 'ignore' }
         );
-        
+
         // Restore backed up files (overwriting cloned files)
         if (jetpack.exists(tempBackup)) {
           jetpack.copy(tempBackup, this.cacheDir, { overwrite: true });
@@ -416,28 +440,28 @@ class GitHubCache {
           this.logger.warn('⚠️ Pull failed, will force push if needed');
         }
       }
-      
+
       // Add README if provided
       let readmeChanged = false;
       if (readme) {
         const readmePath = path.join(this.cacheDir, 'README.md');
         const existingReadme = jetpack.exists(readmePath) ? jetpack.read(readmePath) : '';
-        
+
         if (existingReadme !== readme) {
           this.logger.log('📝 README content has changed, updating...');
           readmeChanged = true;
         }
-        
+
         jetpack.write(readmePath, readme);
       }
-      
+
       // Check if there are changes
       const status = execSync('git status --porcelain', { cwd: this.cacheDir }).toString();
       if (!status.trim()) {
         this.logger.log('⏭️  No changes to commit (including README)');
         return 0;
       }
-      
+
       // Log what changed
       const changedFiles = status.trim().split('\n').length;
       if (readmeChanged && changedFiles === 1) {
@@ -447,11 +471,11 @@ class GitHubCache {
       } else {
         this.logger.log(`📝 ${changedFiles} files have changed`);
       }
-      
+
       // Add all changes
       this.logger.log(`📝 Staging changes...`);
       execSync('git add -A', { cwd: this.cacheDir, stdio: 'ignore' });
-      
+
       // Create commit message based on what changed
       let commitMessage;
       if (readmeChanged && changedFiles === 1) {
@@ -461,13 +485,13 @@ class GitHubCache {
       } else {
         commitMessage = `📦 Update cache: ${changedFiles} files`;
       }
-      
+
       // Commit
       execSync(
         `git -c user.name="GitHub Actions" -c user.email="actions@github.com" commit -m "${commitMessage}"`,
         { cwd: this.cacheDir, stdio: 'ignore' }
       );
-      
+
       // Push
       this.logger.log(`📤 Pushing to GitHub...`);
       try {
@@ -477,7 +501,7 @@ class GitHubCache {
         this.logger.warn('⚠️ Normal push failed, attempting force push...');
         execSync('git push --force origin ' + this.branchName, { cwd: this.cacheDir, stdio: 'ignore' });
       }
-      
+
       return changedFiles;
     } catch (error) {
       this.logger.error(`❌ Git command failed: ${error.message}`);
@@ -488,15 +512,15 @@ class GitHubCache {
   // Check for orphaned files in cache
   async checkForOrphans(validFiles) {
     const validSet = new Set(validFiles);
-    const cacheFiles = jetpack.find(this.cacheDir, { 
-      matching: '**/*', 
-      files: true, 
-      directories: false 
+    const cacheFiles = jetpack.find(this.cacheDir, {
+      matching: '**/*',
+      files: true,
+      directories: false
     });
-    
+
     const orphanedFiles = [];
     const validCacheFiles = [];
-    
+
     cacheFiles.forEach(file => {
       const relativePath = path.relative(this.cacheDir, file);
       if (validSet.has(relativePath) || relativePath === 'meta.json') {
@@ -508,7 +532,7 @@ class GitHubCache {
         }
       }
     });
-    
+
     return {
       hasOrphans: orphanedFiles.length > 0,
       orphanedCount: orphanedFiles.length,
@@ -531,16 +555,16 @@ This branch stores ${this.description}.
   // Generate README with stats
   generateReadme(stats = {}) {
     const date = new Date(stats.timestamp || Date.now());
-    const formattedDate = date.toLocaleString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
+    const formattedDate = date.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       timeZoneName: 'short'
     });
-    
+
     let readme = `# ${this.cacheType} Cache Branch
 
 This branch stores ${this.description}.
@@ -580,7 +604,7 @@ This branch stores ${this.description}.
 - **Files From Cache:** ${stats.fromCache || 0}
 - **Newly Processed:** ${stats.newlyProcessed || 0}
 `;
-      
+
       // Add percentage if both values exist
       if (stats.processedNow && stats.fromCache !== undefined) {
         const cacheRate = ((stats.fromCache / stats.processedNow) * 100).toFixed(1);
@@ -634,7 +658,7 @@ This branch stores ${this.description}.
 - **Optimized:** ${optimized || 0}
 - **Skipped (from cache):** ${skipped || 0}
 `;
-      
+
       if (totalSizeBefore && totalSizeAfter) {
         const savedPercent = ((totalSaved / totalSizeBefore) * 100).toFixed(1);
         readme += `
@@ -668,7 +692,7 @@ ${stats.details}
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
     } else if (minutes > 0) {
