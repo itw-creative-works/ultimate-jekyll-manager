@@ -1,0 +1,25 @@
+---
+### ALL PAGES ###
+layout: null
+permalink: /humans.txt
+
+### REGULAR PAGES ###
+sitemap:
+  include: false
+---
+/* TEAM */
+Website: {{ site.brand.name }}
+Site: {{ site.url }}
+Twitter: {{ site.brand.social.twitter }}
+Location: {{ site.brand.location }}
+
+/* THANKS */
+Framework: Ultimate Jekyll
+Built with: Jekyll, Bootstrap, Font Awesome
+Hosting: Various
+
+/* SITE */
+Last update: {{ site.time | date: "%Y/%m/%d" }}
+Standards: HTML5, CSS3, JavaScript ES6+
+Components: Jekyll, Liquid, SCSS, Webpack
+IDE: Visual Studio Code

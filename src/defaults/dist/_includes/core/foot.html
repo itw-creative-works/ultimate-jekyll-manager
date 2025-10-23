@@ -78,6 +78,41 @@
 <!-- JS Bundle -->
 <script type="text/javascript" src="{{ site.url }}/assets/js/main.bundle.js?cb={{ site.uj.cache_breaker }}" async></script>
 
+<!-- Script to quickly handle nav user state -->
+<script type="text/javascript">
+  try {
+    (function() {
+      'use strict';
+      // Read and parse localStorage data
+      var managerData = localStorage.getItem('_manager');
+      var parsedData = managerData ? JSON.parse(managerData) : null;
+      var isLoggedIn = !!(parsedData && parsedData.auth && parsedData.auth.user && parsedData.auth.user.uid);
+
+      // Quit if NOT logged in
+      if (!isLoggedIn) {
+        return;
+      }
+
+      // Process binds
+      var $bindElements = document.querySelectorAll('[data-wm-bind]');
+
+      $bindElements.forEach(function($el) {
+        var bindValue = $el.getAttribute('data-wm-bind');
+
+        if (bindValue === '@show auth.user') {
+          // Show element when user is logged in
+          $el.removeAttribute('hidden');
+        } else if (bindValue === '@show !auth.user') {
+          // Hide element when user is logged in (show when not logged in)
+          $el.setAttribute('hidden', '');
+        }
+      });
+    }());
+  } catch (error) {
+    console.error('Error occurred while selecting elements:', error);
+  }
+</script>
+
 <!-- Script - Google Analytics Tracking Script -->
 {% iftruthy page.resolved.tracking.google-analytics %}
   <script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id={{ site.tracking.google-analytics }}" async></script>

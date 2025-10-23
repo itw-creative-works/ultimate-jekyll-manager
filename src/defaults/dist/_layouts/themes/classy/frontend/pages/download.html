@@ -232,7 +232,6 @@ cta:
                 role="tab"
                 aria-controls="{{ platform.id }}-pane"
                 aria-selected="false"
-                disabled
               >
                 {% uj_icon platform.icon, "fa-3xl me-2" %}
                 {{ platform.name }}
@@ -269,7 +268,7 @@ cta:
                 <p class="text-muted fs-5 mb-4">{{ page.resolved.downloads.loading.description }}</p>
 
                 <div class="d-flex flex-column gap-3">
-                  <button type="button" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center" disabled>
+                  <button type="button" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center">
                     {% uj_icon "download", "fa-3xl me-2" %}
                     {{ page.resolved.downloads.loading.button_text }}
                   </button>
@@ -344,7 +343,6 @@ cta:
                       <button
                         type="button"
                         class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
-                        disabled
                       >
                         {% uj_icon type.icon, "fa-3xl me-2" %}
                         {{ type.name }}
@@ -358,7 +356,6 @@ cta:
                     <button
                       type="button"
                       class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
-                      disabled
                     >
                       {% uj_icon type.icon, "fa-3xl me-2" %}
                       {{ type.name }}

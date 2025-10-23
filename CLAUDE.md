@@ -63,6 +63,48 @@ When creating pages in the consuming project, follow these guidelines:
 DO NOT USE `bg-light`, `bg-dark`, `text-light`, or `text-dark`. We support BOTH light and dark mode, so instead use `bg-body`, `bg-body-secondary`, `bg-body-tertiary`, `text-body` and for buttons you can use `btn-adaptive` or `btn-outline-adaptive`.
 These classes adapt to light and dark mode automatically.
 
+## Page Loading State & Button Protection
+Ultimate Jekyll implements a sophisticated system to prevent premature button clicks during page initialization. This prevents race conditions and ensures JavaScript is fully loaded before users can trigger actions.
+
+### How It Works:
+1. **Initial State**: The HTML element starts with `data-page-loading="true"` and `aria-busy="true"` attributes (set in `src/defaults/dist/_layouts/core/root.html`)
+2. **Protection During Load**: While `data-page-loading` is present, certain elements are automatically disabled via CSS and JavaScript
+3. **Ready State**: When JavaScript initialization completes, these attributes are removed by `src/assets/js/core/complete.js`
+
+### What Gets Protected:
+When `data-page-loading` is active, the following elements are automatically protected from clicks:
+
+- **All form buttons**: `<button>`, `<input type="submit">`, `<input type="button">`, `<input type="reset">`
+- **Elements with `.btn` class**: Standard Bootstrap buttons
+- **Elements with `.btn-action` class**: Custom action triggers (see below)
+- **Always disabled**: Any element with `disabled` attribute, `.disabled` class, or `:disabled` state
+
+### The `.btn-action` Class:
+Use the `.btn-action` class to selectively protect non-standard elements that trigger important actions:
+
+```html
+<!-- These will be protected during page load -->
+<a href="/api/delete" class="custom-link btn-action">Delete Item</a>
+<div class="card-action btn-action" onclick="processData()">Process</div>
+<span class="text-link btn-action" data-action="save">Save Changes</span>
+
+<!-- These will NOT be protected (regular navigation/UI) -->
+<a href="/about" class="btn btn-primary">About Us</a>
+<button data-bs-toggle="modal">Show Info</button>
+<button data-bs-toggle="collapse">Toggle Details</button>
+```
+
+### When to Use `.btn-action`:
+- **Use it for**: API calls, form submissions, data modifications, payment processing, destructive actions
+- **Don't use it for**: Navigation links, UI toggles, modals, accordions, tabs, harmless interactions
+
+### Implementation Files:
+- **CSS Styles**: `src/assets/css/core/utilities.scss` - Applies `cursor: not-allowed` and disabled styling
+- **Click Prevention**: `src/defaults/dist/_includes/core/body.html` - Inline script that prevents clicks
+- **State Removal**: `src/assets/js/core/complete.js` - Removes `data-page-loading` when ready
+
+This system ensures a smooth, error-free user experience by preventing premature interactions while maintaining full flexibility for developers.
+
 ## Lazy Loading
 Ultimate Jekyll uses a custom lazy loading system powered by web-manager. Elements can be lazy-loaded using the `data-lazy` attribute with the following format:
 

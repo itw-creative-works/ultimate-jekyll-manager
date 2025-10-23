@@ -48,12 +48,6 @@ function setupPlatformDetection() {
 
   // Show loading state initially, then switch to detected platform
   setTimeout(() => {
-    // Enable all platform buttons
-    const $platformButtons = document.querySelectorAll('.platform-btn');
-    $platformButtons.forEach($btn => {
-      $btn.disabled = false;
-    });
-
     // Activate the detected platform tab using Bootstrap's tab API
     const $detectedTab = document.querySelector(`#${detectedPlatform}-tab`);
     if ($detectedTab) {

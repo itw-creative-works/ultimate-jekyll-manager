@@ -1,0 +1,32 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/base
+permalink: /test/libraries/error
+
+### REGULAR PAGES ###
+sitemap:
+  include: true
+meta:
+  title: "Error Test Page"
+  description: "Test page for demonstrating error handling"
+  breadcrumb: "Error Test"
+  index: false
+---
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <h1 class="h2 mb-4">Error Test Page</h1>
+      <p class="lead mb-5">This page demonstrates different error handling scenarios.</p>
+
+      <!-- Trigger Auth Signin Error -->
+      <button id="trigger-error" class="btn btn-danger">Trigger Auth Signin Error</button>
+      <script>
+        document.getElementById('trigger-error').addEventListener('click', function() {
+          Manager.webManager.auth().signInWithEmailAndPassword('invalid@example.com', 'wrongpassword')
+        });
+      </script>
+
+    </div>
+  </div>
+</div>

@@ -74,34 +74,29 @@ export function updateAllUI() {
     // Update trial badge based on current state
     updateTrialBadge();
 
-    // Get payment button elements once
-    const $cardBtn = document.getElementById('pay-with-card');
-    const $paypalBtn = document.getElementById('pay-with-paypal');
-    const $applePayBtn = document.getElementById('pay-with-apple-pay');
-    const $googlePayBtn = document.getElementById('pay-with-google-pay');
-    const $cryptoBtn = document.getElementById('pay-with-crypto');
-
-    // Get button text spans (PayPal uses logo, so no text span)
-    const $cardBtnText = $cardBtn?.querySelector('span.fw-semibold');
-    const $applePayBtnText = $applePayBtn?.querySelector('span.fw-semibold');
-    const $googlePayBtnText = $googlePayBtn?.querySelector('span.fw-semibold');
-    const $cryptoBtnText = $cryptoBtn?.querySelector('span.fw-semibold');
+    // Helper function to update button text for specific payment method
+    const updateButtonText = (paymentMethod, textContent) => {
+      const buttons = document.querySelectorAll(`.payment-button[data-payment-method="${paymentMethod}"] span.fw-semibold`);
+      buttons.forEach(span => {
+        span.textContent = textContent;
+      });
+    };
 
     // Update payment button text based on trial
     if (state.hasFreeTrial) {
       // Update all payment buttons for free trial (keeping logic for future customization)
-      if ($cardBtnText) $cardBtnText.textContent = 'Credit/Debit Card';
+      updateButtonText('card', 'Credit/Debit Card');
       // PayPal uses logo - no text to update
-      if ($applePayBtnText) $applePayBtnText.textContent = 'Apple Pay';
-      if ($googlePayBtnText) $googlePayBtnText.textContent = 'Google Pay';
-      if ($cryptoBtnText) $cryptoBtnText.textContent = 'Crypto';
+      updateButtonText('apple-pay', 'Apple Pay');
+      updateButtonText('google-pay', 'Google Pay');
+      updateButtonText('crypto', 'Crypto');
     } else {
       // Reset to normal payment text
-      if ($cardBtnText) $cardBtnText.textContent = 'Credit/Debit Card';
+      updateButtonText('card', 'Credit/Debit Card');
       // PayPal uses logo - no text to update
-      if ($applePayBtnText) $applePayBtnText.textContent = 'Apple Pay';
-      if ($googlePayBtnText) $googlePayBtnText.textContent = 'Google Pay';
-      if ($cryptoBtnText) $cryptoBtnText.textContent = 'Crypto';
+      updateButtonText('apple-pay', 'Apple Pay');
+      updateButtonText('google-pay', 'Google Pay');
+      updateButtonText('crypto', 'Crypto');
     }
 
     // Update subscription terms
@@ -255,28 +250,18 @@ export function hidePreloader() {
 
 // Update payment button visibility based on processor availability
 export function updatePaymentButtonVisibility(paymentManager) {
-  // Define button mappings - all IDs use payment methods, not processors
-  const buttonMappings = [
-    { paymentMethod: 'card', buttonId: 'pay-with-card' },
-    { paymentMethod: 'paypal', buttonId: 'pay-with-paypal' },
-    { paymentMethod: 'crypto', buttonId: 'pay-with-crypto' },
-    { paymentMethod: 'apple-pay', buttonId: 'pay-with-apple-pay' },
-    { paymentMethod: 'google-pay', buttonId: 'pay-with-google-pay' }
-  ];
+  // Get all payment buttons
+  const paymentButtons = document.querySelectorAll('.payment-button');
 
-  // Check each payment method and update button visibility
-  buttonMappings.forEach(({ paymentMethod, buttonId }) => {
-    const $button = document.getElementById(buttonId);
-    if ($button) {
-      const isAvailable = paymentManager.isPaymentMethodAvailable(paymentMethod);
+  // Update each button's visibility based on its payment method
+  paymentButtons.forEach(button => {
+    const paymentMethod = button.getAttribute('data-payment-method');
+    const isAvailable = paymentManager.isPaymentMethodAvailable(paymentMethod);
 
-      if (isAvailable) {
-        // Show the button
-        $button.classList.remove('d-none');
-      } else {
-        // Hide the button
-        $button.classList.add('d-none');
-      }
+    if (isAvailable) {
+      button.classList.remove('d-none');
+    } else {
+      button.classList.add('d-none');
     }
   });
 

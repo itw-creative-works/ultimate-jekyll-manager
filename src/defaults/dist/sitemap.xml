@@ -13,7 +13,7 @@ sitemap:
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
   >
   {% assign pages = site.pages %}
   {% assign default-time = site.time | date_to_xmlschema %}
@@ -23,7 +23,12 @@ sitemap:
   {% endfor %}
 
   {% for page in pages %}
-    {%- if page.url contains '/@reference' or page.url contains '/_' -%}
+    {%- if page.url contains '/_' -%}
+      {%- continue -%}
+    {%- endif -%}
+
+    {%- assign url_start = page.url | slice: 0, 5 -%}
+    {%- if url_start == '/test' -%}
       {%- continue -%}
     {%- endif -%}
 

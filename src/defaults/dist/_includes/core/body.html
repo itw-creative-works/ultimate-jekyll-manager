@@ -34,3 +34,34 @@
     Save <strong>15%</strong> at checkout—today only! <a href="{{ site.url }}/pricing" target="_blank">Claim discount</a>.
   </div>
 </div>
+
+<!-- Script to prevent clicks on disabled elements during page load -->
+<script type="text/javascript">
+  (function() {
+    'use strict';
+    // Attach click listener immediately to prevent clicks on disabled elements
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+
+      // Check if click is on a disabled element OR a button/form element during page load
+      if (
+        target.closest('*[disabled], *.disabled, :disabled')
+        || (
+          document.documentElement.hasAttribute('data-page-loading')
+          && target.closest('button, input[type="submit"], input[type="button"], input[type="reset"], .btn-action')
+        )
+      ) {
+        // Log disabled click attempt in development
+        if (window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168')) {
+          console.log('Click prevented (disabled):', target);
+        }
+
+        // Prevent all actions
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+        return false;
+      }
+    }, { capture: true });
+  }());
+</script>

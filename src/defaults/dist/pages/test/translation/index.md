@@ -3,14 +3,14 @@
 layout: themes/[ site.theme.id ]/frontend/core/minimal
 permalink: /test/translation
 
+### REGULAR PAGES ###
 sitemap:
   include: true
-
-### REGULAR PAGES ###
 meta:
   title: "Test Translation Page"
   description: "This is a test Translation page for the Ultimate Jekyll Manager."
   breadcrumb: "Test Translation Page"
+  index: false
 
 ### WEB MANAGER CONFIG ###
 web_manager:

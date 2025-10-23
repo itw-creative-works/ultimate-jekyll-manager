@@ -12,7 +12,9 @@
 
 .disabled,
 [disabled],
-:disabled {
+:disabled,
+[data-page-loading] button.btn,
+[data-page-loading] .btn-action {
   cursor: not-allowed !important;
   pointer-events: all !important;
 
@@ -21,6 +23,12 @@
   * {
     pointer-events: none !important;
   }
+}
+
+[data-page-loading] button.btn,
+[data-page-loading] .btn-action {
+  opacity: var(--bs-btn-disabled-opacity);
+  color: var(--bs-btn-disabled-color);
 }
 
 // Prevent pointer events on all children inside buttons and links

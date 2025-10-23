@@ -196,6 +196,72 @@ member:
 `uj-language-dropdown`:
 `uj-language-dropdown-item`
 
+### Utility Classes
+
+#### Max-Width Utilities
+Ultimate Jekyll includes max-width utility classes based on Bootstrap's breakpoint sizes. These classes constrain an element's maximum width to match Bootstrap's standard responsive breakpoints:
+
+- `.mw-sm` - Sets max-width to 576px
+- `.mw-md` - Sets max-width to 768px
+- `.mw-lg` - Sets max-width to 992px
+- `.mw-xl` - Sets max-width to 1200px
+- `.mw-xxl` - Sets max-width to 1400px
+
+**Usage Examples:**
+```html
+<!-- Constrain a form to medium width -->
+<form class="mw-md">
+  <!-- Form content stays readable at max 768px wide -->
+</form>
+
+<!-- Limit content width for better readability -->
+<div class="container mw-lg">
+  <!-- Content won't exceed 992px even on larger screens -->
+</div>
+
+<!-- Combine with margin utilities for centering -->
+<div class="mw-sm mx-auto">
+  <!-- Content is max 576px wide and centered -->
+</div>
+```
+
+These utilities are particularly useful for:
+- Improving readability by preventing text from spanning too wide
+- Creating consistent content widths across different sections
+- Constraining forms, cards, and modals to reasonable sizes
+- Maintaining design consistency with Bootstrap's grid system
+
+### Page Loading Protection System
+
+Ultimate Jekyll includes an automatic protection system that prevents users from clicking buttons before JavaScript is fully loaded, eliminating race conditions and errors.
+
+#### How It Works
+1. Pages start with `data-page-loading="true"` on the HTML element
+2. Certain buttons are automatically protected from clicks during this state
+3. When JavaScript finishes loading, the attribute is removed and buttons become clickable
+
+#### Protected Elements
+During page load, these elements are automatically protected:
+- All form buttons (`<button>`, `<input type="submit">`, etc.)
+- Elements with `.btn` class (Bootstrap buttons)
+- Elements with `.btn-action` class (custom action triggers)
+
+#### Using `.btn-action` Class
+Add the `.btn-action` class to protect custom elements that trigger important actions:
+
+```html
+<!-- These will be protected during page load -->
+<a href="/api/delete" class="custom-link btn-action">Delete Item</a>
+<div onclick="saveData()" class="btn-action">Save</div>
+
+<!-- Regular navigation links are NOT protected -->
+<a href="/about">About Us</a>
+<button data-bs-toggle="modal">Show Modal</button>
+```
+
+**Use `.btn-action` for:** API calls, form submissions, data modifications, payments, destructive actions
+**Don't use for:** Navigation, UI toggles, modals, accordions, harmless interactions
+
 ### Special Query Parameters
 
 #### Authentication

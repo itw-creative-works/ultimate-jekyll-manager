@@ -82,6 +82,11 @@ let index = -1;
 const input = [
   // Files to include
   '_site/**/*.html',
+
+  // Files to exclude
+  // Test pages (except translation.html)
+  '!_site/**/test/**',
+  '_site/test/translation.html',
 ];
 const output = '';
 const delay = 250;

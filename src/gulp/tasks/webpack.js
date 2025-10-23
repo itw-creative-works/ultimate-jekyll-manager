@@ -104,7 +104,11 @@ function getSettings() {
         ? DEFAULT_WEBPACK_TARGET
         : (ujmConfig?.webpack?.target || DEFAULT_WEBPACK_TARGET)
     ],
-    devtool: Manager.actLikeProduction() ? 'source-map' : 'eval-source-map',
+    // devtool: Manager.actLikeProduction() ? 'source-map' : 'eval-source-map',
+    // Production: nosources-source-map, hidden-source-map
+    devtool: Manager.actLikeProduction() ? false : 'eval-source-map',
+    // devtool: 'nosources-source-map',
+    // devtool: 'source-map',
     // devtool: false,
     plugins: [
       new StripDevBlocksPlugin(),
@@ -213,7 +217,8 @@ function getSettings() {
           use: {
             loader: 'babel-loader',
             options: {
-              sourceMaps: true,
+                // sourceMaps: false,
+                sourceMaps: !Manager.actLikeProduction(),
               presets: [
                 [require.resolve('@babel/preset-env', {
                   paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
@@ -319,7 +324,8 @@ function webpack(complete) {
             use: {
               loader: 'babel-loader',
               options: {
-                sourceMaps: true,
+                // sourceMaps: false,
+                sourceMaps: !Manager.actLikeProduction(),
                 presets: [
                   [require.resolve('@babel/preset-env', {
                     paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]

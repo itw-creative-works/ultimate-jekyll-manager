@@ -1,38 +1,122 @@
 ---
 ### ALL PAGES ###
-layout: core/root
+layout: themes/classy/frontend/core/minimal
 permalink: /sitemap
 
 ### REGULAR PAGES ###
-meta:
-  index: false
-
 sitemap:
-  include: false
+  # include: false
+meta:
+  title: "Sitemap - {{ site.brand.name }}"
+  description: "This sitemap has been compiled to better serve those who are looking for a specific page on {{ site.brand.name }}."
+  breadcrumb: "Sitemap"
+  # index: false
+
+### WEB MANAGER CONFIG ###
+web_manager:
+  exitPopup:
+    enabled: false
 ---
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    {% for page in site.pages %}
-      <!-- Skip reference pages -->
-      {%- if page.url contains '/@reference' -%}
-        {%- continue -%}
-      {%- endif -%}
+{% assign all_pages = site.pages %}
+{% for collection in site.collections %}
+  {% assign all_pages = all_pages | concat: collection.docs %}
+{% endfor %}
 
-      <ul>
-        <li>{{ page.url }}</li>
-        <li>
-          <ul>
-            <li>{{ page.title }}</li>
+{% comment %} Build a hash of pages organized by their path segments {% endcomment %}
+{% assign sitemap_sections = "" | split: "" %}
+{% assign processed_paths = "" | split: "" %}
+
+{% for page in all_pages %}
+  {%- if page.url contains '/_' -%}
+    {%- continue -%}
+  {%- endif -%}
+
+  {%- assign url_start = page.url | slice: 0, 5 -%}
+  {%- if url_start == '/test' -%}
+    {%- continue -%}
+  {%- endif -%}
+
+  {%- if page.layout contains 'redirect' -%}
+    {%- continue -%}
+  {%- endif -%}
+
+  {%- if page.resolved.sitemap.include == false or page.layout_data.sitemap.include == false -%}
+    {%- continue -%}
+  {%- endif -%}
+
+  {%- if page.url contains '.js' or page.url contains '.xml' or page.url contains '.json' -%}
+    {%- continue -%}
+  {%- endif -%}
+
+  {% assign url_parts = page.url | split: '/' %}
+  {% assign section_name = "Root Pages" %}
+
+  {% if url_parts.size > 2 %}
+    {% assign section_name = url_parts[1] | replace: '-', ' ' | replace: '_', ' ' | capitalize %}
+  {% endif %}
+
+  {% unless processed_paths contains section_name %}
+    {% assign processed_paths = processed_paths | push: section_name %}
+  {% endunless %}
+{% endfor %}
+
+{% assign sorted_sections = processed_paths | sort %}
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <h1 class="mb-4">Sitemap</h1>
+      <p class="lead mb-5">Browse all pages on {{ site.brand.name }}</p>
+
+      {% for section in sorted_sections %}
+        <section class="mb-5">
+          <h2 class="h4 mb-3 pb-2 border-bottom">{{ section }}</h2>
+          <ul class="list-unstyled">
+            {% for page in all_pages %}
+              {%- if page.url contains '/@reference' or page.url contains '/_' -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              {%- assign url_start = page.url | slice: 0, 5 -%}
+              {%- if url_start == '/test' -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              {%- if page.layout contains 'redirect' -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              {%- if page.resolved.sitemap.include == false or page.layout_data.sitemap.include == false -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              {%- if page.url contains '.js' or page.url contains '.xml' or page.url contains '.json' -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              {% assign url_parts = page.url | split: '/' %}
+              {% assign page_section = "Root Pages" %}
+
+              {% if url_parts.size > 2 %}
+                {% assign page_section = url_parts[1] | replace: '-', ' ' | replace: '_', ' ' | capitalize %}
+              {% endif %}
+
+              {% if page_section == section %}
+                {% assign page_title = page.title | default: page.meta.title | default: page.url %}
+                {% assign depth = url_parts.size | minus: 2 %}
+                {% if depth < 0 %}{% assign depth = 0 %}{% endif %}
+
+                <li class="mb-2" style="margin-left: {{ depth | times: 20 }}px;">
+                  <a href="{{ page.url }}" class="text-decoration-none">
+                    {{ page_title }}
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
           </ul>
-        </li>
-      </ul>
-
-    {%- endfor -%}
-  </body>
-</html>
+        </section>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -35,3 +35,30 @@
 .min-vh-80 { min-height: 80vh !important; }
 .min-vh-90 { min-height: 90vh !important; }
 .min-vh-100 { min-height: 100vh !important; }
+
+// ============================================
+// Max Width Utilities (Bootstrap Breakpoints)
+// ============================================
+// Max width utility classes based on Bootstrap grid breakpoints
+// Usage: mw-sm, mw-md, mw-lg, mw-xl, mw-xxl
+// These set the max-width to match Bootstrap's container breakpoints
+
+.mw-sm {
+  max-width: 576px !important;
+}
+
+.mw-md {
+  max-width: 768px !important;
+}
+
+.mw-lg {
+  max-width: 992px !important;
+}
+
+.mw-xl {
+  max-width: 1200px !important;
+}
+
+.mw-xxl {
+  max-width: 1400px !important;
+}
