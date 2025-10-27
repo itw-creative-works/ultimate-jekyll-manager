@@ -18,8 +18,8 @@ web_manager:
     enabled: false
 ---
 
-{% capture brand %}**{{ site.brand.name | liquify }}**{% endcapture %}
-{% capture breadcrumb %}{{ page.resolved.meta.breadcrumb | liquify }}{% endcapture %}
+{% capture brand %}**{{ site.brand.name | uj_liquify }}**{% endcapture %}
+{% capture breadcrumb %}{{ page.resolved.meta.breadcrumb | uj_liquify }}{% endcapture %}
 
 ### Effective date: <span class="text-primary">8th of April, 2017</span>
 <hr>

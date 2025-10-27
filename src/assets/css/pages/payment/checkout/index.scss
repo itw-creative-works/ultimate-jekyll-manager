@@ -1,15 +1,21 @@
-// Checkout Page Styles - Minimal custom CSS
+// Checkout Page Styles
 
-// Order summary sticky behavior (can't be done with Bootstrap)
+// ============================================
+// Order Summary Sticky Positioning
+// ============================================
 .order-summary-sticky {
   position: sticky;
   top: 2rem;
 }
 
-// Product thumbnail size (specific dimension needed)
+// ============================================
+// Product Thumbnail
+// ============================================
 .product-thumbnail {
   width: 60px;
   height: 60px;
+  min-width: 60px;
+  min-height: 60px;
 }
 
 // Save badge positioning adjustment
@@ -62,8 +68,47 @@
 #pay-with-paypal img {
   filter: brightness(0.9);
 }
-// .btn-check:checked + .btn {
-//     color: var(--bs-btn-active-color);
-//     background-color: var(--bs-btn-active-bg);
-//     border-color: var(--bs-btn-active-border-color);
+
+// ============================================
+// Loading States Enhancement for Bindings
+// ============================================
+// Smooth transitions when bindings update
+// [data-wm-bind] {
+//   transition: opacity 0.3s ease-in-out;
+// }
+
+// Animation for elements appearing via bindings
+// [data-wm-bind*="@show"]:not([hidden]) {
+//   animation: fadeIn 0.3s ease-in-out;
+// }
+
+// @keyframes fadeIn {
+//   from {
+//     opacity: 0;
+//     transform: translateY(-5px);
+//   }
+//   to {
+//     opacity: 1;
+//     transform: translateY(0);
+//   }
+// }
+
+// ============================================
+// Discount Messages Animation
+// ============================================
+// [data-wm-bind*="checkout.discount"] {
+//   &:not([hidden]) {
+//     animation: slideDown 0.2s ease-out;
+//   }
+// }
+
+// @keyframes slideDown {
+//   from {
+//     opacity: 0;
+//     max-height: 0;
+//   }
+//   to {
+//     opacity: 1;
+//     max-height: 50px;
+//   }
 // }

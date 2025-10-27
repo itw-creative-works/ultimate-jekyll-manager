@@ -1,17 +1,17 @@
 <!-- Meta Variables -->
 {% assign page-viewport = "width=device-width, initial-scale=1.0, user-scalable=yes, shrink-to-fit=no" %}
 {%- iftruthy page.resolved.meta.viewport -%}
-  {% assign page-viewport = page.resolved.meta.viewport | liquify %}
+  {% assign page-viewport = page.resolved.meta.viewport | uj_liquify %}
 {% endiftruthy %}
 
 {% assign page-referrer = "strict-origin-when-cross-origin" %}
 {%- iftruthy page.resolved.meta.referrer -%}
-  {% assign page-referrer = page.resolved.meta.referrer | liquify %}
+  {% assign page-referrer = page.resolved.meta.referrer | uj_liquify %}
 {%- endiftruthy -%}
 
 {% assign page-keywords = "" %}
 {%- iftruthy page.resolved.meta.keywords -%}
-  {% assign page-keywords = page.resolved.meta.keywords | liquify %}
+  {% assign page-keywords = page.resolved.meta.keywords | uj_liquify %}
 {%- endiftruthy -%}
 
 {% assign favicon-path = site.url | append: "/assets/images/favicon" %}
@@ -36,23 +36,23 @@
 {% endiffalsy %}
 
 <!-- Assign Default Dynamic Variables -->
-{% assign page-title = page.resolved.meta.title | liquify %}
-{% assign page-description = page.resolved.meta.description | liquify %}
-{% assign page-image = page.resolved.meta.image | liquify %}
+{% assign page-title = page.resolved.meta.title | uj_liquify %}
+{% assign page-description = page.resolved.meta.description | uj_liquify %}
+{% assign page-image = page.resolved.meta.image | uj_liquify %}
 {% assign page-og-type = "website" %}
 
 <!-- Assign Post Dynamic Variables -->
 {%- iftruthy page.resolved.post.id -%}
-  {% assign page-title = page.resolved.post.title | liquify %}
-  {% assign page-description = page.resolved.post.description | liquify %}
+  {% assign page-title = page.resolved.post.title | uj_liquify %}
+  {% assign page-description = page.resolved.post.description | uj_liquify %}
   {% capture page-image %}{%- uj_post page.resolved.post.id, "image" -%}{% endcapture %}
   {% assign page-og-type = "article" %}
 {% endiftruthy %}
 
 <!-- Assign Member Dynamic Variables -->
 {%- iftruthy page.resolved.member.id -%}
-  {% assign page-title = page.resolved.member.name | liquify %}
-  {% assign page-description = page.resolved.member.description | liquify %}
+  {% assign page-title = page.resolved.member.name | uj_liquify %}
+  {% assign page-description = page.resolved.member.description | uj_liquify %}
   {% capture page-image %}{%- uj_member page.resolved.member.id, "image" -%}{% endcapture %}
   {% assign page-og-type = "profile" %}
 {% endiftruthy %}

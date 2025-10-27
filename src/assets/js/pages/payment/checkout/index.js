@@ -1,21 +1,22 @@
 // Libraries
-import { state } from './modules/state.js';
+import { raw } from './modules/state.js';
 import { fetchProductDetails, fetchTrialEligibility, warmupServer } from './modules/api.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
 import {
   updateAllUI,
   handleBillingCycleChange,
   showError,
-  hidePreloader,
-  updatePaymentButtonVisibility
-} from './modules/ui.js';
-import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount.js';
+  updatePaymentButtonVisibility,
+  initializeCheckoutUI
+} from './modules/ui-bindings.js';
+import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount-bindings.js';
 import { paymentManager } from './modules/processors-main.js';
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import {
   generateCheckoutId,
   buildPaymentIntentData,
 } from './modules/session.js';
+import { calculatePrices } from './modules/pricing.js';
 let webManager = null;
 let formManager = null;
 
@@ -134,7 +135,7 @@ function setupEventListeners() {
 
     // Handle billing cycle changes
     if (fieldName === 'billing-cycle') {
-      handleBillingCycleChange(fieldValue);
+      handleBillingCycleChange(fieldValue, webManager);
     }
   });
 
@@ -143,7 +144,7 @@ function setupEventListeners() {
     const { action } = event.detail;
 
     if (action === 'apply-discount') {
-      applyDiscountCode();
+      applyDiscountCode(webManager);
     }
   });
 
@@ -165,15 +166,15 @@ function setupEventListeners() {
       return;
     }
 
-    // Set payment method in state
-    state.paymentMethod = paymentMethod;
+    // Set payment method in raw
+    raw.paymentMethod = paymentMethod;
 
     // Track add_payment_info event when payment method is selected
-    const basePrice = state.isSubscription
-      ? (state.billingCycle === 'monthly' ? state.product.price_monthly : state.product.price_annually)
-      : state.product.price;
+    const basePrice = raw.product.is_subscription
+      ? (raw.billingCycle === 'monthly' ? raw.product.price_monthly : raw.product.price_annually)
+      : raw.product.price;
 
-    trackAddPaymentInfo(state.product, state.total || basePrice, state.billingCycle, paymentMethod);
+    trackAddPaymentInfo(raw.product, basePrice, raw.billingCycle, paymentMethod);
     console.log('Tracked add_payment_info event:', paymentMethod);
 
     // Process the payment
@@ -203,8 +204,8 @@ async function completePurchase() {
     // Get form data from FormManager
     const formData = formManager.getData();
 
-    // Store form data in state
-    state.formData = formData;
+    // Store form data in raw
+    raw.formData = formData;
 
     // Wait 1 second to simulate processing time
     if (webManager.isDevelopment()) {
@@ -212,7 +213,7 @@ async function completePurchase() {
     }
 
     // Add custom validation if needed
-    if (!state.paymentMethod) {
+    if (!raw.paymentMethod) {
       throw new Error('Please select a payment method');
     }
 
@@ -222,14 +223,17 @@ async function completePurchase() {
     // Log the structured payment data
     console.log('🟢 Payment intent data:', paymentIntentData);
 
+    // Calculate pricing for analytics
+    const prices = calculatePrices(raw);
+
     // Store pre-payment analytics data
     const analyticsData = {
-      transaction_id: state.checkoutId,
-      value: state.total,
+      transaction_id: raw.checkoutId,
+      value: prices.total,
       currency: 'USD',
       items: [{
-        item_name: state.product.name,
-        price: state.total,
+        item_name: raw.product.name,
+        price: prices.total,
         quantity: 1
       }]
     };
@@ -241,15 +245,15 @@ async function completePurchase() {
 
     // Store order data for confirmation page (legacy format for now)
     const orderData = {
-      orderId: state.checkoutId,
-      product: state.product.name,
-      productId: state.product.id,
-      total: state.total,
-      subtotal: state.subtotal,
-      discountPercent: state.discountPercent,
-      billingCycle: state.billingCycle,
-      hasFreeTrial: state.hasFreeTrial && state.isSubscription,
-      paymentMethod: state.paymentMethod,
+      orderId: raw.checkoutId,
+      product: raw.product.name,
+      productId: raw.product.id,
+      total: prices.total,
+      subtotal: prices.subtotal,
+      discountPercent: raw.discountPercent,
+      billingCycle: raw.billingCycle,
+      hasFreeTrial: raw.product.has_free_trial,
+      paymentMethod: raw.paymentMethod,
       email: webManager.auth().getUser().email,
       timestamp: new Date().toISOString(),
       formData: formData
@@ -257,11 +261,11 @@ async function completePurchase() {
 
     sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-    // Store the payment intent data in state for processors to use
-    state.paymentIntentData = paymentIntentData;
+    // Store the payment intent data in raw for processors to use
+    raw.paymentIntentData = paymentIntentData;
 
     // Process payment with selected processor (will redirect)
-    await paymentManager.processPayment(state.paymentMethod);
+    await paymentManager.processPayment(raw.paymentMethod);
 
     // This code won't run if redirect is successful
     // If we get here, something went wrong
@@ -283,9 +287,12 @@ async function completePurchase() {
 // Initialize checkout with parallel API calls
 async function initializeCheckout() {
   try {
+    // Initialize UI with loading states (replaces fullscreen loader)
+    initializeCheckoutUI();
+
     // Generate or retrieve checkout session ID
-    state.checkoutId = generateCheckoutId();
-    console.log('Checkout session ID:', state.checkoutId);
+    raw.checkoutId = generateCheckoutId();
+    console.log('Checkout session ID:', raw.checkoutId);
 
     // Get product ID from URL params
     const urlParams = new URLSearchParams(window.location.search);
@@ -318,9 +325,7 @@ async function initializeCheckout() {
     }
 
     // Set product data
-    state.product = productData.value;
-    state.isSubscription = state.product.is_subscription;
-    state.hasFreeTrial = state.product.has_free_trial;
+    raw.product = productData.value;
 
     // Create mutable trial eligibility result for testing
     let trialEligibilityResult = trialEligible;
@@ -336,12 +341,12 @@ async function initializeCheckout() {
 
     // Apply trial eligibility with server/test response
     if (trialEligibilityResult.status === 'fulfilled') {
-      state.hasFreeTrial = trialEligibilityResult.value && state.product.has_free_trial;
+      raw.product.has_free_trial = trialEligibilityResult.value && raw.product.has_free_trial;
     }
 
     // Initialize payment processors with API keys
-    if (state.apiKeys) {
-      paymentManager.initialize(state.apiKeys, webManager);
+    if (raw.apiKeys) {
+      paymentManager.initialize(raw.apiKeys, webManager);
     }
 
     // Update payment button visibility based on available processors
@@ -356,7 +361,7 @@ async function initializeCheckout() {
 
     if (availableMethods.length === 0) {
       console.error('No payment methods available! Check API keys configuration.');
-      showError('No payment methods are currently available. Please contact support for assistance.');
+      showError('No payment methods are currently available. Please contact support for assistance.', webManager);
       return; // Stop initialization since we can't proceed without payment methods
     }
 
@@ -369,12 +374,12 @@ async function initializeCheckout() {
 
     // Set billing cycle from URL parameter (before UI updates)
     if (frequency === 'monthly' || frequency === 'annually') {
-      state.billingCycle = frequency;
+      raw.billingCycle = frequency;
       console.log('Setting billing cycle from URL:', frequency);
     }
 
     // Update UI with product details
-    updateAllUI();
+    updateAllUI(webManager);
 
     // Set up event listeners and FormManager
     setupEventListeners();
@@ -383,23 +388,24 @@ async function initializeCheckout() {
     formManager.setFormState('ready');
 
     // Track begin_checkout event on page load
-    const basePrice = state.isSubscription
-      ? (state.billingCycle === 'monthly' ? state.product.price_monthly : state.product.price_annually)
-      : state.product.price;
+    const basePrice = raw.product.is_subscription
+      ? (raw.billingCycle === 'monthly' ? raw.product.price_monthly : raw.product.price_annually)
+      : raw.product.price;
 
-    trackBeginCheckout(state.product, basePrice, state.billingCycle);
-    console.log('Tracked begin_checkout event for:', state.product.id);
+    trackBeginCheckout(raw.product, basePrice, raw.billingCycle);
+    console.log('Tracked begin_checkout event for:', raw.product.id);
 
     // Auto-apply welcome coupon
-    autoApplyWelcomeCoupon();
+    autoApplyWelcomeCoupon(webManager);
 
   } catch (error) {
     console.error('Checkout initialization failed:', error);
-    showError(error.message || 'Failed to load checkout. Please refresh the page and try again.');
+    showError(error.message || 'Failed to load checkout. Please refresh the page and try again.', webManager);
   } finally {
-    // Hide preloader once everything is loaded (success or failure)
+    // The bindings system handles loading states, no need for a separate preloader
+    // Auth listener is still useful for other purposes
     webManager.auth().listen({}, () => {
-      hidePreloader();
+      console.log('Auth state updated');
     });
   }
 }

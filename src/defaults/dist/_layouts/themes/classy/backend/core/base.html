@@ -48,7 +48,7 @@ web_manager:
     {% endunless %}
 
     <!-- Main Content -->
-    <main id="main-content" class="flex-fill overflow-auto p-3 p-lg-4 {{ page.resolved.theme.main.class | liquify }}" aria-label="Main content">
+    <main id="main-content" class="flex-fill overflow-auto p-3 p-lg-4 {{ page.resolved.theme.main.class | uj_liquify }}" aria-label="Main content">
       {{ content | uj_content_format }}
     </main>
   </div>

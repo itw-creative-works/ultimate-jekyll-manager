@@ -36,7 +36,7 @@ theme:
             {% if page.resolved.theme.header.title.icon %}
               {% uj_icon page.resolved.theme.header.title.icon, "me-2" %}
             {% endif %}
-            {{- page.resolved.theme.header.title.content | default: page.resolved.meta.title | liquify -}}
+            {{- page.resolved.theme.header.title.content | default: page.resolved.meta.title | uj_liquify -}}
           </h1>
         {% endunless %}
 

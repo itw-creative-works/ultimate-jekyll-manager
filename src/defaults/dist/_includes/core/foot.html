@@ -307,9 +307,9 @@
       "@type": "BlogPosting",
       "@id": "{{ page.canonical.url }}#BlogPosting",
       "url": "{{ page.canonical.url }}",
-      "name": "{{ page.resolved.post.title | liquify }}",
-      "description": "{{ page.resolved.post.description | liquify }} ",
-      "headline": "{{ page.resolved.post.title | liquify }}",
+      "name": "{{ page.resolved.post.title | uj_liquify }}",
+      "description": "{{ page.resolved.post.description | uj_liquify }} ",
+      "headline": "{{ page.resolved.post.title | uj_liquify }}",
       "datePublished": "{{ page.date | date_to_xmlschema }}",
       "dateModified": "{{ site.time | date_to_xmlschema }}",
       "author": {
@@ -377,8 +377,8 @@
       "@type": "Product",
       "@id": "{{ page.canonical.url }}#Product",
       "url": "{{ page.canonical.url }}",
-      "name": "{{ page.product.title | liquify }}",
-      "description": "{{ page.product.description | liquify }}",
+      "name": "{{ page.product.title | uj_liquify }}",
+      "description": "{{ page.product.description | uj_liquify }}",
       "image": [
         "{{ site.url }}/assets/images/products/product-{{ page.product.id }}/{{ page.url | split: '/' | last }}.jpg"
       ],
@@ -405,8 +405,8 @@
       "@type": "ContactPage",
       "@id": "{{ page.canonical.url }}#ContactPage",
       "url": "{{ page.canonical.url }}",
-      "name": "{{ page.resolved.meta.title | liquify }}",
-      "description": "{{ page.resolved.meta.description | liquify }}",
+      "name": "{{ page.resolved.meta.title | uj_liquify }}",
+      "description": "{{ page.resolved.meta.description | uj_liquify }}",
       "mainEntity": {
         "@type": "Organization",
         "@id": "{{ site.url }}#{{ site.brand.type }}"

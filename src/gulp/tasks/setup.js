@@ -2,6 +2,7 @@
 const Manager = new (require('../../build.js'));
 const logger = Manager.logger('setup');
 const { execute } = require('node-powertools');
+const detectGitHubRepository = require('./utils/detect-github-repo');
 
 // Load package
 const package = Manager.getPackage('main');

@@ -33,11 +33,11 @@ meta:
 
     {
       "url": "{{ site.url }}{{ item.url }}",
-      "title": "{{ item.meta.title | liquify }}",
-      "desc": "{{ item.meta.description | liquify }}",
-      "breadcrumb": "{{ item.meta.breadcrumb | liquify }}",
-      "category": "{{ item.search.category | default: item.post.category | liquify }}",
-      "type": "{{ page-type | default: item.settings.page-type | liquify }}"
+      "title": "{{ item.meta.title | uj_liquify }}",
+      "desc": "{{ item.meta.description | uj_liquify }}",
+      "breadcrumb": "{{ item.meta.breadcrumb | uj_liquify }}",
+      "category": "{{ item.search.category | default: item.post.category | uj_liquify }}",
+      "type": "{{ page-type | default: item.settings.page-type | uj_liquify }}"
     }{% unless forloop.last %},{% endunless %}
   {% endfor %}
 ]

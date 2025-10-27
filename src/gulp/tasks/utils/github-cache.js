@@ -6,7 +6,7 @@ const jetpack = require('fs-jetpack');
 const crypto = require('crypto');
 const { Octokit } = require('@octokit/rest');
 const AdmZip = require('adm-zip');
-const { execute } = require('node-powertools');
+const detectGitHubRepository = require('./detect-github-repo');
 
 class GitHubCache {
   constructor(options = {}) {
@@ -28,31 +28,15 @@ class GitHubCache {
     }
 
     // Auto-detect repository if not set
-    if (!process.env.GITHUB_REPOSITORY) {
-      try {
-        const result = await execute('git remote get-url origin', { log: false });
-
-        // Parse GitHub repository from remote URL
-        // Supports: https://github.com/owner/repo.git, git@github.com:owner/repo.git
-        const match = result.match(/github\.com[:/]([^/]+\/[^.\s]+)/);
-
-        if (match) {
-          process.env.GITHUB_REPOSITORY = match[1];
-          this.logger.log(`📦 Auto-detected repository from git remote: ${process.env.GITHUB_REPOSITORY}`);
-        }
-      } catch (e) {
-        // Ignore errors from git command
-        this.logger.warn(`⚠️ Could not auto-detect repository from git remote: ${e.message}`);
-      }
-    }
+    const repository = await detectGitHubRepository(this.logger);
 
     // Final check
-    if (!process.env.GITHUB_REPOSITORY) {
+    if (!repository) {
       throw new Error('GITHUB_REPOSITORY environment variable not set and could not auto-detect from git remote');
     }
 
     // Set owner and repo
-    [this.owner, this.repo] = process.env.GITHUB_REPOSITORY.split('/');
+    [this.owner, this.repo] = repository.split('/');
 
     // Initialize Octokit
     if (!this.octokit) {

@@ -1,47 +1,72 @@
 // Pricing calculations for checkout
-import { state } from './state.js';
+import { raw } from './state.js';
 
-// Calculate prices
-export function calculatePrices() {
-  let basePrice;
-
-  if (state.isSubscription) {
-    basePrice = state.billingCycle === 'monthly'
-      ? state.product.price_monthly
-      : state.product.price_annually;
-  } else {
-    basePrice = state.product.price || 0;
+// Calculate prices and return values for bindings
+// Takes raw data and returns formatted values
+export function calculatePrices(rawData = raw) {
+  // Return default values if product not loaded
+  if (!rawData.product) {
+    return {
+      subtotal: 0,
+      discountAmount: 0,
+      trialDiscountAmount: 0,
+      total: 0,
+      recurring: 0,
+      displayPrice: '$--'
+    };
   }
 
-  state.subtotal = basePrice;
-  const discountAmount = (state.subtotal * state.discountPercent) / 100;
+  let basePrice;
+  const isSubscription = rawData.product.is_subscription || false;
+  const hasFreeTrial = rawData.product.has_free_trial || false;
+
+  if (isSubscription) {
+    basePrice = rawData.billingCycle === 'monthly'
+      ? (rawData.product.price_monthly || 0)
+      : (rawData.product.price_annually || 0);
+  } else {
+    basePrice = rawData.product.price || 0;
+  }
+
+  // Calculate subtotal
+  const subtotal = basePrice;
+
+  // Calculate discount amount
+  const discountAmount = (subtotal * rawData.discountPercent) / 100;
 
   // Calculate total after discount
-  const discountedTotal = state.subtotal - discountAmount;
+  const discountedTotal = subtotal - discountAmount;
 
-  // Update UI
-  document.getElementById('subtotal').textContent = `$${state.subtotal.toFixed(2)}`;
-  document.getElementById('discount-amount').textContent = discountAmount.toFixed(2);
+  // Calculate trial discount amount and final total
+  let total;
+  let trialDiscountAmount = 0;
 
-  // Show/hide discount row
-  if (state.discountPercent > 0) {
-    document.getElementById('discount-row').classList.remove('d-none');
+  if (hasFreeTrial && isSubscription) {
+    // Free trial means $0 due today
+    trialDiscountAmount = discountedTotal;
+    total = 0;
   } else {
-    document.getElementById('discount-row').classList.add('d-none');
+    total = discountedTotal;
   }
 
-  // Handle trial discount
-  const $trialDiscountRow = document.getElementById('trial-discount-row');
-  if (state.hasFreeTrial && state.isSubscription) {
-    // Show trial discount (full discounted amount)
-    $trialDiscountRow.classList.remove('d-none');
-    document.getElementById('trial-discount-amount').textContent = discountedTotal.toFixed(2);
-    state.total = 0; // Free trial means $0 due today
-    document.getElementById('total-price').textContent = '$0.00';
+  // Calculate recurring amount (after discount but before trial)
+  const recurring = discountedTotal;
+
+  // Format display price for product
+  let displayPrice;
+  if (isSubscription) {
+    const period = rawData.billingCycle === 'monthly' ? '/mo' : '/yr';
+    displayPrice = `$${discountedTotal.toFixed(2)}${period}`;
   } else {
-    // Hide trial discount
-    $trialDiscountRow.classList.add('d-none');
-    state.total = discountedTotal;
-    document.getElementById('total-price').textContent = `$${discountedTotal.toFixed(2)}`;
+    displayPrice = `$${discountedTotal.toFixed(2)}`;
   }
+
+  return {
+    subtotal,
+    discountAmount,
+    trialDiscountAmount,
+    total,
+    recurring,
+    displayPrice
+  };
 }

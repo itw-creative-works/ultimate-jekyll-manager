@@ -21,7 +21,7 @@ web_manager:
 ---
 
 <!-- Main Content -->
-<main id="main-content" class="p-0 {{ page.resolved.theme.main.class | liquify }}" aria-label="Main content">
+<main id="main-content" class="p-0 {{ page.resolved.theme.main.class | uj_liquify }}" aria-label="Main content">
   <div class="container-fluid p-0">
     {{ content | uj_content_format }}
   </div>
@@ -51,9 +51,9 @@ web_manager:
 
           // Meta information from the iframe
           meta: {
-            title: "{{ page.resolved.meta.title | liquify | escape }}",
-            description: "{{ page.resolved.meta.description | liquify | escape }}",
-            breadcrumb: "{{ page.resolved.meta.breadcrumb | liquify | escape }}",
+            title: "{{ page.resolved.meta.title | uj_liquify | escape }}",
+            description: "{{ page.resolved.meta.description | uj_liquify | escape }}",
+            breadcrumb: "{{ page.resolved.meta.breadcrumb | uj_liquify | escape }}",
           },
         }
       }, '*');

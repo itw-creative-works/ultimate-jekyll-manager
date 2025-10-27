@@ -9,7 +9,7 @@ sitemap:
 meta:
   index: false
 ---
-{% capture url %}{{ page.resolved.redirect.url | default: site.url | liquify }}{% endcapture %}
+{% capture url %}{{ page.resolved.redirect.url | default: site.url | uj_liquify }}{% endcapture %}
 {% capture querystring %}{{ page.resolved.redirect.querystring }}{% endcapture %}
 {% capture modifier %}{{ page.resolved.redirect.modifier | default: "" }}{% endcapture %}
 

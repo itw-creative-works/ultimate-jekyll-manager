@@ -19,27 +19,41 @@ web_manager:
 <!-- Capture payment buttons content to reuse in both desktop and mobile layouts -->
 {% capture payment_buttons_content %}
   <!-- Credit/Debit Card Button -->
-  <button type="submit" class="btn btn-adaptive btn-lg py-3 d-flex align-items-center justify-content-center payment-button" data-payment-method="card" data-action="pay-card">
+  <button type="submit" class="btn btn-adaptive btn-lg py-3 d-flex align-items-center justify-content-center payment-button"
+          data-payment-method="card"
+          data-action="pay-card"
+          data-wm-bind="@show checkout.paymentMethods.card">
     {% uj_icon "credit-card", "me-2 fa-3xl" %}
     <span class="fw-semibold">Credit/Debit</span>
   </button>
 
   <!-- PayPal Button -->
-  <button type="submit" class="btn btn-paypal btn-lg py-3 d-flex align-items-center justify-content-center payment-button" data-payment-method="paypal" data-action="pay-paypal">
+  <button type="submit" class="btn btn-paypal btn-lg py-3 d-flex align-items-center justify-content-center payment-button"
+          data-payment-method="paypal"
+          data-action="pay-paypal"
+          data-wm-bind="@show checkout.paymentMethods.paypal">
     <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-200px.png"
         alt="PayPal"
         height="28"
         style="max-height: 28px;">
   </button>
 
-  <!-- Apple Pay Button (shown conditionally) -->
-  <button type="submit" class="btn btn-dark btn-lg py-3 d-flex align-items-center justify-content-center d-none payment-button" data-payment-method="apple-pay" data-action="pay-apple-pay">
+  <!-- Apple Pay Button -->
+  <button type="submit" class="btn btn-dark btn-lg py-3 d-flex align-items-center justify-content-center payment-button"
+          data-payment-method="apple-pay"
+          data-action="pay-apple-pay"
+          data-wm-bind="@show checkout.paymentMethods.applePay"
+          hidden>
     {% uj_icon "apple", "me-2 fa-3xl" %}
     <span class="fw-semibold">Apple Pay</span>
   </button>
 
-  <!-- Google Pay Button (shown conditionally) -->
-  <button type="submit" class="btn btn-outline-dark btn-lg py-3 d-flex align-items-center justify-content-center d-none payment-button" data-payment-method="google-pay" data-action="pay-google-pay">
+  <!-- Google Pay Button -->
+  <button type="submit" class="btn btn-outline-dark btn-lg py-3 d-flex align-items-center justify-content-center payment-button"
+          data-payment-method="google-pay"
+          data-action="pay-google-pay"
+          data-wm-bind="@show checkout.paymentMethods.googlePay"
+          hidden>
     <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg"
         alt="Google Pay"
         height="24"
@@ -48,7 +62,11 @@ web_manager:
   </button>
 
   <!-- Crypto Button -->
-  <button type="submit" class="btn btn-outline-adaptive btn-lg py-3 d-flex align-items-center justify-content-center payment-button" data-payment-method="crypto" data-action="pay-crypto">
+  <button type="submit" class="btn btn-outline-adaptive btn-lg py-3 d-flex align-items-center justify-content-center payment-button"
+          data-payment-method="crypto"
+          data-action="pay-crypto"
+          data-wm-bind="@show checkout.paymentMethods.crypto"
+          hidden>
     {% uj_icon "bitcoin", "me-2 fa-3xl" %}
     <span class="fw-semibold">Crypto</span>
   </button>
@@ -58,24 +76,13 @@ web_manager:
   </p>
 {% endcapture %}
 
-<!-- Fullscreen Preloader -->
-<div id="checkout-preloader" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-body" style="z-index: 9999;">
-  <div class="text-center">
-    <div class="spinner-border spinner-border-lg text-primary mb-3" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <h5 class="text-muted">Loading secure checkout...</h5>
-    <p class="text-muted small mb-0">Please be patient while your order is prepared.</p>
-  </div>
-</div>
-
-<!-- Error Message Container -->
-<div id="checkout-error-container" class="d-none">
+<!-- Error Message Container (hidden by default, shown via bindings) -->
+<div id="checkout-error-container" data-wm-bind="@show checkout.error.show" hidden>
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="alert alert-danger" role="alert">
         <h4 class="alert-heading">Oops! Something went wrong</h4>
-        <p id="checkout-error-message"></p>
+        <p data-wm-bind="@text checkout.error.message"></p>
         <hr>
         <button class="btn btn-outline-danger" onclick="window.location.reload()">
           Try again
@@ -85,8 +92,8 @@ web_manager:
   </div>
 </div>
 
-<!-- Checkout Section -->
-<section id="checkout-content" class="col-12 col-xl-10 mw-xl">
+<!-- Checkout Section (visible by default, hidden only when error is shown) -->
+<section id="checkout-content" class="col-12 col-xl-10 mw-xl" data-wm-bind="@hide checkout.error.show">
   <div class="row mb-4">
     <div class="col-12">
       <h1 class="h2 mb-0 text-center text-lg-start">Checkout</h1>
@@ -111,9 +118,9 @@ web_manager:
             <div class="_card _border-1 _border-secondary _shadow-sm mb-4">
               <div class="card-body">
                 <h3 class="h5 fw-bold mb-3">Billing Cycle</h3>
-                <div class="d-flex justify-content-between align-items-center mb-3" hidden>
+                <div class="d-flex justify-content-between align-items-center mb-3 _wm-binding-skeleton" _data-wm-bind="@show checkout" hidden>
                   <h6 class="fw-bold mb-0">
-                    <span id="selected-plan-name">Loading...</span> Plan
+                    <span data-wm-bind="@text checkout.product.name">Loading...</span> Plan
                   </h6>
                   <a href="/pricing" class="small text-decoration-none">
                     {% uj_icon "arrow-left", "me-1" %}
@@ -121,52 +128,61 @@ web_manager:
                   </a>
                 </div>
 
-                <!-- Subscription Toggle (hidden by default) -->
-                <div id="subscription-toggle" class="d-none">
+                <!-- Subscription Toggle (shown for subscriptions only) -->
+                <div id="subscription-toggle">
                   <div class="row g-3">
                     <div class="col-6">
-                      <input type="radio" class="btn-check" name="billing-cycle" id="annually" value="annually">
-                      <label class="btn btn-outline-adaptive text-body w-100 p-3 position-relative border-2 rounded-3 _animation-hover-up" for="annually">
-                        <span id="savings-badge" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2">Save --</span>
-                        <div class="d-flex align-items-center justify-content-center mb-2">
-                          <span class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center">
-                            {% uj_icon "check", "fa-md p-1" %}
-                          </span>
-                        </div>
-                        <div class="fs-4 mb-1">
-                          <span id="annually-price-lg">$--</span>
-                          <span class="opacity-60 fs-6 fw-normal">/mo</span>
-                        </div>
-                        <div class="opacity-80 small">Annual Plan</div>
-                      </label>
+                      <div class="wm-binding-skeleton" data-wm-bind="@show checkout.product.isSubscription">
+                        <input type="radio" class="btn-check" name="billing-cycle" id="annually" value="annually">
+                        <label class="btn btn-outline-adaptive text-body w-100 p-3 position-relative border-2 rounded-3 _animation-hover-up wm-binding-skeleton" data-wm-bind="@show checkout.product.isSubscription" for="annually">
+                          <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2"
+                                data-wm-bind="@text checkout.pricing.savingsBadge, @show checkout.pricing.showSavingsBadge"
+                                hidden
+                                >Save --</span>
+                          <div class="d-flex align-items-center justify-content-center mb-2">
+                            <span class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center">
+                              {% uj_icon "check", "fa-md p-1" %}
+                            </span>
+                          </div>
+                          <div class="fs-4 mb-1 wm-binding-skeleton" data-wm-bind="@show checkout">
+                            <span data-wm-bind="@text checkout.pricing.annualMonthlyRate">$--</span>
+                            <span class="opacity-60 fs-6 fw-normal">/mo</span>
+                          </div>
+                          <div class="opacity-80 small">Annual Plan</div>
+                        </label>
+                      </div>
                     </div>
                     <div class="col-6">
-                      <input type="radio" class="btn-check" name="billing-cycle" id="monthly" value="monthly">
-                      <label class="btn btn-outline-adaptive text-body w-100 p-3 border-2 rounded-3 _animation-hover-up" for="monthly">
-                        <div class="d-flex align-items-center justify-content-center mb-2">
-                          <span class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center">
-                            {% uj_icon "check", "fa-md p-1" %}
-                          </span>
-                        </div>
-                        <div class="fs-4 mb-1">
-                          <span id="monthly-price-lg">$--</span>
-                          <span class="opacity-60 fs-6 fw-normal">/mo</span>
-                        </div>
-                        <div class="opacity-80 small">Monthly Plan</div>
-                      </label>
+                      <div class="wm-binding-skeleton" data-wm-bind="@show checkout.product.isSubscription">
+                        <input type="radio" class="btn-check" name="billing-cycle" id="monthly" value="monthly">
+                        <label class="btn btn-outline-adaptive text-body w-100 p-3 border-2 rounded-3 _animation-hover-up wm-binding-skeleton" data-wm-bind="@show checkout.product.isSubscription" for="monthly">
+                          <div class="d-flex align-items-center justify-content-center mb-2">
+                            <span class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center">
+                              {% uj_icon "check", "fa-md p-1" %}
+                            </span>
+                          </div>
+                          <div class="fs-4 mb-1 wm-binding-skeleton" data-wm-bind="@show checkout">
+                            <span data-wm-bind="@text checkout.pricing.monthlyPrice">$--</span>
+                            <span class="opacity-60 fs-6 fw-normal">/mo</span>
+                          </div>
+                          <div class="opacity-80 small">Monthly Plan</div>
+                        </label>
+                      </div>
                     </div>
                   </div>
 
                   <!-- Payment text under the boxes -->
-                  <div class="text-muted small text-center mt-2">
-                    * Pay <span class="mb-0" id="billing-cycle-payment-text">$-- monthly</span>
+                  <div class="text-muted small text-center mt-2 wm-binding-skeleton" data-wm-bind="@show checkout">
+                    * Pay <span class="mb-0">$-- monthly</span>
                   </div>
 
                   <!-- Free Trial Badge -->
-                  <div id="trial-badge" class="alert alert-success mt-3 mb-0 p-2 d-none">
+                  <div class="alert alert-success mt-3 mb-0 p-2"
+                       data-wm-bind="@show checkout.trial.show"
+                       hidden>
                     <small class="d-flex align-items-center mb-0">
                       {% uj_icon "gift", "me-2" %}
-                      <span id="trial-message"></span>
+                      <span data-wm-bind="@text checkout.trial.message"></span>
                     </small>
                   </div>
                 </div>
@@ -180,8 +196,8 @@ web_manager:
               <div class="card-body">
                 <h3 class="h5 fw-bold mb-3">Customer Information</h3>
 
-                <div class="text-start">
-                  Managing order for <strong data-wm-bind="@text auth.user.email"></strong>, <a href="#" id="switch-account">switch account</a>.
+                <div class="text-start wm-binding-skeleton" data-wm-bind="@show checkout">
+                  Managing order for <strong data-wm-bind="@text auth.user.email">loading@example.com</strong>, <a href="#" id="switch-account">switch account</a>.
                 </div>
 
                 <!-- Customer form fields will go here when needed -->
@@ -206,7 +222,7 @@ web_manager:
                 <h3 class="h5 fw-bold mb-3">Payment Method</h3>
 
                 <!-- Direct Payment Buttons -->
-                <div class="d-grid gap-3">
+                <div class="d-grid gap-3 wm-binding-skeleton" data-wm-bind="@show checkout.paymentMethods">
                   {{ payment_buttons_content }}
                 </div>
               </div>
@@ -223,7 +239,7 @@ web_manager:
 
                   <!-- Product Item -->
                   <div class="order-item mb-4">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center wm-binding-skeleton" data-wm-bind="@show checkout">
                       <div class="position-relative me-3">
                         <div class="product-thumbnail bg-light rounded-3 d-flex align-items-center justify-content-center">
                           <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" class="img-fluid p-3" alt="{{ site.brand.name }} Plan Icon"/>
@@ -233,69 +249,75 @@ web_manager:
                           <span class="visually-hidden">quantity</span>
                         </span>
                       </div>
-                      <div class="flex-grow-1 text-start">
-                        <h6 class="mb-1" id="product-name">Loading...</h6>
-                        <p class="text-muted small mb-0" id="product-description">Loading product details...</p>
+                      <div class="flex-grow-1 text-start wm-binding-skeleton" data-wm-bind="@show checkout">
+                        <h6 class="mb-1" data-wm-bind="@text checkout.product.name">Loading...</h6>
+                        <!-- <p class="text-muted small mb-0" data-wm-bind="@text checkout.product.description">Loading product details...</p> -->
                       </div>
                       <div class="text-end d-none">
-                        <div class="fw-bold" id="product-price">$--</div>
+                        <div class="fw-bold" data-wm-bind="@text checkout.pricing.productPrice">$--</div>
                       </div>
                     </div>
                   </div>
 
                   <!-- Discount Code -->
-                  <div class="mb-4">
-                    <div class="input-group">
+                  <div class="mb-4 wm-binding-skeleton" data-wm-bind="@show checkout">
+                    <div class="input-group" data-wm-bind="@show checkout" hidden>
                       <input type="text" class="form-control rounded-start-3 border py-2 px-3 text-start" id="discount-code" name="discount-code" placeholder="Discount code" autocomplete="off">
                       <button class="btn btn-adaptive rounded-end-3 border px-4" type="button" id="apply-discount" data-action="apply-discount">Apply</button>
                     </div>
 
                     <!-- Discount Messages -->
                     <div class="text-start">
-                      <div id="discount-message-loading" class="mt-2 text-primary small d-none">
+                      <div class="mt-2 text-primary small" data-wm-bind="@show checkout.discount.loading" hidden>
                         {% uj_icon "clock", "me-1" %} Checking code...
                       </div>
-                      <div id="discount-message-success" class="mt-2 text-success small d-none">
-                        {% uj_icon "check-circle", "me-1" %} <span id="confirmation-text">Discount applied</span>
+                      <div class="mt-2 text-success small" data-wm-bind="@show checkout.discount.success" hidden>
+                        {% uj_icon "check-circle", "me-1" %} <span data-wm-bind="@text checkout.discount.successMessage">Discount applied</span>
                       </div>
-                      <div id="discount-message-error" class="mt-2 text-danger small d-none">
-                        {% uj_icon "times-circle", "me-1" %} <span id="error-text">Invalid discount code</span>
+                      <div class="mt-2 text-danger small" data-wm-bind="@show checkout.discount.error" hidden>
+                        {% uj_icon "times-circle", "me-1" %} <span data-wm-bind="@text checkout.discount.errorMessage">Invalid discount code</span>
                       </div>
                     </div>
                   </div>
 
                   <!-- Price Breakdown -->
                   <div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between mb-2 wm-binding-skeleton" data-wm-bind="@show checkout">
                       <span class="text-muted">Subtotal</span>
-                      <span id="subtotal">$--</span>
+                      <span data-wm-bind="@text checkout.pricing.subtotal">$--</span>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-2 text-success d-none" id="discount-row">
-                      <span>Discount (<span id="discount-percent"></span>)</span>
-                      <span>-$<span id="discount-amount"></span></span>
+                    <div class="d-flex justify-content-between mb-2 text-success"
+                         data-wm-bind="@show checkout.discount.hasDiscount"
+                         hidden>
+                      <span>Discount (<span data-wm-bind="@text checkout.discount.percent"></span>)</span>
+                      <span>-$<span data-wm-bind="@text checkout.discount.amount"></span></span>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-3 text-success d-none" id="trial-discount-row">
+                    <div class="d-flex justify-content-between mb-3 text-success"
+                         data-wm-bind="@show checkout.trial.hasFreeTrial"
+                         hidden>
                       <span>Free Trial Discount</span>
-                      <span>-$<span id="trial-discount-amount"></span></span>
+                      <span>-$<span data-wm-bind="@text checkout.trial.discountAmount"></span></span>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 wm-binding-skeleton" data-wm-bind="@show checkout">
                       <span class="fw-bold fs-5">Total Due Today</span>
-                      <span class="fw-bold fs-4" id="total-price">$--</span>
+                      <span class="fw-bold fs-4" data-wm-bind="@text checkout.pricing.total">$--</span>
                     </div>
 
                     <hr class="my-3">
 
-                    <div class="d-flex justify-content-between align-items-center text-muted">
+                    <div class="d-flex justify-content-between align-items-center text-muted wm-binding-skeleton" data-wm-bind="@show checkout">
                       <span>Recurring</span>
-                      <span id="recurring-amount">$-- <span id="recurring-period">monthly</span></span>
+                      <span><span data-wm-bind="@text checkout.pricing.recurringAmount">$--</span> <span data-wm-bind="@text checkout.pricing.recurringPeriod">monthly</span></span>
                     </div>
 
                     <!-- Subscription Terms -->
-                    <div id="subscription-terms" class="mt-3 rounded-3 small text-body-tertiary d-none text-start">
-                      <span id="terms-text"></span>
+                    <div class="mt-3 rounded-3 small text-body-tertiary text-start"
+                         data-wm-bind="@show checkout.pricing.showTerms"
+                         hidden>
+                      <span data-wm-bind="@text checkout.pricing.termsText"></span>
                     </div>
                   </div>
                 </div>
@@ -320,7 +342,7 @@ web_manager:
                 <h3 class="h5 fw-bold mb-3">Payment Method</h3>
 
                 <!-- Direct Payment Buttons -->
-                <div class="d-grid gap-3">
+                <div class="d-grid gap-3 wm-binding-skeleton" data-wm-bind="@show checkout.paymentMethods">
                   {{ payment_buttons_content }}
                 </div>
               </div>

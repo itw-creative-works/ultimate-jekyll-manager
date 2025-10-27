@@ -10,11 +10,16 @@ const { execute, template } = require('node-powertools');
 const NPM = require('npm-api');
 const glob = require('glob').globSync;
 const { minimatch } = require('minimatch');
+const detectGitHubRepository = require('../gulp/tasks/utils/detect-github-repo');
+const { Octokit } = require('@octokit/rest');
+const sodium = require('libsodium-wrappers');
 
 // Load package
 const package = Manager.getPackage('main');
 const project = Manager.getPackage('project');
-const config = Manager.getConfig('project');
+let config = Manager.getConfig('project');
+const rootPathPackage = Manager.getRootPath('main');
+const rootPathProject = Manager.getRootPath('project');
 
 // Dependency MAP
 const DEPENDENCY_MAP = {
@@ -30,10 +35,12 @@ module.exports = async function (options) {
   options.checkRuby = options.checkRuby !== 'false';
   options.checkPeerDependencies = options.checkPeerDependencies !== 'false';
   options.setupScripts = options.setupScripts !== 'false';
+  options.ensureCoreFiles = options.ensureCoreFiles !== 'false';
   options.createCname = options.createCname !== 'false';
   options.fetchFirebaseAuth = options.fetchFirebaseAuth !== 'false';
   options.checkLocality = options.checkLocality !== 'false';
   options.updateBundle = options.updateBundle !== 'false';
+  options.publishGitHubToken = options.publishGitHubToken !== 'false';
 
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
@@ -46,6 +53,9 @@ module.exports = async function (options) {
   try {
     // Log current working directory
     await logCWD();
+
+    // Detect GitHub repository early so it's available to all tasks/functions
+    await detectGitHubRepository(logger);
 
     // Ensure this package is up-to-date
     if (options.checkManager) {
@@ -80,6 +90,11 @@ module.exports = async function (options) {
     // Copy all files from src/defaults/dist on first run
     // await copyDefaultDistFiles();
 
+    // Ensure _config.yml exists
+    if (options.ensureCoreFiles) {
+      await ensureCoreFiles();
+    }
+
     // Create CNAME
     if (options.createCname) {
       await createCname();
@@ -87,12 +102,17 @@ module.exports = async function (options) {
 
     // Fetch firebase-auth files
     if (options.fetchFirebaseAuth) {
-      await fetchFirebaseAuth();
+      await fetchFirebaseAuth(options);
     }
 
     // Check which locality we are using
     if (options.checkLocality) {
       await checkLocality();
+    }
+
+    // Publish GH_TOKEN as repository secret
+    if (options.publishGitHubToken) {
+      await publishGitHubToken();
     }
 
     // Check which locality we are using
@@ -238,6 +258,27 @@ function setupScripts() {
   jetpack.write(path.join(process.cwd(), 'package.json'), project);
 }
 
+async function ensureCoreFiles() {
+  // Ensure src/_config.yml exists
+  if (!jetpack.exists('src/_config.yml')) {
+    // Log
+    logger.log('No src/_config.yml found. Creating default config file...');
+
+    // Copy default _config.yml
+    const sourcePath = path.join(rootPathPackage, 'dist/defaults/src/_config.yml');
+    const targetPath = path.join(rootPathProject, 'src/_config.yml');
+
+    jetpack.copy(sourcePath, targetPath);
+    logger.log(`Copied default _config.yml to src/_config.yml`);
+
+    // Inject new config into config variable
+    config = Manager.getConfig('project');
+
+    // Run gulp defaults task since this is likely the first run
+    await execute('UJ_BUILD_MODE=true npm run gulp -- defaults', { log: true });
+  }
+}
+
 function checkLocality() {
   const installedVersion = project.devDependencies[package.name];
 
@@ -304,7 +345,12 @@ async function fetchFirebaseAuth() {
 
   // Throw error if no project ID
   if (!app.projectId) {
-    throw new Error('No Firebase project ID found in config.web_manager.firebase.app.config.projectId');
+    // if (options.skipFirebaseIdCheck) {
+    //   return;
+    // }
+    // throw new Error('No Firebase project ID found in config.web_manager.firebase.app.config.projectId');
+    logger.warn('⚠️  Skipping fetchFirebaseAuth due to missing Firebase project ID.');
+    return;
   }
 
   const files = [
@@ -387,4 +433,68 @@ function logVersionCheck(name, installedVersion, latestVersion, isUpToDate) {
 
   // Log
   logger.log(`Checking if ${name} is up to date (${logger.format.bold(installedVersion)} >= ${logger.format.bold(latestVersion)}): ${isUpToDate ? logger.format.green('Yes') : logger.format.red('No')}`);
+}
+
+// Publish GH_TOKEN as repository secret
+async function publishGitHubToken() {
+  // Check if GH_TOKEN is available
+  if (!process.env.GH_TOKEN) {
+    logger.warn('⚠️  GH_TOKEN not found in environment variables. Skipping secret publication.');
+    return;
+  }
+
+  // Check if GITHUB_REPOSITORY is available
+  if (!process.env.GITHUB_REPOSITORY) {
+    logger.warn('⚠️  GITHUB_REPOSITORY not detected. Skipping secret publication.');
+    return;
+  }
+
+  // Quit if in build mode
+  if (Manager.isBuildMode()) {
+    logger.log('⚠️  Skipping GH_TOKEN publication in build mode.');
+    return;
+  }
+
+  try {
+    // Parse owner and repo
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+
+    // Initialize Octokit
+    const octokit = new Octokit({
+      auth: process.env.GH_TOKEN,
+    });
+
+    logger.log(`🔐 Publishing GH_TOKEN as repository secret for ${owner}/${repo}...`);
+
+    // Initialize sodium
+    await sodium.ready;
+
+    // Get repository public key for encrypting secrets
+    const { data: publicKeyData } = await octokit.actions.getRepoPublicKey({
+      owner,
+      repo,
+    });
+
+    // Convert secret to Uint8Array
+    const secretBytes = Buffer.from(process.env.GH_TOKEN);
+    const keyBytes = Buffer.from(publicKeyData.key, 'base64');
+
+    // Encrypt the secret using libsodium
+    const encryptedBytes = sodium.crypto_box_seal(secretBytes, keyBytes);
+    const encryptedValue = Buffer.from(encryptedBytes).toString('base64');
+
+    // Create or update the repository secret
+    await octokit.actions.createOrUpdateRepoSecret({
+      owner,
+      repo,
+      secret_name: 'GH_TOKEN',
+      encrypted_value: encryptedValue,
+      key_id: publicKeyData.key_id,
+    });
+
+    logger.log(`✅ Successfully published GH_TOKEN as repository secret`);
+  } catch (error) {
+    logger.error(`❌ Failed to publish GH_TOKEN as repository secret: ${error.message}`);
+    // Don't throw - this is not critical for setup to continue
+  }
 }

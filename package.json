@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.83",
+  "version": "0.0.108",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -9,6 +9,7 @@
     "./service-worker": "./dist/service-worker.js"
   },
   "scripts": {
+    "start": "npm run prepare:watch",
     "prepare": "node -e \"require('prepare-package')()\"",
     "prepare:watch": "node -e \"require('prepare-package/watch')()\"",
     "wm:prod": "npm uninstall web-manager && npm i web-manager@latest",
@@ -58,9 +59,10 @@
     "sharp": "0.23.1 (sometime before 2021ish): Hard lock because later versions had issues. Possibly solved in higher node versions"
   },
   "dependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/preset-env": "^7.28.3",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
     "@fullhuman/postcss-purgecss": "^7.0.2",
+    "@minify-html/node": "^0.18.1",
     "@octokit/rest": "^22.0.0",
     "@popperjs/core": "^2.11.8",
     "@prettier/plugin-xml": "^3.4.2",
@@ -80,10 +82,11 @@
     "gulp-responsive-modern": "^1.0.0",
     "gulp-sass": "^6.0.1",
     "html-minifier-terser": "^7.2.0",
-    "html-validate": "^10.1.2",
+    "html-validate": "^10.2.1",
     "itwcw-package-analytics": "^1.0.6",
     "js-yaml": "^4.1.0",
     "json5": "^2.2.3",
+    "libsodium-wrappers": "^0.7.15",
     "lighthouse": "^12.2.1",
     "lodash": "^4.17.21",
     "minimatch": "^10.0.3",
@@ -94,7 +97,7 @@
     "sass": "^1.93.2",
     "spellchecker": "^3.7.1",
     "through2": "^4.0.2",
-    "web-manager": "^4.0.18",
+    "web-manager": "^4.0.23",
     "webpack": "^5.102.1",
     "wonderful-fetch": "^1.3.4",
     "wonderful-version": "^1.3.2",

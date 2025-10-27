@@ -22,25 +22,25 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
       <div class="mb-5">
         <h4 class="fw-bold mb-3">Order Summary</h4>
 
-        <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex justify-content-between mb-3 wm-binding-skeleton" data-wm-bind="@show confirmation">
           <span class="text-muted">Order Number:</span>
-          <span class="fw-semibold" id="order-number">Loading...</span>
+          <span class="fw-semibold" data-wm-bind="@text confirmation.order.id">Loading...</span>
         </div>
 
         <hr>
 
-        <div class="mb-0">
-          <h6 class="fw-semibold mb-2" id="product-name">Loading...</h6>
+        <div class="mb-0 wm-binding-skeleton" data-wm-bind="@show confirmation">
+          <h6 class="fw-semibold mb-2" data-wm-bind="@text confirmation.order.productName">Loading...</h6>
           <div class="d-flex justify-content-between">
             <span class="text-muted">Total Paid:</span>
-            <span class="fw-bold fs-5" id="total-paid">$--</span>
+            <span class="fw-bold fs-5" data-wm-bind="@text confirmation.order.total">$--</span>
           </div>
         </div>
 
-        <div id="subscription-info" class="d-none">
+        <div data-wm-bind="@show confirmation.subscription.show" hidden>
           <hr>
           <div class="alert alert-info mb-0">
-            <p class="mb-0 small" id="billing-info"></p>
+            <p class="mb-0 small" data-wm-bind="@text confirmation.subscription.infoText"></p>
           </div>
         </div>
       </div>

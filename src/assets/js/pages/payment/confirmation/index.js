@@ -1,4 +1,7 @@
 // Libraries
+import { state } from './modules/state.js';
+import { initializeConfirmationUI, updateAllUI } from './modules/bindings.js';
+
 let webManager = null;
 
 /* Test URL
@@ -13,10 +16,16 @@ export default (Manager, options) => {
 
     // Initialize when DOM is ready
     await webManager.dom().ready();
-    
+
+    // Initialize UI with loading states
+    initializeConfirmationUI();
+
+    // Load order data and update bindings
     loadOrderData();
+
+    // Trigger celebration
     await triggerCelebration();
-    
+
     // Resolve after initialization
     return resolve();
   });
@@ -26,59 +35,55 @@ export default (Manager, options) => {
 function loadOrderData() {
   const urlParams = new URLSearchParams(window.location.search);
 
-  // Parse order data from URL
-  const orderData = {
-    orderId: urlParams.get('order_id') || urlParams.get('transaction_id'),
-    productId: urlParams.get('product_id') || urlParams.get('product'),
-    productName: urlParams.get('product_name'),
-    total: parseFloat(urlParams.get('amount') || urlParams.get('total') || 0),
-    currency: urlParams.get('currency') || 'USD',
-    billingCycle: urlParams.get('frequency') || urlParams.get('billing_cycle'),
-    paymentMethod: urlParams.get('payment_method'),
-    hasFreeTrial: urlParams.get('trial') === 'true',
-    email: urlParams.get('email')
-  };
+  // Parse raw data from URL
+  const orderId = urlParams.get('order_id') || urlParams.get('transaction_id') || generateOrderNumber();
+  const productId = urlParams.get('product_id') || urlParams.get('product');
+  const productName = urlParams.get('product_name');
+  const total = parseFloat(urlParams.get('amount') || urlParams.get('total') || 0);
+  const currency = urlParams.get('currency') || 'USD';
+  const billingCycle = urlParams.get('frequency') || urlParams.get('billing_cycle');
+  const paymentMethod = urlParams.get('payment_method');
+  const hasFreeTrial = urlParams.get('trial') === 'true';
 
-  // DOM elements
-  const $orderNumber = document.getElementById('order-number');
-  const $productName = document.getElementById('product-name');
-  const $totalPaid = document.getElementById('total-paid');
-  const $subscriptionInfo = document.getElementById('subscription-info');
-  const $billingInfo = document.getElementById('billing-info');
+  // Build billing cycle text
+  const billingCycleText = billingCycle === 'monthly' ? 'monthly' : billingCycle === 'annually' ? 'annually' : '';
+  const billingPeriodText = billingCycle === 'monthly' ? 'month' : billingCycle === 'annually' ? 'year' : '';
 
-  if (orderData.orderId) {
-    // Populate order details
-    if ($orderNumber) $orderNumber.textContent = orderData.orderId;
-    if ($productName) $productName.textContent = orderData.productName || orderData.productId || 'Product';
-    if ($totalPaid) $totalPaid.textContent = `$${orderData.total.toFixed(2)}`;
-
-    // Handle subscription information
-    if (orderData.billingCycle && $subscriptionInfo) {
-      $subscriptionInfo.classList.remove('d-none');
-
-      if ($billingInfo) {
-        if (orderData.hasFreeTrial) {
-          $billingInfo.innerHTML = `
-            <strong>Free Trial Active!</strong> Your trial period has begun.
-            You'll be charged ${orderData.billingCycle === 'monthly' ? 'monthly' : 'annually'} after the trial ends.
-          `;
-        } else {
-          $billingInfo.innerHTML = `
-            Your ${orderData.billingCycle} subscription is now active.
-            You'll be charged automatically each ${orderData.billingCycle === 'monthly' ? 'month' : 'year'}.
-          `;
-        }
-      }
+  // Build subscription info text
+  let subscriptionInfoText = '';
+  if (billingCycle) {
+    if (hasFreeTrial) {
+      subscriptionInfoText = `Free Trial Active! Your trial period has begun. You'll be charged ${billingCycleText} after the trial ends.`;
+    } else {
+      subscriptionInfoText = `Your ${billingCycleText} subscription is now active. You'll be charged automatically each ${billingPeriodText}.`;
     }
-
-    // Track analytics only if not already tracked
-    trackPurchaseIfNotTracked(orderData);
-  } else {
-    // Fallback for direct page access without params
-    if ($orderNumber) $orderNumber.textContent = generateOrderNumber();
-    if ($productName) $productName.textContent = 'Your Purchase';
-    if ($totalPaid) $totalPaid.textContent = '$0.00';
   }
+
+  // Update state directly in bindings format
+  state.confirmation.order.id = orderId;
+  state.confirmation.order.productName = productName || productId || 'Product';
+  state.confirmation.order.total = `$${total.toFixed(2)}`;
+  state.confirmation.order.currency = currency;
+  state.confirmation.subscription.show = !!billingCycle;
+  state.confirmation.subscription.hasFreeTrial = hasFreeTrial;
+  state.confirmation.subscription.billingCycle = billingCycleText;
+  state.confirmation.subscription.infoText = subscriptionInfoText;
+  state.confirmation.loaded = true;
+
+  // Update UI with complete bindings
+  updateAllUI(webManager);
+
+  // Track analytics only if not already tracked
+  trackPurchaseIfNotTracked({
+    orderId,
+    productId,
+    productName,
+    total,
+    currency,
+    billingCycle,
+    paymentMethod,
+    hasFreeTrial
+  });
 }
 
 // Generate a mock order number
