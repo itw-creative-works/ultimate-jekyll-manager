@@ -41,6 +41,7 @@ module.exports = async function (options) {
   options.checkLocality = options.checkLocality !== 'false';
   options.updateBundle = options.updateBundle !== 'false';
   options.publishGitHubToken = options.publishGitHubToken !== 'false';
+  options.updateGitHubPages = options.updateGitHubPages !== 'false';
 
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
@@ -114,6 +115,11 @@ module.exports = async function (options) {
     if (options.publishGitHubToken) {
       await publishGitHubToken();
     }
+
+    // Update GitHub Pages settings
+    // if (options.updateGitHubPages) {
+    //   await updateGitHubPages(options);
+    // }
 
     // Check which locality we are using
     if (options.updateBundle && !Manager.isServer()) {
@@ -406,6 +412,9 @@ async function fetchFirebaseAuth() {
           r = file.replace(r);
         }
 
+        // Log success for this file
+        logger.log(`Fetched: ${file.remote}`);
+
         // Write to file
         jetpack.write(finalPath,
           '---\n'
@@ -415,14 +424,43 @@ async function fetchFirebaseAuth() {
           + r
         )
       })
+      .catch((error) => {
+        // Only log the filename that failed, not the error content
+        logger.error(`❌ Failed to fetch: ${file.remote}`);
+        logger.error(`   URL: ${url}`);
+
+        // Check if it's a specific type of error (not HTML response)
+        // Use regex to check case-insensitive for HTML content
+        const htmlPattern = /<!doctype|<html|<head|<body/i;
+        if (error.message && !htmlPattern.test(error.message)) {
+          logger.error(`   Error: ${error.message}`);
+        }
+
+        // Re-throw to make Promise.all fail
+        throw new Error(`Failed to fetch Firebase auth file: ${file.remote}`);
+      })
     );
   });
 
-  // Await all promises
-  await Promise.all(promises);
-
   // Log
-  logger.log('Fetched firebase-auth files');
+  logger.log('Fetching firebase-auth files...');
+
+  try {
+    // Await all promises
+    await Promise.all(promises);
+
+    // Log success
+    logger.log('✅ Fetched firebase-auth files');
+  } catch (error) {
+    // Check if we should skip Firebase auth errors
+    if (process.env.UJ_SKIP_FIREBASE_AUTH_ERRORS === 'true') {
+      logger.warn('⚠️  Failed to fetch some Firebase auth files, but continuing due to UJ_SKIP_FIREBASE_AUTH_ERRORS=true');
+      return;
+    }
+
+    // Error already logged above, just throw to stop execution
+    throw new Error('Failed to fetch one or more Firebase auth files. Please check your Firebase project configuration.');
+  }
 }
 
 function logVersionCheck(name, installedVersion, latestVersion, isUpToDate) {
@@ -495,6 +533,124 @@ async function publishGitHubToken() {
     logger.log(`✅ Successfully published GH_TOKEN as repository secret`);
   } catch (error) {
     logger.error(`❌ Failed to publish GH_TOKEN as repository secret: ${error.message}`);
+    // Don't throw - this is not critical for setup to continue
+  }
+}
+
+// Update GitHub Pages settings
+async function updateGitHubPages(options) {
+  options = options || {};
+
+  // Check if GH_TOKEN is available
+  if (!process.env.GH_TOKEN) {
+    logger.warn('⚠️  GH_TOKEN not found in environment variables. Skipping GitHub Pages update.');
+    return;
+  }
+
+  // Check if GITHUB_REPOSITORY is available
+  if (!process.env.GITHUB_REPOSITORY) {
+    logger.warn('⚠️  GITHUB_REPOSITORY not detected. Skipping GitHub Pages update.');
+    return;
+  }
+
+  // Quit if in build mode
+  if (Manager.isBuildMode()) {
+    logger.log('⚠️  Skipping GitHub Pages update in build mode.');
+    return;
+  }
+
+  try {
+    // Parse owner and repo
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+
+    // Initialize Octokit
+    const octokit = new Octokit({
+      auth: process.env.GH_TOKEN,
+    });
+
+    logger.log(`📄 Configuring GitHub Pages for ${owner}/${repo}...`);
+
+    // Get current repository info to check if Pages is already enabled
+    let pagesInfo;
+    try {
+      const { data } = await octokit.repos.getPages({
+        owner,
+        repo,
+      });
+      pagesInfo = data;
+      logger.log('GitHub Pages already enabled, updating configuration...');
+    } catch (error) {
+      if (error.status === 404) {
+        logger.log('GitHub Pages not yet enabled, creating Pages site...');
+        pagesInfo = null;
+      } else {
+        throw error;
+      }
+    }
+
+    // Determine the source configuration
+    const sourceConfig = options.source || { branch: 'gh-pages', path: '/' };
+
+    // If custom domain is provided in config, use it
+    const customDomain = options.customDomain || (config.url ? new URL(config.url).host : null);
+
+    // Build options for API call
+    const pagesOptions = {
+      owner,
+      repo,
+      source: sourceConfig,
+    };
+
+    // Add custom domain if available and not github.io domain
+    if (customDomain && !customDomain.includes('github.io')) {
+      pagesOptions.cname = customDomain;
+    }
+
+    // Add HTTPS enforcement (recommended)
+    if (options.httpsEnforced !== false) {
+      pagesOptions.https_enforced = true;
+    }
+
+    // Create or update Pages configuration
+    if (!pagesInfo) {
+      // Create new Pages site
+      const { data } = await octokit.repos.createPagesSite(pagesOptions);
+      logger.log(`✅ GitHub Pages enabled successfully!`);
+      logger.log(`   URL: ${data.html_url}`);
+      if (data.cname) {
+        logger.log(`   Custom domain: ${data.cname}`);
+      }
+    } else {
+      // Update existing Pages site
+      const updateOptions = {
+        owner,
+        repo,
+      };
+
+      // Only include fields that can be updated
+      if (customDomain && !customDomain.includes('github.io')) {
+        updateOptions.cname = customDomain;
+      }
+
+      if (options.httpsEnforced !== false) {
+        updateOptions.https_enforced = true;
+      }
+
+      // Update source if different
+      if (JSON.stringify(pagesInfo.source) !== JSON.stringify(sourceConfig)) {
+        updateOptions.source = sourceConfig;
+      }
+
+      const { data } = await octokit.repos.updateInformationAboutPagesSite(updateOptions);
+      logger.log(`✅ GitHub Pages configuration updated successfully!`);
+      logger.log(`   URL: ${data.html_url}`);
+      if (data.cname) {
+        logger.log(`   Custom domain: ${data.cname}`);
+      }
+    }
+
+  } catch (error) {
+    logger.error(`❌ Failed to update GitHub Pages: ${error.message}`);
     // Don't throw - this is not critical for setup to continue
   }
 }

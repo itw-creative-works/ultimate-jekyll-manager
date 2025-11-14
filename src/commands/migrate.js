@@ -19,6 +19,7 @@ module.exports = async function () {
     await migrateAssets();
     await fixPostsLayout();
     await fixPostFilenames();
+    await cleanupOldDirectories();
 
     // Log completion
     logger.log(logger.format.green('✓ Migration complete!'));
@@ -40,47 +41,47 @@ async function migratePosts() {
     return;
   }
 
-  // Check if target already exists
-  const targetExists = jetpack.exists(targetPath);
-
-  if (targetExists) {
-    logger.warn(`Target directory ${targetPath} already exists!`);
-    logger.log('Checking for conflicts...');
-
-    // Get list of files in both directories
-    const sourceFiles = jetpack.list(sourcePath) || [];
-    const targetFiles = jetpack.list(targetPath) || [];
-
-    // Find conflicts
-    const conflicts = sourceFiles.filter((file) => targetFiles.includes(file));
-
-    if (conflicts.length > 0) {
-      logger.warn(`Found ${conflicts.length} conflicting file(s):`);
-      conflicts.forEach((file) => logger.warn(`  - ${file}`));
-      throw new Error('Cannot migrate _posts: conflicts detected. Please resolve manually.');
-    }
-  }
-
-  // Log the migration
   logger.log(`Migrating _posts from root to src/...`);
-  logger.log(`  Source: ${sourcePath}`);
-  logger.log(`  Target: ${targetPath}`);
 
-  // Ensure target directory exists
-  jetpack.dir(path.dirname(targetPath));
+  // Get all files recursively from source (not directories)
+  const sourceFiles = jetpack.find(sourcePath, { matching: '**/*', directories: false }) || [];
 
-  // Move the directory
-  jetpack.move(sourcePath, targetPath);
-
-  // Verify the move
-  const moveSuccessful = jetpack.exists(targetPath)
-    && !jetpack.exists(sourcePath);
-
-  if (moveSuccessful) {
-    logger.log(logger.format.green('✓ Successfully migrated _posts to src/_posts'));
-  } else {
-    throw new Error('Failed to migrate _posts directory');
+  if (sourceFiles.length === 0) {
+    logger.log('No files found in _posts directory');
+    jetpack.remove(sourcePath);
+    return;
   }
+
+  let movedCount = 0;
+  let overwrittenCount = 0;
+
+  // Just move everything, overwrite if needed
+  sourceFiles.forEach((sourceFile) => {
+    const relativePath = path.relative(sourcePath, sourceFile);
+    const targetFile = path.join(targetPath, relativePath);
+
+    // Check if target exists
+    const targetExists = jetpack.exists(targetFile);
+
+    // Ensure parent directory exists
+    jetpack.dir(path.dirname(targetFile));
+
+    // Move the file (this overwrites if target exists)
+    jetpack.move(sourceFile, targetFile, { overwrite: true });
+
+    if (targetExists) {
+      overwrittenCount++;
+      logger.log(`  ✓ Overwrote: ${relativePath}`);
+    } else {
+      movedCount++;
+      logger.log(`  ✓ Moved: ${relativePath}`);
+    }
+  });
+
+  // Remove the source directory
+  jetpack.remove(sourcePath);
+
+  logger.log(logger.format.green(`✓ Successfully migrated _posts: ${movedCount} moved, ${overwrittenCount} overwritten`));
 }
 
 async function migrateAssets() {
@@ -99,47 +100,101 @@ async function migrateAssets() {
   const targetExists = jetpack.exists(targetPath);
 
   if (targetExists) {
-    logger.warn(`Target directory ${targetPath} already exists!`);
-    logger.log('Merging assets directories...');
+    logger.log(`Target directory ${targetPath} already exists - will merge contents...`);
 
-    // Get list of files in both directories (recursively)
-    const sourceFiles = jetpack.find(sourcePath, { matching: '**/*' }) || [];
-    const targetFiles = jetpack.find(targetPath, { matching: '**/*' }) || [];
+    // Get all files recursively from source (not directories)
+    const sourceFiles = jetpack.find(sourcePath, { matching: '**/*', directories: false }) || [];
 
-    // Convert to relative paths for comparison
-    const sourceRelative = sourceFiles.map((f) => path.relative(sourcePath, f));
-    const targetRelative = targetFiles.map((f) => path.relative(targetPath, f));
+    let movedCount = 0;
+    let identicalCount = 0;
+    const conflicts = [];
 
-    // Find conflicts
-    const conflicts = sourceRelative.filter((file) => targetRelative.includes(file));
+    // First pass: check for conflicts
+    sourceFiles.forEach((sourceFile) => {
+      const relativePath = path.relative(sourcePath, sourceFile);
+      const targetFile = path.join(targetPath, relativePath);
 
-    if (conflicts.length > 0) {
-      logger.warn(`Found ${conflicts.length} conflicting file(s):`);
-      conflicts.slice(0, 10).forEach((file) => logger.warn(`  - ${file}`));
-      if (conflicts.length > 10) {
-        logger.warn(`  ... and ${conflicts.length - 10} more`);
-      }
-      throw new Error('Cannot migrate assets: conflicts detected. Please resolve manually.');
-    }
+      // Only care about file conflicts, not directory existence
+      if (jetpack.exists(targetFile) === 'file') {
+        // Check if files are identical
+        const sourceStats = jetpack.inspect(sourceFile);
+        const targetStats = jetpack.inspect(targetFile);
 
-    // Move all files from source to target
-    logger.log('Moving files...');
-    sourceRelative.forEach((file) => {
-      const src = path.join(sourcePath, file);
-      const dest = path.join(targetPath, file);
+        // Compare file sizes first (faster than reading content)
+        if (sourceStats.size !== targetStats.size) {
+          // Different sizes, definitely a conflict
+          conflicts.push(relativePath);
+        } else {
+          // Same size, need to compare content for small files
+          if (sourceStats.size < 1024 * 1024) { // Less than 1MB
+            const sourceContent = jetpack.read(sourceFile, 'buffer');
+            const targetContent = jetpack.read(targetFile, 'buffer');
 
-      // Only move files, not directories
-      if (jetpack.exists(src) === 'file') {
-        jetpack.move(src, dest);
+            if (Buffer.compare(sourceContent, targetContent) !== 0) {
+              // Files differ - this is a real conflict
+              conflicts.push(relativePath);
+            }
+          }
+          // For large files with same size, we assume they're identical
+        }
       }
     });
 
-    // Remove the old assets directory
-    jetpack.remove(sourcePath);
+    // If we have actual file conflicts, throw error
+    if (conflicts.length > 0) {
+      logger.error(`Found ${conflicts.length} conflicting file(s) with different content:`);
+      conflicts.slice(0, 10).forEach((file) => logger.error(`  - ${file}`));
+      if (conflicts.length > 10) {
+        logger.error(`  ... and ${conflicts.length - 10} more`);
+      }
+      throw new Error('Cannot migrate assets: duplicate files with different content detected. Please resolve manually.');
+    }
 
-    logger.log(logger.format.green('✓ Successfully merged assets into src/assets'));
+    // No conflicts, proceed with migration
+    sourceFiles.forEach((sourceFile) => {
+      const relativePath = path.relative(sourcePath, sourceFile);
+      const targetFile = path.join(targetPath, relativePath);
+
+      if (jetpack.exists(targetFile) === 'file') {
+        // Files are identical (we checked above), just remove source
+        jetpack.remove(sourceFile);
+        identicalCount++;
+        logger.log(`  ✓ Skipped identical file: ${relativePath}`);
+      } else {
+        // No file conflict, move it (directory will be created if needed)
+        jetpack.dir(path.dirname(targetFile));
+        jetpack.move(sourceFile, targetFile);
+        movedCount++;
+        logger.log(`  ✓ Moved: ${relativePath}`);
+      }
+    });
+
+    // Clean up empty directories in source
+    const remainingItems = jetpack.list(sourcePath) || [];
+    if (remainingItems.length === 0) {
+      jetpack.remove(sourcePath);
+      logger.log(`  ✓ Removed empty source directory`);
+    } else {
+      // Try to clean up empty subdirectories
+      const remainingDirs = jetpack.find(sourcePath, { matching: '*/', directories: true, files: false }) || [];
+      remainingDirs.reverse().forEach((dir) => {
+        const contents = jetpack.list(dir) || [];
+        if (contents.length === 0) {
+          jetpack.remove(dir);
+        }
+      });
+
+      // Check again if root is empty
+      const finalCheck = jetpack.list(sourcePath) || [];
+      if (finalCheck.length === 0) {
+        jetpack.remove(sourcePath);
+        logger.log(`  ✓ Removed empty source directory after cleanup`);
+      }
+    }
+
+    logger.log(logger.format.green(`✓ Successfully merged assets: ${movedCount} moved, ${identicalCount} identical files skipped`));
   } else {
-    // Log the migration
+    // Simple move when target doesn't exist
     logger.log(`Migrating assets from root to src/...`);
     logger.log(`  Source: ${sourcePath}`);
     logger.log(`  Target: ${targetPath}`);
@@ -151,8 +206,7 @@ async function migrateAssets() {
     jetpack.move(sourcePath, targetPath);
 
     // Verify the move
-    const moveSuccessful = jetpack.exists(targetPath)
-      && !jetpack.exists(sourcePath);
+    const moveSuccessful = jetpack.exists(targetPath) && !jetpack.exists(sourcePath);
 
     if (moveSuccessful) {
       logger.log(logger.format.green('✓ Successfully migrated assets to src/assets'));
@@ -327,5 +381,44 @@ async function fixPostFilenames() {
     logger.log(logger.format.green(`✓ Renamed ${renamedCount} post file(s)`));
   } else {
     logger.log('All post filenames are already clean');
+  }
+}
+
+async function cleanupOldDirectories() {
+  const directoriesToCheck = [
+    { path: path.join(process.cwd(), 'assets'), name: 'assets' },
+    { path: path.join(process.cwd(), '_posts'), name: '_posts' },
+  ];
+
+  logger.log('Checking for empty old directories to clean up...');
+
+  let deletedCount = 0;
+
+  directoriesToCheck.forEach(({ path: dirPath, name }) => {
+    // Check if directory exists
+    const exists = jetpack.exists(dirPath);
+
+    if (!exists) {
+      return;
+    }
+
+    // Check if directory has any FILES (not just subdirectories)
+    const files = jetpack.find(dirPath, { matching: '**/*', directories: false }) || [];
+
+    if (files.length === 0) {
+      // Directory has no files (might have empty subdirectories), delete it
+      jetpack.remove(dirPath);
+      logger.log(`  ✓ Deleted empty ${name} directory`);
+      deletedCount++;
+    } else {
+      logger.warn(`  ⚠ ${name} directory still exists with ${files.length} file(s)`);
+      logger.warn(`    Please manually review: ${dirPath}`);
+    }
+  });
+
+  if (deletedCount > 0) {
+    logger.log(logger.format.green(`✓ Cleaned up ${deletedCount} empty director${deletedCount === 1 ? 'y' : 'ies'}`));
+  } else {
+    logger.log('No empty directories to clean up');
   }
 }

@@ -4,9 +4,8 @@ const jetpack = require('fs-jetpack');
 const fs = require('fs');
 const JSON5 = require('json5');
 const argv = require('yargs').argv;
-const { force } = require('node-powertools');
+const { force, execute } = require('node-powertools');
 const yaml = require('js-yaml');
-const version = require('wonderful-version');
 
 // Global task tracking (shared across all Manager instances)
 global._ultimateJekyllActiveTasks = global._ultimateJekyllActiveTasks || new Map();
@@ -63,7 +62,6 @@ Manager.prototype.getArguments = Manager.getArguments;
 
 // Report build errors with notification
 Manager.reportBuildError = function (error, callback) {
-  const { execute } = require('node-powertools');
   const logger = new (require('./lib/logger'))('build-error');
 
   // Send notification using notifly
@@ -137,7 +135,7 @@ Manager.prototype.getPackage = Manager.getPackage;
 
 // getUJMConfig: requires and parses ultimate-jekyll-manager.json
 Manager.getUJMConfig = function () {
-  const configPath = path.join(process.cwd(), 'ultimate-jekyll-manager.json');
+  const configPath = path.join(process.cwd(), 'config', 'ultimate-jekyll-manager.json');
   return JSON5.parse(jetpack.read(configPath));
 }
 Manager.prototype.getUJMConfig = Manager.getUJMConfig;

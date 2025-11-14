@@ -17,15 +17,55 @@ The "consuming" project has the following structure:
 ## Local Development
 When working with a consuming project, the local development server URL can be found in the `.temp/_config_browsersync.yml` file in the consuming project's root directory. You should read this file to determine the correct local URL for browsing and testing the site.
 
-Other Ultimate Jekyll Components:
+## Other Ultimate Jekyll Components:
 src/assets/css/ultimate-jekyll-manager.scss = Main stylesheet used by Ultimate Jekyll to style the site
 src/assets/css/global = Global styles that are used by Ultimate Jekyll
 src/assets/css/pages = Page-specific styles that are used by Ultimate Jekyll
 * If you are making a page, put the styles in this directory like so: `src/assets/css/pages/[page-name]/index.scss`
 
+src/assets/css/main.scss
+* This file runs on EVERY page and should be edited to contain site-wide CSS styles.
+
+
 src/assets/js/ultimate-jekyll-manager.js = Main JavaScript file used by Ultimate Jekyll to manage the site
 src/assets/js/pages = Page-specific JavaScript files that are used by Ultimate Jekyll
 * If you are making a page, put the JavaScript in this directory like so: `src/assets/js/pages/[page-name]/index.js`
+* The page-specific JS and CSS files are automatically included in the page based on the page's canonical path.
+* You need to use our standardized structure:
+  * Notice how how the helpers are outside the main export function.
+```js
+/**
+ * XXX Page JavaScript
+ */
+
+// Libraries
+let webManager = null;
+
+// Module
+export default (Manager) => {
+  return new Promise(async function (resolve) {
+    // Shortcuts
+    webManager = Manager.webManager;
+
+    // Initialize when DOM is ready
+    await webManager.dom().ready();
+
+    // We just need to pause videos when switching tabs for better UX
+    helper1();
+
+    // Resolve after initialization
+    return resolve();
+  });
+};
+
+// Helper functions
+function helper1() {
+  // ...
+}
+```
+
+/src/assets/js/main.js
+* This file runs on EVERY page and should be edited to contain site-wide JavaScript functionality.
 
 src/assets/themes = Theme scss and js files that are can be picked and used by the consuming project.
 

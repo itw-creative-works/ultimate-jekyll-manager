@@ -62,7 +62,10 @@ class Manager {
       );
 
       /* @dev-only:start */
-      console.log(`Page module loading (${pageModulePathFull})`);
+      {
+        console.log(`Page-specific module loading: #main/${pageModulePathFull}`);
+        console.log(`Page-specific module loading: #project/${pageModulePathFull}`);
+      }
       /* @dev-only:end */
 
       // Load page-specific scripts
@@ -74,9 +77,9 @@ class Manager {
           })
           .catch(e => {
             if (this.isNotFound(e, pageModulePath)) {
-              console.warn(`Page module #main not found (${pageModulePathFull})`);
+              console.warn(`Page-specific module missing: #main/${pageModulePathFull}`);
             } else {
-              console.error(`Page module #main error (${pageModulePathFull})`, e);
+              console.error(`Page-specific module error: #main/${pageModulePathFull}`, e);
             }
           })
       );
@@ -89,9 +92,9 @@ class Manager {
           })
           .catch(e => {
             if (this.isNotFound(e, pageModulePath)) {
-              console.warn(`Project module #project not found (${pageModulePathFull})`);
+              console.warn(`Page-specific module missing: #project/${pageModulePathFull}`);
             } else {
-              console.error(`Project module #project error (${pageModulePathFull})`, e);
+              console.error(`Page-specific module error: #project/${pageModulePathFull}`, e);
             }
           })
       );
@@ -99,7 +102,7 @@ class Manager {
       // Wait for all modules to load
       await Promise.all(modulePromises);
 
-      // Execute page modules
+      // Execute page-specific modules
       for (const mod of modules) {
         // Skip if module wasn't found
         if (!mod?.default) {
@@ -109,12 +112,12 @@ class Manager {
         // Execute the module function
         try {
           /* @dev-only:start */
-          console.log(`Page module #${mod.tag} loaded (${pageModulePathFull})`);
+          console.log(`Page-specific module loaded: #${mod.tag}/${pageModulePathFull}`);
           /* @dev-only:end */
 
           await mod.default(this, options);
         } catch (e) {
-          console.error(`Page module #${mod.tag} error (${pageModulePathFull})`, e);
+          console.error(`Page-specific module error: #${mod.tag}/${pageModulePathFull}`, e);
           break; // Stop execution if any module fails
         }
       }

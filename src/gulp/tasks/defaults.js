@@ -18,6 +18,10 @@ const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
+// Load ultimate-jekyll-manager.json config
+const ujConfigPath = path.join(rootPathPackage, 'dist/defaults/config/ultimate-jekyll-manager.json');
+const ujConfig = jetpack.exists(ujConfigPath) ? JSON5.parse(jetpack.read(ujConfigPath)) : {};
+
 // Get clean versions
 // const cleanVersions = { versions: Manager.getCleanVersions()};
 const cleanVersions = { versions: package.engines };
@@ -25,6 +29,9 @@ const cleanVersions = { versions: package.engines };
 // File MAP
 const FILE_MAP = {
   // Files to skip overwrite
+  '**/*.md': {
+    overwrite: false,
+  },
   'hooks/**/*': {
     overwrite: false,
   },
@@ -58,14 +65,14 @@ const FILE_MAP = {
   },
 
   // Config file with smart merging
-  'ultimate-jekyll-manager.json': {
+  'config/ultimate-jekyll-manager.json': {
     overwrite: true,
     merge: true,
   },
 
   // Files to run templating on
   '.github/workflows/build.yml': {
-    template: cleanVersions,
+    template: { ...cleanVersions, ...ujConfig },
   },
   '.nvmrc': {
     template: cleanVersions,

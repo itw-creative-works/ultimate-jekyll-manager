@@ -13,10 +13,8 @@ export default (Manager) => {
     setupBillingToggle();
     setupPlanButtons();
 
-    // Setup promo countdown
-    setTimeout(() => {
-      setupPromoCountdown();
-    }, 1000);
+    // Setup promo countdown (wait until mouse is not over nav)
+    waitForNavUnhover();
 
     // Resolve after initialization
     return resolve();
@@ -251,6 +249,31 @@ function trackEnterpriseContact() {
   ttq.track('Contact', {
     content_name: 'Enterprise Plan'
   });
+}
+
+function waitForNavUnhover() {
+  function checkAndRun() {
+    const $nav = document.querySelector('nav');
+
+    if (!$nav) {
+      // If no nav element found, just run immediately
+      setupPromoCountdown();
+      return;
+    }
+
+    const isHovering = $nav.matches(':hover');
+
+    if (isHovering) {
+      // Mouse is over nav, restart timer
+      setTimeout(checkAndRun, 1000);
+    } else {
+      // Mouse is not over nav, safe to run
+      setupPromoCountdown();
+    }
+  }
+
+  // Always wait 1 second first, then check
+  setTimeout(checkAndRun, 1000);
 }
 
 function setupPromoCountdown() {

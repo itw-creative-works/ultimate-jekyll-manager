@@ -7,19 +7,19 @@
 
 // Import libraries
 // Important to do these BEFORE defaults so the animations, etc can be overridden
-// @use 'core/chatsy' as *;
-@use 'core/cookieconsent' as *;
-@use 'core/lazy-loading' as *;
-@use 'core/bindings' as *;
-@use 'core/social-sharing' as *;
-@use 'core/custom-font-awesome' as *;
+// @use 'core/_chatsy' as *;
+@use 'core/_cookieconsent' as *;
+@use 'core/_lazy-loading' as *;
+@use 'core/_bindings' as *;
+@use 'core/_social-sharing' as *;
+@use 'core/_custom-font-awesome' as *;
 
 // Import default Ultimate Jekyll Manager styles
-@use 'core/initialize' as *;
-@use 'core/utilities' as *;
-@use 'core/animations' as *;
-@use 'core/alert' as *;
-@use 'core/exit-popup' as *;
+@use 'core/_initialize' as *;
+@use 'core/_utilities' as *;
+@use 'core/_animations' as *;
+@use 'core/_alert' as *;
+@use 'core/_exit-popup' as *;
 
 // Import page-specific styles
 @use '_page-specific' as *;

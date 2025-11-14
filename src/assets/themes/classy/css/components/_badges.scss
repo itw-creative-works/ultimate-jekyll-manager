@@ -13,11 +13,11 @@
 }
 
 // Global fix - any element containing a badge should not clip
-* {
-  &:has(.badge) {
-    overflow: visible !important;
-  }
-}
+// * {
+//   &:has(.badge) {
+//     overflow: visible !important;
+//   }
+// }
 
 // Base badge styling improvements
 .badge {

@@ -107,7 +107,7 @@ function sass(complete) {
         path.resolve(rootPathProject, 'dist/assets/css'),
 
         // TODO: Add more load paths like node_modules for things like fontawesome
-        // path.resolve(rootPathProject, 'node_modules'),
+        path.resolve(rootPathProject, 'node_modules'),
       ],
       // Suppress deprecation warnings from Bootstrap
       quietDeps: true,
@@ -237,6 +237,10 @@ function sass(complete) {
             /^mh-/,
             /^min-/,
             /^max-/,
+
+            // Utilities
+            /^ratio-/,
+            /^object-/,
 
             // Libraries
             // Cookies
