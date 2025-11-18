@@ -11,7 +11,6 @@ let signoutAllForm = null; // FormManager instance for sign out all sessions
 export function init(wm) {
   webManager = wm;
   initializeSigninMethods();
-  initializeSigninMethodForms();
   initializeSignoutAllForm();
 }
 
@@ -19,8 +18,14 @@ export function init(wm) {
 export function loadData(account) {
   if (!account) return;
 
-  // Update signin methods
+  console.log('[DEBUG] security.js - loadData() called with account:', account);
+
+  // CRITICAL: Update signin methods BEFORE initializing FormManagers
+  // This ensures FormManager stores the correct button state from the start
   updateSigninMethods();
+
+  // Initialize FormManagers AFTER setting correct button states
+  initializeSigninMethodForms();
 
   // Update 2FA status
   update2FAStatus(account.security?.twoFactor);
@@ -31,6 +36,8 @@ export function loadData(account) {
 
 // Initialize signin methods
 async function initializeSigninMethods() {
+  console.log('[DEBUG] security.js - initializeSigninMethods() called');
+
   // Get Firebase auth instance
   firebaseAuth = webManager.firebaseAuth;
 
@@ -61,13 +68,23 @@ async function checkRedirectResult() {
 
 // Update signin methods display
 async function updateSigninMethods() {
+  console.log('[DEBUG] security.js - updateSigninMethods() called');
+
   // Use Firebase auth directly for most up-to-date provider information
   const firebaseUser = firebaseAuth?.currentUser;
-  if (!firebaseUser) return;
+  if (!firebaseUser) {
+    console.log('[DEBUG] security.js - No firebaseUser, returning');
+    return;
+  }
 
   // Get the formatted user from webManager for consistency, but we'll use firebaseUser for provider data
   const user = webManager.auth().getUser();
-  if (!user) return;
+  if (!user) {
+    console.log('[DEBUG] security.js - No user from webManager, returning');
+    return;
+  }
+
+  console.log('[DEBUG] security.js - firebaseUser.providerData:', firebaseUser.providerData);
 
   // Update password email display
   const $passwordEmail = document.getElementById('password-email');
@@ -75,6 +92,7 @@ async function updateSigninMethods() {
     // Check if user has password provider using firebaseUser for most up-to-date data
     const hasPassword = firebaseUser.providerData?.some(provider => provider.providerId === 'password');
     $passwordEmail.textContent = hasPassword ? user.email : 'Not set';
+    console.log('[DEBUG] security.js - hasPassword:', hasPassword);
   }
 
   // Update Google signin display
@@ -85,32 +103,61 @@ async function updateSigninMethods() {
   const $googleAction = $googleForm?.querySelector('input[name="action"]');
   const $googleIcon = $googleBtn?.querySelector('.fa-icon');
 
+  console.log('[DEBUG] security.js - Google DOM elements:', {
+    $googleEmail: !!$googleEmail,
+    $googleBtn: !!$googleBtn,
+    $googleBtnText: !!$googleBtnText,
+    $googleAction: !!$googleAction,
+    $googleIcon: !!$googleIcon
+  });
+
   if ($googleEmail && $googleBtn) {
     // Check if user has Google provider using firebaseUser for most up-to-date data
     const googleProvider = firebaseUser.providerData?.find(provider => provider.providerId === 'google.com');
 
+    console.log('[DEBUG] security.js - googleProvider:', googleProvider);
+    console.log('[DEBUG] security.js - googleProvider found:', !!googleProvider);
+
     if (googleProvider) {
+      console.log('[DEBUG] security.js - Setting button to DISCONNECT state');
+      console.log('[DEBUG] security.js - Button text before:', $googleBtnText?.textContent);
+      console.log('[DEBUG] security.js - Button classes before:', $googleBtn.className);
+
       $googleEmail.textContent = googleProvider.email || 'Connected';
       if ($googleBtnText) $googleBtnText.textContent = 'Disconnect';
       if ($googleAction) $googleAction.value = 'disconnect';
       $googleBtn.classList.remove('btn-primary');
       $googleBtn.classList.add('btn-outline-danger');
+
       // Update icon from link to unlink
       if ($googleIcon) {
         $googleIcon.classList.remove('fa-link');
         $googleIcon.classList.add('fa-unlink');
       }
+
+      console.log('[DEBUG] security.js - Button text after:', $googleBtnText?.textContent);
+      console.log('[DEBUG] security.js - Button classes after:', $googleBtn.className);
+      console.log('[DEBUG] security.js - Action value:', $googleAction?.value);
     } else {
+      console.log('[DEBUG] security.js - Setting button to CONNECT state');
+      console.log('[DEBUG] security.js - Button text before:', $googleBtnText?.textContent);
+      console.log('[DEBUG] security.js - Button classes before:', $googleBtn.className);
+
       $googleEmail.textContent = 'Not connected';
       if ($googleBtnText) $googleBtnText.textContent = 'Connect';
       if ($googleAction) $googleAction.value = 'connect';
       $googleBtn.classList.remove('btn-outline-danger');
       $googleBtn.classList.add('btn-primary');
+
       // Update icon from unlink to link
       if ($googleIcon) {
         $googleIcon.classList.remove('fa-unlink');
         $googleIcon.classList.add('fa-link');
       }
+
+      console.log('[DEBUG] security.js - Button text after:', $googleBtnText?.textContent);
+      console.log('[DEBUG] security.js - Button classes after:', $googleBtn.className);
+      console.log('[DEBUG] security.js - Action value:', $googleAction?.value);
     }
   }
 }
@@ -248,9 +295,9 @@ async function updateActiveSessions(account) {
     };
 
     // Only add if it's different from current session (different IP or timestamp)
-    if (!sessions[0] ||
-        (lastSession.ip !== sessions[0].ip ||
-         lastSession.timestampUNIX !== sessions[0].timestampUNIX)) {
+    if (!sessions[0]
+        || (lastSession.ip !== sessions[0].ip
+        || lastSession.timestampUNIX !== sessions[0].timestampUNIX)) {
       sessions.push(lastSession);
     }
   }
@@ -294,10 +341,14 @@ async function updateActiveSessions(account) {
 
 // Initialize FormManager for signin methods
 function initializeSigninMethodForms() {
+  console.log('[DEBUG] security.js - initializeSigninMethodForms() called');
+
   // Initialize password form
   const $passwordForm = document.getElementById('signin-method-password-form');
 
   if ($passwordForm && !signinMethodForms.has('password')) {
+    console.log('[DEBUG] security.js - Initializing password FormManager');
+
     const formManager = new FormManager($passwordForm, {
       allowMultipleSubmissions: false,
       autoDisable: true,
@@ -321,12 +372,16 @@ function initializeSigninMethodForms() {
   const $googleForm = document.getElementById('signin-method-google-form');
 
   if ($googleForm && !signinMethodForms.has('google')) {
+    console.log('[DEBUG] security.js - About to initialize Google FormManager');
+    console.log('[DEBUG] security.js - Google form exists:', !!$googleForm);
+
     const formManager = new FormManager($googleForm, {
       autoDisable: true,
       showSpinner: true
     });
 
     signinMethodForms.set('google', formManager);
+    console.log('[DEBUG] security.js - Google FormManager initialized and stored');
 
     formManager.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -342,21 +397,15 @@ function initializeSigninMethodForms() {
         // Set form state back to ready first
         formManager.setFormState('ready');
 
-        // Then update display (after FormManager has restored button)
-        // Use setTimeout to ensure FormManager has finished updating
-        setTimeout(() => {
-          updateSigninMethods();
-        }, 0);
+        // Then update display (this will set the button text correctly again)
+        updateSigninMethods();
       } catch (error) {
         // Reset form state
         formManager.setFormState('ready');
 
         // If user cancelled, also update the display to ensure button state is correct
         if (error.message === 'Disconnection cancelled') {
-          // Update display to ensure button reflects current state
-          setTimeout(() => {
-            updateSigninMethods();
-          }, 0);
+          updateSigninMethods();
         } else {
           // Show error for other failures
           formManager.showError(error);
@@ -429,9 +478,9 @@ async function connectGoogleProvider() {
     return result;
   } catch (error) {
     // Check if we should fallback to redirect
-    if (error.code === 'auth/popup-blocked' ||
-        error.code === 'auth/popup-closed-by-user' ||
-        error.code === 'auth/cancelled-popup-request') {
+    if (error.code === 'auth/popup-blocked'
+        || error.code === 'auth/popup-closed-by-user'
+        || error.code === 'auth/cancelled-popup-request') {
 
       console.log('Popup failed, falling back to redirect:', error.code);
 
@@ -703,4 +752,3 @@ function formatDate(timestamp) {
   // More than 7 days - show full date
   return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-

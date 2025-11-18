@@ -17,169 +17,159 @@ importScripts(
   // 'https://www.gstatic.com/firebasejs/%%% firebaseVersion %%%/firebase-firestore-compat.js',
 );
 
-// Class
-function Manager() {
-  const self = this;
-
-  // Properties
-  self.serviceWorker = null;
-
-  // Load config
-  self.config = serviceWorker.UJ_BUILD_JSON?.config || {};
-
-  // Defaults
-  self.app = self.config?.brand?.id || 'default';
-  self.environment = self.config?.uj?.environment || 'production';
-  self.cache = {
-    breaker: self.config?.uj?.cache_breaker || new Date().getTime(),
-  };
-  self.cache.name = `${self.app}-${self.cache.breaker}`;
-
-  // Libraries
-  self.libraries = {
-    firebase: false,
-    messaging: false,
-    promoServer: false,
-  };
-
-  // Return
-  return self;
-}
-
-// Initialize
-Manager.prototype.initialize = function () {
-  const self = this;
-
-  return new Promise(function(resolve, reject) {
+// Manager Class
+class Manager {
+  constructor() {
     // Properties
-    self.serviceWorker = serviceWorker;
+    this.serviceWorker = null;
+
+    // Load config
+    this.config = serviceWorker.UJ_BUILD_JSON?.config || {};
+
+    // Defaults
+    this.app = this.config?.brand?.id || 'default';
+    this.environment = this.config?.uj?.environment || 'production';
+    this.cache = {
+      breaker: this.config?.uj?.cache_breaker || new Date().getTime(),
+    };
+    this.cache.name = `${this.app}-${this.cache.breaker}`;
+
+    // Libraries
+    this.libraries = {
+      firebase: false,
+      messaging: false,
+      promoServer: false,
+    };
+  }
+
+  // Initialize
+  async initialize() {
+    // Properties
+    this.serviceWorker = serviceWorker;
 
     // Setup instance-specific message handlers
-    self.setupInstanceHandlers();
+    this.setupInstanceHandlers();
 
     // Initialize Firebase
-    self.initializeFirebase();
+    this.initializeFirebase();
 
     // Update cache
-    self.updateCache();
+    this.updateCache();
 
     // Log
     console.log('Initialized!', serviceWorker.location.pathname, serviceWorker);
+    console.log('Config loaded from UJ_BUILD_JSON:', this.config);
 
     // Return
-    return resolve(serviceWorker);
-  });
-};
+    return serviceWorker;
+  }
 
-// ['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
-//   Manager.prototype[method] = function() {
-//     // Get arguments
-//     const time = new Date().toLocaleTimeString('en-US', {
-//       hour12: false,
-//       hour: '2-digit',
-//       minute: '2-digit',
-//       second: '2-digit'
-//     });
+  // ['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
+  //   Manager.prototype[method] = function() {
+  //     // Get arguments
+  //     const time = new Date().toLocaleTimeString('en-US', {
+  //       hour12: false,
+  //       hour: '2-digit',
+  //       minute: '2-digit',
+  //       second: '2-digit'
+  //     });
 
-//     // Add prefix
-//     const args = [`[${time}] service-worker:`, ...Array.from(arguments)];
+  //     // Add prefix
+  //     const args = [`[${time}] service-worker:`, ...Array.from(arguments)];
 
-//     // Call the original console method
-//     console[method].apply(console, args);
-//   };
-// });
+  //     // Call the original console method
+  //     console[method].apply(console, args);
+  //   };
+  // });
 
-// Setup instance-specific message handlers
-Manager.prototype.setupInstanceHandlers = function () {
-  const self = this;
+  // Setup instance-specific message handlers
+  setupInstanceHandlers() {
+    // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
+    // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
+    serviceWorker.addEventListener('message', (event) => {
+      // Get the data
+      const data = event.data || {};
 
-  // Send messages: https://stackoverflow.com/questions/35725594/how-do-i-pass-data-like-a-user-id-to-a-web-worker-for-fetching-additional-push
-  // more messaging: http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.XSKpRZNKiL8
-  serviceWorker.addEventListener('message', (event) => {
-    // Get the data
-    const data = event.data || {};
+      // Parse the data
+      const command = data.command || '';
+      const payload = data.payload || {};
 
-    // Parse the data
-    const command = data.command || '';
-    const payload = data.payload || {};
+      // Quit if no command
+      if (!command) {
+        return;
+      }
 
-    // Quit if no command
-    if (!command) return;
+      // Log
+      console.log('message', command, payload, event);
+
+      // Handle commands
+      if (command === 'update-cache') {
+        const pages = payload.pages || [];
+        this.updateCache(pages)
+          .then(() => {
+            event.ports[0]?.postMessage({ status: 'success' });
+          })
+          .catch(error => {
+            event.ports[0]?.postMessage({ status: 'error', error: error.message });
+          });
+      }
+    });
 
     // Log
-    console.log('message', command, payload, event);
+    console.log('Set up message handlers');
+  }
 
-    // Handle commands
-    if (command === 'update-cache') {
-      const pages = payload.pages || [];
-      self.updateCache(pages)
-        .then(() => {
-          event.ports[0]?.postMessage({ status: 'success' });
-        })
-        .catch(error => {
-          event.ports[0]?.postMessage({ status: 'error', error: error.message });
-        });
+  // Setup Firebase init
+  initializeFirebase() {
+    // Get Firebase config
+    const firebaseConfig = this.config?.web_manager?.firebase?.app?.config;
+
+    // Check if Firebase config is available
+    if (!firebaseConfig) {
+      console.log('Firebase config not available yet, skipping Firebase initialization');
+      return;
     }
-  });
 
-  // Log
-  console.log('Set up message handlers');
-}
+    // Check if already initialized
+    if (this.libraries.firebase) {
+      console.log('Firebase already initialized');
+      return;
+    }
 
-// Setup Firebase init
-Manager.prototype.initializeFirebase = function () {
-  const self = this;
+    // Log
+    console.log('Initializing Firebase v%%% firebaseVersion %%%');
 
-  // Get Firebase config
-  const firebaseConfig = self.config?.web_manager?.firebase?.app?.config;
+    // Initialize app (libraries were already imported at the top)
+    firebase.initializeApp(firebaseConfig);
 
-  // Check if Firebase config is available
-  if (!firebaseConfig) {
-    console.log('Firebase config not available yet, skipping Firebase initialization');
-    return;
+    // Initialize messaging
+    this.libraries.messaging = firebase.messaging();
+
+    // Attach firebase to SWManager
+    this.libraries.firebase = firebase;
   }
 
-  // Check if already initialized
-  if (self.libraries.firebase) {
-    console.log('Firebase already initialized');
-    return;
+  // Setup cache update
+  updateCache(pages) {
+    // Set default pages to cache
+    const defaults = [
+      '/',
+      '/assets/css/main.bundle.css',
+      '/assets/js/main.bundle.js',
+    ];
+
+    // Ensure pages is an array
+    pages = pages || [];
+
+    // Merge with additional pages
+    const pagesToCache = [...new Set([...defaults, ...pages])];
+
+    // Open cache and add pages
+    return caches.open(this.cache.name)
+      .then(cache => cache.addAll(pagesToCache))
+      .then(() => console.log('Cached resources:', pagesToCache))
+      .catch(error => console.error('Failed to cache resources:', error));
   }
-
-  // Log
-  console.log('Initializing Firebase v%%% firebaseVersion %%%');
-
-  // Initialize app (libraries were already imported at the top)
-  firebase.initializeApp(firebaseConfig);
-
-  // Initialize messaging
-  self.libraries.messaging = firebase.messaging();
-
-  // Attach firebase to SWManager
-  self.libraries.firebase = firebase;
-}
-
-// Setup cache update
-Manager.prototype.updateCache = function (pages) {
-  const self = this;
-
-  // Set default pages to cache
-  const defaults = [
-    '/',
-    '/assets/css/main.bundle.css',
-    '/assets/js/main.bundle.js',
-  ];
-
-  // Ensure pages is an array
-  pages = pages || [];
-
-  // Merge with additional pages
-  const pagesToCache = [...new Set([...defaults, ...pages])];
-
-  // Open cache and add pages
-  return caches.open(self.cache.name)
-    .then(cache => cache.addAll(pagesToCache))
-    .then(() => console.log('Cached resources:', pagesToCache))
-    .catch(error => console.error('Failed to cache resources:', error));
 }
 
 // Helper: Setup global listeners

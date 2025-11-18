@@ -872,7 +872,7 @@ badges:
               </div>
 
               {% for connection in page.resolved.connections %}
-                <div id="connection-{{ connection.id }}" class="list-group-item border-bottom-0 {% unless forloop.first %}border-top{% endunless %} px-0 py-3 d-none bg-body-tertiary">
+                <div id="connection-{{ connection.id }}" class="{% unless forloop.first %}border-top{% endunless %} px-0 py-3 d-none">
                   <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3">
                     <div class="d-flex align-items-center">
                       <div class="d-flex align-items-center justify-content-center me-3 flex-shrink-0 fa fa-3xl">

@@ -51,9 +51,6 @@ function displayConnections() {
   const availableProviders = appData?.oauth2 || {};
   const userConnections = accountData?.oauth2 || {};
 
-  console.log('Available OAuth providers:', availableProviders);
-  console.log('User connections:', userConnections);
-
   // Check if any providers are configured
   let hasEnabledProviders = false;
 
@@ -62,19 +59,25 @@ function displayConnections() {
     const providerSettings = availableProviders[providerId];
     const $providerElement = document.getElementById(`connection-${providerId}`);
 
-    if (!$providerElement) return;
+    if (!$providerElement) {
+      return;
+    }
 
     // Check if provider is enabled
-    if (providerSettings && providerSettings.enabled !== false) {
+    const isEnabled = providerSettings && providerSettings.enabled !== false;
+
+    if (isEnabled) {
       hasEnabledProviders = true;
 
       // Show the provider element
       $providerElement.classList.remove('d-none');
 
-      // Update provider status based on user connection
-      updateProviderStatus(providerId, userConnections[providerId], providerSettings);
+      // CRITICAL: Update button status BEFORE initializing FormManager
+      // This ensures FormManager stores the CORRECT button state from the start
+      const userConnection = userConnections[providerId];
+      updateProviderStatus(providerId, userConnection, providerSettings);
 
-      // Initialize FormManager for this provider
+      // Initialize FormManager AFTER setting correct button state
       initializeProviderForm(providerId);
     } else {
       // Hide disabled providers
@@ -113,9 +116,10 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
       twitter: 'Share updates and connect with Twitter',
       facebook: 'Connect your Facebook account for social features'
     };
-    
-    // Use provider description or fallback to default
-    const descriptionText = providerSettings?.description || defaultDescriptions[providerId] || `Connect your ${providerId.charAt(0).toUpperCase() + providerId.slice(1)} account`;
+
+    const descriptionText = providerSettings?.description
+      || defaultDescriptions[providerId]
+      || `Connect your ${providerId.charAt(0).toUpperCase() + providerId.slice(1)} account`;
     $description.textContent = descriptionText;
     $description.classList.remove('d-none');
   }
@@ -148,21 +152,20 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
 
   if ($button && $buttonText && $action) {
     if (isConnected) {
-      // Update to disconnect state
+      // Update to disconnect state (RED button)
       $button.classList.remove('btn-primary');
       $button.classList.add('btn-outline-danger');
       $buttonText.textContent = 'Disconnect';
       $action.value = 'disconnect';
 
-      // Replace icon - need to update the button's first icon element
+      // Replace icon
       const $icon = $button.querySelector('.fa-icon');
       if ($icon) {
-        // Change icon classes from link to unlink
         $icon.classList.remove('fa-link');
         $icon.classList.add('fa-unlink');
       }
     } else {
-      // Update to connect state
+      // Update to connect state (BLUE button)
       $button.classList.remove('btn-outline-danger');
       $button.classList.add('btn-primary');
       $buttonText.textContent = 'Connect';
@@ -171,27 +174,23 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
       // Replace icon
       const $icon = $button.querySelector('.fa-icon');
       if ($icon) {
-        // Change icon classes from unlink to link
         $icon.classList.remove('fa-unlink');
         $icon.classList.add('fa-link');
       }
     }
   }
-
-  // The updated section has been removed from HTML, no longer needed
 }
 
 // Get display name for connection
 function getConnectionDisplayName(connection) {
   if (!connection || !connection.identity) return 'Unknown';
 
-  // Try different fields based on provider
-  return connection.identity.global_name ||
-         connection.identity.username ||
-         connection.identity.name ||
-         connection.identity.email ||
-         connection.identity.id ||
-         'Connected';
+  return connection.identity.global_name
+    || connection.identity.username
+    || connection.identity.name
+    || connection.identity.email
+    || connection.identity.id
+    || 'Connected';
 }
 
 // Initialize FormManager for a provider
@@ -199,7 +198,10 @@ function initializeProviderForm(providerId) {
   const formId = `connection-form-${providerId}`;
   const form = document.getElementById(formId);
 
-  if (!form) return;
+  if (!form) {
+    console.warn(`Form not found for provider: ${providerId}`);
+    return;
+  }
 
   // Skip if already initialized
   if (connectionForms.has(providerId)) {
@@ -231,13 +233,10 @@ function initializeProviderForm(providerId) {
         if (success) {
           // Reset form state and update UI after successful disconnect
           formManager.setFormState('ready');
-          // Get provider settings to pass for description display
           const providerSettings = appData?.oauth2?.[provider];
           updateProviderStatus(provider, null, providerSettings);
         }
       }
-
-      // Success - FormManager will handle state automatically
     } catch (error) {
       // Show error and reset form state
       formManager.showError(error);
@@ -276,8 +275,6 @@ async function handleConnect(providerId) {
       }
     },
   });
-
-  console.log('OAuth connect response:', response);
 
   // For authorize requests, server returns an object with URL to redirect to
   if (response.url) {
@@ -324,15 +321,12 @@ async function handleDisconnect(providerId) {
     },
   });
 
-  console.log('OAuth disconnect response:', response);
-
   if (response.success) {
     // Update local account data
     if (accountData.oauth2 && accountData.oauth2[providerId]) {
       delete accountData.oauth2[providerId];
     }
 
-    // Return success
     return true;
   } else {
     throw new Error(response.message || 'Failed to disconnect');
@@ -341,8 +335,6 @@ async function handleDisconnect(providerId) {
 
 // Called when section is shown
 export function onShow() {
-  // Refresh connections display when section is shown
-  if (accountData && appData) {
-    displayConnections();
-  }
+  // Don't re-run displayConnections() - it's already been called from loadData()
+  // Re-running it would re-initialize FormManager and cause race conditions
 }
