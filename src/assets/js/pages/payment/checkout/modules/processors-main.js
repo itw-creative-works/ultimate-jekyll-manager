@@ -41,9 +41,9 @@ export class PaymentProcessorManager {
 
     // Determine processor based on payment method and available API keys
     if (paymentMethod === 'card') {
-      // Check for _test_cardProcessor override in URL params (for testing)
+      // Check for _dev_cardProcessor override in URL params (for testing)
       const urlParams = new URLSearchParams(window.location.search);
-      const forcedProcessor = urlParams.get('_test_cardProcessor');
+      const forcedProcessor = urlParams.get('_dev_cardProcessor');
 
       if (forcedProcessor && this.processors[forcedProcessor]) {
         processorName = forcedProcessor;

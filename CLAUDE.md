@@ -1,41 +1,54 @@
-# Identity
-This is Ultimate Jekyll, it is a template project that other "consuming" projects can use to build a Jekyll site. It comes installed as an NPM module and is helpful for setting up, configuring, and maintaining a Jekyll site with best practices in mind.
+# Ultimate Jekyll Manager
 
-It is not a stand-alone project, but rather a collection of components that can be used to build a Jekyll site quickly and efficiently.
-* You cannot use `npm start` or `npm run build` in this project.
+## Project Overview
 
-## Structure
-Ultimate Jekll has the following structure:
-src/gulp/tasks = Gulp tasks that are used to build the Jekyll site.
-src/defaults/src = Default source files that can be used as a starting point for a Jekyll site and ARE meant to be edited by the user. They are copied to the consuming project's "src" directory.
-src/defaults/dist = Default distribution files that can be used as a starting point for a Jekyll site and NOT meant to be edited by the user. They are copied to the consuming project's "dist" directory.
+Ultimate Jekyll Manager is a template framework that consuming projects install as an NPM module to build Jekyll sites quickly and efficiently. It provides best-practice configurations, default components, themes, and build tools.
 
-The "consuming" project has the following structure:
-"src" = Compiled to "dist" with npm
-"dist" = Compiled to "_site" with Jekyll.
+**Important:** This is NOT a standalone project. You cannot run `npm start` or `npm run build` directly in this repository.
+
+## Project Structure
+
+### Directory Organization
+- `src/gulp/tasks` - Gulp tasks for building Jekyll sites
+- `src/defaults/src` - Default source files (editable by users, copied to consuming project's `src/`)
+- `src/defaults/dist` - Default distribution files (not editable by users, copied to consuming project's `dist/`)
+- `src/assets/css` - Stylesheets (global, pages, themes)
+- `src/assets/js` - JavaScript modules (core, pages, libraries)
+- `src/assets/themes` - Theme SCSS and JS files
+
+### Consuming Project Structure
+- `src/` - Compiled to `dist/` via npm
+- `dist/` - Compiled to `_site/` via Jekyll
 
 ## Local Development
-When working with a consuming project, the local development server URL can be found in the `.temp/_config_browsersync.yml` file in the consuming project's root directory. You should read this file to determine the correct local URL for browsing and testing the site.
 
-## Other Ultimate Jekyll Components:
-src/assets/css/ultimate-jekyll-manager.scss = Main stylesheet used by Ultimate Jekyll to style the site
-src/assets/css/global = Global styles that are used by Ultimate Jekyll
-src/assets/css/pages = Page-specific styles that are used by Ultimate Jekyll
-* If you are making a page, put the styles in this directory like so: `src/assets/css/pages/[page-name]/index.scss`
+The local development server URL is stored in `.temp/_config_browsersync.yml` in the consuming project's root directory. Read this file to determine the correct URL for browsing and testing.
 
-src/assets/css/main.scss
-* This file runs on EVERY page and should be edited to contain site-wide CSS styles.
+## Asset Organization
 
+### CSS Architecture
+- `src/assets/css/ultimate-jekyll-manager.scss` - Main UJ stylesheet
+- `src/assets/css/main.scss` - Site-wide styles (runs on every page)
+- `src/assets/css/global/` - Global UJ styles
+- `src/assets/css/pages/` - Page-specific styles
+  - Format: `src/assets/css/pages/[page-name]/index.scss`
 
-src/assets/js/ultimate-jekyll-manager.js = Main JavaScript file used by Ultimate Jekyll to manage the site
-src/assets/js/pages = Page-specific JavaScript files that are used by Ultimate Jekyll
-* If you are making a page, put the JavaScript in this directory like so: `src/assets/js/pages/[page-name]/index.js`
-* The page-specific JS and CSS files are automatically included in the page based on the page's canonical path.
-* You need to use our standardized structure:
-  * Notice how how the helpers are outside the main export function.
-```js
+### JavaScript Architecture
+- `src/assets/js/ultimate-jekyll-manager.js` - Main UJ JavaScript entry point
+- `src/assets/js/main.js` - Site-wide JavaScript (runs on every page)
+- `src/assets/js/core/` - Core UJ modules
+- `src/assets/js/pages/` - Page-specific JavaScript
+  - Format: `src/assets/js/pages/[page-name]/index.js`
+
+**Asset Loading:** Page-specific CSS/JS files are automatically included based on the page's canonical path. Override with `asset_path` frontmatter.
+
+### Page Module Structure
+
+All page modules must follow this standardized pattern:
+
+```javascript
 /**
- * XXX Page JavaScript
+ * [Page Name] Page JavaScript
  */
 
 // Libraries
@@ -50,7 +63,7 @@ export default (Manager) => {
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
-    // We just need to pause videos when switching tabs for better UX
+    // Page initialization logic
     helper1();
 
     // Resolve after initialization
@@ -60,155 +73,334 @@ export default (Manager) => {
 
 // Helper functions
 function helper1() {
-  // ...
+  // Helper implementation
 }
 ```
 
-/src/assets/js/main.js
-* This file runs on EVERY page and should be edited to contain site-wide JavaScript functionality.
+**Key Points:**
+- Helpers are defined outside the main export function
+- Use `webManager` shortcuts for common operations
+- Always wait for DOM ready before manipulating elements
 
-src/assets/themes = Theme scss and js files that are can be picked and used by the consuming project.
+## Layouts and Pages
 
-## UJ Powertools
-Ultimate Jekyll uses the `jekyll-uj-powertools` gem which provides many custom Liquid filters, tags, and variables. You should review the full documentation to understand all available tools: `/Users/ian/Developer/Repositories/ITW-Creative-works/jekyll-uj-powertools/README.md`
+### Page Types
+- **One-off pages** (e.g., `/categories`, `/sitemap`) - Create as pages without custom layouts; use existing layouts
+- **Repeating page types** (e.g., blog posts, category pages) - Create a dedicated layout (e.g., `_layouts/category.html`)
 
-Key features include:
-* **Filters**: `uj_strip_ads`, `uj_json_escape`, `uj_title_case`, `uj_content_format`
-* **Tags**: `iftruthy`, `iffalsy`, `uj_icon`, `uj_logo`, `uj_image`, `uj_member`, `uj_post`, `uj_readtime`, `uj_social`, `uj_translation_url`, `uj_fake_comments`, `uj_language`
-* **Global Variables**: `site.uj.cache_breaker`
-* **Page Variables**: `page.random_id`, `page.extension`, `page.layout_data`, `page.resolved`
-
-ALWAYS check the README before assuming a filter or tag exists or how it works.
-
-## SOME SPECIAL LIQUID FUNCTIONS:
-* uj_content_format = A custom liquid filter that formats the content like so: first, it LIQUIFIES the content, then, if it's a markdown file, it runs MARKDOWNIFY.
-* iftruthy = a custom liquid tag that checks if a variable is truthy in JavaScript terms, meaning it checks if the variable is not null, undefined, or an empty string. Use it like this: `{% iftruthy variable %}`. But it DOES NOT SUPPORT any logical operators and does not support `else` statements. But you CAN put sub-statements inside it.
-* iffalsy = same but opposite of iftruthy.
-* page.resolved = a custom page object property of all site, layout, and page variables deeply merged together, with page variables taking precedence over layout, and layout variables taking precedence over site variables. This allows a system of site defaults, layout overrides, and page-specific overrides.
-
-### Specifics:
-* {% uj_icon icon-name, "fa-md" %} = Custom tag for inserting fontawesome icons. "icon-name" can be a string or a variable. If its a string, put it in quotes like "rocket" (dont include "fa-")
-* Set `asset_path: path/to/asset` for layouts or pages to override the default page-specific CSS/JS path. When set, it uses `/assets/css/pages/{{ asset_path }}.bundle.css` instead of deriving the path from `page.canonical.path`. Useful when multiple pages share the same assets like all blog posts using `asset_path: blog/post`.
-
-## Layouts and Pages in Consuming Projects
-When creating pages in the consuming project, follow these guidelines:
-* **One-off pages** (like `/categories`, `/sitemap`, etc.) should be created directly as pages (e.g., `pages/categories.html`) WITHOUT their own custom layout. These pages should use an existing layout.
-* **Repeating page types** (like individual category pages, individual blog posts, etc.) should have a dedicated layout that all instances use (e.g., `_layouts/category.html` used by all category pages).
-* **All layouts and pages** must eventually require one of the theme entry points, such as `layout: themes/[ site.theme.id ]/frontend/core/base`. This ensures consistent theming across the site.
-  * YES, the "[[ site.theme.id ]]" syntax is correct here; it allows dynamic selection of the theme based on site configuration.
-* This approach keeps the codebase maintainable by reusing layouts for similar pages while avoiding unnecessary layout files for unique pages.
-* So you should put assets like CSS and JS for a one-off page like `categories.html` in `src/assets/css/pages/categories/index.scss` and `src/assets/js/pages/categories/index.js` respectively, and for repeating page types like an individual category that uses a LAYOUT, put them in `src/assets/css/pages/categories/category.scss` and `src/assets/js/pages/categories/category.js` (and you will of course set the `asset_path: categories/category` frontmatter variable on the layout so that the correct assets are loaded).
-
-## CSS
-DO NOT USE `bg-light`, `bg-dark`, `text-light`, or `text-dark`. We support BOTH light and dark mode, so instead use `bg-body`, `bg-body-secondary`, `bg-body-tertiary`, `text-body` and for buttons you can use `btn-adaptive` or `btn-outline-adaptive`.
-These classes adapt to light and dark mode automatically.
-
-## Page Loading State & Button Protection
-Ultimate Jekyll implements a sophisticated system to prevent premature button clicks during page initialization. This prevents race conditions and ensures JavaScript is fully loaded before users can trigger actions.
-
-### How It Works:
-1. **Initial State**: The HTML element starts with `data-page-loading="true"` and `aria-busy="true"` attributes (set in `src/defaults/dist/_layouts/core/root.html`)
-2. **Protection During Load**: While `data-page-loading` is present, certain elements are automatically disabled via CSS and JavaScript
-3. **Ready State**: When JavaScript initialization completes, these attributes are removed by `src/assets/js/core/complete.js`
-
-### What Gets Protected:
-When `data-page-loading` is active, the following elements are automatically protected from clicks:
-
-- **All form buttons**: `<button>`, `<input type="submit">`, `<input type="button">`, `<input type="reset">`
-- **Elements with `.btn` class**: Standard Bootstrap buttons
-- **Elements with `.btn-action` class**: Custom action triggers (see below)
-- **Always disabled**: Any element with `disabled` attribute, `.disabled` class, or `:disabled` state
-
-### The `.btn-action` Class:
-Use the `.btn-action` class to selectively protect non-standard elements that trigger important actions:
-
-```html
-<!-- These will be protected during page load -->
-<a href="/api/delete" class="custom-link btn-action">Delete Item</a>
-<div class="card-action btn-action" onclick="processData()">Process</div>
-<span class="text-link btn-action" data-action="save">Save Changes</span>
-
-<!-- These will NOT be protected (regular navigation/UI) -->
-<a href="/about" class="btn btn-primary">About Us</a>
-<button data-bs-toggle="modal">Show Info</button>
-<button data-bs-toggle="collapse">Toggle Details</button>
+### Layout Requirements
+All layouts and pages must eventually require a theme entry point:
+```yaml
+layout: themes/[ site.theme.id ]/frontend/core/base
 ```
 
-### When to Use `.btn-action`:
-- **Use it for**: API calls, form submissions, data modifications, payment processing, destructive actions
-- **Don't use it for**: Navigation links, UI toggles, modals, accordions, tabs, harmless interactions
+**Note:** The `[ site.theme.id ]` syntax is correct and allows dynamic theme selection.
 
-### Implementation Files:
-- **CSS Styles**: `src/assets/css/core/utilities.scss` - Applies `cursor: not-allowed` and disabled styling
-- **Click Prevention**: `src/defaults/dist/_includes/core/body.html` - Inline script that prevents clicks
-- **State Removal**: `src/assets/js/core/complete.js` - Removes `data-page-loading` when ready
+### Asset Path Configuration
 
-This system ensures a smooth, error-free user experience by preventing premature interactions while maintaining full flexibility for developers.
+For pages sharing the same assets, use the `asset_path` frontmatter variable:
 
-## Lazy Loading
-Ultimate Jekyll uses a custom lazy loading system powered by web-manager. Elements can be lazy-loaded using the `data-lazy` attribute with the following format:
+```yaml
+---
+# Instead of deriving path from page.canonical.path
+asset_path: categories/category
+---
+```
 
+**Example:**
+- One-off page: `pages/categories.html` → `src/assets/css/pages/categories/index.scss`
+- Repeating layout: `_layouts/category.html` → `src/assets/css/pages/categories/category.scss` (set `asset_path: categories/category` in layout frontmatter)
+
+## UJ Powertools (Jekyll Plugin)
+
+Ultimate Jekyll uses the `jekyll-uj-powertools` gem for custom Liquid functionality.
+
+**Documentation:** `/Users/ian/Developer/Repositories/ITW-Creative-works/jekyll-uj-powertools/README.md`
+
+### Available Features
+- **Filters:** `uj_strip_ads`, `uj_json_escape`, `uj_title_case`, `uj_content_format`
+- **Tags:** `iftruthy`, `iffalsy`, `uj_icon`, `uj_logo`, `uj_image`, `uj_member`, `uj_post`, `uj_readtime`, `uj_social`, `uj_translation_url`, `uj_fake_comments`, `uj_language`
+- **Global Variables:** `site.uj.cache_breaker`
+- **Page Variables:** `page.random_id`, `page.extension`, `page.layout_data`, `page.resolved`
+
+**Always check the README before assuming functionality.**
+
+### Key Liquid Functions
+
+#### `uj_content_format`
+Formats content by first liquifying it, then markdownifying it (if markdown file).
+
+#### `iftruthy` / `iffalsy`
+Custom tags that check JavaScript truthiness (not null, undefined, or empty string).
+
+```liquid
+{% iftruthy variable %}
+  <!-- Content -->
+{% endiftruthy %}
+```
+
+**Limitations:**
+- Does NOT support logical operators
+- Does NOT support `else` statements
+- CAN contain nested sub-statements
+
+#### `page.resolved`
+A deeply merged object containing all site, layout, and page variables. Precedence: page > layout > site. Enables a system of defaults with progressive overrides.
+
+#### `uj_icon`
+Inserts Font Awesome icons:
+
+```liquid
+{% uj_icon icon-name, "fa-md" %}
+{% uj_icon "rocket", "fa-3xl" %}
+```
+
+**Parameters:**
+1. Icon name (string or variable, without "fa-" prefix)
+2. CSS classes (optional, defaults to "fa-3xl")
+
+#### `asset_path` Override
+Override default page-specific CSS/JS path derivation:
+
+```yaml
+---
+asset_path: blog/post
+---
+```
+
+Uses `/assets/css/pages/{{ asset_path }}.bundle.css` instead of deriving from `page.canonical.path`. Useful when multiple pages share assets (e.g., all blog posts).
+
+## Icon Pre-rendering System
+
+Ultimate Jekyll includes a frontmatter-based icon pre-rendering system for optimal performance.
+
+### How It Works
+
+1. **Define icons in page frontmatter:**
+```yaml
+---
+prerender_icons:
+  - name: "apple"
+    class: "fa-3xl"
+  - name: "android"
+    class: "fa-2xl"
+  - name: "chrome"
+---
+```
+
+2. **Icons are rendered in HTML** via `src/defaults/dist/_includes/core/body.html`
+
+3. **Access icons in JavaScript:**
+```javascript
+const iconHTML = webManager.utilities().getPrerenderedIcon('apple');
+```
+
+### Benefits
+- Icons are rendered server-side with proper Font Awesome classes
+- No client-side icon generation overhead
+- Consistent icon styling across the application
+- Easy to access via JavaScript utilities
+
+## CSS Guidelines
+
+### Theme-Adaptive Classes
+
+**DO NOT USE:** `bg-light`, `bg-dark`, `text-light`, `text-dark`
+
+Ultimate Jekyll supports both light and dark modes. Use adaptive classes instead:
+
+**Backgrounds:**
+- `bg-body` - Primary background
+- `bg-body-secondary` - Secondary background
+- `bg-body-tertiary` - Tertiary background
+
+**Text:**
+- `text-body` - Body text color
+
+**Buttons:**
+- `btn-adaptive` - Adaptive button
+- `btn-outline-adaptive` - Adaptive outline button
+
+These classes automatically adapt to the current theme mode.
+
+## Page Loading Protection System
+
+Ultimate Jekyll prevents race conditions by disabling buttons during JavaScript initialization.
+
+### How It Works
+1. HTML element starts with `data-page-loading="true"` and `aria-busy="true"` (`src/defaults/dist/_layouts/core/root.html`)
+2. Protected elements are automatically disabled during this state
+3. Attributes are removed when JavaScript completes (`src/assets/js/core/complete.js`)
+
+### Protected Elements
+- All form buttons (`<button>`, `<input type="submit">`, `<input type="button">`, `<input type="reset">`)
+- Elements with `.btn` class (Bootstrap buttons)
+- Elements with `.btn-action` class (custom action triggers)
+
+### The `.btn-action` Class
+
+Selectively protect non-standard elements that trigger important actions:
+
+```html
+<!-- Protected during page load -->
+<a href="/api/delete" class="custom-link btn-action">Delete Item</a>
+<div class="card-action btn-action" onclick="processData()">Process</div>
+
+<!-- NOT protected (regular navigation/UI) -->
+<a href="/about" class="btn btn-primary">About Us</a>
+<button data-bs-toggle="modal">Show Info</button>
+```
+
+**Use `.btn-action` for:**
+- API calls
+- Form submissions
+- Data modifications
+- Payment processing
+- Destructive actions
+
+**Don't use for:**
+- Navigation links
+- UI toggles (modals, accordions, tabs)
+- Harmless interactions
+
+### Implementation
+- **CSS:** `src/assets/css/core/utilities.scss` - Disabled styling
+- **Click Prevention:** `src/defaults/dist/_includes/core/body.html` - Inline script
+- **State Removal:** `src/assets/js/core/complete.js` - Removes loading state
+
+## Lazy Loading System
+
+Ultimate Jekyll uses a custom lazy loading system powered by web-manager.
+
+### Syntax
 ```html
 data-lazy="@type value"
 ```
 
-### Supported Types:
-* `@src` - Lazy load the `src` attribute (for images, iframes, videos, source elements)
-  ```html
-  <img data-lazy="@src /assets/images/hero.jpg" alt="Hero">
-  <iframe data-lazy="@src https://example.com/embed"></iframe>
-  ```
+### Supported Types
 
-* `@srcset` - Lazy load the `srcset` attribute (for responsive images)
-  ```html
-  <img data-lazy="@srcset /img/small.jpg 480w, /img/large.jpg 1024w">
-  ```
+#### `@src` - Lazy load src attribute
+```html
+<img data-lazy="@src /assets/images/hero.jpg" alt="Hero">
+<iframe data-lazy="@src https://example.com/embed"></iframe>
+```
 
-* `@bg` - Lazy load background images via `background-image` CSS
-  ```html
-  <div data-lazy="@bg /assets/images/background.jpg"></div>
-  ```
+#### `@srcset` - Lazy load srcset attribute
+```html
+<img data-lazy="@srcset /img/small.jpg 480w, /img/large.jpg 1024w">
+```
 
-* `@class` - Lazy add CSS classes when element comes into view (useful for animations)
-  ```html
-  <div data-lazy="@class animation-fade-in">Content</div>
-  ```
+#### `@bg` - Lazy load background images
+```html
+<div data-lazy="@bg /assets/images/background.jpg"></div>
+```
 
-* `@html` - Lazy inject HTML content
-  ```html
-  <div data-lazy="@html <p>Lazy loaded content</p>"></div>
-  ```
+#### `@class` - Lazy add CSS classes
+```html
+<div data-lazy="@class animation-fade-in">Content</div>
+```
 
-* `@script` - Lazy load external scripts with JSON configuration
-  ```html
-  <div data-lazy='@script {"src": "https://example.com/widget.js", "attributes": {"async": true}}'></div>
-  ```
+#### `@html` - Lazy inject HTML content
+```html
+<div data-lazy="@html <p>Lazy loaded content</p>"></div>
+```
 
-### Features:
-* Automatically adds cache busters to URLs using `buildTime`
-* Uses IntersectionObserver for performance (starts loading 50px before element enters viewport)
-* Adds CSS classes during loading states: `lazy-loading`, `lazy-loaded`, `lazy-error`
-* Handles video/audio sources intelligently by observing the parent element
-* Automatically re-scans DOM for dynamically added elements
+#### `@script` - Lazy load external scripts
+```html
+<div data-lazy='@script {"src": "https://example.com/widget.js", "attributes": {"async": true}}'></div>
+```
 
-See implementation: [src/assets/js/core/lazy-loading.js](src/assets/js/core/lazy-loading.js)
+### Features
+- Automatic cache busting via `buildTime`
+- IntersectionObserver for performance (50px threshold)
+- Loading state CSS classes: `lazy-loading`, `lazy-loaded`, `lazy-error`
+- Intelligent handling of video/audio sources
+- Automatic DOM re-scanning for dynamic elements
 
-## Libraries
-I have some library preferences that I want you to follow:
+**Implementation:** `src/assets/js/core/lazy-loading.js`
+
+## JavaScript Libraries
 
 ### WebManager
-We use a custom library called `web-manager` to manage various aspects of the site. Please make yourself familiar with it by reviewing it: `/Users/ian/Developer/Repositories/ITW-Creative-Works/web-manager/src`
-It offers various ultities like webManager.auth(), webManager.utilities(), webManager.sentry(), webManager.dom(). You should be using these utilities instead of writing your own code all the time.
-DO NOT JUST ASSUME THAT webManager has a function, though, you should CHECK THE SOURCE CODE to see what functions are available and how to use them or check the README: `/Users/ian/Developer/Repositories/ITW-Creative-Works/web-manager/README.md`
 
-## FormManager
-We use a custom library called `form-manager` to manage forms on the site. Please make yourself familiar with it by reviewing it: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/assets/js/libs/form-manager.js`
-* A good example of how to use it is the contact page
-  * HTML: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/defaults/dist/_layouts/themes/classy/frontend/pages/contact.html`
-  * JS: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/src/assets/js/pages/contact/index.js`
+Custom library for site management functionality.
 
-## Audits
-I may ask you to help me fix problems identified by the AUDIT TASK (@src/gulp/tasks/audit.js)
-* In that case, please LOOK AT THE AUDIT FILES (Which I will provide the location to) and help me fix the issues ONE BY ONE.
-* Make a TODO list for each category in the audit, then read the ENTIRE AUDIT file and make a plan for what items in that category need to be fixed.
-* Remember, these are BIG AUDIT FILES, so you will have to tackle them in parts. DO NOT TRY TO FIX EVERYTHING AT ONCE.
+**Documentation:** `/Users/ian/Developer/Repositories/ITW-Creative-Works/web-manager/README.md`
+
+**Available Utilities:**
+- `webManager.auth()` - Authentication management
+- `webManager.utilities()` - Utility functions
+- `webManager.sentry()` - Error tracking
+- `webManager.dom()` - DOM manipulation
+
+**Important:** Always check the source code or README before assuming a function exists. Do not guess at API methods.
+
+### Ultimate Jekyll Libraries
+
+Ultimate Jekyll provides helper libraries in `src/assets/js/libs/` that can be imported as needed.
+
+#### Prerendered Icons Library
+
+Provides access to icons defined in page frontmatter and rendered server-side.
+
+**Import:**
+```javascript
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+```
+
+**Usage:**
+```javascript
+const iconHTML = getPrerenderedIcon('apple');
+```
+
+**Reference:** `src/assets/js/libs/prerendered-icons.js`
+
+#### Authorized Fetch Library
+
+Simplifies authenticated API requests by automatically adding Firebase authentication tokens via Authorization Bearer header.
+
+**Import:**
+```javascript
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+```
+
+**Usage:**
+```javascript
+const response = await authorizedFetch(url, options);
+```
+
+**Key Benefits:**
+- No need to manually call `webManager.auth().getIdToken()`
+- Automatic token injection as Authorization Bearer header
+- Centralized authentication handling
+
+**Reference:** `src/assets/js/libs/authorized-fetch.js`
+
+#### FormManager Library
+
+Form handling library with built-in state management and validation.
+
+**Import:**
+```javascript
+import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+```
+
+**Usage:**
+```javascript
+const formManager = new FormManager('#my-form', options);
+```
+
+**Reference:** `src/assets/js/libs/form-manager.js`
+**Example:** `src/assets/js/pages/contact/index.js`
+
+## Audit Workflow
+
+When fixing issues identified by the audit task (`src/gulp/tasks/audit.js`):
+
+1. Review the audit file location provided
+2. Create a TODO list for each audit category
+3. Read the ENTIRE audit file and plan fixes for each category
+4. Tackle issues incrementally - DO NOT attempt to fix everything at once
+5. Work through one category at a time
+
+**Remember:** Audit files are large. Systematic, incremental fixes prevent errors and ensure thoroughness.

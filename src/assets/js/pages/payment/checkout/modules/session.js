@@ -30,7 +30,7 @@ export function buildPaymentIntentData(webManager) {
   let processorName = state.paymentMethod;
   if (state.paymentMethod === 'card') {
     // Determine which processor will be used for card payments
-    const forcedProcessor = urlParams.get('_test_cardProcessor');
+    const forcedProcessor = urlParams.get('_dev_cardProcessor');
 
     if (forcedProcessor) {
       processorName = forcedProcessor;
@@ -46,7 +46,7 @@ export function buildPaymentIntentData(webManager) {
   // Get UTM parameters from storage
   const utmData = webManager.storage().get('marketing.utm');
   let utm = {};
-  
+
   // Check if stored UTM data exists and is less than 30 days old
   if (utmData && utmData.timestamp && utmData.tags) {
     const daysDiff = (new Date() - new Date(utmData.timestamp)) / (1000 * 60 * 60 * 24);
@@ -56,8 +56,8 @@ export function buildPaymentIntentData(webManager) {
   }
 
   // Check for test app ID override
-  const _test_appId = urlParams.get('_test_appId');
-  const appId = _test_appId || webManager.config.brand.id;
+  const _dev_appId = urlParams.get('_dev_appId');
+  const appId = _dev_appId || webManager.config.brand.id;
 
   // Build the payment intent data structure
   const paymentIntentData = {

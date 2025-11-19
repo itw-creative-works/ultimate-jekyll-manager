@@ -11,10 +11,10 @@ export function init(wm) {
 // Load referrals data
 export function loadData(account) {
   if (!account) return;
-  
+
   // Update referral code (real code only)
   updateReferralCode(account.affiliate?.code);
-  
+
   // Update referrals list
   updateReferralsList(account.affiliate?.referrals);
 }
@@ -22,7 +22,7 @@ export function loadData(account) {
 // Update referral code display
 function updateReferralCode(code) {
   const $codeInput = document.getElementById('referral-code-input');
-  
+
   if ($codeInput) {
     if (code) {
       const baseUrl = window.location.origin;
@@ -39,19 +39,19 @@ function updateReferralsList(referrals) {
   const $recentReferrals = document.getElementById('recent-referrals');
   const $referralsBadge = document.getElementById('referrals-badge');
   const $referralsList = document.getElementById('referrals-list');
-  
+
   // Initialize referrals array
   let referralData = referrals || [];
-  
-  // Add fake data if _test_prefill=true is in query string
+
+  // Add fake data if _dev_prefill=true is in query string
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('_test_prefill') === 'true') {
+  if (urlParams.get('_dev_prefill') === 'true') {
     console.log('Adding fake referral data for testing');
     const fakeReferrals = generateFakeReferrals();
     // Add fake referrals to existing data
     referralData = [...referralData, ...fakeReferrals];
   }
-  
+
   // Handle empty state
   if (!referralData || !Array.isArray(referralData) || referralData.length === 0) {
     // No referrals - show empty state
@@ -67,7 +67,7 @@ function updateReferralsList(referrals) {
     }
     return;
   }
-  
+
   // Calculate stats
   const totalCount = referralData.length;
   const now = new Date();
@@ -76,19 +76,19 @@ function updateReferralsList(referrals) {
     const timestamp = ref.timestamp || ref.timestampUNIX * 1000;
     return timestamp >= thisMonth;
   }).length;
-  
+
   // Update stats
   if ($totalReferrals) $totalReferrals.textContent = totalCount.toString();
   if ($recentReferrals) $recentReferrals.textContent = recentCount.toString();
   if ($referralsBadge) $referralsBadge.textContent = totalCount.toString();
-  
+
   // Sort referrals by timestamp in reverse order (newest first)
   const sortedReferrals = [...referralData].sort((a, b) => {
     const timeA = a.timestamp || (a.timestampUNIX * 1000) || 0;
     const timeB = b.timestamp || (b.timestampUNIX * 1000) || 0;
     return timeB - timeA; // Reverse order
   });
-  
+
   // Generate referral list HTML
   if ($referralsList) {
     if (sortedReferrals.length === 0) {
@@ -103,7 +103,7 @@ function updateReferralsList(referrals) {
         const date = timestamp ? new Date(timestamp) : null;
         const dateStr = date ? formatDate(date) : 'Unknown date';
         const timeStr = date ? formatTime(date) : '';
-        
+
         return `
           <div class="list-group-item px-0">
             <div class="d-flex justify-content-between align-items-center">
@@ -123,7 +123,7 @@ function updateReferralsList(referrals) {
           </div>
         `;
       }).join('');
-      
+
       $referralsList.innerHTML = referralHTML;
     }
   }
@@ -149,45 +149,45 @@ function formatTime(date) {
 // Get time since string
 function getTimeSince(timestamp) {
   if (!timestamp) return '<small class="text-muted">Unknown</small>';
-  
+
   const now = Date.now();
   const diff = now - timestamp;
-  
+
   // Less than 1 minute
   if (diff < 60000) {
     return '<small class="text-success">Just now</small>';
   }
-  
+
   // Less than 1 hour
   if (diff < 3600000) {
     const minutes = Math.floor(diff / 60000);
     return `<small class="text-muted">${minutes} min${minutes > 1 ? 's' : ''} ago</small>`;
   }
-  
+
   // Less than 24 hours
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return `<small class="text-muted">${hours} hour${hours > 1 ? 's' : ''} ago</small>`;
   }
-  
+
   // Less than 7 days
   if (diff < 604800000) {
     const days = Math.floor(diff / 86400000);
     return `<small class="text-muted">${days} day${days > 1 ? 's' : ''} ago</small>`;
   }
-  
+
   // Less than 30 days
   if (diff < 2592000000) {
     const weeks = Math.floor(diff / 604800000);
     return `<small class="text-muted">${weeks} week${weeks > 1 ? 's' : ''} ago</small>`;
   }
-  
+
   // More than 30 days
   const months = Math.floor(diff / 2592000000);
   if (months < 12) {
     return `<small class="text-muted">${months} month${months > 1 ? 's' : ''} ago</small>`;
   }
-  
+
   const years = Math.floor(months / 12);
   return `<small class="text-muted">${years} year${years > 1 ? 's' : ''} ago</small>`;
 }
@@ -205,31 +205,31 @@ function setupButtons() {
 async function handleCopyReferralCode() {
   const $codeInput = document.getElementById('referral-code-input');
   const $copyBtn = document.getElementById('copy-referral-code-btn');
-  
+
   if (!$codeInput || !$codeInput.value || $codeInput.value === 'No referral link available') {
     webManager.utilities().showNotification('No referral link to copy', 'warning');
     return;
   }
-  
+
   try {
     // Copy the full URL directly from the input (it now contains the full URL)
     await webManager.utilities().clipboardCopy($codeInput);
-    
+
     // Update button text temporarily
     const $text = $copyBtn.querySelector('.button-text');
     const originalText = $text.textContent;
-    
+
     $text.textContent = 'Copied!';
     $copyBtn.classList.remove('btn-primary');
     $copyBtn.classList.add('btn-success');
-    
+
     // Reset after 2 seconds
     setTimeout(() => {
       $text.textContent = originalText;
       $copyBtn.classList.remove('btn-success');
       $copyBtn.classList.add('btn-primary');
     }, 2000);
-    
+
   } catch (err) {
     console.error('Failed to copy referral link:', err);
     webManager.utilities().showNotification('Failed to copy referral link', 'danger');
@@ -240,7 +240,7 @@ async function handleCopyReferralCode() {
 function generateFakeReferrals() {
   const now = Date.now();
   const oneDay = 24 * 60 * 60 * 1000;
-  
+
   return [
     {
       uid: 'user_k9m2n8p4q1r7',

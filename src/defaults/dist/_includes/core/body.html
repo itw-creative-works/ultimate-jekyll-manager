@@ -35,6 +35,29 @@
   </div>
 </div>
 
+{%- comment -%}
+  Icon Pre-rendering System
+  Pages can specify which icons to pre-render in their frontmatter:
+  prerender_icons:
+    - name: "apple"
+      class: "fa-3xl"
+    - name: "android"
+      class: "fa-2xl"
+{%- endcomment -%}
+{%- assign icons = page.resolved.prerender_icons | default: empty -%}
+{%- iftruthy icons -%}
+<!-- Pre-rendered Icon Templates -->
+<div id="prerendered-icons" class="d-none" aria-hidden="true">
+  {%- for icon in icons -%}
+    {%- assign icon_name = icon.name | default: icon -%}
+    {%- assign icon_class = icon.class | default: "fa-3xl" -%}
+    <div data-icon="{{ icon_name }}" data-class="{{ icon_class }}">
+      {% uj_icon icon_name, icon_class %}
+    </div>
+  {%- endfor -%}
+</div>
+{%- endiftruthy -%}
+
 <!-- Script to prevent clicks on disabled elements during page load -->
 <script type="text/javascript">
   (function() {

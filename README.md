@@ -282,6 +282,114 @@ Add the `.btn-action` class to protect custom elements that trigger important ac
   - `_test_trialEligible=false`: User is not eligible for trial
 * `_test_cardProcessor`: Force a specific payment processor for testing (e.g., `_test_cardProcessor=stripe` or `_test_cardProcessor=paypal`)
 
+## JavaScript API
+
+### Ultimate Jekyll Libraries
+
+Ultimate Jekyll provides helper libraries in `src/assets/js/libs/` that can be imported as needed in your page modules.
+
+#### Prerendered Icons Library
+
+The prerendered icons library provides access to icons defined in page frontmatter. Icons are rendered server-side for optimal performance.
+
+**Import:**
+```javascript
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+```
+
+**Function: `getPrerenderedIcon(iconName)`**
+
+**Parameters:**
+- `iconName` (string) - Name of the icon to retrieve (matches `data-icon` attribute in frontmatter)
+
+**Returns:**
+- (string) Icon HTML or empty string if not found
+
+**Example:**
+```javascript
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+
+// Get a pre-rendered icon
+const appleIcon = getPrerenderedIcon('apple');
+
+// Use in your page
+document.querySelector('.device-icon').innerHTML = appleIcon;
+```
+
+**Setup:**
+Define icons in your page frontmatter:
+```yaml
+---
+prerender_icons:
+  - name: "apple"
+    class: "fa-3xl"
+  - name: "android"
+    class: "fa-2xl"
+  - name: "chrome"
+    class: "fa-lg"
+---
+```
+
+Icons are automatically rendered in the page HTML and can be retrieved by importing the library function.
+
+#### Authorized Fetch Library
+
+The authorized fetch library simplifies authenticated API requests by automatically adding Firebase authentication tokens.
+
+**Import:**
+```javascript
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+```
+
+**Function: `authorizedFetch(url, options)`**
+
+**Parameters:**
+- `url` (string) - The API endpoint URL
+- `options` (Object) - Request options for wonderful-fetch (method, body, timeout, etc.)
+
+**Returns:**
+- (Promise) - The response from the API
+
+**Example:**
+```javascript
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+
+// Make an authenticated API call
+const response = await authorizedFetch(serverApiURL, {
+  method: 'POST',
+  timeout: 30000,
+  response: 'json',
+  tries: 2,
+  body: {
+    command: 'user:get-data',
+    payload: { id: 'example' }
+  }
+});
+```
+
+**How It Works:**
+1. Retrieves the current Firebase user's ID token automatically
+2. Adds the token to the request as an `Authorization: Bearer <token>` header
+3. Makes the request using wonderful-fetch
+4. Throws an error if no authenticated user is found
+
+**Benefits:**
+- No need to manually call `webManager.auth().getIdToken()`
+- No need to add `authenticationToken` to request body
+- Centralized authentication handling
+- Consistent authentication across all API calls
+
+#### FormManager Library
+
+Custom library for form handling with built-in state management and validation.
+
+**Import:**
+```javascript
+import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+```
+
+**Documentation:** See [form-manager.js](src/assets/js/libs/form-manager.js) for full API and usage examples.
+
 ### Icons
 * Fontawesome
   * https://fontawesome.com/search

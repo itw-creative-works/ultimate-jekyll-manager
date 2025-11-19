@@ -82,7 +82,7 @@ async function initializeAccount() {
     {
       // Check for test subscription parameter
       const urlParams = new URLSearchParams(window.location.search);
-      const testSubscription = urlParams.get('_test_subscription');
+      const testSubscription = urlParams.get('_dev_subscription');
 
       if (testSubscription && webManager.isDevelopment()) {
         try {

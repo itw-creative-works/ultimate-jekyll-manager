@@ -298,8 +298,8 @@ async function initializeCheckout() {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
     const frequency = urlParams.get('frequency') || 'annually';
-    const _test_appId = urlParams.get('_test_appId');
-    const _test_trialEligible = urlParams.get('_test_trialEligible');
+    const _dev_appId = urlParams.get('_dev_appId');
+    const _dev_trialEligible = urlParams.get('_dev_trialEligible');
 
     // Product ID is required
     if (!productId) {
@@ -307,7 +307,7 @@ async function initializeCheckout() {
     }
 
     // Check for testing parameters
-    const appId = _test_appId || webManager.config.brand.id;
+    const appId = _dev_appId || webManager.config.brand.id;
 
     // Warmup server (fire and forget)
     warmupServer(webManager);
@@ -331,10 +331,10 @@ async function initializeCheckout() {
     let trialEligibilityResult = trialEligible;
 
     // Override trial eligibility for testing (only in development)
-    if (_test_trialEligible && webManager.isDevelopment()) {
-      if (_test_trialEligible === 'false') {
+    if (_dev_trialEligible && webManager.isDevelopment()) {
+      if (_dev_trialEligible === 'false') {
         trialEligibilityResult = { status: 'fulfilled', value: false };
-      } else if (_test_trialEligible === 'true') {
+      } else if (_dev_trialEligible === 'true') {
         trialEligibilityResult = { status: 'fulfilled', value: true };
       }
     }

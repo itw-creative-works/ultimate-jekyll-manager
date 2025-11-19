@@ -1,4 +1,4 @@
-import fetch from 'wonderful-fetch';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 // Auth Module
 export default function (Manager, options) {
@@ -166,9 +166,6 @@ function setAnalyticsUserId(user) {
 // Send user metadata to server (affiliate, UTM params, etc.)
 async function sendUserSignupMetadata(user, webManager) {
   try {
-    // Get the auth token
-    const token = await webManager.auth().getIdToken();
-
     // Get affiliate data from storage
     const affiliateData = webManager.storage().get('marketing.affiliate', null);
     const utmData = webManager.storage().get('marketing.utm', null);
@@ -193,11 +190,10 @@ async function sendUserSignupMetadata(user, webManager) {
     // Get server API URL
     const serverApiURL = webManager.getApiUrl() + '/backend-manager';
 
-    // Make API call to reset API key
-    const response = await fetch(serverApiURL, {
+    // Make API call to send signup metadata
+    const response = await authorizedFetch(serverApiURL, {
       method: 'POST',
       body: {
-        authenticationToken: token,
         command: 'user:sign-up',
         payload: payload
       }

@@ -13,6 +13,21 @@ web_manager:
     config:
       policy: "authenticated"
 
+### ICON PRE-RENDERING ###
+prerender_icons:
+  - name: "apple"
+    class: "fa-3xl"
+  - name: "android"
+    class: "fa-3xl"
+  - name: "windows"
+    class: "fa-3xl"
+  - name: "linux"
+    class: "fa-3xl"
+  - name: "chrome"
+    class: "fa-3xl"
+  - name: "desktop"
+    class: "fa-3xl"
+
 ### PAGE CONFIG ###
 sections:
   - id: "profile"
@@ -790,19 +805,23 @@ badges:
                     </div>
                   </div>
                   <div class="flex-shrink-0">
-                    <form id="signin-method-{{ method.id }}-form" class="d-inline" novalidate>
+                    <form id="signin-method-{{ method.id }}-form" class="d-grid d-sm-inline-block" novalidate>
                       <input type="hidden" name="method" value="{{ method.id }}">
                       {% if method.id == "password" %}
-                        <input type="hidden" name="action" value="change">
-                        <button type="submit" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                        <button type="submit" class="btn btn-primary btn-sm" data-action="change">
                           {% uj_icon "key", "me-1" %}
                           <span class="button-text">Change</span>
                         </button>
                       {% else %}
-                        <input type="hidden" name="action" value="connect">
-                        <button type="submit" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                        <!-- Connect button -->
+                        <button type="submit" class="btn btn-primary btn-sm" data-action="connect">
                           {% uj_icon "link", "me-1" %}
                           <span class="button-text">Connect</span>
+                        </button>
+                        <!-- Disconnect button (hidden by default) -->
+                        <button type="submit" class="btn btn-sm btn-outline-danger d-none" data-action="disconnect">
+                          {% uj_icon "unlink", "me-1" %}
+                          <span class="button-text">Disconnect</span>
                         </button>
                       {% endif %}
                     </form>
@@ -828,6 +847,7 @@ badges:
           <div class="card-body">
             <h5 class="card-title">Active Sessions</h5>
             <p class="card-text text-muted">Manage your active sessions across devices. Review and revoke access from unrecognized devices.</p>
+
             <div id="active-sessions-list" class="list-group list-group-flush mb-3">
               <!-- Sessions will be loaded here -->
               <div class="text-center py-3">
@@ -884,15 +904,22 @@ badges:
                       </div>
                     </div>
                     <div class="text-start text-sm-end flex-shrink-0">
-                      <form id="connection-form-{{ connection.id }}" class="d-inline" novalidate>
-                        <input type="hidden" name="provider" value="{{ connection.id }}">
-                        <input type="hidden" name="action" value="connect">
-                        <button type="submit" class="btn btn-sm btn-primary w-100 w-sm-auto" data-connect-text="Connect" data-disconnect-text="Disconnect">
-                          {% uj_icon "link", "fa-sm" %}
-                          <span class="button-text">Connect</span>
-                        </button>
-                      </form>
-                      <small class="text-muted d-block mt-1" id="{{ connection.id }}-connection-status"></small>
+                      <div>
+                        <form id="connection-form-{{ connection.id }}" class="d-grid d-sm-inline-block" novalidate>
+                          <input type="hidden" name="provider" value="{{ connection.id }}">
+                          <!-- Connect button -->
+                          <button type="submit" class="btn btn-sm btn-primary" data-action="connect">
+                            {% uj_icon "link", "fa-sm" %}
+                            <span class="button-text">Connect</span>
+                          </button>
+                          <!-- Disconnect button (hidden by default) -->
+                          <button type="submit" class="btn btn-sm btn-outline-danger d-none" data-action="disconnect">
+                            {% uj_icon "unlink", "fa-sm" %}
+                            <span class="button-text">Disconnect</span>
+                          </button>
+                        </form>
+                        <small class="text-muted d-block mt-1" id="{{ connection.id }}-connection-status"></small>
+                      </div>
                     </div>
                   </div>
                 </div>

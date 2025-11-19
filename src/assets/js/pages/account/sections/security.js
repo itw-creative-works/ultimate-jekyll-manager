@@ -1,6 +1,7 @@
 // Security section module
-import fetch from 'wonderful-fetch';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 
 let webManager = null;
 let firebaseAuth = null;
@@ -98,20 +99,17 @@ async function updateSigninMethods() {
   // Update Google signin display
   const $googleEmail = document.getElementById('google-email');
   const $googleForm = document.getElementById('signin-method-google-form');
-  const $googleBtn = $googleForm?.querySelector('button[type="submit"]');
-  const $googleBtnText = $googleBtn?.querySelector('.button-text');
-  const $googleAction = $googleForm?.querySelector('input[name="action"]');
-  const $googleIcon = $googleBtn?.querySelector('.fa-icon');
+  const $connectButton = $googleForm?.querySelector('button[data-action="connect"]');
+  const $disconnectButton = $googleForm?.querySelector('button[data-action="disconnect"]');
 
   console.log('[DEBUG] security.js - Google DOM elements:', {
     $googleEmail: !!$googleEmail,
-    $googleBtn: !!$googleBtn,
-    $googleBtnText: !!$googleBtnText,
-    $googleAction: !!$googleAction,
-    $googleIcon: !!$googleIcon
+    $googleForm: !!$googleForm,
+    $connectButton: !!$connectButton,
+    $disconnectButton: !!$disconnectButton
   });
 
-  if ($googleEmail && $googleBtn) {
+  if ($googleEmail && $connectButton && $disconnectButton) {
     // Check if user has Google provider using firebaseUser for most up-to-date data
     const googleProvider = firebaseUser.providerData?.find(provider => provider.providerId === 'google.com');
 
@@ -119,45 +117,19 @@ async function updateSigninMethods() {
     console.log('[DEBUG] security.js - googleProvider found:', !!googleProvider);
 
     if (googleProvider) {
-      console.log('[DEBUG] security.js - Setting button to DISCONNECT state');
-      console.log('[DEBUG] security.js - Button text before:', $googleBtnText?.textContent);
-      console.log('[DEBUG] security.js - Button classes before:', $googleBtn.className);
+      console.log('[DEBUG] security.js - Showing disconnect button');
 
       $googleEmail.textContent = googleProvider.email || 'Connected';
-      if ($googleBtnText) $googleBtnText.textContent = 'Disconnect';
-      if ($googleAction) $googleAction.value = 'disconnect';
-      $googleBtn.classList.remove('btn-primary');
-      $googleBtn.classList.add('btn-outline-danger');
-
-      // Update icon from link to unlink
-      if ($googleIcon) {
-        $googleIcon.classList.remove('fa-link');
-        $googleIcon.classList.add('fa-unlink');
-      }
-
-      console.log('[DEBUG] security.js - Button text after:', $googleBtnText?.textContent);
-      console.log('[DEBUG] security.js - Button classes after:', $googleBtn.className);
-      console.log('[DEBUG] security.js - Action value:', $googleAction?.value);
+      // Hide connect button, show disconnect button
+      $connectButton.classList.add('d-none');
+      $disconnectButton.classList.remove('d-none');
     } else {
-      console.log('[DEBUG] security.js - Setting button to CONNECT state');
-      console.log('[DEBUG] security.js - Button text before:', $googleBtnText?.textContent);
-      console.log('[DEBUG] security.js - Button classes before:', $googleBtn.className);
+      console.log('[DEBUG] security.js - Showing connect button');
 
       $googleEmail.textContent = 'Not connected';
-      if ($googleBtnText) $googleBtnText.textContent = 'Connect';
-      if ($googleAction) $googleAction.value = 'connect';
-      $googleBtn.classList.remove('btn-outline-danger');
-      $googleBtn.classList.add('btn-primary');
-
-      // Update icon from unlink to link
-      if ($googleIcon) {
-        $googleIcon.classList.remove('fa-unlink');
-        $googleIcon.classList.add('fa-link');
-      }
-
-      console.log('[DEBUG] security.js - Button text after:', $googleBtnText?.textContent);
-      console.log('[DEBUG] security.js - Button classes after:', $googleBtn.className);
-      console.log('[DEBUG] security.js - Action value:', $googleAction?.value);
+      // Show connect button, hide disconnect button
+      $connectButton.classList.remove('d-none');
+      $disconnectButton.classList.add('d-none');
     }
   }
 }
@@ -214,16 +186,14 @@ async function updateActiveSessions(account) {
 
   // Fetch other active sessions from server
   try {
-    const token = await webManager.auth().getIdToken();
     const serverApiURL = webManager.getApiUrl() + '/backend-manager';
 
-    const data = await fetch(serverApiURL, {
+    const data = await authorizedFetch(serverApiURL, {
       method: 'POST',
       timeout: 60000,
       response: 'json',
       tries: 2,
       body: {
-        authenticationToken: token,
         command: 'user:get-active-sessions',
         payload: {
           // id: 'app',
@@ -231,14 +201,12 @@ async function updateActiveSessions(account) {
       },
     });
 
-    console.log('Active sessions data from server:', data);
-
     // Process sessions from server response
     let sessionData = data || {};
 
-    // Add fake data if _test_prefill=true is in query string
+    // Add fake data if _dev_prefill=true is in query string
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('_test_prefill') === 'true') {
+    if (urlParams.get('_dev_prefill') === 'true') {
       console.log('Adding fake session data for testing');
       const fakeSessions = generateFakeSessions();
       // Merge fake sessions with existing data (fake sessions don't override real ones)
@@ -308,23 +276,24 @@ async function updateActiveSessions(account) {
     return;
   }
 
-  const sessionHTML = sessions.map(session => {
+  const sessionHTML = sessions.map((session, index) => {
     const deviceName = session.device || 'Unknown Device';
     const browserName = session.browser || 'Unknown Browser';
     const location = formatSessionLocation(session);
+    const isLast = index === sessions.length - 1;
 
     return `
-    <div class="list-group-item px-0 bg-body-tertiary">
+    <div class="px-0 py-3${isLast ? '' : ' border-bottom'}">
       <div class="d-flex justify-content-between align-items-start">
-        <div class="d-flex align-items-start">
-          <div class="me-3 mt-1">
+        <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-muted">
             ${getDeviceIcon(session.platform || deviceName)}
           </div>
           <div>
-            <div class="fw-semibold">${deviceName}</div>
-            <small class="text-muted d-block">${browserName}${session.mobile !== undefined ? ` • ${session.mobile ? 'Mobile' : 'Desktop'}` : ''}</small>
-            ${location ? `<small class="text-muted d-block">${location}</small>` : ''}
-            ${session.ip ? `<small class="text-muted d-block">IP: ${session.ip}</small>` : ''}
+            <strong>${deviceName}</strong>
+            <div class="text-muted small">${browserName}${session.mobile !== undefined ? ` • ${session.mobile ? 'Mobile' : 'Desktop'}` : ''}</div>
+            ${location ? `<div class="text-muted small">${location}</div>` : ''}
+            ${session.ip ? `<div class="text-muted small">IP: ${session.ip}</div>` : ''}
           </div>
         </div>
         <div class="text-end">
@@ -385,12 +354,15 @@ function initializeSigninMethodForms() {
 
     formManager.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const { data } = event.detail;
+      const { submitButton } = event.detail;
+
+      // Determine action from the clicked button's data-action attribute
+      const action = submitButton?.getAttribute('data-action');
 
       try {
-        if (data.action === 'disconnect') {
+        if (action === 'disconnect') {
           await disconnectGoogleProvider();
-        } else {
+        } else if (action === 'connect') {
           await connectGoogleProvider();
         }
 
@@ -632,20 +604,25 @@ function getPlatformName(platform) {
 // Get device icon based on device type
 function getDeviceIcon(device) {
   const deviceLower = (device || '').toLowerCase();
+  let iconName = 'desktop'; // default
 
-  if (deviceLower.includes('iphone') || deviceLower.includes('ipad') || deviceLower.includes('ios') || deviceLower.includes('mac')) {
-    return '<i class="fa-brands fa-apple fa-lg"></i>';
+  if (deviceLower.includes('iphone')
+      || deviceLower.includes('ipad')
+      || deviceLower.includes('ios')
+      || deviceLower.includes('mac')) {
+    iconName = 'apple';
   } else if (deviceLower.includes('android')) {
-    return '<i class="fa-brands fa-android fa-lg"></i>';
+    iconName = 'android';
   } else if (deviceLower.includes('windows')) {
-    return '<i class="fa-brands fa-windows fa-lg"></i>';
+    iconName = 'windows';
   } else if (deviceLower.includes('linux')) {
-    return '<i class="fa-brands fa-linux fa-lg"></i>';
+    iconName = 'linux';
   } else if (deviceLower.includes('chrome')) {
-    return '<i class="fa-brands fa-chrome fa-lg"></i>';
-  } else {
-    return '<i class="fa-solid fa-desktop fa-lg"></i>';
+    iconName = 'chrome';
   }
+
+  // Get the pre-rendered icon
+  return getPrerenderedIcon(iconName);
 }
 
 // Format location from session data

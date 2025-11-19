@@ -1,6 +1,6 @@
 // API Keys section module
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
-import fetch from 'wonderful-fetch';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 let webManager = null;
 let resetApiKeyFormManager = null;
@@ -113,20 +113,16 @@ async function handleCopyApiKey() {
 
 // Handle reset API key form submission
 async function handleResetApiKeySubmit() {
-  // Get authentication token
-  const token = await webManager.auth().getIdToken();
-
   // Get server API URL
   const serverApiURL = webManager.getApiUrl() + '/backend-manager';
 
   // Make API call to reset API key
-  const response = await fetch(serverApiURL, {
+  const response = await authorizedFetch(serverApiURL, {
     method: 'POST',
     timeout: 30000,
     response: 'json',
     tries: 2,
     body: {
-      authenticationToken: token,
       command: 'user:regenerate-api-keys',
     },
   });
