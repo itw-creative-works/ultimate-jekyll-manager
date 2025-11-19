@@ -11,7 +11,9 @@ hero:
 
 # Newsletter CTA Section
 newsletter_cta:
-  superheadline: "{% uj_icon 'envelope' %} Newsletter"
+  superheadline:
+    icon: "envelope"
+    text: "Newsletter"
   headline: "Never Miss a"
   headline_accent: "Post"
   subheadline: "Get the latest insights delivered straight to your inbox. No spam, unsubscribe anytime."
@@ -229,64 +231,76 @@ newsletter_cta:
 
 <!-- Newsletter CTA -->
 <section>
-  <div class="container" data-lazy="@class animation-slide-up">
-    <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient">
-      <div class="row align-items-center py-4">
-        <div class="col-lg-6 text-light">
-          {% iftruthy page.resolved.newsletter_cta.superheadline %}
-            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.newsletter_cta.superheadline }}</span>
-          {% endiftruthy %}
-          <h2 class="h2 mb-2">
-            {{ page.resolved.newsletter_cta.headline }}
-            {% iftruthy page.resolved.newsletter_cta.headline_accent %}
-              <span class="text-accent">{{ page.resolved.newsletter_cta.headline_accent }}</span>
-            {% endiftruthy %}
-          </h2>
-          {% iftruthy page.resolved.newsletter_cta.subheadline %}
-            <p class="fs-5 mb-4 opacity-90">
-              {{ page.resolved.newsletter_cta.subheadline }}
-            </p>
-          {% endiftruthy %}
-        </div>
-        <div class="col-lg-6">
-          <!-- Newsletter Form -->
-          <form id="newsletter-form" class="newsletter-form">
-            <div class="row g-2">
-              <div class="col-md-8">
-                <input
-                  type="email"
-                  class="form-control form-control-lg"
-                  placeholder="{{ page.resolved.newsletter_cta.form.placeholder }}"
-                  name="email"
-                  required
-                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                  autocomplete="email"
-                >
-                <div class="invalid-feedback text-start">
-                  Please enter a valid email address.
-                </div>
-              </div>
-              <div class="col-md-4">
-                <button type="submit" class="btn btn-adaptive btn-lg px-4 w-100">
-                  {{ page.resolved.newsletter_cta.button.text }}
-                  <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </span>
-                </button>
-              </div>
-            </div>
+  <div class="container">
+    <div class="card border-0 bg-gradient bg-primary text-white rounded-4 p-4 p-md-5 text-center position-relative overflow-hidden" data-lazy="@class animation-slide-up">
+      <!-- Decorative icon - top right -->
+      <div class="position-absolute top-0 end-0 opacity-25" style="font-size:10rem;transform:rotate(15deg)translate(30%,-30%)">
+        {% uj_icon "pen-nib", "text-white" %}
+      </div>
 
-            <!-- Success/Error Messages -->
-            <div class="newsletter-success-alert alert alert-success mt-3 d-none" role="alert">
-              {% uj_icon "check-circle", "me-2" %}
-              {{ page.resolved.newsletter_cta.form.success_message }}
+      <!-- Decorative icon - bottom left -->
+      <div class="position-absolute bottom-0 start-0 opacity-25" style="font-size:8rem;transform:rotate(-20deg)translate(-30%,30%)">
+        {% uj_icon "book-open", "text-white" %}
+      </div>
+
+      <div class="position-relative">
+        {% iftruthy page.resolved.newsletter_cta.superheadline.text %}
+          <span class="badge bg-white bg-opacity-25 text-light p-2 mb-3 fw-semibold small">
+            {% iftruthy page.resolved.newsletter_cta.superheadline.icon %}
+              {% uj_icon page.resolved.newsletter_cta.superheadline.icon, "me-1" %}
+            {% endiftruthy %}
+            {{ page.resolved.newsletter_cta.superheadline.text }}
+          </span>
+        {% endiftruthy %}
+
+        <h2 class="h3 fw-bold mb-3">
+          {{ page.resolved.newsletter_cta.headline }}
+          {% iftruthy page.resolved.newsletter_cta.headline_accent %}
+            {{ page.resolved.newsletter_cta.headline_accent }}
+          {% endiftruthy %}
+        </h2>
+
+        {% iftruthy page.resolved.newsletter_cta.subheadline %}
+          <p class="lead mb-4">{{ page.resolved.newsletter_cta.subheadline }}</p>
+        {% endiftruthy %}
+
+        <!-- Newsletter Form -->
+        <form id="newsletter-form" class="newsletter-form">
+          <div class="row g-3 justify-content-center">
+            <div class="col-md-7">
+              <input
+                type="email"
+                class="form-control form-control-lg"
+                placeholder="{{ page.resolved.newsletter_cta.form.placeholder }}"
+                name="email"
+                required
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                autocomplete="email"
+              >
+              <div class="invalid-feedback text-start">
+                Please enter a valid email address.
+              </div>
             </div>
-            <div class="newsletter-error-alert alert alert-danger mt-3 d-none" role="alert">
-              {% uj_icon "exclamation-circle", "me-2" %}
-              <span class="error-message">{{ page.resolved.newsletter_cta.form.error_message }}</span>
+            <div class="col-md-auto">
+              <button type="submit" class="btn btn-light btn-lg px-4">
+                {{ page.resolved.newsletter_cta.button.text }}
+                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+              </button>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <!-- Success/Error Messages -->
+          <div class="newsletter-success-alert alert alert-success mt-3 d-none" role="alert">
+            {% uj_icon "check-circle", "me-2" %}
+            {{ page.resolved.newsletter_cta.form.success_message }}
+          </div>
+          <div class="newsletter-error-alert alert alert-danger mt-3 d-none" role="alert">
+            {% uj_icon "exclamation-circle", "me-2" %}
+            <span class="error-message">{{ page.resolved.newsletter_cta.form.error_message }}</span>
+          </div>
+        </form>
       </div>
     </div>
   </div>

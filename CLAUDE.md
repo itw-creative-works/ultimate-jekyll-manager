@@ -170,36 +170,95 @@ asset_path: blog/post
 
 Uses `/assets/css/pages/{{ asset_path }}.bundle.css` instead of deriving from `page.canonical.path`. Useful when multiple pages share assets (e.g., all blog posts).
 
-## Icon Pre-rendering System
+## Icon System
 
-Ultimate Jekyll includes a frontmatter-based icon pre-rendering system for optimal performance.
+Ultimate Jekyll uses Font Awesome icons but does NOT include the Font Awesome JavaScript or CSS library. All icons must be rendered server-side using Jekyll's `{% uj_icon %}` tag.
 
-### How It Works
+### When to Use `{% uj_icon %}` vs Prerendered Icons
 
-1. **Define icons in page frontmatter:**
+**IMPORTANT:** Use the correct method based on WHERE the icon will be used:
+
+#### Use `{% uj_icon %}` in HTML/Liquid Templates
+
+When icons are part of the static HTML template, use `{% uj_icon %}` directly:
+
+```liquid
+<!-- Alerts -->
+<div class="alert alert-success">
+  {% uj_icon "circle-check", "fa-sm" %} Success message
+</div>
+
+<!-- Buttons -->
+<button class="btn btn-primary">
+  {% uj_icon "paper-plane", "fa-md me-2" %}
+  Send
+</button>
+
+<!-- Labels -->
+<label>
+  {% uj_icon "envelope", "fa-sm me-1 text-info" %}
+  Email
+</label>
+```
+
+**Use this when:**
+- The icon is in a Jekyll template (.html file)
+- The icon is static and known at build time
+- The icon is part of the page structure
+
+#### Use Prerendered Icons in JavaScript
+
+When icons need to be dynamically inserted via JavaScript, pre-render them in frontmatter and access them via the library:
+
+**1. Add icons to page frontmatter:**
 ```yaml
 ---
 prerender_icons:
-  - name: "apple"
-    class: "fa-3xl"
-  - name: "android"
-    class: "fa-2xl"
-  - name: "chrome"
+  - name: "mobile"
+    class: "fa-sm me-1"
+  - name: "envelope"
+    class: "fa-sm me-1"
+  - name: "bell"
+    class: "fa-sm me-1"
 ---
 ```
 
-2. **Icons are rendered in HTML** via `src/defaults/dist/_includes/core/body.html`
-
-3. **Access icons in JavaScript:**
+**2. Import the library in JavaScript:**
 ```javascript
-const iconHTML = webManager.utilities().getPrerenderedIcon('apple');
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+```
+
+**3. Use in your code:**
+```javascript
+const iconHTML = getPrerenderedIcon('mobile');
+$badge.innerHTML = `${iconHTML}Push Notification`;
+```
+
+**Use this when:**
+- Icons are dynamically inserted via JavaScript
+- Icons are part of dynamically generated content
+- Icons are added to elements created with `document.createElement()`
+
+### What NOT to Do
+
+**NEVER use manual icon HTML in JavaScript:**
+```javascript
+// ❌ WRONG - Bootstrap Icons (we don't use Bootstrap Icons)
+$el.innerHTML = '<i class="bi bi-check-circle"></i> Text';
+
+// ❌ WRONG - Manual Font Awesome (we don't have FA JS/CSS)
+$el.innerHTML = '<i class="fa-solid fa-check"></i> Text';
+
+// ✅ CORRECT - Use prerendered icons
+const iconHTML = getPrerenderedIcon('circle-check');
+$el.innerHTML = `${iconHTML} Text`;
 ```
 
 ### Benefits
 - Icons are rendered server-side with proper Font Awesome classes
 - No client-side icon generation overhead
 - Consistent icon styling across the application
-- Easy to access via JavaScript utilities
+- No Font Awesome JavaScript/CSS library needed
 
 ## CSS Guidelines
 

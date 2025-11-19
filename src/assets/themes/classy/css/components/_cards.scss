@@ -11,8 +11,8 @@
   box-shadow: $classy-shadow-sm;
   position: relative;
 
-  // Allow badges to overflow
-  &:has(.badge) {
+  // Allow badges to overflow (except when overflow-hidden is explicitly set)
+  &:has(.badge):not(.overflow-hidden) {
     overflow: visible !important;
   }
 

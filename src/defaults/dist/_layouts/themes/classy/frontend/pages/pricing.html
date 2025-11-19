@@ -100,7 +100,9 @@ pricing:
 
 # Feature Comparison Section
 feature_comparison:
-  superheadline: "{% uj_icon 'list-check' %} Features"
+  superheadline:
+    icon: "sparkles"
+    text: "Features"
   headline: "Compare all"
   headline_accent: "Plans"
   subheadline: "See exactly what's included in each plan"
@@ -125,18 +127,22 @@ social_proof:
 
 # CTA Section
 cta:
-  superheadline: "{% uj_icon 'comments' %} Support"
+  superheadline:
+    icon: "comments"
+    text: "Support"
   headline: "Need help finding the right plan for your"
   headline_accent: "needs?"
   subheadline: "Talk to our support team 24/7"
   button:
     text: "Talk to Us"
-    icon: "comments"
+    icon: "headset"
     href: "/contact"
 
 # Testimonials Section
 testimonials:
-  superheadline: "{% uj_icon 'comments' %} Testimonials"
+  superheadline:
+    icon: "megaphone"
+    text: "Testimonials"
   headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
   subheadline: "Hear from real people who have transformed their business with us"
   items:
@@ -158,7 +164,9 @@ testimonials:
 
 # FAQs Section
 faqs:
-  superheadline: "{% uj_icon 'circle-question' %} FAQs"
+  superheadline:
+    icon: "messages-question"
+    text: "FAQs"
   headline: "Frequently Asked"
   headline_accent: "Questions"
   subheadline: "Everything you need to know about the product and billing. Can't find the answer you're looking for? Please chat to our friendly team."
@@ -454,8 +462,13 @@ faqs:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      {% iftruthy page.resolved.feature_comparison.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.feature_comparison.superheadline }}</span>
+      {% iftruthy page.resolved.feature_comparison.superheadline.text %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+          {% iftruthy page.resolved.feature_comparison.superheadline.icon %}
+            {% uj_icon page.resolved.feature_comparison.superheadline.icon, "me-1" %}
+          {% endiftruthy %}
+          {{ page.resolved.feature_comparison.superheadline.text }}
+        </span>
       {% endiftruthy %}
       <h2 class="h2 mb-2">
         {{ page.resolved.feature_comparison.headline }}
@@ -597,53 +610,46 @@ faqs:
 
 <!-- CTA Section -->
 <section>
-  <div class="container" data-lazy="@class animation-slide-up">
-    <!-- style="background: linear-gradient(135deg, #2d2d2d 0%, #673ab7 50%, #2196f3 100%);" -->
-    <div class="rounded-4 p-5 position-relative overflow-hidden bg-primary bg-gradient">
-      <div class="row align-items-center py-4">
-        <div class="col-lg-7 text-light">
-          {% iftruthy page.resolved.cta.superheadline %}
-            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.cta.superheadline }}</span>
-          {% endiftruthy %}
-          <h2 class="h2 mb-2">
-            {{ page.resolved.cta.headline }}
-            {% iftruthy page.resolved.cta.headline_accent %}
-              <span class="text-accent">{{ page.resolved.cta.headline_accent }}</span>
+  <div class="container">
+    <div class="card border-0 bg-gradient bg-primary text-white rounded-4 p-4 p-md-5 text-center position-relative overflow-hidden" data-lazy="@class animation-slide-up">
+      <!-- Decorative icon - top right -->
+      <div class="position-absolute top-0 end-0 opacity-25" style="font-size:10rem;transform:rotate(15deg)translate(30%,-30%)">
+        {% uj_icon "messages-question", "text-white" %}
+      </div>
+
+      <!-- Decorative icon - bottom left -->
+      <div class="position-absolute bottom-0 start-0 opacity-25" style="font-size:8rem;transform:rotate(-20deg)translate(-30%,30%)">
+        {% uj_icon "shield-check", "text-white" %}
+      </div>
+
+      <div class="position-relative">
+        {% iftruthy page.resolved.cta.superheadline.text %}
+          <span class="badge bg-white bg-opacity-25 text-light p-2 mb-3 fw-semibold small">
+            {% iftruthy page.resolved.cta.superheadline.icon %}
+              {% uj_icon page.resolved.cta.superheadline.icon, "me-1" %}
             {% endiftruthy %}
-          </h2>
-          {% iftruthy page.resolved.cta.subheadline %}
-            <p class="fs-5 mb-4 opacity-90">{{ page.resolved.cta.subheadline }}</p>
+            {{ page.resolved.cta.superheadline.text }}
+          </span>
+        {% endiftruthy %}
+
+        <h2 class="h3 fw-bold mb-3">
+          {{ page.resolved.cta.headline }}
+          {% iftruthy page.resolved.cta.headline_accent %}
+            {{ page.resolved.cta.headline_accent }}
           {% endiftruthy %}
-          <a href="{{ page.resolved.cta.button.href }}" class="btn btn-adaptive btn-lg px-5 py-3">
+        </h2>
+
+        {% iftruthy page.resolved.cta.subheadline %}
+          <p class="lead mb-4">{{ page.resolved.cta.subheadline }}</p>
+        {% endiftruthy %}
+
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+          <a href="{{ page.resolved.cta.button.href }}" class="btn btn-light btn-lg px-4">
             {% uj_icon page.resolved.cta.button.icon, "me-2" %}
             {{ page.resolved.cta.button.text }}
           </a>
         </div>
-        <div class="col-lg-5 d-none d-lg-block position-relative">
-          <div class="text-end">
-            <div class="d-inline-block position-relative">
-              <!-- <div class="rounded-circle bg-white bg-opacity-25 p-5" style="backdrop-filter: blur(10px);">
-                <img src="https://via.placeholder.com/300x300/ffffff00/ffffff?text=👩‍💻"
-                     alt="Support"
-                     class="img-fluid"
-                     style="filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
-              </div> -->
-              <!-- <div class="position-absolute bottom-0 end-0 bg-white rounded-circle p-3 shadow-lg">
-              </div> -->
-              <div class="position-absolute bottom-0 end-0 p-3">
-                {% uj_icon "comment-dots", "text-light display-1" %}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-      <!-- Decorative elements -->
-      <!-- <div class="position-absolute top-0 end-0 opacity-25">
-        <div class="rounded-circle" style="width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); transform: translate(50%, -50%);"></div>
-      </div>
-      <div class="position-absolute bottom-0 start-0 opacity-25">
-        <div class="rounded-circle" style="width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); transform: translate(-50%, 50%);"></div>
-      </div> -->
     </div>
   </div>
 </section>
@@ -652,8 +658,13 @@ faqs:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      {% iftruthy page.resolved.testimonials.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.testimonials.superheadline }}</span>
+      {% iftruthy page.resolved.testimonials.superheadline.text %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+          {% iftruthy page.resolved.testimonials.superheadline.icon %}
+            {% uj_icon page.resolved.testimonials.superheadline.icon, "me-1" %}
+          {% endiftruthy %}
+          {{ page.resolved.testimonials.superheadline.text }}
+        </span>
       {% endiftruthy %}
       <h2 class="h2 mb-2">{{ page.resolved.testimonials.headline }}</h2>
       {% iftruthy page.resolved.testimonials.subheadline %}
@@ -712,8 +723,13 @@ faqs:
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="text-center mb-4" data-lazy="@class animation-slide-up">
-          {% iftruthy page.resolved.faqs.superheadline %}
-            <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.faqs.superheadline }}</span>
+          {% iftruthy page.resolved.faqs.superheadline.text %}
+            <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+              {% iftruthy page.resolved.faqs.superheadline.icon %}
+                {% uj_icon page.resolved.faqs.superheadline.icon, "me-1" %}
+              {% endiftruthy %}
+              {{ page.resolved.faqs.superheadline.text }}
+            </span>
           {% endiftruthy %}
           <h2 class="h2 mb-2">
             {{ page.resolved.faqs.headline }}

@@ -66,7 +66,9 @@ trusted_by:
 
 # Product Demo Section
 product_demo:
-  superheadline: "{% uj_icon 'desktop' %} Demo"
+  superheadline:
+    icon: "rocket"
+    text: "Demo"
   headline: "See {{ site.brand.name }} in"
   headline_accent: "Action"
   subheadline: "Explore powerful features that help you succeed"
@@ -102,9 +104,11 @@ product_demo:
         - "Compliance Tools"
         - "Data Protection"
 
-# Alternating Features Section
-alternating_features:
-  superheadline: "{% uj_icon 'sparkles' %} Features"
+# Showcase Section
+showcase:
+  superheadline:
+    icon: "cubes"
+    text: "Showcase"
   headline: "What Makes {{ site.brand.name }}"
   headline_accent: "Different"
   subheadline: "Powerful features designed to accelerate your success"
@@ -123,7 +127,9 @@ alternating_features:
 
 # Features Section
 features:
-  superheadline: "{% uj_icon 'check-circle' %} Features"
+  superheadline:
+    icon: "sparkles"
+    text: "Features"
   headline: "Design made"
   headline_accent: "simple"
   subheadline: "Get unlimited design requests delivered fast with our streamlined process."
@@ -144,7 +150,9 @@ features:
 
 # Testimonials Section
 testimonials:
-  superheadline: "{% uj_icon 'comments' %} Testimonials"
+  superheadline:
+    icon: "megaphone"
+    text: "Testimonials"
   headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
   subheadline: "Hear from real people who have transformed their business with us"
   items:
@@ -189,7 +197,9 @@ stats:
 
 # CTA Section
 cta:
-  superheadline: "{% uj_icon 'rocket' %} Launch"
+  superheadline:
+    icon: "rocket"
+    text: "Launch"
   headline: "Ready to Transform your"
   headline_accent: "Business?"
   description: "Join thousands of successful companies who have already accelerated their growth with {{ site.brand.name }}"
@@ -354,8 +364,13 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      {% iftruthy page.resolved.product_demo.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.product_demo.superheadline }}</span>
+      {% iftruthy page.resolved.product_demo.superheadline.text %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+          {% iftruthy page.resolved.product_demo.superheadline.icon %}
+            {% uj_icon page.resolved.product_demo.superheadline.icon, "me-1" %}
+          {% endiftruthy %}
+          {{ page.resolved.product_demo.superheadline.text }}
+        </span>
       {% endiftruthy %}
 
       <h2 class="h2 mb-2">
@@ -422,21 +437,26 @@ cta:
   </div>
 </section>
 
-<!-- Alternating Features Section -->
+<!-- Showcase Section -->
 <section class="bg-body-secondary rounded-4">
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      {% iftruthy page.resolved.alternating_features.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.alternating_features.superheadline }}</span>
+      {% iftruthy page.resolved.showcase.superheadline.text %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+          {% iftruthy page.resolved.showcase.superheadline.icon %}
+            {% uj_icon page.resolved.showcase.superheadline.icon, "me-1" %}
+          {% endiftruthy %}
+          {{ page.resolved.showcase.superheadline.text }}
+        </span>
       {% endiftruthy %}
       <h2 class="h2 mb-2">
-        {{ page.resolved.alternating_features.headline }}
-        <span class="text-accent">{{ page.resolved.alternating_features.headline_accent }}</span>
+        {{ page.resolved.showcase.headline }}
+        <span class="text-accent">{{ page.resolved.showcase.headline_accent }}</span>
       </h2>
-      <p class="fs-5 text-muted">{{ page.resolved.alternating_features.subheadline }}</p>
+      <p class="fs-5 text-muted">{{ page.resolved.showcase.subheadline }}</p>
     </div>
 
-    {% for item in page.resolved.alternating_features.items %}
+    {% for item in page.resolved.showcase.items %}
       {% assign is_even = forloop.index | modulo: 2 %}
 
       <!-- Set classes based on position -->
@@ -450,8 +470,8 @@ cta:
 
       <!-- Common content -->
       {% capture image_content %}
-        {% assign ratio = page.resolved.alternating_features.image_ratio | default: "4x3" %}
-        {% assign object_position = page.resolved.alternating_features.image_object_position | default: "center" %}
+        {% assign ratio = page.resolved.showcase.image_ratio | default: "4x3" %}
+        {% assign object_position = page.resolved.showcase.image_object_position | default: "center" %}
         <div class="card border-0 shadow-sm ratio ratio-{{ ratio }}">
           {% uj_image item.image, class="w-100 h-100 object-fit-cover rounded", style="object-position: {{ object_position }};", alt=item.title %}
         </div>
@@ -478,8 +498,13 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      {% iftruthy page.resolved.features.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.features.superheadline }}</span>
+      {% iftruthy page.resolved.features.superheadline.text %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+          {% iftruthy page.resolved.features.superheadline.icon %}
+            {% uj_icon page.resolved.features.superheadline.icon, "me-1" %}
+          {% endiftruthy %}
+          {{ page.resolved.features.superheadline.text }}
+        </span>
       {% endiftruthy %}
       <h2 class="h2 mb-2">
         {{ page.resolved.features.headline }}
@@ -523,8 +548,13 @@ cta:
 <section>
   <div class="container">
     <div class="text-center mb-5" data-lazy="@class animation-slide-up">
-      {% iftruthy page.resolved.testimonials.superheadline %}
-        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">{{ page.resolved.testimonials.superheadline }}</span>
+      {% iftruthy page.resolved.testimonials.superheadline.text %}
+        <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
+          {% iftruthy page.resolved.testimonials.superheadline.icon %}
+            {% uj_icon page.resolved.testimonials.superheadline.icon, "me-1" %}
+          {% endiftruthy %}
+          {{ page.resolved.testimonials.superheadline.text }}
+        </span>
       {% endiftruthy %}
       <h2 class="h2 mb-2">{{ page.resolved.testimonials.headline }}</h2>
       {% iftruthy page.resolved.testimonials.subheadline %}
@@ -607,29 +637,49 @@ cta:
 <!-- CTA Section -->
 <section>
   <div class="container">
-    <div class="rounded-4 p-5 bg-primary bg-gradient text-light text-center" data-lazy="@class animation-slide-up">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          {% iftruthy page.resolved.cta.superheadline %}
-            <span class="badge bg-white bg-opacity-25 text-light p-2 mb-1 fw-semibold small">{{ page.resolved.cta.superheadline }}</span>
+    <div class="card border-0 bg-gradient bg-primary text-white rounded-4 p-4 p-md-5 text-center position-relative overflow-hidden" data-lazy="@class animation-slide-up">
+      <!-- Decorative icon - top right -->
+      <div class="position-absolute top-0 end-0 opacity-25" style="font-size:10rem;transform:rotate(15deg)translate(30%,-30%)">
+        {% uj_icon "rocket", "text-white" %}
+      </div>
+
+      <!-- Decorative icon - bottom left -->
+      <div class="position-absolute bottom-0 start-0 opacity-25" style="font-size:8rem;transform:rotate(-20deg)translate(-30%,30%)">
+        {% uj_icon "sparkles", "text-white" %}
+      </div>
+
+      <div class="position-relative">
+        {% iftruthy page.resolved.cta.superheadline.text %}
+          <span class="badge bg-white bg-opacity-25 text-light p-2 mb-3 fw-semibold small">
+            {% iftruthy page.resolved.cta.superheadline.icon %}
+              {% uj_icon page.resolved.cta.superheadline.icon, "me-1" %}
+            {% endiftruthy %}
+            {{ page.resolved.cta.superheadline.text }}
+          </span>
+        {% endiftruthy %}
+
+        <h2 class="h3 fw-bold mb-3">
+          {{ page.resolved.cta.headline }}
+          {% iftruthy page.resolved.cta.headline_accent %}
+            {{ page.resolved.cta.headline_accent }}
           {% endiftruthy %}
-          <h2 class="h2 mb-4">
-            {{ page.resolved.cta.headline }}
-            <span class="text-accent">{{ page.resolved.cta.headline_accent }}</span>
-          </h2>
-          <p class="fs-5 mb-4 opacity-90">
-            {{ page.resolved.cta.description }}
-          </p>
-          <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-            <a href="{{ page.resolved.cta.primary_button.href }}" class="btn btn-light btn-lg px-5 py-3">
-              {% uj_icon page.resolved.cta.primary_button.icon, "me-2" %}
-              {{ page.resolved.cta.primary_button.text }}
-            </a>
-            <a href="{{ page.resolved.cta.secondary_button.href }}" class="btn btn-outline-light btn-lg px-5 py-3">
+        </h2>
+
+        {% iftruthy page.resolved.cta.description %}
+          <p class="lead mb-4">{{ page.resolved.cta.description }}</p>
+        {% endiftruthy %}
+
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+          <a href="{{ page.resolved.cta.primary_button.href }}" class="btn btn-light btn-lg px-4">
+            {% uj_icon page.resolved.cta.primary_button.icon, "me-2" %}
+            {{ page.resolved.cta.primary_button.text }}
+          </a>
+          {% iftruthy page.resolved.cta.secondary_button %}
+            <a href="{{ page.resolved.cta.secondary_button.href }}" class="btn btn-outline-light btn-lg px-4">
               {% uj_icon page.resolved.cta.secondary_button.icon, "me-2" %}
               {{ page.resolved.cta.secondary_button.text }}
             </a>
-          </div>
+          {% endiftruthy %}
         </div>
       </div>
     </div>
