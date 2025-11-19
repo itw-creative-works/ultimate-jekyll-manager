@@ -7,15 +7,26 @@ meta:
   title: "Create Notification - Admin"
   description: "Create and send a new notification"
   breadcrumb: "Create Notification"
+
+### ICON PRE-RENDERING ###
+prerender_icons:
+  - name: "mobile"
+    class: "fa-sm me-1"
+  - name: "envelope"
+    class: "fa-sm me-1"
+  - name: "comment-sms"
+    class: "fa-sm me-1"
+  - name: "bell"
+    class: "fa-sm me-1"
 ---
 
 <!-- Success/Error Alerts -->
 <div class="notification-success-alert alert alert-success d-none" role="alert">
-  <i class="bi bi-check-circle"></i> <span class="alert-message">Notification sent successfully!</span>
+  {% uj_icon "circle-check", "fa-sm" %} <span class="alert-message">Notification sent successfully!</span>
 </div>
 
 <div class="notification-error-alert alert alert-danger d-none" role="alert">
-  <i class="bi bi-exclamation-triangle"></i> <span class="alert-message">An error occurred</span>
+  {% uj_icon "triangle-exclamation", "fa-sm" %} <span class="alert-message">An error occurred</span>
 </div>
 
 <!-- Notification Creation Form -->

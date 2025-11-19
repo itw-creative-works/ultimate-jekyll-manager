@@ -406,10 +406,13 @@ function initializeSignoutAllForm() {
     signoutAllForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
+      // 1ms wait to allow form state to update and show processing
+      await new Promise(resolve => setTimeout(resolve, 1));
+
       try {
         // Confirm sign out
         if (!confirm('Are you sure you want to sign out of all sessions? This will log you out everywhere, including this device.')) {
-          throw new Error('Sign out cancelled');
+          return signoutAllForm.setFormState('ready');
         }
 
         // Sign out of all sessions

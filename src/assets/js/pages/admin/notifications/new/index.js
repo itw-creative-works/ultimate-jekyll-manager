@@ -1,6 +1,7 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 let webManager = null;
 
 // Module
@@ -416,7 +417,9 @@ function updateChannelBadges(formData) {
   const channels = formData.channels || {};
   const $badgesContainer = document.querySelector('.card .d-flex.gap-2.flex-wrap');
 
-  if (!$badgesContainer) return;
+  if (!$badgesContainer) {
+    return;
+  }
 
   // Clear existing badges
   $badgesContainer.innerHTML = '';
@@ -430,20 +433,24 @@ function updateChannelBadges(formData) {
   };
 
   Object.keys(channelConfigs).forEach(channel => {
-    if (channels[channel]?.enabled) {
-      const config = channelConfigs[channel];
-      const $badge = document.createElement('span');
-      $badge.className = `badge bg-${config.color}`;
-      $badge.innerHTML = `<i class="bi bi-${config.icon} me-1"></i>${channel.charAt(0).toUpperCase() + channel.slice(1)}`;
-      $badgesContainer.appendChild($badge);
+    if (!channels[channel]?.enabled) {
+      return;
     }
+
+    const config = channelConfigs[channel];
+    const iconHTML = getPrerenderedIcon(config.icon);
+    const $badge = document.createElement('span');
+    $badge.className = `badge bg-${config.color}`;
+    $badge.innerHTML = `${iconHTML}${channel.charAt(0).toUpperCase() + channel.slice(1)}`;
+    $badgesContainer.appendChild($badge);
   });
 
   // Default to push if no channels selected
   if ($badgesContainer.children.length === 0) {
+    const iconHTML = getPrerenderedIcon('mobile');
     const $badge = document.createElement('span');
     $badge.className = 'badge bg-primary';
-    $badge.innerHTML = '<i class="bi bi-mobile me-1"></i>Push';
+    $badge.innerHTML = `${iconHTML}Push`;
     $badgesContainer.appendChild($badge);
   }
 }

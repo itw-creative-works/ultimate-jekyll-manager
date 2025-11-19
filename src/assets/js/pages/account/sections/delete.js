@@ -1,7 +1,9 @@
 // Delete account section module
-import fetch from 'wonderful-fetch';
+import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 let webManager = null;
+let formManager = null;
 
 // Initialize delete section
 export async function init(wm) {
@@ -15,9 +17,21 @@ function setupDeleteAccountForm() {
   const $checkbox = document.getElementById('delete-confirm-checkbox');
   const $deleteBtn = document.getElementById('delete-account-btn');
   const $cancelBtn = document.getElementById('cancel-delete-btn');
-  const $reason = document.getElementById('delete-reason');
 
-  if (!$form || !$checkbox || !$deleteBtn) return;
+  if (!$form || !$checkbox || !$deleteBtn) {
+    return;
+  }
+
+  // Initialize FormManager
+  formManager = new FormManager('#delete-account-form', {
+    autoDisable: true,
+    showSpinner: true,
+    validateOnSubmit: false, // We'll handle validation manually due to custom confirmation flow
+    allowMultipleSubmissions: false,
+    resetOnSuccess: false,
+    submitButtonLoadingText: 'Deleting account...',
+    initialState: 'ready',
+  });
 
   // Enable/disable delete button based on checkbox
   $checkbox.addEventListener('change', (e) => {
@@ -32,75 +46,80 @@ function setupDeleteAccountForm() {
     });
   }
 
-  // Handle form submission
-  $form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  // Listen to FormManager submit event
+  formManager.addEventListener('submit', handleFormSubmit);
+}
 
-    // Check if checkbox is checked
-    if (!$checkbox.checked) {
-      alert('Please confirm that you understand this action is permanent.');
-      return;
-    }
+// Handle form submission
+async function handleFormSubmit(event) {
+  // Prevent default FormManager submission
+  event.preventDefault();
 
-    // Show confirmation dialog
-    const confirmMessage = `Are you absolutely sure you want to delete your account?\n\nThis action CANNOT be undone.\n\nType "DELETE" to confirm:`;
-    const userInput = prompt(confirmMessage);
+  const formData = event.detail.data;
+  const $checkbox = document.getElementById('delete-confirm-checkbox');
 
-    if (userInput !== 'DELETE') {
-      alert('Account deletion cancelled. You must type "DELETE" exactly to confirm.');
-      return;
-    }
+  // Check if checkbox is checked
+  if (!$checkbox.checked) {
+    formManager.showError('Please confirm that you understand this action is permanent.');
+    formManager.setFormState('ready');
+    return;
+  }
 
-    // Final confirmation
-    const finalConfirm = confirm('This is your last chance to cancel.\n\nAre you sure you want to permanently delete your account?');
-    
-    if (!finalConfirm) {
-      return;
-    }
+  // Show confirmation dialog
+  const confirmMessage = `Are you absolutely sure you want to delete your account?\n\nThis action CANNOT be undone.\n\nType "DELETE" to confirm:`;
+  const userInput = prompt(confirmMessage);
 
-    // Disable button and show loading
-    $deleteBtn.disabled = true;
-    $deleteBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span class="button-text">Deleting account...</span>`;
+  if (userInput !== 'DELETE') {
+    formManager.showError('Account deletion cancelled. You must type "DELETE" exactly to confirm.');
+    formManager.setFormState('ready');
+    return;
+  }
 
-    try {
-      // Get API base URL
-      const apiBaseUrl = webManager.isDevelopment()
-        ? 'http://localhost:5002'
-        : 'https://api.itwcreativeworks.com';
+  // Final confirmation
+  const finalConfirm = confirm('This is your last chance to cancel.\n\nAre you sure you want to permanently delete your account?');
 
-      // Send delete request to server
-      const response = await fetch(`${apiBaseUrl}/account/delete`, {
-        method: 'POST',
-        response: 'json',
-        body: {
-          reason: $reason.value || '',
+  if (!finalConfirm) {
+    formManager.setFormState('ready');
+    return;
+  }
+
+  try {
+    // Send delete request to server
+    const response = await authorizedFetch(webManager.getApiUrl(), {
+      method: 'POST',
+      timeout: 30000,
+      response: 'json',
+      tries: 2,
+      body: {
+        command: 'user:delete',
+        payload: {
+          reason: formData.reason || '',
           confirmed: true
         }
-      });
-
-      console.log('Delete account response:', response);
-
-      if (response.success) {
-        // Show success message
-        alert('Your account has been successfully deleted. You will now be signed out.');
-        
-        // Sign out the user
-        await webManager.auth().signOut();
-        
-        // Redirect to home page
-        window.location.href = '/';
-      } else {
-        throw new Error(response.message || 'Failed to delete account');
       }
-    } catch (error) {
-      console.error('Failed to delete account:', error);
-      alert(`Failed to delete account: ${error.message}`);
-      
-      // Re-enable button
-      $deleteBtn.disabled = !$checkbox.checked;
-      $deleteBtn.innerHTML = `<i class="fa-solid fa-trash fa-sm me-2"></i><span class="button-text">Delete My Account Permanently</span>`;
+    });
+
+    console.log('Delete account response:', response);
+
+    if (response.success) {
+      // Show success message
+      formManager.showSuccess('Your account has been successfully deleted. You will now be signed out.');
+
+      // Sign out the user
+      await webManager.auth().signOut();
+
+      // Redirect to home page
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    } else {
+      throw new Error(response.message || 'Failed to delete account');
     }
-  });
+  } catch (error) {
+    console.error('Failed to delete account:', error);
+    formManager.showError(`Failed to delete account: ${error.message}`);
+    formManager.setFormState('ready');
+  }
 }
 
 // Load delete section data (if needed)
@@ -111,25 +130,5 @@ export async function loadData(account) {
 
 // Called when section is shown
 export function onShow() {
-  // Reset form when shown
-  const $form = document.getElementById('delete-account-form');
-  const $checkbox = document.getElementById('delete-confirm-checkbox');
-  const $deleteBtn = document.getElementById('delete-account-btn');
-  const $reason = document.getElementById('delete-reason');
 
-  if ($form) {
-    $form.reset();
-  }
-
-  if ($checkbox) {
-    $checkbox.checked = false;
-  }
-
-  if ($deleteBtn) {
-    $deleteBtn.disabled = true;
-  }
-
-  if ($reason) {
-    $reason.value = '';
-  }
 }

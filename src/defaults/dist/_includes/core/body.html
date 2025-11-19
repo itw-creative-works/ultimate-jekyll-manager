@@ -9,7 +9,7 @@
   hidden>
   <span class="main-alert-close">&times;</span>
   <div>
-    <i class="fa-solid fa-warning fa-bounce me-2"></i>
+    {% uj_icon "warning", "fa-bounce me-2" %}
     You are using an outdated browser that our site <strong>DOES NOT</strong> support. Please <a href="https://www.google.com/chrome" rel="nofollow" target="_blank">click here</a> to update your browser.
   </div>
 </div>
@@ -19,11 +19,11 @@
   hidden>
   <span class="main-alert-close">&times;</span>
   <div>
-    <i class="fa-solid fa-warning fa-bounce me-2"></i>
+    {% uj_icon "warning", "fa-bounce me-2" %}
     There is a <strong>problem with your payment method</strong>. To continue using <strong>{{ site.brand.name }}</strong>, please <a href="{{ site.url }}/account#billing" target="_blank">update your payment method</a>.
   </div>
 </div>
-<div
+<!-- <div
   class="main-alert main-alert-top main-alert-fixed main-alert-sale bg-primary animation-fade-in"
   role="alert" aria-live="polite" aria-label="Flash sale"
   hidden>
@@ -33,17 +33,9 @@
     <strong>FLASH SALE!</strong>
     Save <strong>15%</strong> at checkout—today only! <a href="{{ site.url }}/pricing" target="_blank">Claim discount</a>.
   </div>
-</div>
+</div> -->
 
-{%- comment -%}
-  Icon Pre-rendering System
-  Pages can specify which icons to pre-render in their frontmatter:
-  prerender_icons:
-    - name: "apple"
-      class: "fa-3xl"
-    - name: "android"
-      class: "fa-2xl"
-{%- endcomment -%}
+<!-- Prerendered Icons -->
 {%- assign icons = page.resolved.prerender_icons | default: empty -%}
 {%- iftruthy icons -%}
 <!-- Pre-rendered Icon Templates -->

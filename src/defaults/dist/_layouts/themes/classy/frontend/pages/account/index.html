@@ -800,7 +800,7 @@ badges:
                       {% endiftruthy %}
                     </div>
                     <div>
-                      <strong>{{ method.name }}</strong>
+                      <h6 class="mb-0">{{ method.name }}</h6>
                       <div class="text-muted small" id="{{ method.id }}-email"></div>
                     </div>
                   </div>
@@ -845,7 +845,18 @@ badges:
 
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Active Sessions</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0">Active Sessions</h5>
+              <form id="signout-all-sessions-form" class="d-inline" novalidate>
+                <input type="hidden" name="action" value="signout-all">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  {% uj_icon "right-from-bracket", "me-1" %}
+                  <span class="button-text">
+                    Sign out<span class="d-none d-md-inline"> of all sessions</span>
+                  </span>
+                </button>
+              </form>
+            </div>
             <p class="card-text text-muted">Manage your active sessions across devices. Review and revoke access from unrecognized devices.</p>
 
             <div id="active-sessions-list" class="list-group list-group-flush mb-3">
@@ -856,15 +867,6 @@ badges:
                 </div>
               </div>
             </div>
-
-            <!-- Sign out of all sessions -->
-            <form id="signout-all-sessions-form" class="d-grid d-sm-block" novalidate>
-              <input type="hidden" name="action" value="signout-all">
-              <button type="submit" class="btn btn-outline-danger">
-                {% uj_icon "right-from-bracket", "me-1" %}
-                <span class="button-text">Sign out of all sessions</span>
-              </button>
-            </form>
           </div>
         </div>
       </section>
@@ -1074,7 +1076,17 @@ badges:
 
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Your API Key</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0">Your API Key</h5>
+              <form id="reset-api-key-form" class="d-inline" novalidate>
+                <button type="submit" class="btn btn-outline-danger btn-sm" id="reset-api-key-btn">
+                  {% uj_icon "rotate", "me-1" %}
+                  <span class="button-text">
+                    Reset<span class="d-none d-md-inline"> API Key</span>
+                  </span>
+                </button>
+              </form>
+            </div>
             <p class="card-text text-muted">Use this private key to authenticate API requests. Keep it secure and never share it publicly.</p>
 
             <!-- API Key Display -->
@@ -1090,21 +1102,14 @@ badges:
             </div>
 
             <!-- Reset API Key -->
-            <div class="alert alert-warning d-flex align-items-start" role="alert">
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
               <div class="me-3">
-                {% uj_icon "triangle-exclamation", "fa-lg" %}
+                {% uj_icon "triangle-exclamation", "fa-2xl" %}
               </div>
               <div class="flex-grow-1">
                 <strong>Warning:</strong> Resetting your API key will invalidate the current key. Any applications using the old key will stop working.
               </div>
             </div>
-
-            <form id="reset-api-key-form" class="d-grid d-sm-block" novalidate>
-              <button type="submit" class="btn btn-danger" id="reset-api-key-btn">
-                {% uj_icon "rotate", "me-2" %}
-                <span class="button-text">Reset API Key</span>
-              </button>
-            </form>
           </div>
         </div>
       </section>
