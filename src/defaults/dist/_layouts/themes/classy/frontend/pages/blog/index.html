@@ -6,7 +6,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 # Hero Section
 hero:
   headline: "The {{ site.brand.name }}"
-  headline_accent: "Blog"
+  headline_accent: "blog"
   subheadline: "Discover insights, tutorials, and news from our team"
 
 # Newsletter CTA Section
@@ -14,8 +14,8 @@ newsletter_cta:
   superheadline:
     icon: "envelope"
     text: "Newsletter"
-  headline: "Never Miss a"
-  headline_accent: "Post"
+  headline: "Never miss a"
+  headline_accent: "post"
   subheadline: "Get the latest insights delivered straight to your inbox. No spam, unsubscribe anytime."
   button:
     text: "Subscribe"
@@ -34,7 +34,7 @@ newsletter_cta:
           {{ page.resolved.hero.headline }} <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
         {% iftruthy page.resolved.hero.subheadline %}
-          <p class="fs-5 text-muted mb-0">
+          <p class="fs-5 text-muted">
             {{ page.resolved.hero.subheadline }}
           </p>
         {% endiftruthy %}

@@ -104,7 +104,7 @@ feature_comparison:
     icon: "sparkles"
     text: "Features"
   headline: "Compare all"
-  headline_accent: "Plans"
+  headline_accent: "plans"
   subheadline: "See exactly what's included in each plan"
 
 # Social Proof Section
@@ -143,7 +143,8 @@ testimonials:
   superheadline:
     icon: "megaphone"
     text: "Testimonials"
-  headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
+  headline: "People {% uj_icon \"heart\", \"text-danger\" %} "
+  headline_accent: "{{ site.brand.name }}"
   subheadline: "Hear from real people who have transformed their business with us"
   items:
     - quote: "This platform transformed my business. The support is incredible!"
@@ -167,9 +168,9 @@ faqs:
   superheadline:
     icon: "messages-question"
     text: "FAQs"
-  headline: "Frequently Asked"
-  headline_accent: "Questions"
-  subheadline: "Everything you need to know about the product and billing. Can't find the answer you're looking for? Please chat to our friendly team."
+  headline: "Frequently asked"
+  headline_accent: "questions"
+  subheadline: "Everything you need to know about {{ site.brand.name }} billing & subscriptions."
   items:
     # - question: "Is {{ site.brand.name }} AI included with my existing {{ site.brand.name }} Studio plan?"
     #   answer: "No, {{ site.brand.name }} AI and {{ site.brand.name }} Studio function as separate products with individual pricing plans. If you were an active lifetime deal holder of {{ site.brand.name }} Studio and had purchased it before August 15, 2023, you'll qualify for free {{ site.brand.name }} AI credits. These will be phased in gradually, and you'll be notified via email when they become available. As for other {{ site.brand.name }} Studio subscribers, we're actively exploring ways to offer some benefits to help you get started on {{ site.brand.name }} AI. Stay tuned for more announcements.<br><br>PS: This is available exclusively to users who have purchased their {{ site.brand.name }} accounts from {{ site.brand.name }}."
@@ -218,7 +219,7 @@ faqs:
           {{ page.resolved.hero.headline }} <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
         {% iftruthy page.resolved.hero.subheadline %}
-          <p class="fs-5 text-muted mb-0">
+          <p class="fs-5 text-muted">
             {{ page.resolved.hero.subheadline }}
           </p>
         {% endiftruthy %}
@@ -635,7 +636,7 @@ faqs:
         <h2 class="h3 fw-bold mb-3">
           {{ page.resolved.cta.headline }}
           {% iftruthy page.resolved.cta.headline_accent %}
-            {{ page.resolved.cta.headline_accent }}
+            <span class="text-accent">{{ page.resolved.cta.headline_accent }}</span>
           {% endiftruthy %}
         </h2>
 
@@ -666,7 +667,12 @@ faqs:
           {{ page.resolved.testimonials.superheadline.text }}
         </span>
       {% endiftruthy %}
-      <h2 class="h2 mb-2">{{ page.resolved.testimonials.headline }}</h2>
+      <h2 class="h2 mb-2">
+        {{ page.resolved.testimonials.headline }}
+        {% iftruthy page.resolved.testimonials.headline_accent %}
+          <span class="text-accent">{{ page.resolved.testimonials.headline_accent }}</span>
+        {% endiftruthy %}
+      </h2>
       {% iftruthy page.resolved.testimonials.subheadline %}
         <p class="fs-5 text-muted">{{ page.resolved.testimonials.subheadline }}</p>
       {% endiftruthy %}
@@ -722,7 +728,7 @@ faqs:
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="text-center mb-4" data-lazy="@class animation-slide-up">
+        <div class="text-center mb-5" data-lazy="@class animation-slide-up">
           {% iftruthy page.resolved.faqs.superheadline.text %}
             <span class="badge bg-body-tertiary border-gradient-rainbow border-1 text-body p-2 mb-1 fw-semibold small">
               {% iftruthy page.resolved.faqs.superheadline.icon %}
@@ -738,7 +744,7 @@ faqs:
             {% endiftruthy %}
           </h2>
           {% iftruthy page.resolved.faqs.subheadline %}
-            <p class="fs-5 text-muted mb-0">{{ page.resolved.faqs.subheadline }}</p>
+            <p class="fs-5 text-muted">{{ page.resolved.faqs.subheadline }}</p>
           {% endiftruthy %}
         </div>
 

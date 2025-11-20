@@ -11,8 +11,8 @@ theme:
 # Hero Section
 hero:
   tagline: "Introducing {{ site.brand.name }}"
-  headline: "The #1 Platform for"
-  headline_accent: "Business Success"
+  headline: "The #1 platform for"
+  headline_accent: "business success"
   description: "AI automation for modern businesses made simple."
   primary_button:
     text: "Get Started Free"
@@ -70,7 +70,7 @@ product_demo:
     icon: "rocket"
     text: "Demo"
   headline: "See {{ site.brand.name }} in"
-  headline_accent: "Action"
+  headline_accent: "action"
   subheadline: "Explore powerful features that help you succeed"
   tabs:
     - id: "dashboard"
@@ -109,19 +109,19 @@ showcase:
   superheadline:
     icon: "cubes"
     text: "Showcase"
-  headline: "What Makes {{ site.brand.name }}"
-  headline_accent: "Different"
+  headline: "What makes {{ site.brand.name }}"
+  headline_accent: "different"
   subheadline: "Powerful features designed to accelerate your success"
   image_ratio: "4x3" # Options: 1x1, 4x3, 16x9, 21x9
   image_object_position: "center" # Options: center, top, bottom, left, right
   items:
-    - title: "Seamless Integration"
+    - title: "Seamless integration"
       description: "Connect with your existing tools and platforms effortlessly. Our system automatically syncs data and streamlines your workflow for maximum efficiency."
       image: "https://cdn.itwcreativeworks.com/assets/sample/images/demos/1x1/sample-demo-1.svg"
-    - title: "Data-Driven Insights"
+    - title: "Data-driven insights"
       description: "Make informed decisions with real-time analytics and actionable insights that help you understand what matters most to your business."
       image: "https://cdn.itwcreativeworks.com/assets/sample/images/demos/1x1/sample-demo-2.svg"
-    - title: "Smart Automation"
+    - title: "Smart automation"
       description: "Focus on what matters while our intelligent platform handles routine tasks automatically, working 24/7 to keep your business running smoothly."
       image: "https://cdn.itwcreativeworks.com/assets/sample/images/demos/1x1/sample-demo-3.svg"
 
@@ -153,7 +153,8 @@ testimonials:
   superheadline:
     icon: "megaphone"
     text: "Testimonials"
-  headline: "People {% uj_icon \"heart\", \"text-danger\" %} {{ site.brand.name }}"
+  headline: "People {% uj_icon \"heart\", \"text-danger\" %} "
+  headline_accent: "{{ site.brand.name }}"
   subheadline: "Hear from real people who have transformed their business with us"
   items:
     - quote: "This platform transformed my business. The support is incredible!"
@@ -200,8 +201,8 @@ cta:
   superheadline:
     icon: "rocket"
     text: "Launch"
-  headline: "Ready to Transform your"
-  headline_accent: "Business?"
+  headline: "Ready to transform your"
+  headline_accent: "business?"
   description: "Join thousands of successful companies who have already accelerated their growth with {{ site.brand.name }}"
   primary_button:
     text: "Start Today"
@@ -556,7 +557,12 @@ cta:
           {{ page.resolved.testimonials.superheadline.text }}
         </span>
       {% endiftruthy %}
-      <h2 class="h2 mb-2">{{ page.resolved.testimonials.headline }}</h2>
+      <h2 class="h2 mb-2">
+        {{ page.resolved.testimonials.headline }}
+        {% iftruthy page.resolved.testimonials.headline_accent %}
+          <span class="text-accent">{{ page.resolved.testimonials.headline_accent }}</span>
+        {% endiftruthy %}
+      </h2>
       {% iftruthy page.resolved.testimonials.subheadline %}
         <p class="fs-5 text-muted">{{ page.resolved.testimonials.subheadline }}</p>
       {% endiftruthy %}
@@ -661,7 +667,7 @@ cta:
         <h2 class="h3 fw-bold mb-3">
           {{ page.resolved.cta.headline }}
           {% iftruthy page.resolved.cta.headline_accent %}
-            {{ page.resolved.cta.headline_accent }}
+            <span class="text-accent">{{ page.resolved.cta.headline_accent }}</span>
           {% endiftruthy %}
         </h2>
 

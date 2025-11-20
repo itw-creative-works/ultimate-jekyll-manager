@@ -6,17 +6,17 @@ layout: themes/[ site.theme.id ]/frontend/core/base
 # Hero Section
 hero:
   headline: "Get in"
-  headline_accent: "Touch"
+  headline_accent: "touch"
   subheadline: "We're here to help! Reach out to our friendly support team and we'll get back to you as soon as possible."
 
 # Contact Methods Section
 contact_methods:
-  - title: "Email Support"
+  - title: "Email support"
     description: "Get help within 24 hours"
     icon: "envelope"
     value: "Email Us"
     link: "#form"
-  - title: "Live Chat"
+  - title: "Live chat"
     description: "Chat with our team now 24/7"
     icon: "comments"
     value: "Chat Now"
@@ -28,7 +28,7 @@ contact_form:
     icon: "envelope"
     text: "Email"
   headline: "Send us a"
-  headline_accent: "Message"
+  headline_accent: "message"
   subheadline: "Fill out the form below and we'll get back to you within 24 hours."
 
 # Stats Section
@@ -56,8 +56,8 @@ testimonials:
   superheadline:
     icon: "megaphone"
     text: "Testimonials"
-  headline: "What Our Customers"
-  headline_accent: "Say"
+  headline: "What our customers"
+  headline_accent: "say"
   subheadline: "Hear from people who've experienced our support firsthand"
   items:
   - quote: "The support team responded within minutes and solved my issue perfectly!"
@@ -81,8 +81,9 @@ faqs:
   superheadline:
     icon: "messages-question"
     text: "FAQs"
-  headline: "Frequently Asked"
-  headline_accent: "Questions"
+  headline: "Frequently asked"
+  headline_accent: "questions"
+  subheadline: "Everything you need to know about our support experience."
   items:
   - question: "How quickly do you respond to support requests?"
     answer: "We aim to respond to all support requests within 24 hours during business days. For urgent issues, our live chat is available 24/7."
@@ -101,7 +102,7 @@ faqs:
           {{ page.resolved.hero.headline }} <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
         {% iftruthy page.resolved.hero.subheadline %}
-          <p class="fs-5 text-muted mb-0">
+          <p class="fs-5 text-muted">
             {{ page.resolved.hero.subheadline }}
           </p>
         {% endiftruthy %}
@@ -334,6 +335,9 @@ faqs:
               <span class="text-accent">{{ page.resolved.faqs.headline_accent }}</span>
             {% endiftruthy %}
           </h2>
+          {% iftruthy page.resolved.faqs.subheadline %}
+            <p class="fs-5 text-muted">{{ page.resolved.faqs.subheadline }}</p>
+          {% endiftruthy %}
         </div>
 
         {% if page.resolved.faqs.items %}
