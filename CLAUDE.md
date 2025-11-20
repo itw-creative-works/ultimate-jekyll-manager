@@ -452,6 +452,67 @@ const formManager = new FormManager('#my-form', options);
 **Reference:** `src/assets/js/libs/form-manager.js`
 **Example:** `src/assets/js/pages/contact/index.js`
 
+## Analytics & Tracking
+
+Ultimate Jekyll uses three tracking platforms: Google Analytics (gtag), Facebook Pixel (fbq), and TikTok Pixel (ttq).
+
+### Tracking Guidelines
+
+**IMPORTANT Rules:**
+- Track important user events with Google Analytics, Facebook Pixel, and TikTok Pixel
+- NEVER add conditional checks for tracking functions (e.g., `if (typeof gtag !== 'undefined')`)
+- Always assume tracking functions exist - they're globally available or stubbed
+- Reference standard events documentation before implementing custom tracking
+- Always track events to ALL THREE platforms in this order:
+  1. Google Analytics (gtag)
+  2. Facebook Pixel (fbq)
+  3. TikTok Pixel (ttq)
+- Put all 3 tracking events in their own function per event for clarity
+
+**Standard Events Documentation:**
+- **Google Analytics GA4:** https://developers.google.com/analytics/devguides/collection/ga4/reference/events
+- **Facebook Pixel:** https://www.facebook.com/business/help/402791146561655?id=1205376682832142
+- **TikTok Pixel:** https://ads.tiktok.com/help/article/standard-events-parameters?redirected=2
+
+### Platform-Specific Requirements
+
+#### TikTok Pixel Requirements
+TikTok has strict validation requirements:
+
+**Required Parameters:**
+- `content_id` - MUST be included in all events
+
+**Valid Content Types:**
+- `"product"`
+- `"product_group"`
+- `"destination"`
+- `"hotel"`
+- `"flight"`
+- `"vehicle"`
+
+Any other content type will generate a validation error.
+
+**Example:**
+```javascript
+// ✅ CORRECT
+ttq.track('ViewContent', {
+  content_id: 'product-123',
+  content_type: 'product'
+});
+
+// ❌ WRONG - Missing content_id
+ttq.track('ViewContent', {
+  content_type: 'product'
+});
+
+// ❌ WRONG - Invalid content_type
+ttq.track('ViewContent', {
+  content_id: 'product-123',
+  content_type: 'custom'  // Not in approved list
+});
+```
+
+
 ## Audit Workflow
 
 When fixing issues identified by the audit task (`src/gulp/tasks/audit.js`):

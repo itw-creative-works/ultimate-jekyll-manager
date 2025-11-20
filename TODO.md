@@ -34,7 +34,7 @@ MAKE COMPONENTS? ASK CLAUDE HOW AND IF ITS POSSIBLE
 
 FIX SIGNIN/SINGUP FORM
 
-https://192.168.86.69:4000/payment/checkout?product=premium&_test_trialEligible=true&_test_appId=dev&_test_cardProcessor=stripe
+https://192.168.86.69:4000/payment/checkout?product=premium&_dev_trialEligible=true&_dev_appId=dev&_dev_cardProcessor=stripe
 
 filter-adaptive-inverse
 

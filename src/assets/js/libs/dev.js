@@ -121,159 +121,222 @@ function setupBreakpointLogger() {
 function setupTrackingInterceptors() {
   console.log('🔍 Setting up tracking interceptors...');
 
-  // Intercept Google Analytics (gtag)
-  if (typeof window.gtag !== 'undefined') {
-    const originalGtag = window.gtag;
-    window.gtag = function() {
-      const args = Array.from(arguments);
-      const command = args[0];
-      const eventNameOrParams = args[1];
-      const params = args[2];
+  // Track which interceptors have been installed
+  const installed = {
+    gtag: false,
+    fbq: false,
+    ttq: false,
+  };
 
-      // Log the gtag call
-      console.log('📊 gtag:', {
-        command: command,
-        event: eventNameOrParams,
-        params: params || eventNameOrParams,
-        fullArgs: args
-      });
+  // Try to install interceptors
+  const tryInstallInterceptors = () => {
+    // Try installing gtag if not already installed
+    if (!installed.gtag && typeof window.gtag !== 'undefined') {
+      installGtagInterceptor();
+      installed.gtag = true;
+    }
 
-      // Call the original gtag function
-      return originalGtag.apply(this, arguments);
-    };
-    console.log('✅ gtag interceptor installed');
+    // Try installing fbq if not already installed
+    if (!installed.fbq && typeof window.fbq !== 'undefined') {
+      installFbqInterceptor();
+      installed.fbq = true;
+    }
+
+    // Try installing ttq if not already installed
+    if (!installed.ttq && typeof window.ttq !== 'undefined' && window.ttq.track) {
+      // Check if it's a stub (contains 'push' in the function)
+      const isStub = window.ttq.track.toString().includes('push');
+
+      if (!isStub) {
+        installTtqInterceptor();
+        installed.ttq = true;
+      }
+    }
+
+    // Return true if all interceptors are installed
+    return installed.gtag && installed.fbq && installed.ttq;
+  };
+
+  // Try installing immediately
+  if (tryInstallInterceptors()) {
+    return;
   }
 
-  // Intercept Facebook Pixel (fbq)
-  if (typeof window.fbq !== 'undefined') {
-    const originalFbq = window.fbq;
+  // Poll every 500ms to check if tracking libraries are ready
+  const pollInterval = setInterval(() => {
+    if (tryInstallInterceptors()) {
+      clearInterval(pollInterval);
+    }
+  }, 500);
 
-    // Create wrapper function that preserves all properties
-    const fbqWrapper = function() {
-      const args = Array.from(arguments);
-      const command = args[0];
-      const event = args[1];
-      const params = args[2];
+  // Stop polling after 10 seconds regardless
+  setTimeout(() => {
+    clearInterval(pollInterval);
+    console.log('⏱️ Tracking interceptor polling stopped');
 
-      // Log the fbq call
-      console.log('📘 fbq:', {
-        command: command,
-        event: event,
-        params: params,
-        fullArgs: args
-      });
+    if (!installed.gtag) {
+      console.log('⚠️ gtag interceptor was never installed');
+    }
+    if (!installed.fbq) {
+      console.log('⚠️ fbq interceptor was never installed');
+    }
+    if (!installed.ttq) {
+      console.log('⚠️ ttq interceptor was never installed');
+    }
+  }, 10000);
+}
 
-      // Call the original fbq function
-      return originalFbq.apply(this, arguments);
-    };
+function installGtagInterceptor() {
+  if (typeof window.gtag === 'undefined') {
+    return;
+  }
 
-    // Copy all properties from original fbq to wrapper
-    Object.keys(originalFbq).forEach(key => {
-      fbqWrapper[key] = originalFbq[key];
+  const originalGtag = window.gtag;
+
+  window.gtag = function() {
+    const args = Array.from(arguments);
+    const command = args[0];
+    const eventNameOrParams = args[1];
+    const params = args[2];
+
+    // Log the gtag call
+    console.log('📊 gtag:', {
+      command: command,
+      event: eventNameOrParams,
+      params: params || eventNameOrParams,
+      fullArgs: args
     });
 
-    // If callMethod exists, wrap it too
-    if (originalFbq.callMethod) {
-      const originalCallMethod = originalFbq.callMethod;
-      fbqWrapper.callMethod = function() {
-        const args = Array.from(arguments);
-        console.log('📘 fbq.callMethod:', args);
-        return originalCallMethod.apply(originalFbq, arguments);
-      };
-    }
+    // Call the original gtag function
+    return originalGtag.apply(this, arguments);
+  };
 
-    // Preserve queue if it exists (for stub implementation)
-    if (originalFbq.queue) {
-      fbqWrapper.queue = originalFbq.queue;
-    }
+  console.log('✅ gtag interceptor installed');
+}
 
-    // Preserve push method if it exists (for stub implementation)
-    if (originalFbq.push) {
-      fbqWrapper.push = originalFbq.push;
-    }
-
-    window.fbq = fbqWrapper;
-    console.log('✅ fbq interceptor installed');
+function installFbqInterceptor() {
+  if (typeof window.fbq === 'undefined') {
+    return;
   }
 
-  // Intercept TikTok Pixel (ttq)
-  if (typeof window.ttq !== 'undefined' && window.ttq.track) {
-    const originalTtq = window.ttq;
-    const originalTrack = window.ttq.track;
-    const originalPage = window.ttq.page;
-    const originalIdentify = window.ttq.identify;
-    const originalLoad = window.ttq.load;
+  const originalFbq = window.fbq;
 
-    // Intercept track method
-    window.ttq.track = function() {
+  // Create wrapper function that preserves all properties
+  const fbqWrapper = function() {
+    const args = Array.from(arguments);
+    const command = args[0];
+    const event = args[1];
+    const params = args[2];
+
+    // Log the fbq call
+    console.log('📘 fbq:', {
+      command: command,
+      event: event,
+      params: params,
+      fullArgs: args
+    });
+
+    // Call the original fbq function
+    return originalFbq.apply(this, arguments);
+  };
+
+  // Copy all properties from original fbq to wrapper
+  Object.keys(originalFbq).forEach(key => {
+    fbqWrapper[key] = originalFbq[key];
+  });
+
+  // If callMethod exists, wrap it too
+  if (originalFbq.callMethod) {
+    const originalCallMethod = originalFbq.callMethod;
+    fbqWrapper.callMethod = function() {
       const args = Array.from(arguments);
-      const event = args[0];
-      const params = args[1];
-
-      // Log the ttq.track call
-      console.log('🎵 ttq.track:', {
-        event: event,
-        params: params,
-        fullArgs: args
-      });
-
-      // Call the original track function
-      return originalTrack.apply(originalTtq, arguments);
+      console.log('📘 fbq.callMethod:', args);
+      return originalCallMethod.apply(originalFbq, arguments);
     };
-
-    // Intercept page method
-    window.ttq.page = function() {
-      const args = Array.from(arguments);
-
-      // Log the ttq.page call
-      console.log('🎵 ttq.page:', {
-        fullArgs: args
-      });
-
-      // Call the original page function
-      return originalPage.apply(originalTtq, arguments);
-    };
-
-    // Intercept identify method
-    window.ttq.identify = function() {
-      const args = Array.from(arguments);
-
-      // Log the ttq.identify call
-      console.log('🎵 ttq.identify:', {
-        fullArgs: args
-      });
-
-      // Call the original identify function
-      return originalIdentify.apply(originalTtq, arguments);
-    };
-
-    // Intercept load method
-    window.ttq.load = function() {
-      const args = Array.from(arguments);
-
-      // Log the ttq.load call
-      console.log('🎵 ttq.load:', {
-        pixelId: args[0],
-        fullArgs: args
-      });
-
-      // Call the original load function
-      return originalLoad.apply(originalTtq, arguments);
-    };
-
-    console.log('✅ ttq interceptor installed');
   }
 
-  // Check again after a delay in case tracking libraries load asynchronously
-  setTimeout(() => {
-    if (typeof window.gtag === 'undefined') {
-      console.log('⚠️ gtag not found - may load later');
-    }
-    if (typeof window.fbq === 'undefined') {
-      console.log('⚠️ fbq not found - may load later');
-    }
-    if (typeof window.ttq === 'undefined' || !window.ttq.track) {
-      console.log('⚠️ ttq not found or is a stub - may load later');
-    }
-  }, 3000);
+  // Preserve queue if it exists (for stub implementation)
+  if (originalFbq.queue) {
+    fbqWrapper.queue = originalFbq.queue;
+  }
+
+  // Preserve push method if it exists (for stub implementation)
+  if (originalFbq.push) {
+    fbqWrapper.push = originalFbq.push;
+  }
+
+  window.fbq = fbqWrapper;
+  console.log('✅ fbq interceptor installed');
+}
+
+function installTtqInterceptor() {
+  if (typeof window.ttq === 'undefined' || !window.ttq.track) {
+    return;
+  }
+
+  const originalTtq = window.ttq;
+  const originalTrack = window.ttq.track;
+  const originalPage = window.ttq.page;
+  const originalIdentify = window.ttq.identify;
+  const originalLoad = window.ttq.load;
+
+  // Intercept track method
+  window.ttq.track = function() {
+    const args = Array.from(arguments);
+    const event = args[0];
+    const params = args[1];
+
+    // Log the ttq.track call
+    console.log('🎵 ttq.track:', {
+      event: event,
+      params: params,
+      fullArgs: args
+    });
+
+    // Call the original track function
+    return originalTrack.apply(originalTtq, arguments);
+  };
+
+  // Intercept page method
+  window.ttq.page = function() {
+    const args = Array.from(arguments);
+
+    // Log the ttq.page call
+    console.log('🎵 ttq.page:', {
+      fullArgs: args
+    });
+
+    // Call the original page function
+    return originalPage.apply(originalTtq, arguments);
+  };
+
+  // Intercept identify method
+  window.ttq.identify = function() {
+    const args = Array.from(arguments);
+
+    // Log the ttq.identify call
+    console.log('🎵 ttq.identify:', {
+      userData: args[0],
+      fullArgs: args
+    });
+
+    // Call the original identify function
+    return originalIdentify.apply(originalTtq, arguments);
+  };
+
+  // Intercept load method
+  window.ttq.load = function() {
+    const args = Array.from(arguments);
+
+    // Log the ttq.load call
+    console.log('🎵 ttq.load:', {
+      pixelId: args[0],
+      fullArgs: args
+    });
+
+    // Call the original load function
+    return originalLoad.apply(originalTtq, arguments);
+  };
+
+  console.log('✅ ttq interceptor installed');
 }

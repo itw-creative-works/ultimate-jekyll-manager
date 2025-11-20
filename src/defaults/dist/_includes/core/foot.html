@@ -69,6 +69,7 @@
     buildTime: {{ site.uj.cache_breaker }},
     brand: {{ page.resolved.brand | jsonify }},
     advertising: {{ page.resolved.advertising | jsonify }},
+    tracking: {{ page.resolved.tracking | jsonify }},
     {% for item in page.resolved.web_manager %}
       {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
     {% endfor %}

@@ -32,7 +32,7 @@ export default function (Manager, options) {
       console.log('[Auth] state changed:', state);
 
       // Set user ID for analytics tracking
-      setAnalyticsUserId(user);
+      setAnalyticsUserId(user, webManager);
 
       // Check if we're in the process of signing out
       if (authSignout === 'true' && user) {
@@ -119,9 +119,10 @@ function redirect(url, returnUrl) {
   window.location.href = newURL;
 }
 
-function setAnalyticsUserId(user) {
+function setAnalyticsUserId(user, webManager) {
   const userId = user?.uid;
   const email = user?.email;
+  const metaPixelId = webManager.config.tracking['meta-pixel'];
 
   // Short-circuit if no user
   if (!userId) {
@@ -129,7 +130,7 @@ function setAnalyticsUserId(user) {
     gtag('set', { user_id: null });
 
     // Facebook Pixel - Clear advanced matching
-    fbq('init', fbq.pixelId, {});
+    fbq('init', metaPixelId, {});
 
     // TikTok Pixel - Clear user data
     ttq.identify({});
@@ -147,7 +148,7 @@ function setAnalyticsUserId(user) {
   });
 
   // Facebook Pixel - Set advanced matching with user data
-  fbq('init', fbq.pixelId, {
+  fbq('init', metaPixelId, {
     external_id: userId,
     // em: email ? btoa(email.toLowerCase().trim()) : undefined,
     em: email,
