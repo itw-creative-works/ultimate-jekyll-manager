@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.120",
+  "version": "0.0.121",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -56,7 +56,8 @@
   "homepage": "https://template.itwcreativeworks.com",
   "noteDeps": {
     "browser-sync": "2.23.7 (6-22-2023): Hard lock because every version after uses socket.io@4.7.0 which uses engine.io@6.5.0 which is incompatible with node 10.15.1 due to TextDecoder() in build process",
-    "sharp": "0.23.1 (sometime before 2021ish): Hard lock because later versions had issues. Possibly solved in higher node versions"
+    "sharp": "0.23.1 (sometime before 2021ish): Hard lock because later versions had issues. Possibly solved in higher node versions",
+    "@sentry/core (override)": "Must match the major version used by @sentry/browser in web-manager. Lighthouse uses @sentry/node@9.x which causes hoisting conflicts."
   },
   "dependencies": {
     "@babel/core": "^7.28.5",
@@ -108,5 +109,8 @@
   },
   "devDependencies": {
     "prepare-package": "^1.2.5"
+  },
+  "overrides": {
+    "@sentry/core": ">=10.0.0"
   }
 }
