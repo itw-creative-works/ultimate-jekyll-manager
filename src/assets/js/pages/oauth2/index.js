@@ -33,7 +33,7 @@ async function handleOAuthCallback() {
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    const stateParam = urlParams.get('state');
+    const state = urlParams.get('state');
     const error = urlParams.get('error');
     const errorDescription = urlParams.get('error_description');
 
@@ -47,47 +47,47 @@ async function handleOAuthCallback() {
       throw new Error('Missing authorization code');
     }
 
-    if (!stateParam) {
+    if (!state) {
       throw new Error('Missing state parameter');
     }
 
     // Parse state
-    let state;
+    let stateParsed;
     try {
-      state = JSON.parse(decodeURIComponent(stateParam));
+      stateParsed = JSON.parse(decodeURIComponent(state));
     } catch (e) {
       console.error('Failed to parse state:', e);
       throw new Error('Invalid state parameter');
     }
 
-    console.log('OAuth callback state:', state);
+    console.log('OAuth callback state:', stateParsed);
 
     // Validate state
-    if (!state.provider) {
+    if (!stateParsed.provider) {
       throw new Error('Missing provider in state');
     }
 
-    if (!state.authenticationToken) {
+    if (!stateParsed.authenticationToken) {
       throw new Error('Missing authentication token');
     }
 
-    if (!state.serverUrl) {
+    if (!stateParsed.serverUrl) {
       throw new Error('Missing server URL');
     }
 
     // Update provider name
-    const providerName = capitalizeFirstLetter(state.provider);
+    const providerName = capitalizeFirstLetter(stateParsed.provider);
     $provider.textContent = providerName;
 
     // Validate redirect URL
-    if (state.redirectUrl && !isValidRedirectUrl(state.redirectUrl)) {
+    if (stateParsed.redirectUrl && !isValidRedirectUrl(stateParsed.redirectUrl)) {
       throw new Error('Invalid redirect URL');
     }
 
     // Build tokenize payload
     const payload = {
       state: 'tokenize',
-      provider: state.provider,
+      provider: stateParsed.provider,
       code: code
     };
 
@@ -101,13 +101,13 @@ async function handleOAuthCallback() {
     console.log('Tokenize payload:', payload);
 
     // Call server to complete OAuth flow
-    const response = await fetch(state.serverUrl, {
+    const response = await fetch(stateParsed.serverUrl, {
       method: 'POST',
       timeout: 60000,
       response: 'json',
       tries: 2,
       body: {
-        authenticationToken: state.authenticationToken,
+        authenticationToken: stateParsed.authenticationToken,
         command: 'user:oauth2',
         payload: payload
       }
@@ -120,7 +120,7 @@ async function handleOAuthCallback() {
     }
 
     // Show success
-    showSuccess(state.redirectUrl || state.referrer || '/account#connections');
+    showSuccess(stateParsed.redirectUrl || stateParsed.referrer || '/account#connections');
 
   } catch (error) {
     console.error('OAuth callback error:', error);
@@ -163,11 +163,11 @@ function showError(message) {
 
   // Set return button href
   const urlParams = new URLSearchParams(window.location.search);
-  const stateParam = urlParams.get('state');
+  const state = urlParams.get('state');
 
-  if (stateParam) {
+  if (state) {
     try {
-      const state = JSON.parse(decodeURIComponent(stateParam));
+      const state = JSON.parse(decodeURIComponent(state));
       if (state.referrer) {
         $returnButton.href = state.referrer;
       }

@@ -1,4 +1,8 @@
-// Profile section module
+/**
+ * Profile Section JavaScript
+ */
+
+// Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 
 let formManager = null;
@@ -13,7 +17,9 @@ export function init(wm) {
 
 // Load profile data
 export function loadData(account, user) {
-  if (!account) return;
+  if (!account) {
+    return;
+  }
 
   // Format birthday if it exists
   let birthdayValue = '';
@@ -33,34 +39,31 @@ export function loadData(account, user) {
   const formData = {
     auth: {
       email: account.auth?.email || user?.email || '',
-      uid: user?.uid || account.auth?.uid || ''
+      uid: user?.uid || account.auth?.uid || '',
     },
     personal: {
       name: {
         first: account.personal?.name?.first || '',
-        last: account.personal?.name?.last || ''
+        last: account.personal?.name?.last || '',
       },
       birthday: birthdayValue,
       gender: account.personal?.gender || '',
       location: {
         country: account.personal?.location?.country || '',
         region: account.personal?.location?.region || '',
-        city: account.personal?.location?.city || ''
+        city: account.personal?.location?.city || '',
       },
       telephone: {
         countryCode: phoneCountryCode,
-        national: account.personal?.telephone?.national?.toString() || ''
-      }
-    }
+        national: account.personal?.telephone?.national?.toString() || '',
+      },
+    },
   };
 
-  formManager.setValues(formData);
+  formManager.setData(formData);
 
   // Set form to ready state now that data is loaded
-  formManager.setFormState('ready');
-
-  // Avatar and display name are now handled by data-wm-bind in HTML
-  // since photoURL and displayName are always available from getUser()
+  formManager.ready();
 
   // Update join date
   updateJoinDate(user);
@@ -72,29 +75,16 @@ export function loadData(account, user) {
 // Setup profile form
 function setupProfileForm() {
   formManager = new FormManager('#profile-form', {
-    autoDisable: true,
-    showSpinner: true,
-    allowMultipleSubmissions: true,
-    submitButtonLoadingText: 'Saving...',
-    initialState: 'loading' // Start in loading state until data loads
+    autoReady: false, // Start in initializing state until data loads
+    submittingText: 'Saving...',
   });
 
-  // Handle form submission
-  formManager.addEventListener('submit', async (event) => {
-    const { data } = event.detail;
+  formManager.on('submit', async ({ data }) => {
+    // Update user profile
+    await updateUserProfile(data);
 
-    try {
-      // Update user profile
-      await updateUserProfile(data);
-
-      // Show success message
-      webManager.utilities().showNotification('Profile updated successfully', 'success');
-
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      webManager.utilities().showNotification('Failed to update profile. Please try again.', 'danger');
-      throw error; // Re-throw to trigger FormManager's error handling
-    }
+    // Show success message
+    formManager.showSuccess('Profile updated successfully!');
   });
 }
 
@@ -117,12 +107,12 @@ async function updateUserProfile(data) {
     const date = new Date(data.personal.birthday);
     data.personal.birthday = {
       timestamp: date.toISOString(),
-      timestampUNIX: Math.floor(date.getTime() / 1000)
+      timestampUNIX: Math.floor(date.getTime() / 1000),
     };
   } else {
     data.personal.birthday = {
-      timestamp: "1970-01-01T00:00:00.000Z",
-      timestampUNIX: 0
+      timestamp: '1970-01-01T00:00:00.000Z',
+      timestampUNIX: 0,
     };
   }
 
@@ -151,21 +141,16 @@ async function updateUserProfile(data) {
   await userDocRef.set(data, { merge: true });
 
   console.log('Profile successfully updated in Firestore');
-
-  // Avatar updates automatically via data-wm-bind
 }
-
-// Avatar functionality removed - photoURL is always available from getUser()
-// and is handled via data-wm-bind in the HTML template
-
-
 
 // Handle copy UID
 async function handleCopyUid() {
   const $uidInput = document.getElementById('uid-input');
   const $copyBtn = document.getElementById('copy-uid-btn');
 
-  if (!$uidInput || !$uidInput.value) return;
+  if (!$uidInput || !$uidInput.value) {
+    return;
+  }
 
   try {
     // Use webManager's clipboard utility
@@ -185,29 +170,26 @@ async function handleCopyUid() {
       $copyBtn.classList.remove('btn-success');
       $copyBtn.classList.add('btn-outline-adaptive');
     }, 2000);
-
   } catch (err) {
     console.error('Failed to copy UID:', err);
   }
 }
 
-// Display name functionality removed - displayName is always available from getUser()
-// and is handled via data-wm-bind in the HTML template
-
 // Update join date from Firebase user
 function updateJoinDate(user) {
   const $joinDate = document.getElementById('profile-join-date');
-  if (!$joinDate) return;
+  if (!$joinDate) {
+    return;
+  }
 
   // Get creation time from Firebase user metadata
-  // The metadata object has creationTime as a string timestamp
   const creationTime = user?.metadata?.creationTime;
 
   if (creationTime) {
     const joinDate = new Date(creationTime);
     const formattedDate = joinDate.toLocaleDateString('en-US', {
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     $joinDate.textContent = `Member since ${formattedDate}`;
@@ -228,7 +210,7 @@ function updateRoleBadges(account) {
     developer: 'badge-coder',
     moderator: 'badge-moderator',
     betaTester: 'badge-beta',
-    vip: 'badge-vip'
+    vip: 'badge-vip',
   };
 
   // Show/hide role badges
@@ -246,9 +228,9 @@ function updateRoleBadges(account) {
   // Show premium badge if subscription is active
   const $premiumBadge = document.getElementById('badge-premium');
   if ($premiumBadge) {
-    const isActive = subscription?.status === 'active' ||
-                     subscription?.status === 'trialing' ||
-                     subscription?.active === true;
+    const isActive = subscription?.status === 'active'
+      || subscription?.status === 'trialing'
+      || subscription?.active === true;
 
     if (isActive) {
       $premiumBadge.classList.remove('d-none');
@@ -257,4 +239,3 @@ function updateRoleBadges(account) {
     }
   }
 }
-

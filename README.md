@@ -381,14 +381,183 @@ const response = await authorizedFetch(serverApiURL, {
 
 #### FormManager Library
 
-Custom library for form handling with built-in state management and validation.
+Lightweight form state management library with built-in validation, state machine, and event system.
 
 **Import:**
 ```javascript
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 ```
 
-**Documentation:** See [form-manager.js](src/assets/js/libs/form-manager.js) for full API and usage examples.
+**Basic Usage:**
+```javascript
+const formManager = new FormManager('#my-form', {
+  allowResubmit: true,      // Allow form to be submitted again after success
+  resetOnSuccess: false,    // Don't clear fields after success
+  warnOnUnsavedChanges: false // Don't warn on page leave
+});
+
+// Handle form submission
+formManager.on('submit', async ({ data, $submitButton }) => {
+  const response = await fetch('/api/submit', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error('Submission failed');
+  }
+
+  formManager.showSuccess('Form submitted successfully!');
+});
+```
+
+**State Machine:**
+```
+initializing → ready ⇄ submitting → ready (or submitted)
+```
+
+**Events:**
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `submit` | `{ data, $submitButton }` | Form submission. Throw an error to show failure message. |
+| `validation` | `{ data, setError }` | Custom validation before submit. Use `setError(fieldName, message)` to add errors. |
+| `change` | `{ field, name, value, data }` | Called when any field value changes. |
+| `statechange` | `{ state, previousState }` | Called when form state changes. |
+
+**Validation:**
+
+FormManager runs validation automatically before the `submit` event:
+
+1. **HTML5 Validation** - Automatically checks `required`, `minlength`, `maxlength`, `min`, `max`, `pattern`, `type="email"`, `type="url"`
+2. **Custom Validation** - Use the `validation` event for business logic
+
+```javascript
+formManager.on('validation', ({ data, setError }) => {
+  // Custom validation runs AFTER HTML5 validation
+  if (data.age && parseInt(data.age) < 18) {
+    setError('age', 'You must be 18 or older');
+  }
+
+  if (data.password !== data.confirmPassword) {
+    setError('confirmPassword', 'Passwords do not match');
+  }
+});
+```
+
+Validation errors are displayed using Bootstrap's `is-invalid` class and `.invalid-feedback` elements. The first field with an error is automatically focused.
+
+**Autofocus:**
+
+When the form transitions to `ready` state, FormManager automatically focuses any field with the `autofocus` attribute:
+
+```html
+<input type="text" name="email" autofocus>
+```
+
+**Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `on(event, callback)` | Register event listener (chainable) |
+| `ready()` | Manually transition to ready state (for `autoReady: false`) |
+| `getData()` | Get form data as nested object |
+| `setData(obj)` | Populate form from a nested object |
+| `showSuccess(msg)` | Show success notification |
+| `showError(msg)` | Show error notification |
+| `reset()` | Reset form and state |
+| `isDirty()` | Check if form has unsaved changes |
+| `clearFieldErrors()` | Clear all validation error displays |
+| `throwFieldErrors({ field: msg })` | Set errors and throw (for use in submit handler) |
+
+**Nested Field Names (Dot Notation):**
+
+Use dot notation in field `name` attributes for nested data structures:
+
+```html
+<input name="user.name" value="John">
+<input name="user.address.city" value="NYC">
+<input name="user.address.zip" value="10001">
+```
+
+Produces:
+```javascript
+{
+  user: {
+    name: 'John',
+    address: {
+      city: 'NYC',
+      zip: '10001'
+    }
+  }
+}
+```
+
+**Checkbox Handling:**
+
+- **Single checkbox:** Returns `true` or `false`
+- **Checkbox group (multiple with same name):** Returns object with each value as key
+
+```html
+<!-- Single checkbox -->
+<input type="checkbox" name="subscribe" checked>
+<!-- Result: { subscribe: true } -->
+
+<!-- Checkbox group -->
+<input type="checkbox" name="features" value="darkmode" checked>
+<input type="checkbox" name="features" value="analytics">
+<input type="checkbox" name="features" value="beta" checked>
+<!-- Result: { features: { darkmode: true, analytics: false, beta: true } } -->
+```
+
+**Multiple Submit Buttons:**
+
+Access the clicked submit button to handle different actions:
+
+```html
+<button type="submit" data-action="save">Save</button>
+<button type="submit" data-action="draft">Save as Draft</button>
+```
+
+```javascript
+formManager.on('submit', async ({ data, $submitButton }) => {
+  const action = $submitButton?.dataset?.action;
+
+  if (action === 'draft') {
+    await saveDraft(data);
+    formManager.showSuccess('Draft saved!');
+  } else {
+    await saveAndPublish(data);
+    formManager.showSuccess('Published!');
+  }
+});
+```
+
+**Manual Ready Mode:**
+
+For forms that need async initialization (e.g., loading data from API):
+
+```javascript
+const formManager = new FormManager('#my-form', { autoReady: false });
+
+// Load data, then mark ready
+const userData = await fetchUserData();
+formManager.setData(userData);
+formManager.ready(); // Now form is interactive
+```
+
+**Configuration Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `autoReady` | `true` | Auto-transition to ready when DOM is ready |
+| `initialState` | `'ready'` | State after autoReady fires |
+| `allowResubmit` | `true` | Allow form resubmission after success |
+| `resetOnSuccess` | `false` | Clear fields after successful submission |
+| `warnOnUnsavedChanges` | `false` | Show browser warning when leaving with unsaved changes |
+| `submittingText` | `'Processing...'` | Text shown on submit button during submission |
+
+**Test Page:** Navigate to `/test/libraries/form-manager` to see FormManager in action with various configurations.
 
 ### Icons
 * Fontawesome

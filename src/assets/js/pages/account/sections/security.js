@@ -1,4 +1,8 @@
-// Security section module
+/**
+ * Security Section JavaScript
+ */
+
+// Libraries
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
@@ -6,7 +10,11 @@ import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js
 let webManager = null;
 let firebaseAuth = null;
 let signinMethodForms = new Map(); // Store FormManager instances for signin methods
-let signoutAllForm = null; // FormManager instance for sign out all sessions
+let signoutAllFormManager = null; // FormManager instance for sign out all sessions
+
+// Check query string for popup parameter
+const url = new URL(window.location.href);
+const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== window.top;
 
 // Initialize security section
 export function init(wm) {
@@ -17,7 +25,9 @@ export function init(wm) {
 
 // Load security data
 export function loadData(account) {
-  if (!account) return;
+  if (!account) {
+    return;
+  }
 
   console.log('[DEBUG] security.js - loadData() called with account:', account);
 
@@ -106,7 +116,7 @@ async function updateSigninMethods() {
     $googleEmail: !!$googleEmail,
     $googleForm: !!$googleForm,
     $connectButton: !!$connectButton,
-    $disconnectButton: !!$disconnectButton
+    $disconnectButton: !!$disconnectButton,
   });
 
   if ($googleEmail && $connectButton && $disconnectButton) {
@@ -161,7 +171,9 @@ function update2FAStatus(twoFactorData) {
 // Update active sessions
 async function updateActiveSessions(account) {
   const $sessionsList = document.getElementById('active-sessions-list');
-  if (!$sessionsList) return;
+  if (!$sessionsList) {
+    return;
+  }
 
   const sessions = [];
 
@@ -179,7 +191,7 @@ async function updateActiveSessions(account) {
       region: account.activity.geolocation?.region,
       country: account.activity.geolocation?.country,
       timestamp: account.activity.created?.timestamp,
-      timestampUNIX: account.activity.created?.timestampUNIX
+      timestampUNIX: account.activity.created?.timestampUNIX,
     };
     sessions.push(currentSession);
   }
@@ -195,9 +207,7 @@ async function updateActiveSessions(account) {
       tries: 2,
       body: {
         command: 'user:get-active-sessions',
-        payload: {
-          // id: 'app',
-        },
+        payload: {},
       },
     });
 
@@ -240,7 +250,6 @@ async function updateActiveSessions(account) {
         sessions.push(sessionObj);
       });
     }
-
   } catch (error) {
     console.error('Failed to get active sessions:', error);
   }
@@ -259,7 +268,7 @@ async function updateActiveSessions(account) {
       region: account.lastActivity.geolocation?.region,
       country: account.lastActivity.geolocation?.country,
       timestamp: account.lastActivity.timestamp,
-      timestampUNIX: account.lastActivity.timestampUNIX
+      timestampUNIX: account.lastActivity.timestampUNIX,
     };
 
     // Only add if it's different from current session (different IP or timestamp)
@@ -319,21 +328,16 @@ function initializeSigninMethodForms() {
     console.log('[DEBUG] security.js - Initializing password FormManager');
 
     const formManager = new FormManager($passwordForm, {
-      allowMultipleSubmissions: false,
-      autoDisable: true,
-      showSpinner: true,
-      submitButtonSuccessText: 'Email Sent'
+      allowResubmit: false,
+      submittingText: 'Sending...',
+      submittedText: 'Email Sent!',
     });
 
     signinMethodForms.set('password', formManager);
 
-    formManager.addEventListener('submit', async () => {
-      try {
-        await handleChangePassword();
-      } catch (error) {
-        formManager.showError(error);
-        formManager.setFormState('ready');
-      }
+    formManager.on('submit', async () => {
+      await handleChangePassword();
+      formManager.showSuccess('Password reset email sent!');
     });
   }
 
@@ -345,44 +349,24 @@ function initializeSigninMethodForms() {
     console.log('[DEBUG] security.js - Google form exists:', !!$googleForm);
 
     const formManager = new FormManager($googleForm, {
-      autoDisable: true,
-      showSpinner: true
+      submittingText: 'Connecting...',
     });
 
     signinMethodForms.set('google', formManager);
     console.log('[DEBUG] security.js - Google FormManager initialized and stored');
 
-    formManager.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const { submitButton } = event.detail;
-
+    formManager.on('submit', async ({ $submitButton }) => {
       // Determine action from the clicked button's data-action attribute
-      const action = submitButton?.getAttribute('data-action');
+      const action = $submitButton?.getAttribute('data-action');
 
-      try {
-        if (action === 'disconnect') {
-          await disconnectGoogleProvider();
-        } else if (action === 'connect') {
-          await connectGoogleProvider();
-        }
-
-        // Set form state back to ready first
-        formManager.setFormState('ready');
-
-        // Then update display (this will set the button text correctly again)
-        updateSigninMethods();
-      } catch (error) {
-        // Reset form state
-        formManager.setFormState('ready');
-
-        // If user cancelled, also update the display to ensure button state is correct
-        if (error.message === 'Disconnection cancelled') {
-          updateSigninMethods();
-        } else {
-          // Show error for other failures
-          formManager.showError(error);
-        }
+      if (action === 'disconnect') {
+        await disconnectGoogleProvider();
+      } else if (action === 'connect') {
+        await connectGoogleProvider();
       }
+
+      // Update display after success
+      updateSigninMethods();
     });
   }
 
@@ -397,43 +381,30 @@ function initializeSigninMethodForms() {
 function initializeSignoutAllForm() {
   const $form = document.getElementById('signout-all-sessions-form');
 
-  if ($form && !signoutAllForm) {
-    signoutAllForm = new FormManager($form, {
-      autoDisable: true,
-      showSpinner: true
+  if ($form && !signoutAllFormManager) {
+    signoutAllFormManager = new FormManager($form, {
+      submittingText: 'Signing out...',
     });
 
-    signoutAllForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
+    signoutAllFormManager.on('submit', async () => {
       // 1ms wait to allow form state to update and show processing
       await new Promise(resolve => setTimeout(resolve, 1));
 
-      try {
-        // Confirm sign out
-        if (!confirm('Are you sure you want to sign out of all sessions? This will log you out everywhere, including this device.')) {
-          return signoutAllForm.setFormState('ready');
-        }
-
-        // Sign out of all sessions
-        await webManager.auth().signOut();
-
-        // Show success message
-        webManager.utilities().showNotification('Successfully signed out of all sessions.', 'success');
-
-        // Note: The page will likely redirect due to auth state change
-        // so we might not need to reset form state
-      } catch (error) {
-        if (error.message !== 'Sign out cancelled') {
-          signoutAllForm.showError(error);
-        }
-        signoutAllForm.setFormState('ready');
+      // Confirm sign out
+      if (!confirm('Are you sure you want to sign out of all sessions? This will log you out everywhere, including this device.')) {
+        throw new Error('Sign out cancelled.');
       }
+
+      // Sign out of all sessions
+      await webManager.auth().signOut();
+
+      // Show success message
+      signoutAllFormManager.showSuccess('Successfully signed out of all sessions.');
+
+      // Note: The page will likely redirect due to auth state change
     });
   }
 }
-
-
 
 // Connect Google provider
 async function connectGoogleProvider() {
@@ -442,35 +413,38 @@ async function connectGoogleProvider() {
 
   const provider = new GoogleAuthProvider();
 
-  try {
-    // Try popup first for better UX
-    const result = await linkWithPopup(firebaseAuth.currentUser, provider);
-    webManager.utilities().showNotification('Google account connected successfully', 'success');
+  // Use popup if query parameter is set, otherwise use redirect
+  if (useAuthPopup) {
+    try {
+      const result = await linkWithPopup(firebaseAuth.currentUser, provider);
+      webManager.utilities().showNotification('Google account connected successfully', 'success');
 
-    // Force refresh of the current user to get updated provider data
-    await firebaseAuth.currentUser.reload();
+      // Force refresh of the current user to get updated provider data
+      await firebaseAuth.currentUser.reload();
 
-    return result;
-  } catch (error) {
-    // Check if we should fallback to redirect
-    if (error.code === 'auth/popup-blocked'
-        || error.code === 'auth/popup-closed-by-user'
-        || error.code === 'auth/cancelled-popup-request') {
+      return result;
+    } catch (error) {
+      // Check if we should fallback to redirect
+      if (error.code === 'auth/popup-blocked'
+          || error.code === 'auth/popup-closed-by-user'
+          || error.code === 'auth/cancelled-popup-request') {
 
-      console.log('Popup failed, falling back to redirect:', error.code);
+        console.log('Popup failed, falling back to redirect:', error.code);
 
-      // Fallback to redirect
-      try {
+        // Fallback to redirect
         await linkWithRedirect(firebaseAuth.currentUser, provider);
         // This will redirect the page, so no immediate result
-      } catch (redirectError) {
-        throw redirectError;
+      } else if (error.code === 'auth/credential-already-in-use') {
+        throw new Error('This Google account is already linked to another user');
+      } else {
+        throw error;
       }
-    } else if (error.code === 'auth/credential-already-in-use') {
-      throw new Error('This Google account is already linked to another user');
-    } else {
-      throw error;
     }
+  } else {
+    // Use redirect by default
+    console.log('Using redirect for Google account linking');
+    await linkWithRedirect(firebaseAuth.currentUser, provider);
+    // This will redirect the page, so no immediate result
   }
 }
 
@@ -481,7 +455,7 @@ async function disconnectGoogleProvider() {
 
   // Confirm disconnection
   if (!confirm('Are you sure you want to disconnect your Google account?')) {
-    throw new Error('Disconnection cancelled');
+    throw new Error('Disconnection cancelled.');
   }
 
   // Dynamic import of Firebase auth methods
@@ -508,22 +482,16 @@ async function disconnectGoogleProvider() {
 
 // Handle change password
 async function handleChangePassword() {
-  try {
-    const user = webManager.auth().getUser();
-    if (!user || !user.email) {
-      throw new Error('Please log in to reset your password.');
-    }
-
-    // Import Firebase auth method
-    const { sendPasswordResetEmail } = await import('@firebase/auth');
-
-    // Send password reset email
-    await sendPasswordResetEmail(firebaseAuth, user.email);
-    webManager.utilities().showNotification('Password reset email sent. Please check your inbox.', 'info');
-  } catch (error) {
-    console.error('Failed to send password reset:', error);
-    throw new Error(error.message || 'Failed to send password reset email. Please try again.');
+  const user = webManager.auth().getUser();
+  if (!user || !user.email) {
+    throw new Error('Please log in to reset your password.');
   }
+
+  // Import Firebase auth method
+  const { sendPasswordResetEmail } = await import('@firebase/auth');
+
+  // Send password reset email
+  await sendPasswordResetEmail(firebaseAuth, user.email);
 }
 
 // Handle 2FA button click
@@ -540,10 +508,11 @@ async function handle2FAClick(event) {
   }
 }
 
-
 // Get device from user agent string
 function getDeviceFromUserAgent(userAgent) {
-  if (!userAgent) return 'Unknown Device';
+  if (!userAgent) {
+    return 'Unknown Device';
+  }
 
   const ua = userAgent.toLowerCase();
 
@@ -568,7 +537,9 @@ function getDeviceFromUserAgent(userAgent) {
 
 // Get browser from user agent string
 function getBrowserFromUserAgent(userAgent) {
-  if (!userAgent) return 'Unknown Browser';
+  if (!userAgent) {
+    return 'Unknown Browser';
+  }
 
   const ua = userAgent.toLowerCase();
 
@@ -585,7 +556,9 @@ function getBrowserFromUserAgent(userAgent) {
 
 // Get platform name from platform string
 function getPlatformName(platform) {
-  if (!platform) return 'Unknown Device';
+  if (!platform) {
+    return 'Unknown Device';
+  }
 
   const platformLower = platform.toLowerCase();
 
@@ -652,7 +625,6 @@ function formatSessionLocation(session) {
   return parts.length > 0 ? parts.join(', ') : null;
 }
 
-
 // Generate fake sessions for development mode
 function generateFakeSessions() {
   const now = Date.now();
@@ -665,42 +637,44 @@ function generateFakeSessions() {
       platform: 'Windows',
       ip: '98.137.246.8',
       timestamp: new Date(now - (3 * oneHour)).toISOString(),
-      timestampUNIX: Math.floor((now - (3 * oneHour)) / 1000)
+      timestampUNIX: Math.floor((now - (3 * oneHour)) / 1000),
     },
     'session_def456': {
       _current: false,
       platform: 'Darwin',  // macOS
       ip: '192.168.1.42',
       timestamp: new Date(now - (8 * oneHour)).toISOString(),
-      timestampUNIX: Math.floor((now - (8 * oneHour)) / 1000)
+      timestampUNIX: Math.floor((now - (8 * oneHour)) / 1000),
     },
     'session_ghi789': {
       _current: false,
       platform: 'Linux',
       ip: '45.62.189.3',
       timestamp: new Date(now - (oneDay)).toISOString(),
-      timestampUNIX: Math.floor((now - (oneDay)) / 1000)
+      timestampUNIX: Math.floor((now - (oneDay)) / 1000),
     },
     'session_jkl012': {
       _current: false,
       platform: 'Win32',
       ip: '203.0.113.45',
       timestamp: new Date(now - (2 * oneDay)).toISOString(),
-      timestampUNIX: Math.floor((now - (2 * oneDay)) / 1000)
+      timestampUNIX: Math.floor((now - (2 * oneDay)) / 1000),
     },
     'session_mno345': {
       _current: false,
       platform: 'Mac',
       ip: '172.217.16.195',
       timestamp: new Date(now - (5 * oneDay)).toISOString(),
-      timestampUNIX: Math.floor((now - (5 * oneDay)) / 1000)
-    }
+      timestampUNIX: Math.floor((now - (5 * oneDay)) / 1000),
+    },
   };
 }
 
 // Format date helper
 function formatDate(timestamp) {
-  if (!timestamp) return 'Unknown';
+  if (!timestamp) {
+    return 'Unknown';
+  }
 
   const date = new Date(timestamp);
   const now = new Date();

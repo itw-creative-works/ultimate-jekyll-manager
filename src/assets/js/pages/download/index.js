@@ -1,8 +1,12 @@
+/**
+ * Download Page JavaScript
+ */
+
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import fetch from 'wonderful-fetch';
+
 let webManager = null;
-let mobileEmailForms = {};
 
 // Module
 export default (Manager) => {
@@ -37,8 +41,8 @@ const config = {
   selectors: {
     platformButtons: '.platform-btn',
     platformDownloads: '[data-platform]',
-    downloadButtons: '.tab-pane[data-platform] .btn-primary:not([type="submit"])'
-  }
+    downloadButtons: '.tab-pane[data-platform] .btn-primary:not([type="submit"])',
+  },
 };
 
 // Setup platform detection and auto-select
@@ -128,36 +132,7 @@ function showOnboardingModal(platform) {
   modal.show();
 }
 
-
 // Tracking functions
-// function trackPlatformDetection(platform) {
-//   gtag('event', 'platform_detected', {
-//     platform: platform
-//   });
-//   fbq('track', 'ViewContent', {
-//     content_name: 'Download Page',
-//     content_category: platform
-//   });
-//   ttq.track('ViewContent', {
-//     content_name: 'Download Page',
-//     content_type: platform
-//   });
-// }
-
-// function trackPlatformSwitch(platform) {
-//   gtag('event', 'platform_switch', {
-//     platform: platform
-//   });
-//   fbq('track', 'CustomizeProduct', {
-//     content_name: 'Platform Selection',
-//     content_category: platform
-//   });
-//   ttq.track('ClickButton', {
-//     content_name: 'Platform Switch',
-//     content_type: platform
-//   });
-// }
-
 function trackDownloadClick(platform, downloadName, downloadUrl) {
   console.log('Download clicked:', platform, downloadName, downloadUrl);
 
@@ -187,7 +162,9 @@ function setupCopyButtons() {
     $button.addEventListener('click', async function() {
       const $input = this.closest('.input-group').querySelector('input');
 
-      if (!$input || !$input.value) return;
+      if (!$input || !$input.value) {
+        return;
+      }
 
       try {
         await webManager.utilities().clipboardCopy($input);
@@ -220,57 +197,32 @@ function setupMobileEmailForms() {
     const formId = `#mobile-email-form-${platform}`;
 
     const formManager = new FormManager(formId, {
-      autoDisable: true,
-      showSpinner: true,
-      validateOnSubmit: true,
-      allowMultipleSubmissions: false,
-      submitButtonLoadingText: 'Sending...',
-      submitButtonSuccessText: 'Sent!',
+      allowResubmit: false,
+      submittingText: 'Sending...',
+      submittedText: 'Email Sent!',
     });
 
-    formManager.addEventListener('submit', (e) => handleMobileEmailSubmit(e, platform));
+    formManager.on('submit', async ({ data }) => {
+      console.log('Mobile email form submitted:', { platform, email: data.email });
 
-    mobileEmailForms[platform] = formManager;
-  });
-}
+      // Get API endpoint
+      const apiEndpoint = webManager.getApiUrl() + '/backend-manager';
 
-// Handle mobile email form submission
-async function handleMobileEmailSubmit(event, platform) {
-  event.preventDefault();
+      // Send request using wonderful-fetch
+      await fetch(apiEndpoint, {
+        method: 'POST',
+        body: {
+          command: 'general:send-email',
+          payload: {
+            id: 'general:download-app-link',
+            email: data.email,
+          },
+        },
+        response: 'json',
+        timeout: 30000,
+      });
 
-  const formData = event.detail.data;
-  const email = formData.email;
-  const formManager = mobileEmailForms[platform];
-
-  console.log('Mobile email form submitted:', {
-    platform: platform,
-    email: email
-  });
-
-  try {
-    // Get API endpoint
-    const apiEndpoint = webManager.getApiUrl() + '/backend-manager';
-
-    // Send request using wonderful-fetch
-    await fetch(apiEndpoint, {
-      method: 'POST',
-      body: {
-        command: 'general:send-email',
-        payload: {
-          id: 'general:download-app-link',
-          email: email,
-        }
-      },
-      response: 'json',
-      timeout: 30000
+      formManager.showSuccess('Success! Please check your email for the download link.');
     });
-
-    // Handle successful response
-    formManager.showSuccess('Success! Please check your email for the download link.');
-    formManager.setFormState('submitted');
-  } catch (error) {
-    webManager.sentry().captureException(new Error('Mobile email form submission error', { cause: error }));
-    formManager.showError(error.message || 'Failed to send email');
-    formManager.setFormState('ready');
-  }
+  });
 }

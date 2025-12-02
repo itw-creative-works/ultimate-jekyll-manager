@@ -26,19 +26,179 @@ The local development server URL is stored in `.temp/_config_browsersync.yml` in
 
 ## Asset Organization
 
-### CSS Architecture
-- `src/assets/css/ultimate-jekyll-manager.scss` - Main UJ stylesheet
-- `src/assets/css/main.scss` - Site-wide styles (runs on every page)
+### Ultimate Jekyll Manager Files (THIS project)
+
+**CSS:**
+- `src/assets/css/ultimate-jekyll-manager.scss` - Main UJ stylesheet (provides core styles)
 - `src/assets/css/global/` - Global UJ styles
-- `src/assets/css/pages/` - Page-specific styles
+- `src/assets/css/pages/` - Page-specific styles provided by UJ
+  - Format: `src/assets/css/pages/[page-name]/index.scss`
+  - Example: `src/assets/css/pages/download/index.scss`
+
+**JavaScript:**
+- `src/assets/js/ultimate-jekyll-manager.js` - Main UJ JavaScript entry point (provides core functionality)
+- `src/assets/js/core/` - Core UJ modules
+- `src/assets/js/pages/` - Page-specific JavaScript provided by UJ
+  - Format: `src/assets/js/pages/[page-name]/index.js`
+  - Example: `src/assets/js/pages/download/index.js`
+- `src/assets/js/libs/` - UJ library modules (prerendered-icons, form-manager, authorized-fetch, etc.)
+
+**Default Pages & Layouts:**
+
+UJ provides default page templates and layouts in `src/defaults/dist/` that are copied to consuming projects. These are NOT meant to be edited by users.
+
+- Format: `src/defaults/dist/_layouts/themes/[theme-id]/frontend/pages/[page-name].html`
+- Examples:
+  - `src/defaults/dist/_layouts/themes/classy/frontend/pages/download.html`
+  - `src/defaults/dist/_layouts/themes/classy/frontend/pages/pricing.html`
+  - `src/defaults/dist/_layouts/themes/classy/frontend/pages/payment/checkout.html`
+  - `src/defaults/dist/_layouts/themes/classy/frontend/pages/payment/confirmation.html`
+  - `src/defaults/dist/_layouts/themes/classy/frontend/pages/contact.html`
+- Core layouts:
+  - `src/defaults/dist/_layouts/core/root.html` - Root HTML wrapper
+  - `src/defaults/dist/_layouts/themes/[theme-id]/frontend/core/base.html` - Theme base layout
+
+**Complete UJ Page Example:**
+- **HTML:** `src/defaults/dist/_layouts/themes/classy/frontend/pages/download.html`
+- **CSS:** `src/assets/css/pages/download/index.scss`
+- **JS:** `src/assets/js/pages/download/index.js`
+
+These files serve as blueprints and reference implementations. When building custom pages in consuming projects, reference these for patterns and best practices.
+
+**IMPORTANT:** Consuming projects CAN create files with the same paths in their own `src/` directory to override UJ defaults, but this should ONLY be done when absolutely necessary. Prefer using `src/pages/` and `src/_layouts/` for custom pages instead of overriding UJ default files.
+
+### Section Configuration Files (JSON)
+
+UJ provides JSON configuration files for common sections like navigation and footer. These JSON files are consumed by corresponding HTML templates during the build process.
+
+**Configuration Files:**
+- `src/defaults/src/_includes/frontend/sections/nav.json` - Navigation configuration
+- `src/defaults/src/_includes/frontend/sections/footer.json` - Footer configuration
+
+**How It Works:**
+1. JSON files contain structured data (links, labels, settings)
+2. HTML templates in `src/defaults/dist/_includes/themes/[theme-id]/frontend/sections/` read and render this data
+3. The build process converts `.json` → data loaded by `.html` templates
+
+**Customizing Navigation/Footer:**
+
+Consuming projects should create their own JSON files in `src/_includes/frontend/sections/`:
+- `src/_includes/frontend/sections/nav.json`
+- `src/_includes/frontend/sections/footer.json`
+
+**Example: Footer Configuration**
+
+```json
+{
+  logo: {
+    href: '/',
+    class: 'filter-adaptive',
+    text: '{{ site.brand.name }}',
+    description: '{{ site.meta.description }}',
+  },
+  links: [
+    {
+      label: 'Company',
+      href: null,
+      links: [
+        {
+          label: 'About Us',
+          href: '/about',
+        },
+        {
+          label: 'Pricing',
+          href: '/pricing',
+        },
+      ],
+    },
+  ],
+  socials: {
+    enabled: true,
+  },
+  copyright: {
+    enabled: true,
+    text: null,
+  },
+}
+```
+
+**Note:** These are JSON5 files (support comments, trailing commas, unquoted keys). The corresponding HTML templates automatically process these files during the build.
+
+### Customizing Default Pages via Frontmatter
+
+**BEST PRACTICE:** UJ default pages are designed to be customized through frontmatter WITHOUT writing any HTML. Consuming projects can create a simple page that includes ONLY frontmatter to configure the default page's behavior.
+
+**How It Works:**
+1. UJ default pages use `page.resolved` to access merged frontmatter (site → layout → page)
+2. **IMPORTANT:** Before customizing, READ the UJ default page in `src/defaults/dist/_layouts/` to understand available frontmatter options and how they're used
+3. Consuming projects create a page in `src/pages/` with custom frontmatter
+4. The page uses a UJ layout (e.g., `blueprint/pricing`)
+5. Frontmatter overrides default values without any HTML
+
+**Example: Customizing the Pricing Page**
+
+**Step 1:** Read the UJ default pricing page to see available frontmatter options:
+- File: `src/defaults/dist/_layouts/themes/classy/frontend/pages/pricing.html`
+- Look for frontmatter at the top and how `page.resolved.pricing` is used in the HTML
+
+**Step 2:** In consuming project, create `src/pages/pricing.html`:
+
+```yaml
+---
+### ALL PAGES ###
+layout: blueprint/pricing
+permalink: /pricing
+
+### PAGE CONFIG ###
+pricing:
+  price_per_unit:
+    enabled: true
+    feature_id: "credits"
+    label: "credit"
+  plans:
+    - id: "basic"
+      name: "Basic"
+      tagline: "best for getting started"
+      url: "/download"
+      pricing:
+        monthly: 0
+        annually: 0
+      features:
+        - id: "credits"
+          name: "Credits"
+          value: 1
+          icon: "sparkles"
+    ...
+---
+```
+
+That's it! No HTML needed. The UJ pricing layout reads `page.resolved.pricing` and renders the plans accordingly.
+
+**When to Use Frontmatter Customization:**
+- ✅ Customizing UJ default pages (pricing, contact, download, etc.)
+- ✅ Changing configuration without touching HTML
+- ✅ Maintaining upgradability when UJ updates
+
+**When to Create Custom Pages:**
+- ❌ Building entirely new page types
+- ❌ Needing custom HTML structure
+- ❌ Pages with unique layouts not provided by UJ
+
+### Consuming Project Files
+
+**CSS:**
+- `src/assets/css/main.scss` - Site-wide custom styles (runs on every page, edits by consuming project)
+- `src/assets/css/pages/` - Page-specific custom styles
   - Format: `src/assets/css/pages/[page-name]/index.scss`
 
-### JavaScript Architecture
-- `src/assets/js/ultimate-jekyll-manager.js` - Main UJ JavaScript entry point
-- `src/assets/js/main.js` - Site-wide JavaScript (runs on every page)
-- `src/assets/js/core/` - Core UJ modules
-- `src/assets/js/pages/` - Page-specific JavaScript
+**JavaScript:**
+- `src/assets/js/main.js` - Site-wide custom JavaScript (runs on every page, edits by consuming project)
+- `src/assets/js/pages/` - Page-specific custom JavaScript
   - Format: `src/assets/js/pages/[page-name]/index.js`
+
+**Pages & Layouts:**
+- `src/pages/` - Individual page HTML/Markdown files
+- `src/_layouts/` - Custom layouts for the consuming project
 
 **Asset Loading:** Page-specific CSS/JS files are automatically included based on the page's canonical path. Override with `asset_path` frontmatter.
 
@@ -437,19 +597,119 @@ const response = await authorizedFetch(url, options);
 
 #### FormManager Library
 
-Form handling library with built-in state management and validation.
+Lightweight form state management library with built-in validation, state machine, and event system.
 
 **Import:**
 ```javascript
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 ```
 
-**Usage:**
+**Basic Usage:**
 ```javascript
 const formManager = new FormManager('#my-form', options);
+
+formManager.on('submit', async ({ data, $submitButton }) => {
+  const response = await fetch('/api', { body: JSON.stringify(data) });
+  if (!response.ok) throw new Error('Failed');
+  formManager.showSuccess('Form submitted!');
+});
+```
+
+**State Machine:**
+```
+initializing → ready ⇄ submitting → ready (or submitted)
+```
+
+**Configuration Options:**
+```javascript
+{
+  autoReady: true,           // Auto-transition to initialState when DOM ready
+  initialState: 'ready',     // State after autoReady fires
+  allowResubmit: true,       // Allow resubmission after success (false = 'submitted' state)
+  resetOnSuccess: false,     // Clear form fields after successful submission
+  warnOnUnsavedChanges: false, // Warn user before leaving with unsaved changes
+  submittingText: 'Processing...', // Text shown on submit button during submission
+  submittedText: 'Processed!'  // Text shown on submit button after success (when allowResubmit: false)
+}
+```
+
+**Events:**
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `submit` | `{ data, $submitButton }` | Form submission (throw error to show failure) |
+| `validation` | `{ data, setError }` | Custom validation before submit |
+| `change` | `{ field, name, value, data }` | Field value changed |
+| `statechange` | `{ state, previousState }` | State transition |
+
+**Validation System:**
+
+FormManager runs validation automatically before `submit`:
+1. **HTML5 validation** - Checks `required`, `minlength`, `maxlength`, `min`, `max`, `pattern`, `type="email"`, `type="url"`
+2. **Custom validation** - Use `validation` event for business logic
+
+```javascript
+fm.on('validation', ({ data, setError }) => {
+  if (data.age && parseInt(data.age) < 18) {
+    setError('age', 'You must be 18 or older');
+  }
+});
+```
+
+Errors display with Bootstrap's `is-invalid` class and `.invalid-feedback` elements.
+
+**Autofocus:**
+
+When the form transitions to `ready` state, FormManager automatically focuses the field with the `autofocus` attribute (if present and not disabled).
+
+**Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `on(event, callback)` | Register event listener (chainable) |
+| `ready()` | Transition to ready state |
+| `getData()` | Get form data as nested object (supports dot notation) |
+| `setData(obj)` | Set form values from nested object |
+| `showSuccess(msg)` | Show success notification |
+| `showError(msg)` | Show error notification |
+| `reset()` | Reset form and go to ready state |
+| `isDirty()` | Check if form has unsaved changes |
+| `setDirty(bool)` | Set dirty state |
+| `clearFieldErrors()` | Clear all field validation errors |
+| `throwFieldErrors({ field: msg })` | Set and display field errors, throw error |
+
+**Nested Field Names (Dot Notation):**
+
+Use dot notation in field names for nested data:
+```html
+<input name="user.address.city" value="NYC">
+```
+
+Results in:
+```javascript
+{ user: { address: { city: 'NYC' } } }
+```
+
+**Checkbox Handling:**
+- **Single checkbox:** Returns `true`/`false`
+- **Checkbox group (same name):** Returns object `{ value1: true, value2: false }`
+
+**Multiple Submit Buttons:**
+
+Access the clicked button via `$submitButton`:
+```html
+<button type="submit" data-action="save">Save</button>
+<button type="submit" data-action="draft">Save Draft</button>
+```
+
+```javascript
+fm.on('submit', async ({ data, $submitButton }) => {
+  const action = $submitButton?.dataset?.action; // 'save' or 'draft'
+});
 ```
 
 **Reference:** `src/assets/js/libs/form-manager.js`
+**Test Page:** `src/assets/js/pages/test/libraries/form-manager/index.js`
 **Example:** `src/assets/js/pages/contact/index.js`
 
 ## Analytics & Tracking
@@ -459,15 +719,10 @@ Ultimate Jekyll uses three tracking platforms: Google Analytics (gtag), Facebook
 ### Tracking Guidelines
 
 **IMPORTANT Rules:**
-- Track important user events with Google Analytics, Facebook Pixel, and TikTok Pixel
+- Track important user events with `gtag()`, `fbq()`, and `ttq()` functions
 - NEVER add conditional checks for tracking functions (e.g., `if (typeof gtag !== 'undefined')`)
 - Always assume tracking functions exist - they're globally available or stubbed
 - Reference standard events documentation before implementing custom tracking
-- Always track events to ALL THREE platforms in this order:
-  1. Google Analytics (gtag)
-  2. Facebook Pixel (fbq)
-  3. TikTok Pixel (ttq)
-- Put all 3 tracking events in their own function per event for clarity
 
 **Standard Events Documentation:**
 - **Google Analytics GA4:** https://developers.google.com/analytics/devguides/collection/ga4/reference/events
@@ -512,6 +767,17 @@ ttq.track('ViewContent', {
 });
 ```
 
+### Tracking Implementation
+
+**IMPORTANT:** Always track events to ALL THREE platforms in this order:
+1. Google Analytics (gtag)
+2. Facebook Pixel (fbq)
+3. TikTok Pixel (ttq)
+
+Track events directly without existence checks. All three tracking calls should be made together for every event.
+
+**Development Mode:**
+In development mode, all tracking calls are intercepted and logged to the console for debugging. See `src/assets/js/libs/dev.js` for implementation.
 
 ## Audit Workflow
 

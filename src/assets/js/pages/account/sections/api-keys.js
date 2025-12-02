@@ -1,9 +1,12 @@
-// API Keys section module
+/**
+ * API Keys Section JavaScript
+ */
+
+// Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 let webManager = null;
-let resetApiKeyFormManager = null;
 
 // Initialize API Keys section
 export function init(wm) {
@@ -14,7 +17,9 @@ export function init(wm) {
 
 // Load API Keys data
 export function loadData(account) {
-  if (!account) return;
+  if (!account) {
+    return;
+  }
 
   // Update API key display
   updateApiKey(account.api?.privateKey);
@@ -44,35 +49,44 @@ function setupButtons() {
 
 // Setup reset API key form
 function setupResetApiKeyForm() {
-  // Initialize FormManager
-  resetApiKeyFormManager = new FormManager('#reset-api-key-form', {
-    autoDisable: true,
-    showSpinner: true,
-    allowMultipleSubmissions: false,
-    submitButtonLoadingText: 'Resetting...'
+  const formManager = new FormManager('#reset-api-key-form', {
+    allowResubmit: false,
+    submittingText: 'Resetting...',
+    submittedText: 'Reset!',
   });
 
-  // Handle form submission
-  resetApiKeyFormManager.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    // 1ms wait
+  formManager.on('submit', async () => {
+    // 1ms wait for dialog to appear properly
     await new Promise(resolve => setTimeout(resolve, 1));
 
     // Show confirmation dialog
     if (!confirm('Are you sure you want to reset your API key? This will invalidate your current key and any applications using it will stop working.')) {
-      return resetApiKeyFormManager.setFormState('ready');
+      throw new Error('API key reset cancelled.');
     }
 
-    try {
-      await handleResetApiKeySubmit();
-      // Success - FormManager will handle state automatically
-      resetApiKeyFormManager.setFormState('ready');
-    } catch (error) {
-      // Manually show error and reset form state
-      resetApiKeyFormManager.showError(error);
-      resetApiKeyFormManager.setFormState('ready');
+    // Get server API URL
+    const serverApiURL = webManager.getApiUrl() + '/backend-manager';
+
+    // Make API call to reset API key
+    const response = await authorizedFetch(serverApiURL, {
+      method: 'POST',
+      timeout: 30000,
+      response: 'json',
+      tries: 2,
+      body: {
+        command: 'user:regenerate-api-keys',
+      },
+    });
+
+    if (!response.privateKey) {
+      throw new Error(response.message || 'Failed to reset API key');
     }
+
+    // Update the displayed API key
+    updateApiKey(response.privateKey);
+
+    // Show success message
+    formManager.showSuccess('API key has been reset successfully!');
   });
 }
 
@@ -104,37 +118,8 @@ async function handleCopyApiKey() {
       $copyBtn.classList.remove('btn-success');
       $copyBtn.classList.add('btn-outline-adaptive');
     }, 2000);
-
   } catch (err) {
     console.error('Failed to copy API key:', err);
     webManager.utilities().showNotification('Failed to copy API key', 'danger');
   }
 }
-
-// Handle reset API key form submission
-async function handleResetApiKeySubmit() {
-  // Get server API URL
-  const serverApiURL = webManager.getApiUrl() + '/backend-manager';
-
-  // Make API call to reset API key
-  const response = await authorizedFetch(serverApiURL, {
-    method: 'POST',
-    timeout: 30000,
-    response: 'json',
-    tries: 2,
-    body: {
-      command: 'user:regenerate-api-keys',
-    },
-  });
-
-  if (response.privateKey) {
-    // Update the displayed API key
-    updateApiKey(response.privateKey);
-
-    // Show success message
-    webManager.utilities().showNotification('API key has been reset successfully', 'success');
-  } else {
-    throw new Error(response.message || 'Failed to reset API key');
-  }
-}
-

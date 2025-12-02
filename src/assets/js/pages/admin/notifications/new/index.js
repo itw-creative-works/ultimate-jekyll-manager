@@ -1,7 +1,12 @@
+/**
+ * Admin Notifications Page JavaScript
+ */
+
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+
 let webManager = null;
 
 // Module
@@ -28,7 +33,7 @@ export default (Manager) => {
 let formManager = null;
 let stats = {
   totalUsers: 0,
-  filteredUsers: 0
+  filteredUsers: 0,
 };
 let autoSubmitTimer = null;
 let isInitialized = false;
@@ -36,7 +41,9 @@ let isInitialized = false;
 // Main initialization
 async function initializeNotificationCreator() {
   // Prevent re-initialization
-  if (isInitialized) return;
+  if (isInitialized) {
+    return;
+  }
   isInitialized = true;
 
   // Initialize FormManager
@@ -66,15 +73,39 @@ async function initializeNotificationCreator() {
 // Initialize FormManager
 function initializeFormManager() {
   formManager = new FormManager('#notification-form', {
-    autoDisable: true,
-    showSpinner: true,
-    validateOnSubmit: true,
-    allowMultipleSubmissions: false,
+    allowResubmit: false,
   });
 
-  // Event listeners
-  formManager.addEventListener('change', handleFormChange);
-  formManager.addEventListener('submit', handleSubmit);
+  formManager.on('change', ({ data }) => {
+    // Update preview in real-time
+    updatePreview(data);
+
+    // Update character counts
+    updateCharacterCounts(data);
+
+    // Check auto-submit status
+    checkAutoSubmit(data);
+  });
+
+  formManager.on('submit', async ({ data }) => {
+    // Transform data for API
+    const payload = transformDataForAPI(data);
+
+    // Add user stats
+    payload.reach = {
+      available: { total: stats.totalUsers },
+      filtered: { total: stats.filteredUsers },
+    };
+
+    // Call API
+    await sendNotification(payload);
+
+    // Track success
+    trackNotificationSent(payload);
+
+    // Success
+    formManager.showSuccess(`Notification sent successfully to ${stats.filteredUsers.toLocaleString()} users!`);
+  });
 }
 
 // Initialize UI elements
@@ -139,13 +170,6 @@ function initializeUI() {
     });
   }
 
-  // Channel toggles - commented out since channels aren't currently supported
-  // document.querySelectorAll('input[name^="channels."]').forEach(checkbox => {
-  //   checkbox.addEventListener('change', (e) => {
-  //     toggleChannelSettings(e.target);
-  //   });
-  // });
-
   // Notification preview click handler
   const $notificationPreview = document.querySelector('#notification-preview-clickable');
   if ($notificationPreview) {
@@ -164,54 +188,11 @@ function initializeUI() {
   // Trigger initial form change to update character counts and preview with form data
   if (formManager) {
     setTimeout(() => {
-      handleFormChange();
+      const data = formManager.getData();
+      updatePreview(data);
+      updateCharacterCounts(data);
+      checkAutoSubmit(data);
     }, 100);
-  }
-}
-
-// Handle form changes
-function handleFormChange(event) {
-  const formData = formManager.getData();
-
-  // Update preview in real-time
-  updatePreview(formData);
-
-  // Update character counts
-  updateCharacterCounts(formData);
-
-  // Check auto-submit status
-  checkAutoSubmit(formData);
-}
-
-// Handle form submission
-async function handleSubmit(event) {
-  // Get data from event detail if available, otherwise from formManager
-  const formData = event.detail?.data || formManager.getData();
-
-  try {
-    // Transform data for API
-    const payload = transformDataForAPI(formData);
-
-    // Add user stats
-    payload.reach = {
-      available: { total: stats.totalUsers },
-      filtered: { total: stats.filteredUsers }
-    };
-
-
-    // Call API
-    const response = await sendNotification(payload);
-
-    // Track success
-    trackNotificationSent(payload);
-
-    // Success
-    formManager.showSuccess(`Notification sent successfully to ${stats.filteredUsers.toLocaleString()} users!`);
-
-  } catch (error) {
-    console.error('Notification send error:', error);
-    webManager.sentry().captureException(new Error('Failed to send notification', { cause: error }));
-    formManager.showError(error.message || 'Failed to send notification');
   }
 }
 
@@ -248,12 +229,12 @@ function transformDataForAPI(formData) {
       icon: notification.icon || '',
       title: notification.title || '',
       body: notification.body || '',
-      clickAction: redirectUrl.toString()
+      clickAction: redirectUrl.toString(),
     },
     created: now.toISOString(),
     channels: formData.channels || {},
     audience: formData.audience || {},
-    schedule: formData.schedule || {}
+    schedule: formData.schedule || {},
   };
 }
 
@@ -269,8 +250,8 @@ async function sendNotification(payload) {
     log: true,
     body: {
       command: 'admin:send-notification',
-      payload: payload
-    }
+      payload: payload,
+    },
   });
 }
 
@@ -286,16 +267,15 @@ async function fetchUserStats() {
       body: {
         command: 'admin:firestore-read',
         payload: {
-          path: 'meta/stats'
-        }
-      }
+          path: 'meta/stats',
+        },
+      },
     });
 
     // Extract user count from response
     const total = response?.notifications?.total || 0;
     stats.totalUsers = total;
     stats.filteredUsers = total; // Initially all users
-
   } catch (error) {
     console.error('Failed to fetch user stats:', error);
     webManager.sentry().captureException(new Error('Failed to fetch user stats', { cause: error }));
@@ -356,9 +336,6 @@ function updatePreview(formData = null) {
   if ($previewTime) {
     $previewTime.textContent = 'Now';
   }
-
-  // Update channel badges - commented out since channels aren't currently supported
-  // updateChannelBadges(formData);
 }
 
 // Update icon preview
@@ -394,64 +371,6 @@ function updateCharacterCounts(formData) {
     const length = (notification.body || '').length;
     $bodyCount.textContent = `${length} / 200`;
     $bodyCount.className = length > 200 ? 'text-danger' : 'text-muted';
-  }
-}
-
-// Toggle channel-specific settings
-function toggleChannelSettings(checkbox) {
-  const channelName = checkbox.name.replace('channels.', '').replace('.enabled', '');
-  const $settingsEl = document.querySelector(`#${channelName}-channel-settings`);
-
-  if ($settingsEl) {
-    if (checkbox.checked) {
-      $settingsEl.classList.remove('d-none');
-      $settingsEl.classList.add('animate__animated', 'animate__fadeIn');
-    } else {
-      $settingsEl.classList.add('d-none');
-    }
-  }
-}
-
-// Update channel badges in preview
-function updateChannelBadges(formData) {
-  const channels = formData.channels || {};
-  const $badgesContainer = document.querySelector('.card .d-flex.gap-2.flex-wrap');
-
-  if (!$badgesContainer) {
-    return;
-  }
-
-  // Clear existing badges
-  $badgesContainer.innerHTML = '';
-
-  // Add badges for enabled channels
-  const channelConfigs = {
-    push: { icon: 'mobile', color: 'primary' },
-    email: { icon: 'envelope', color: 'info' },
-    sms: { icon: 'comment-sms', color: 'success' },
-    inapp: { icon: 'bell', color: 'warning' }
-  };
-
-  Object.keys(channelConfigs).forEach(channel => {
-    if (!channels[channel]?.enabled) {
-      return;
-    }
-
-    const config = channelConfigs[channel];
-    const iconHTML = getPrerenderedIcon(config.icon);
-    const $badge = document.createElement('span');
-    $badge.className = `badge bg-${config.color}`;
-    $badge.innerHTML = `${iconHTML}${channel.charAt(0).toUpperCase() + channel.slice(1)}`;
-    $badgesContainer.appendChild($badge);
-  });
-
-  // Default to push if no channels selected
-  if ($badgesContainer.children.length === 0) {
-    const iconHTML = getPrerenderedIcon('mobile');
-    const $badge = document.createElement('span');
-    $badge.className = 'badge bg-primary';
-    $badge.innerHTML = `${iconHTML}Push`;
-    $badgesContainer.appendChild($badge);
   }
 }
 
@@ -509,7 +428,9 @@ function startAutoSubmitCountdown(targetDate) {
   clearAutoSubmitCountdown();
 
   const $countdownEl = document.querySelector('#auto-submit-countdown');
-  if (!$countdownEl) return;
+  if (!$countdownEl) {
+    return;
+  }
 
   $countdownEl.classList.remove('d-none');
 
@@ -524,7 +445,10 @@ function startAutoSubmitCountdown(targetDate) {
       // Fetch updated stats before submitting
       fetchUserStats()
         .then(() => updateUserCount())
-        .finally(() => formManager.submit());
+        .finally(() => {
+          // Programmatically submit the form
+          formManager.$form.requestSubmit();
+        });
 
       return;
     }

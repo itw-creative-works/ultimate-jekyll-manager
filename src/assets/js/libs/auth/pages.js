@@ -9,12 +9,6 @@ export default function (Manager) {
   // Form manager instance
   let formManager = null;
 
-  // Shared FormManager configuration
-  const formManagerConfig = {
-    allowMultipleSubmissions: false,
-    validateOnSubmit: true,
-  };
-
   // Check query string for popup parameter
   const url = new URL(window.location.href);
   const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== window.top;
@@ -61,125 +55,66 @@ export default function (Manager) {
     }
   }
 
+  // Shared validation for signin/signup forms - only validate when email provider is selected
+  function validateEmailProvider({ data, setError, $submitButton }) {
+    const provider = $submitButton?.getAttribute('data-provider');
+
+    if (provider === 'email') {
+      if (!data.email?.trim()) {
+        setError('email', 'Email is required');
+      }
+      if (!data.password) {
+        setError('password', 'Password is required');
+      }
+    }
+  }
+
+  // Shared submit handler factory for signin/signup forms
+  function createAuthSubmitHandler(action, emailHandler) {
+    return async ({ data, $submitButton }) => {
+      const provider = $submitButton?.getAttribute('data-provider');
+
+      if (provider === 'email') {
+        await emailHandler(data);
+      } else if (provider) {
+        await signInWithProvider(provider, action);
+      }
+    };
+  }
+
   // Initialize signin form
   function initializeSigninForm() {
     formManager = new FormManager('#signin-form', {
-      ...formManagerConfig,
-      submitButtonLoadingText: 'Signing in...'
+      allowResubmit: false,
+      submittingText: 'Signing in...',
+      submittedText: 'Signed In!',
     });
 
-    // Handle form submission
-    formManager.addEventListener('submit', async (e) => {
-      // Prevent FormManager's default submit handler
-      e.preventDefault();
-
-      const { submitButton, data } = e.detail;
-      const provider = submitButton?.getAttribute('data-provider');
-
-      // Only validate for email provider
-      if (provider === 'email') {
-        const validation = formManager.validate(data);
-        if (!validation.isValid) {
-          formManager.showErrors(validation.errors);
-          formManager.setFormState('ready');
-          return;
-        }
-      }
-
-      try {
-        if (provider === 'email') {
-          // Pass the already collected data to avoid re-collecting from disabled fields
-          await handleEmailSignin(data);
-        } else if (provider) {
-          await signInWithProvider(provider, 'signin');
-        }
-      } catch (error) {
-        // Set form back to ready state
-        formManager.setFormState('ready');
-
-        // Show the error to the user
-        formManager.showError(error.message || 'An error occurred during sign in');
-
-        // Log for debugging
-        console.error('Signin error:', error);
-      }
-    });
+    formManager.on('validation', validateEmailProvider);
+    formManager.on('submit', createAuthSubmitHandler('signin', handleEmailSignin));
   }
 
   // Initialize signup form
   function initializeSignupForm() {
     formManager = new FormManager('#signup-form', {
-      ...formManagerConfig,
-      submitButtonLoadingText: 'Creating account...'
+      allowResubmit: false,
+      submittingText: 'Creating account...',
+      submittedText: 'Account Created!',
     });
 
-    // Handle form submission
-    formManager.addEventListener('submit', async (e) => {
-      // Prevent FormManager's default submit handler
-      e.preventDefault();
-
-      const { submitButton, data } = e.detail;
-      const provider = submitButton?.getAttribute('data-provider');
-
-      // Only validate for email provider
-      if (provider === 'email') {
-        const validation = formManager.validate(data);
-        if (!validation.isValid) {
-          formManager.showErrors(validation.errors);
-          formManager.setFormState('ready');
-          return;
-        }
-      }
-
-      try {
-        if (provider === 'email') {
-          // Pass the already collected data to avoid re-collecting from disabled fields
-          await handleEmailSignup(data);
-        } else if (provider) {
-          await signInWithProvider(provider, 'signup');
-        }
-      } catch (error) {
-        // Set form back to ready state
-        formManager.setFormState('ready');
-
-        // Show the error to the user
-        formManager.showError(error.message || 'An error occurred during sign up');
-
-        // Log for debugging
-        console.error('Signup error:', error);
-      }
-    });
+    formManager.on('validation', validateEmailProvider);
+    formManager.on('submit', createAuthSubmitHandler('signup', handleEmailSignup));
   }
 
   // Initialize reset form
   function initializeResetForm() {
     formManager = new FormManager('#reset-form', {
-      ...formManagerConfig,
-      submitButtonLoadingText: 'Sending...',
-      submitButtonSuccessText: 'Email Sent!'
+      allowResubmit: false,
+      submittingText: 'Sending...',
+      submittedText: 'Email Sent!',
     });
 
-    // Handle form submission
-    formManager.addEventListener('submit', async (e) => {
-      // Prevent FormManager's default submit handler
-      e.preventDefault();
-
-      const { data } = e.detail;
-
-      try {
-        // Pass the already collected data to avoid re-collecting from disabled fields
-        await handlePasswordReset(data);
-      } catch (error) {
-        // Set form back to ready state
-        formManager.setFormState('ready');
-
-        // Show the error to the user
-        formManager.showError(error.message || 'An error occurred during password reset');
-
-        // Log for debugging
-        console.error('Reset error:', error);
-      }
-    });
+    formManager.on('submit', ({ data }) => handlePasswordReset(data));
   }
 
   async function handleRedirectResult() {
@@ -211,14 +146,10 @@ export default function (Manager) {
 
       if (isNewUser || isSignupPage) {
         trackSignup(providerId, result.user);
-        // Show success message
         formManager.showSuccess('Account created successfully!');
-        formManager.setFormState('submitted');
       } else {
         trackLogin(providerId, result.user);
-        // Show success message
         formManager.showSuccess('Successfully signed in!');
-        formManager.setFormState('submitted');
       }
     } catch (error) {
       // Only capture unexpected errors to Sentry
@@ -353,9 +284,6 @@ export default function (Manager) {
 
       // Show success message
       formManager.showSuccess('Account created successfully!');
-
-      // FormManager will handle the success state
-      formManager.setFormState('submitted');
     } catch (error) {
       // Handle Firebase-specific errors
       if (error.code === 'auth/email-already-in-use') {
@@ -370,9 +298,6 @@ export default function (Manager) {
 
           // Show success message
           formManager.showSuccess('Successfully signed in!');
-
-          // Set success state
-          formManager.setFormState('submitted');
           return;
         } catch (signInError) {
           // Throw error for outer catch to handle
@@ -403,9 +328,6 @@ export default function (Manager) {
 
     // Show success message
     formManager.showSuccess('Successfully signed in!');
-
-    // FormManager will handle the success state
-    formManager.setFormState('submitted');
   }
 
   async function handlePasswordReset(formData) {
@@ -429,9 +351,6 @@ export default function (Manager) {
 
       // Show success message
       formManager.showSuccess(`Password reset email sent to ${email}. Please check your inbox.`);
-
-      // Set form to submitted state
-      formManager.setFormState('submitted');
     } catch (error) {
       // Handle Firebase-specific errors
       if (error.code === 'auth/user-not-found') {
@@ -439,7 +358,6 @@ export default function (Manager) {
         // Still show success to prevent email enumeration
         trackPasswordReset(email); // Track as success for security
         formManager.showSuccess(`If an account exists for ${email}, a password reset email has been sent.`);
-        formManager.setFormState('submitted');
         return;
       }
 
@@ -484,19 +402,32 @@ export default function (Manager) {
           throw new Error(`Unsupported provider: ${providerName}`);
       }
 
-      // Show warning in dev mode when using redirect
-      if (webManager.isDevelopment() && !useAuthPopup) {
-        webManager.utilities().showNotification(
-          'OAuth redirect may fail in development. Use localhost:4000 or add ?authPopup=true to the URL',
-          {
-            type: 'warning',
-            timeout: 10000 // Show for 10 seconds
-          }
-        );
+      /* @dev-only:start */
+      {
+        // // Add device_id and device_name for private IP addresses (required by Firebase)
+        // const deviceId = webManager.storage().get('devDeviceId') || crypto.randomUUID();
+        // webManager.storage().set('devDeviceId', deviceId);
 
-        // Wait
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // provider.setCustomParameters({
+        //   device_id: deviceId,
+        //   device_name: navigator.userAgent.substring(0, 100),
+        // });
+
+        // Show warning in dev mode when using redirect
+        if (!useAuthPopup) {
+          webManager.utilities().showNotification(
+            'OAuth redirect may fail in development. Use localhost:4000 or add ?authPopup=true to the URL',
+            {
+              type: 'warning',
+              timeout: 10000 // Show for 10 seconds
+            }
+          );
+
+          // Wait
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
+      /* @dev-only:end */
 
       // Use popup if query parameter is set, otherwise use redirect
       if (useAuthPopup) {
@@ -516,9 +447,6 @@ export default function (Manager) {
             // Show success message
             formManager.showSuccess('Successfully signed in!');
           }
-
-          // Set form to submitted state
-          formManager.setFormState('submitted');
         } catch (popupError) {
           // Check if popup was blocked or failed
           if (popupError.code === 'auth/popup-blocked' ||
@@ -620,6 +548,7 @@ export default function (Manager) {
 
   function trackLogin(method, user) {
     const userId = user.uid;
+    const methodName = method.charAt(0).toUpperCase() + method.slice(1);
 
     // Google Analytics 4
     gtag('event', 'login', {
@@ -629,21 +558,22 @@ export default function (Manager) {
 
     // Facebook Pixel
     fbq('trackCustom', 'Login', {
+      content_name: `Account Login ${methodName}`,
       method: method,
-      status: 'success'
     });
 
     // TikTok Pixel
     ttq.track('Login', {
-      content_name: 'Account',
-      content_id: userId,
-      status: 'success'
+      content_id: `account-login-${method}`,
+      content_type: 'product',
+      content_name: `Account Login ${methodName}`
     });
   }
 
   // Analytics tracking functions
   function trackSignup(method, user) {
     const userId = user.uid;
+    const methodName = method.charAt(0).toUpperCase() + method.slice(1);
 
     // Google Analytics 4
     gtag('event', 'sign_up', {
@@ -653,17 +583,15 @@ export default function (Manager) {
 
     // Facebook Pixel
     fbq('track', 'CompleteRegistration', {
-      content_name: 'Account',
-      status: 'success',
-      value: 0,
-      currency: 'USD'
+      content_name: `Account Registration ${methodName}`,
+      method: method,
     });
 
     // TikTok Pixel
     ttq.track('CompleteRegistration', {
-      content_name: 'Account',
-      content_id: userId,
-      status: 'success'
+      content_id: `account-registration-${method}`,
+      content_type: 'product',
+      content_name: `Account Registration ${methodName}`
     });
   }
 
@@ -683,8 +611,9 @@ export default function (Manager) {
 
     // TikTok Pixel
     ttq.track('SubmitForm', {
-      content_name: 'Password Reset',
-      content_type: 'account_recovery'
+      content_id: 'password-reset',
+      content_type: 'product',
+      content_name: 'Password Reset'
     });
   }
 }

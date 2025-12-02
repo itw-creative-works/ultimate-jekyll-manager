@@ -1,5 +1,10 @@
+/**
+ * Blog Page JavaScript
+ */
+
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+
 let webManager = null;
 
 // Module
@@ -19,9 +24,6 @@ export default (Manager) => {
   });
 };
 
-// Global variables
-let newsletterForm = null;
-
 // Setup newsletter form
 function setupNewsletterForm() {
   const $form = document.getElementById('newsletter-form');
@@ -30,19 +32,27 @@ function setupNewsletterForm() {
     return;
   }
 
-  // Initialize FormManager
-  newsletterForm = new FormManager('#newsletter-form', {
-    autoDisable: true,
-    showSpinner: true,
-    validateOnSubmit: true,
-    allowMultipleSubmissions: false,
+  const formManager = new FormManager('#newsletter-form', {
+    allowResubmit: false,
     resetOnSuccess: true,
     submitButtonLoadingText: 'Subscribing...',
     submitButtonSuccessText: 'Subscribed!',
   });
 
-  // Listen to FormManager events
-  newsletterForm.addEventListener('submit', handleNewsletterSubmit);
+  formManager.on('submit', async ({ data }) => {
+    console.log('Newsletter subscription:', data.email);
+
+    // Here you would integrate with your newsletter service
+    // For example: Mailchimp, SendGrid, ConvertKit, etc.
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Track signup
+    trackNewsletterSignup();
+
+    formManager.showSuccess('Thank you for subscribing! Check your email to confirm.');
+  });
 }
 
 // Setup blog search functionality
@@ -90,7 +100,6 @@ function setupSearch() {
 // Perform search on blog posts
 function performSearch(query, $blogPosts, $searchResults) {
   let matchCount = 0;
-  const results = [];
 
   $blogPosts.forEach(post => {
     const title = post.dataset.title?.toLowerCase() || '';
@@ -100,10 +109,6 @@ function performSearch(query, $blogPosts, $searchResults) {
     if (title.includes(query) || excerpt.includes(query) || tags.includes(query)) {
       post.classList.remove('d-none');
       matchCount++;
-      results.push({
-        title: post.dataset.title,
-        url: post.querySelector('a')?.href
-      });
     } else {
       post.classList.add('d-none');
     }
@@ -120,33 +125,6 @@ function performSearch(query, $blogPosts, $searchResults) {
 
   // Track search
   trackBlogSearch(query);
-}
-
-// Handle newsletter form submission
-async function handleNewsletterSubmit(event) {
-  // Prevent default FormManager submission
-  event.preventDefault();
-
-  const formData = event.detail.data;
-
-  console.log('Newsletter subscription:', formData.email);
-
-  try {
-    // Here you would integrate with your newsletter service
-    // For example: Mailchimp, SendGrid, ConvertKit, etc.
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // For demo purposes, just show success
-    trackNewsletterSignup();
-    newsletterForm.showSuccess('Thank you for subscribing! Check your email to confirm.');
-    newsletterForm.setFormState('submitted');
-  } catch (error) {
-    webManager.sentry().captureException(new Error('Newsletter subscription failed', { cause: error }));
-    newsletterForm.showError('An error occurred. Please try again.');
-    newsletterForm.setFormState('ready');
-  }
 }
 
 // Tracking functions

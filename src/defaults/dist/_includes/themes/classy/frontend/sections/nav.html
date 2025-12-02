@@ -130,18 +130,23 @@
                       <span>{{ child.label }}</span>
                     </span>
                   {% endcapture %}
-                  <li>
-                    {% iftruthy child.href %}
-                      <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                        {{ child_content }}
-                      </a>
-                    {% endiftruthy %}
-                    {% iffalsy child.href %}
-                      <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                        {{ child_content }}
-                      </button>
-                    {% endiffalsy %}
-                  </li>
+
+                  {% if child.divider %}
+                    <li><hr class="dropdown-divider" {{ child_attributes }}/></li>
+                  {% else %}
+                    <li>
+                      {% iftruthy child.href %}
+                        <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
+                          {{ child_content }}
+                        </a>
+                      {% endiftruthy %}
+                      {% iffalsy child.href %}
+                        <button class="{{ child_class }}" type="button" {{ child_attributes }}>
+                          {{ child_content }}
+                        </button>
+                      {% endiffalsy %}
+                    </li>
+                  {% endif %}
                 {% endfor %}
               </ul>
             </li>
@@ -272,18 +277,23 @@
                         <span>{{ child.label }}</span>
                       </span>
                     {% endcapture %}
-                    <li>
-                      {% iftruthy child.href %}
-                        <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                          {{ child_content }}
-                        </a>
-                      {% endiftruthy %}
-                      {% iffalsy child.href %}
-                        <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                          {{ child_content }}
-                        </button>
-                      {% endiffalsy %}
-                    </li>
+
+                    {% if child.divider %}
+                      <li><hr class="dropdown-divider" {{ child_attributes }}/></li>
+                    {% else %}
+                      <li>
+                        {% iftruthy child.href %}
+                          <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
+                            {{ child_content }}
+                          </a>
+                        {% endiftruthy %}
+                        {% iffalsy child.href %}
+                          <button class="{{ child_class }}" type="button" {{ child_attributes }}>
+                            {{ child_content }}
+                          </button>
+                        {% endiffalsy %}
+                      </li>
+                    {% endif %}
                   {% endfor %}
                 </ul>
               </div>
@@ -343,18 +353,23 @@
                         <span>{{ child.label }}</span>
                       </span>
                     {% endcapture %}
-                    <li>
-                      {% iftruthy child.href %}
-                        <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                          {{ child_content }}
-                        </a>
-                      {% endiftruthy %}
-                      {% iffalsy child.href %}
-                        <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                          {{ child_content }}
-                        </button>
-                      {% endiffalsy %}
-                    </li>
+
+                    {% if child.divider %}
+                      <li><hr class="dropdown-divider" {{ child_attributes }}/></li>
+                    {% else %}
+                      <li>
+                        {% iftruthy child.href %}
+                          <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
+                            {{ child_content }}
+                          </a>
+                        {% endiftruthy %}
+                        {% iffalsy child.href %}
+                          <button class="{{ child_class }}" type="button" {{ child_attributes }}>
+                            {{ child_content }}
+                          </button>
+                        {% endiffalsy %}
+                      </li>
+                    {% endif %}
                   {% endfor %}
                 </ul>
               </div>

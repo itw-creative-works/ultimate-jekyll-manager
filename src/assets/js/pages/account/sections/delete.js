@@ -1,4 +1,8 @@
-// Delete account section module
+/**
+ * Delete Account Section JavaScript
+ */
+
+// Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
@@ -22,15 +26,10 @@ function setupDeleteAccountForm() {
     return;
   }
 
-  // Initialize FormManager
   formManager = new FormManager('#delete-account-form', {
-    autoDisable: true,
-    showSpinner: true,
-    validateOnSubmit: false, // We'll handle validation manually due to custom confirmation flow
-    allowMultipleSubmissions: false,
-    resetOnSuccess: false,
-    submitButtonLoadingText: 'Deleting account...',
-    initialState: 'ready',
+    allowResubmit: false,
+    submittingText: 'Deleting account...',
+    submittedText: 'Account Deleted!',
   });
 
   // Enable/disable delete button based on checkbox
@@ -46,44 +45,30 @@ function setupDeleteAccountForm() {
     });
   }
 
-  // Listen to FormManager submit event
-  formManager.addEventListener('submit', handleFormSubmit);
-}
+  formManager.on('submit', async ({ data }) => {
+    // Check if checkbox is checked
+    if (!$checkbox.checked) {
+      throw new Error('Please confirm that you understand this action is permanent.');
+    }
 
-// Handle form submission
-async function handleFormSubmit(event) {
-  // Prevent default FormManager submission
-  event.preventDefault();
+    // 1ms wait for dialog to appear properly
+    await new Promise(resolve => setTimeout(resolve, 1));
 
-  const formData = event.detail.data;
-  const $checkbox = document.getElementById('delete-confirm-checkbox');
+    // Show confirmation dialog
+    const confirmMessage = `Are you absolutely sure you want to delete your account?\n\nThis action CANNOT be undone.\n\nType "DELETE" to confirm:`;
+    const userInput = prompt(confirmMessage);
 
-  // Check if checkbox is checked
-  if (!$checkbox.checked) {
-    formManager.showError('Please confirm that you understand this action is permanent.');
-    formManager.setFormState('ready');
-    return;
-  }
+    if (userInput !== 'DELETE') {
+      throw new Error('Account deletion cancelled. You must type "DELETE" exactly to confirm.');
+    }
 
-  // Show confirmation dialog
-  const confirmMessage = `Are you absolutely sure you want to delete your account?\n\nThis action CANNOT be undone.\n\nType "DELETE" to confirm:`;
-  const userInput = prompt(confirmMessage);
+    // Final confirmation
+    const finalConfirm = confirm('This is your last chance to cancel.\n\nAre you sure you want to permanently delete your account?');
 
-  if (userInput !== 'DELETE') {
-    formManager.showError('Account deletion cancelled. You must type "DELETE" exactly to confirm.');
-    formManager.setFormState('ready');
-    return;
-  }
+    if (!finalConfirm) {
+      throw new Error('Account deletion cancelled.');
+    }
 
-  // Final confirmation
-  const finalConfirm = confirm('This is your last chance to cancel.\n\nAre you sure you want to permanently delete your account?');
-
-  if (!finalConfirm) {
-    formManager.setFormState('ready');
-    return;
-  }
-
-  try {
     // Send delete request to server
     const response = await authorizedFetch(webManager.getApiUrl(), {
       method: 'POST',
@@ -93,42 +78,37 @@ async function handleFormSubmit(event) {
       body: {
         command: 'user:delete',
         payload: {
-          reason: formData.reason || '',
-          confirmed: true
-        }
-      }
+          reason: data.reason || '',
+          confirmed: true,
+        },
+      },
     });
 
     console.log('Delete account response:', response);
 
-    if (response.success) {
-      // Show success message
-      formManager.showSuccess('Your account has been successfully deleted. You will now be signed out.');
-
-      // Sign out the user
-      await webManager.auth().signOut();
-
-      // Redirect to home page
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
-    } else {
+    if (!response.success) {
       throw new Error(response.message || 'Failed to delete account');
     }
-  } catch (error) {
-    console.error('Failed to delete account:', error);
-    formManager.showError(`Failed to delete account: ${error.message}`);
-    formManager.setFormState('ready');
-  }
+
+    // Show success message
+    formManager.showSuccess('Your account has been successfully deleted. You will now be signed out.');
+
+    // Sign out the user
+    await webManager.auth().signOut();
+
+    // Redirect to home page
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1500);
+  });
 }
 
 // Load delete section data (if needed)
-export async function loadData(account) {
+export async function loadData() {
   // No specific data to load for delete section
-  // Could potentially show account age or other info here
 }
 
 // Called when section is shown
 export function onShow() {
-
+  // Nothing needed
 }

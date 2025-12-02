@@ -1,6 +1,10 @@
-// Connections section module for OAuth account linking
+/**
+ * Connections Section JavaScript - OAuth account linking
+ */
+
+// Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
-import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';;
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 let webManager = null;
 let appData = null;
@@ -22,7 +26,9 @@ export async function init(wm) {
 
 // Load connections data
 export async function loadData(account, sharedAppData) {
-  if (!account) return;
+  if (!account) {
+    return;
+  }
 
   accountData = account;
   appData = sharedAppData;
@@ -133,7 +139,7 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
     $description: !!$description,
     $form: !!$form,
     $connectButton: !!$connectButton,
-    $disconnectButton: !!$disconnectButton
+    $disconnectButton: !!$disconnectButton,
   });
 
   const isConnected = userConnection && userConnection.identity;
@@ -146,7 +152,7 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
       discord: 'Connect to access Discord community features',
       github: 'Link your GitHub account for repository access',
       twitter: 'Share updates and connect with Twitter',
-      facebook: 'Connect your Facebook account for social features'
+      facebook: 'Connect your Facebook account for social features',
     };
 
     // Use provider description or fallback to default
@@ -167,7 +173,7 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
         const dateStr = date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
-          year: 'numeric'
+          year: 'numeric',
         });
         statusText = `${displayName} • ${dateStr}`;
       }
@@ -201,15 +207,17 @@ function updateProviderStatus(providerId, userConnection, providerSettings) {
 
 // Get display name for connection
 function getConnectionDisplayName(connection) {
-  if (!connection || !connection.identity) return 'Unknown';
+  if (!connection || !connection.identity) {
+    return 'Unknown';
+  }
 
   // Try different fields based on provider
-  return connection.identity.global_name ||
-         connection.identity.username ||
-         connection.identity.name ||
-         connection.identity.email ||
-         connection.identity.id ||
-         'Connected';
+  return connection.identity.global_name
+    || connection.identity.username
+    || connection.identity.name
+    || connection.identity.email
+    || connection.identity.id
+    || 'Connected';
 }
 
 // Initialize FormManager for a provider
@@ -230,22 +238,19 @@ function initializeProviderForm(providerId) {
 
   console.log(`Initializing FormManager for ${providerId}`);
 
-  // Create new FormManager
   const formManager = new FormManager(`#${formId}`, {
-    autoDisable: true,
-    showSpinner: true
+    submittingText: 'Connecting...',
   });
 
   // Store the FormManager instance
   connectionForms.set(providerId, formManager);
 
   // Listen for state changes to update button after FormManager is ready
-  formManager.addEventListener('statechange', (event) => {
-    const { status } = event.detail;
-    console.log(`[DEBUG] ${providerId} - FormManager state changed to:`, status);
+  formManager.on('statechange', ({ state }) => {
+    console.log(`[DEBUG] ${providerId} - FormManager state changed to:`, state);
 
     // When FormManager transitions to ready, update the button status
-    if (status === 'ready') {
+    if (state === 'ready') {
       console.log(`[DEBUG] ${providerId} - FormManager is ready, updating button status`);
       const userConnection = accountData?.oauth2?.[providerId];
       const providerSettings = appData?.oauth2?.[providerId];
@@ -253,37 +258,23 @@ function initializeProviderForm(providerId) {
     }
   });
 
-  // Handle form submission
-  formManager.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const { data, submitButton } = event.detail;
+  formManager.on('submit', async ({ data, $submitButton }) => {
     const provider = data.provider;
 
     // Determine action from the clicked button's data-action attribute
-    const action = submitButton?.getAttribute('data-action');
+    const action = $submitButton?.getAttribute('data-action');
 
     console.log(`[DEBUG] ${providerId} - Form submitted. Action:`, action, 'Provider:', provider);
 
-    try {
-      if (action === 'connect') {
-        await handleConnect(provider);
-      } else if (action === 'disconnect') {
-        const success = await handleDisconnect(provider);
-        if (success) {
-          // Reset form state and update UI after successful disconnect
-          formManager.setFormState('ready');
-          // Get provider settings to pass for description display
-          const providerSettings = appData?.oauth2?.[provider];
-          updateProviderStatus(provider, null, providerSettings);
-        }
+    if (action === 'connect') {
+      await handleConnect(provider);
+    } else if (action === 'disconnect') {
+      const success = await handleDisconnect(provider);
+      if (success) {
+        // Get provider settings to pass for description display
+        const providerSettings = appData?.oauth2?.[provider];
+        updateProviderStatus(provider, null, providerSettings);
       }
-
-      // Success - FormManager will handle state automatically
-    } catch (error) {
-      // Show error and reset form state
-      formManager.showError(error);
-      formManager.setFormState('ready');
     }
   });
 }
@@ -311,7 +302,7 @@ async function handleConnect(providerId) {
         state: 'authorize',
         scope: scope,
         referrer: window.location.href,
-      }
+      },
     },
   });
 
@@ -354,7 +345,7 @@ async function handleDisconnect(providerId) {
         state: 'deauthorize',
         scope: scope,
         referrer: window.location.href,
-      }
+      },
     },
   });
 

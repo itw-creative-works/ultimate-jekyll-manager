@@ -17,7 +17,7 @@ pricing:
     label: "credit"  # What to call the unit (e.g., "credit", "user", "GB")
   plans:
     - id: "basic"
-      name: Basic
+      name: "Basic"
       tagline: "best for getting started"
       url: "/download"  # URL for free plan signup
       pricing:
@@ -26,7 +26,7 @@ pricing:
       features:
         - id: "credits"
           name: "Credits"
-          value: 1
+          value: 10
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
@@ -34,7 +34,7 @@ pricing:
           icon: "download"
 
     - id: "starter"
-      name: Starter
+      name: "Starter"
       tagline: "best for individuals"
       pricing:
         monthly: 28
@@ -42,7 +42,7 @@ pricing:
       features:
         - id: "credits"
           name: "Credits"
-          value: 10
+          value: 100
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
@@ -58,7 +58,7 @@ pricing:
           icon: "headset"
 
     - id: "pro"
-      name: Pro
+      name: "Pro"
       tagline: "best for small businesses"
       popular: true
       pricing:
@@ -67,7 +67,7 @@ pricing:
       features:
         - id: "credits"
           name: "Credits"
-          value: 40
+          value: 200
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
@@ -75,7 +75,7 @@ pricing:
           icon: "download"
 
     - id: "max"
-      name: Max
+      name: "Max"
       tagline: "best for growing businesses"
       pricing:
         monthly: 100
@@ -83,7 +83,7 @@ pricing:
       features:
         - id: "credits"
           name: "Credits"
-          value: 100
+          value: 500
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
@@ -256,6 +256,31 @@ faqs:
 
         {% assign plan_count = page.resolved.pricing.plans | size %}
 
+        <!-- Automatically detect common features across ALL plans -->
+        {% assign common_feature_ids = "" | split: "," %}
+        {% if plan_count > 0 %}
+          {% assign first_plan = page.resolved.pricing.plans[0] %}
+          {% for first_feature in first_plan.features %}
+            {% assign is_common = true %}
+            {% for check_plan in page.resolved.pricing.plans %}
+              {% assign found_in_plan = false %}
+              {% for check_feature in check_plan.features %}
+                {% if check_feature.id == first_feature.id %}
+                  {% assign found_in_plan = true %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+              {% unless found_in_plan %}
+                {% assign is_common = false %}
+                {% break %}
+              {% endunless %}
+            {% endfor %}
+            {% if is_common %}
+              {% assign common_feature_ids = common_feature_ids | push: first_feature.id %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
         <!-- Determine column classes based on number of plans -->
         {% if plan_count == 1 %}
           {% assign col_classes = "col-12 col-md-8 col-lg-6 col-xl-5" %}
@@ -296,10 +321,10 @@ faqs:
 
                     <!-- Price -->
                     {% if plan.pricing.monthly == 0 %}
-                      <p class="display-5 fw-bold mb-0">Free</p>
+                      <p class="display-6 fw-bold mb-0">Free</p>
                     {% else %}
                       <p class="mb-0">
-                        <span class="display-5 fw-bold">
+                        <span class="display-6 fw-bold">
                           <span class="fs-3">$</span><span class="amount" data-monthly="{{ plan.pricing.monthly }}" data-annually="{{ plan.pricing.annually | divided_by: 12 | round }}">{{ plan.pricing.annually | divided_by: 12 | round }}</span>
                         </span>
                         <small class="text-muted">/month</small>
@@ -352,8 +377,8 @@ faqs:
                       {% if plan.pricing.monthly == 0 %}
                         <span>No credit card required</span>
                       {% else %}
-                        <span class="billing-info" data-monthly="Billed ${{ plan.pricing.monthly }} monthly" data-annually="Billed ${{ plan.pricing.annually }} annually">
-                          Billed ${{ plan.pricing.annually }} annually
+                        <span class="billing-info" data-monthly="Billed ${{ plan.pricing.monthly | uj_commaify }} monthly" data-annually="Billed ${{ plan.pricing.annually | uj_commaify }} annually">
+                          Billed ${{ plan.pricing.annually | uj_commaify }} annually
                         </span>
                       {% endif %}
                     </p>
@@ -364,16 +389,15 @@ faqs:
                     <div>
                       <!-- Common features that vary by plan -->
                       <ul class="list-unstyled mb-3">
-                        {% assign common_features = "credits,exports,video_mins" | split: "," %}
                         {% for feature in plan.features %}
-                          {% if common_features contains feature.id %}
+                          {% if common_feature_ids contains feature.id %}
                             <li class="d-flex align-items-start mb-2">
                               <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                               <span>
                                 {% if feature.value == "Unlimited" %}
                                   Unlimited {{ feature.name }}
                                 {% else %}
-                                  {{ feature.value }} {{ feature.name }}
+                                  {{ feature.value | uj_commaify }} {{ feature.name }}
                                 {% endif %}
                               </span>
                             </li>
@@ -386,7 +410,7 @@ faqs:
                         <!-- Check if there are additional features -->
                         {% assign has_additional = false %}
                         {% for feature in plan.features %}
-                          {% unless common_features contains feature.id %}
+                          {% unless common_feature_ids contains feature.id %}
                             {% assign has_additional = true %}
                             {% break %}
                           {% endunless %}
@@ -410,7 +434,7 @@ faqs:
                         {% if has_additional %}
                           <ul class="list-unstyled mb-0">
                             {% for feature in plan.features %}
-                              {% unless common_features contains feature.id %}
+                              {% unless common_feature_ids contains feature.id %}
                                 <li class="d-flex align-items-start mb-2 {% if forloop.last %}mb-0{% endif %}">
                                   <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                                   <span>
@@ -419,7 +443,7 @@ faqs:
                                     {% elsif feature.value == "Included" or feature.value == "Available" or feature.value == "Full" %}
                                       {{ feature.name }}
                                     {% else %}
-                                      {{ feature.value }} {{ feature.name }}
+                                      {{ feature.value | uj_commaify }} {{ feature.name }}
                                     {% endif %}
                                   </span>
                                 </li>

@@ -1,485 +1,672 @@
 /**
- * Form Manager Library
- * A comprehensive form management system that handles state, validation, submission, and UI updates
+ * FormManager - Lightweight form state management
+ *
+ * States: initializing → ready ⇄ submitting → ready (or submitted)
+ *
+ * Usage:
+ *   const formManager = new FormManager('#my-form', { options });
+ *   formManager.on('submit', async (data) => {
+ *     const response = await fetch('/api', { body: JSON.stringify(data) });
+ *     if (!response.ok) throw new Error('Failed');
+ *   });
  */
 
-export class FormManager extends EventTarget {
+// Libraries
+import { ready as domReady } from 'web-manager/modules/dom.js';
+import { showNotification } from 'web-manager/modules/utilities.js';
+
+export class FormManager {
   constructor(selector, options = {}) {
-    super();
-
-    // Store whether initialState was explicitly provided
-    this.hasCustomInitialState = options.hasOwnProperty('initialState');
-
-    // Configuration with defaults
-    this.config = {
-      autoDisable: true, // Auto disable/enable form controls
-      showSpinner: true, // Show spinner on submit buttons
-      validateOnSubmit: true, // Validate before submission
-      allowMultipleSubmissions: true, // Allow multiple submissions
-      resetOnSuccess: false, // Reset form after successful submission
-      spinnerHTML: '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>', // Spinner HTML
-      submitButtonLoadingText: 'Processing...',
-      submitButtonSuccessText: null, // Text to show on button after successful submission (when allowMultipleSubmissions: false)
-      fieldErrorClass: 'is-invalid',
-      fieldSuccessClass: 'is-valid',
-      initialState: 'loading', // Initial state: loading, ready, submitting, submitted
-      toastPosition: 'top-center', // Toast position: top-center, top-end, bottom-center, bottom-end, middle-center
-      toastDuration: 5000, // Toast duration in milliseconds
-      ...options
-    };
-
     // Get form element
-    this.form = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (!this.form) {
-      throw new Error(`Form not found: ${selector}`);
+    this.$form = typeof selector === 'string'
+      ? document.querySelector(selector)
+      : selector;
+
+    if (!this.$form) {
+      throw new Error(`FormManager: Form not found: ${selector}`);
     }
 
-    // State management
-    this.state = {
-      status: 'loading', // loading, ready, submitting, submitted
-      isValid: true,
-      errors: {},
-      data: {},
-      isDirty: false
+    // Configuration
+    this.config = {
+      autoReady: true, // Auto-transition to initialState when DOM is ready
+      initialState: 'ready', // State to transition to when autoReady fires
+      allowResubmit: true, // Allow resubmission after success (false = go to 'submitted' state)
+      resetOnSuccess: false, // Clear form fields after successful submission
+      warnOnUnsavedChanges: false, // Warn user before leaving page with unsaved changes
+      submittingText: 'Processing...', // Text shown on submit button during submission
+      submittedText: 'Processed!', // Text shown on submit button after submission (when allowResubmit: false)
+      ...options,
     };
 
-    // Store original button states
-    this.originalButtonStates = new Map();
+    // State
+    this.state = 'initializing';
+    this._isDirty = false;
+
+    // Event listeners
+    this._listeners = {
+      change: [],
+      validation: [],
+      submit: [],
+      statechange: [],
+    };
+
+    // Field errors (populated during validation)
+    this._fieldErrors = {};
+
+    // Bind beforeunload handler so we can remove it later
+    this._beforeUnloadHandler = (e) => this._handleBeforeUnload(e);
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Initialized', {
+        selector: typeof selector === 'string' ? selector : this.$form.id || this.$form,
+        config: this.config,
+      });
+    }
+    /* @dev-only:end */
 
     // Initialize
-    this.init();
+    this._init();
   }
 
   /**
    * Initialize the form manager
    */
-  init() {
-    // Store original button states BEFORE setting loading state
-    this.form.querySelectorAll('button').forEach(button => {
-      const state = {
-        innerHTML: button.innerHTML,
-        disabled: button.disabled
-      };
-      this.originalButtonStates.set(button, state);
+  _init() {
+    // Disable form during initialization
+    this._setDisabled(true);
 
-      /* @dev-only:start */
-      {
-        console.log(`[FormManager] Storing button "${button.textContent.trim()}": disabled=${state.disabled}`);
-      }
-      /* @dev-only:end */
-    });
+    // Attach submit handler
+    this.$form.addEventListener('submit', (e) => this._handleSubmit(e));
 
-    // Track which submit button was clicked
-    this.clickedSubmitButton = null;
+    // Attach change handlers
+    this.$form.addEventListener('input', (e) => this._handleChange(e));
+    this.$form.addEventListener('change', (e) => this._handleChange(e));
 
-    // Store if this is the first initialization
-    this.isInitializing = true;
+    // Attach beforeunload handler if configured
+    if (this.config.warnOnUnsavedChanges) {
+      window.addEventListener('beforeunload', this._beforeUnloadHandler);
+    }
 
-    // Set initial state
-    this.setFormState(this.config.initialState);
+    // Handle page restored from bfcache (e.g., back button after OAuth redirect)
+    window.addEventListener('pageshow', (e) => this._handlePageShow(e));
 
-    // Attach event listeners
-    this.attachEventListeners();
-
-    // Handle page show event (when navigating back from OAuth redirect or other navigation)
-    window.addEventListener('pageshow', (event) => {
-      // Check if page was restored from cache (persisted)
-
-      // Log
-      console.log('[FormManager] pageshow event', event);
-
-      // Quit if not persisted
-      if (!event.persisted) {
-        return;
-      }
-
-      // Log
-      console.log('[FormManager] Page restored from cache, resetting form to ready state');
-
-      // Reset form to ready state if it was in submitting state
-      if (this.state.status === 'submitting') {
-        this.setFormState('ready');
-      }
-    });
-
-    // Only auto-transition to ready if initialState wasn't explicitly set
-    // (meaning it's using the default 'loading' value)
-    if (!this.hasCustomInitialState) {
-      // Set ready state when DOM is ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          this.isInitializing = false;
-          this.setFormState('ready');
-        });
-      } else {
-        // Use setTimeout to ensure any parent initialization completes
-        setTimeout(() => {
-          this.isInitializing = false;
-          this.setFormState('ready');
-        }, 0);
-      }
-    } else {
-      // If custom initial state was provided, we're done initializing
-      this.isInitializing = false;
+    // Auto-transition to initialState when DOM is ready
+    if (this.config.autoReady) {
+      domReady().then(() => this._setInitialState());
     }
   }
 
   /**
-   * Attach all event listeners
+   * Register event listener
    */
-  attachEventListeners() {
-    // Form submit
-    this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+  on(event, callback) {
+    if (!this._listeners[event]) {
+      this._listeners[event] = [];
+    }
+    this._listeners[event].push(callback);
+    return this; // Allow chaining
+  }
 
-    // Unified input changes - capture all user interactions
-    const inputEvents = ['keyup', 'change', 'paste', 'cut'];
-    const changeHandler = (e) => this.handleChange(e);
+  /**
+   * Emit event to all listeners
+   */
+  async _emit(event, data) {
+    const listeners = this._listeners[event] || [];
+    for (const callback of listeners) {
+      await callback(data);
+    }
+  }
 
-    // Attach to all form inputs
-    this.form.querySelectorAll('input, select, textarea').forEach(element => {
-      inputEvents.forEach(eventType => {
-        element.addEventListener(eventType, changeHandler);
-      });
-    });
+  /**
+   * Set initial state based on config
+   */
+  _setInitialState() {
+    const state = this.config.initialState;
 
-    // Button clicks (for non-submit buttons)
-    this.form.querySelectorAll('button[type="button"]').forEach(button => {
-      button.addEventListener('click', (e) => this.handleButtonClick(e));
-    });
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] DOM ready, setting initial state:', state);
+    }
+    /* @dev-only:end */
 
-    // Track submit button clicks
-    this.form.querySelectorAll('button[type="submit"]').forEach(button => {
-      button.addEventListener('click', (e) => {
-        this.clickedSubmitButton = e.currentTarget;
-      });
-    });
+    if (state === 'ready') {
+      this.ready();
+    } else {
+      this._setState(state);
+    }
+  }
+
+  /**
+   * Transition to ready state
+   */
+  ready() {
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] ready() called');
+    }
+    /* @dev-only:end */
+
+    this._setState('ready');
+    this._setDisabled(false);
+
+    // Focus the field with autofocus attribute if it exists
+    const $autofocusField = this.$form.querySelector('[autofocus]');
+    if ($autofocusField && !$autofocusField.disabled) {
+      $autofocusField.focus();
+    }
   }
 
   /**
    * Handle form submission
    */
-  async handleSubmit(e) {
+  async _handleSubmit(e) {
+    // Always prevent default - this is the whole point
     e.preventDefault();
 
-    // Check if already submitting
-    if (this.state.status === 'submitting' && !this.config.allowMultipleSubmissions) {
+    // Ignore if not ready
+    if (this.state !== 'ready') {
+      /* @dev-only:start */
+      {
+        console.log('[Form-manager] Submit ignored, not ready. Current state:', this.state);
+      }
+      /* @dev-only:end */
       return;
     }
 
-    // Clear any existing errors
-    this.clearErrors();
+    // Get the submit button that was clicked (native browser API)
+    const $submitButton = e.submitter;
 
-    // Collect form data
-    const formData = this.collectFormData();
+    // Collect form data BEFORE disabling (disabled elements aren't in FormData)
+    const data = this.getData();
 
-    // Build the submit event detail
-    const submitEvent = new CustomEvent('submit', {
-      detail: {
-        data: formData,
-        form: this.form,
-        submitButton: this.clickedSubmitButton
-      },
-      cancelable: true
-    });
+    // Clear previous field errors
+    this.clearFieldErrors();
+
+    // Run validation BEFORE transitioning to submitting state
+    const validationPassed = await this._runValidation(data, $submitButton);
+    if (!validationPassed) {
+      return;
+    }
+
+    // Transition to submitting
+    this._setState('submitting');
+    this._setDisabled(true);
+    this._showSpinner(true);
 
     /* @dev-only:start */
     {
-      console.log(`[FormManager] Submit event triggered on ${this.form.id}`, formData, submitEvent.detail.submitButton);
+      console.log('[Form-manager] Submitting', {
+        data,
+        submitButton: $submitButton?.name ? `${$submitButton.name}=${$submitButton.value}` : null,
+      });
     }
     /* @dev-only:end */
 
-    // Validate if enabled
-    console.log('-----1');
-    if (this.config.validateOnSubmit) {
-    console.log('-----2');
-      const validation = this.validate(formData);
-      if (!validation.isValid) {
-    console.log('-----3');
-        this.showErrors(validation.errors);
-        // Show a summary notification for validation errors
-        const errorCount = Object.keys(validation.errors).length;
-        const message = errorCount === 1
-          ? 'Please correct the error below'
-          : `Please correct the ${errorCount} errors below`;
-        this.showNotification(message, 'danger');
-        return;
-      }
-    }
-
-    // Set submitting state
-    this.setFormState('submitting');
-
-    // Emit submit event with the clicked submit button
-    this.dispatchEvent(submitEvent);
-
-    // Reset clicked button after dispatching event
-    this.clickedSubmitButton = null;
-
-    // If event was not cancelled, handle default submission
-    if (!submitEvent.defaultPrevented) {
-      try {
-        // Default submission (can be overridden by listening to submit event)
-        await this.defaultSubmitHandler(formData);
-
-        // Success - set state based on allowMultipleSubmissions
-        if (this.config.allowMultipleSubmissions) {
-          this.setFormState('ready');
-        } else {
-          this.setFormState('submitted');
-        }
-
-        this.dispatchEvent(new CustomEvent('success', {
-          detail: { data: formData }
-        }));
-
-        // Reset form if configured
-        if (this.config.resetOnSuccess) {
-          this.reset();
-        }
-      } catch (error) {
-        // Error - always go back to ready state
-        this.setFormState('ready');
-        this.showError(error.message);
-        this.dispatchEvent(new CustomEvent('error', {
-          detail: { error, data: formData }
-        }));
-      }
-    }
-  }
-
-  /**
-   * Default submit handler (can be overridden)
-   */
-  async defaultSubmitHandler(data) {
-    // Default implementation - just log
-    console.log('Form submitted with data:', data);
-    // Simulate async operation
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-
-  /**
-   * Handle input changes with debouncing
-   */
-  handleChange(e) {
-    const field = e.target;
-
-    // Clear field error immediately when user starts typing
-    if (field.classList.contains(this.config.fieldErrorClass)) {
-      this.clearFieldError(field);
-    }
-
-    // Clear any existing timeout for this field
-    if (this.changeTimeouts) {
-      clearTimeout(this.changeTimeouts.get(field));
-    } else {
-      this.changeTimeouts = new Map();
-    }
-
-    // Set a new timeout to capture the final value
-    this.changeTimeouts.set(field, setTimeout(() => {
-      this.state.isDirty = true;
-
-      // Collect all form data after the change
-      const data = this.collectFormData();
-
-      // Get the specific field value
-      const fieldValue = this.getFieldValue(field);
-
-      // Emit the unified change event
-      this.dispatchEvent(new CustomEvent('change', {
-        detail: {
-          field: field,
-          fieldName: field.name,
-          fieldValue: fieldValue,
-          data: data,
-          event: e
-        }
-      }));
-
-      // Clean up the timeout reference
-      this.changeTimeouts.delete(field);
-    }, 100)); // 100ms delay to ensure we capture the final value
-  }
-
-  /**
-   * Handle non-submit button clicks
-   */
-  handleButtonClick(e) {
-    const button = e.currentTarget;
-    const action = button.getAttribute('data-action') || button.id;
-
-    this.dispatchEvent(new CustomEvent('button', {
-      detail: {
-        button,
-        action,
-        data: this.collectFormData()
-      }
-    }));
-  }
-
-  /**
-   * Set form state and update UI accordingly
-   */
-  setFormState(status) {
-    const previousStatus = this.state.status;
-    this.state.status = status;
-
-    /* @dev-only:start */
-    {
-      console.log(`[FormManager] ${this.form.id || 'form'}: ${previousStatus} --> ${status}`);
-    }
-    /* @dev-only:end */
-
-    // Update form data attribute
-    this.form.setAttribute('data-form-state', status);
-
-    switch (status) {
-      case 'loading':
-        this.disableForm();
-        break;
-
-      case 'ready':
-        this.enableForm();
-        this.hideSubmittingState();
-        break;
-
-      case 'submitting':
-        this.disableForm();
-        this.showSubmittingState();
-        break;
-
-      case 'submitted':
-        // Keep form disabled after submission by default
-        if (!this.config.resetOnSuccess) {
-          this.disableForm();
-        }
-        this.hideSubmittingState();
-        // Update button text if submitButtonSuccessText is configured
-        if (this.config.submitButtonSuccessText && !this.config.allowMultipleSubmissions) {
-          this.showSuccessButtonText();
-        }
-        break;
-    }
-
-    // Emit state change event
-    this.dispatchEvent(new CustomEvent('statechange', {
-      detail: {
-        status,
-        previousStatus
-      }
-    }));
-  }
-
-  /**
-   * Disable all form controls
-   */
-  disableForm() {
-    if (!this.config.autoDisable) return;
-
-    // Disable all inputs, selects, textareas, and buttons
-    this.form.querySelectorAll('input, select, textarea, button').forEach(element => {
-      element.disabled = true;
-    });
-  }
-
-  /**
-   * Enable all form controls
-   */
-  enableForm() {
-    if (!this.config.autoDisable) return;
-
-    /* @dev-only:start */
-    {
-      const count = this.form.querySelectorAll('input, select, textarea, button').length;
-      console.log(`[FormManager] Enabling ${count} controls in ${this.form.id || 'form'}`);
-    }
-    /* @dev-only:end */
-
-    // Enable all inputs, selects, textareas, and buttons
-    this.form.querySelectorAll('input, select, textarea, button').forEach(element => {
-      // Only enable if it wasn't originally disabled
-      const originalState = this.originalButtonStates.get(element);
-
-      // Always enable submit buttons regardless of original state
-      const isSubmitButton = element.type === 'submit';
+    try {
+      // Let consumers handle the submission
+      await this._emit('submit', { data, $submitButton });
 
       /* @dev-only:start */
       {
-        if (element.tagName === 'BUTTON') {
-          const willEnable = isSubmitButton || !originalState || !originalState.disabled;
-          console.log(`[FormManager] Button "${element.textContent.trim()}": originally ${originalState?.disabled ? 'disabled' : 'enabled'} --> ${willEnable ? 'enabling' : 'keeping disabled'}`);
-        }
+        console.log('[Form-manager] Submit success', {
+          resetOnSuccess: this.config.resetOnSuccess,
+          allowResubmit: this.config.allowResubmit,
+        });
       }
       /* @dev-only:end */
 
-      if (isSubmitButton || !originalState || !originalState.disabled) {
-        element.disabled = false;
-      }
-    });
+      // Success - clear dirty state
+      this.setDirty(false);
+      this._showSpinner(false);
 
-    // Focus the field with autofocus attribute if it exists
-    const autofocusField = this.form.querySelector('[autofocus]');
-    if (autofocusField && !autofocusField.disabled) {
-      autofocusField.focus();
+      if (this.config.resetOnSuccess) {
+        this.$form.reset();
+      }
+
+      if (this.config.allowResubmit) {
+        this._setState('ready');
+        this._setDisabled(false);
+      } else {
+        this._setState('submitted');
+        this._showSubmittedText();
+        // Stay disabled - no more submissions allowed
+      }
+    } catch (error) {
+      /* @dev-only:start */
+      {
+        console.log('[Form-manager] Submit error:', error.message);
+      }
+      /* @dev-only:end */
+
+      // Error - go back to ready and show error
+      this._setState('ready');
+      this._setDisabled(false);
+      this._showSpinner(false);
+      this.showError(error.message || 'An error occurred');
     }
   }
 
   /**
-   * Show submitting state on buttons
+   * Handle input changes
    */
-  showSubmittingState() {
-    if (!this.config.showSpinner) return;
+  _handleChange(e) {
+    // Mark form as dirty
+    this.setDirty(true);
 
-    // Update submit buttons
-    this.form.querySelectorAll('button[type="submit"]').forEach(button => {
-      const originalState = this.originalButtonStates.get(button);
-      if (originalState) {
-        button.innerHTML = this.config.spinnerHTML + this.config.submitButtonLoadingText;
+    const data = this.getData();
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Change', {
+        name: e.target.name,
+        value: e.target.value,
+        data,
+      });
+    }
+    /* @dev-only:end */
+
+    this._emit('change', {
+      field: e.target,
+      name: e.target.name,
+      value: e.target.value,
+      data,
+    });
+
+    // Clear field error when user types in that field
+    if (this._fieldErrors[e.target.name]) {
+      this._clearFieldError(e.target.name);
+    }
+  }
+
+  /**
+   * Run validation (HTML5 + custom validation event)
+   * Returns true if validation passed, false if there are errors
+   */
+  async _runValidation(data, $submitButton) {
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Running validation');
+    }
+    /* @dev-only:end */
+
+    // Create setError helper for custom validation
+    const setError = (fieldName, message) => {
+      this._fieldErrors[fieldName] = message;
+    };
+
+    // 1. Run automatic HTML5 validation
+    this._runHTML5Validation(setError);
+
+    // 2. Run custom validation listeners
+    await this._emit('validation', { data, setError, $submitButton });
+
+    // 3. Check if there are any errors
+    const errorCount = Object.keys(this._fieldErrors).length;
+    if (errorCount > 0) {
+      /* @dev-only:start */
+      {
+        console.log('[Form-manager] Validation failed:', this._fieldErrors);
+      }
+      /* @dev-only:end */
+
+      // Display all field errors
+      this._displayFieldErrors();
+
+      // Focus first error field
+      this._focusFirstError();
+
+      return false;
+    }
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Validation passed');
+    }
+    /* @dev-only:end */
+
+    return true;
+  }
+
+  /**
+   * Run HTML5 constraint validation on all form fields
+   */
+  _runHTML5Validation(setError) {
+    const $fields = this.$form.querySelectorAll('input, select, textarea');
+
+    $fields.forEach(($field) => {
+      const name = $field.name;
+      if (!name) {
+        return;
+      }
+
+      // Skip if already has an error (from previous validation)
+      if (this._fieldErrors[name]) {
+        return;
+      }
+
+      const value = $field.value;
+      const type = $field.type;
+
+      // Required validation
+      if ($field.hasAttribute('required')) {
+        if (type === 'checkbox' && !$field.checked) {
+          setError(name, 'This field is required');
+          return;
+        }
+        if (!value || !value.trim()) {
+          setError(name, 'This field is required');
+          return;
+        }
+      }
+
+      // Skip further validation if empty and not required
+      if (!value) {
+        return;
+      }
+
+      // Email validation
+      if (type === 'email') {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(value)) {
+          setError(name, 'Please enter a valid email address');
+          return;
+        }
+      }
+
+      // URL validation
+      if (type === 'url') {
+        try {
+          new URL(value);
+        } catch {
+          setError(name, 'Please enter a valid URL');
+          return;
+        }
+      }
+
+      // Min length validation
+      if ($field.hasAttribute('minlength')) {
+        const minLength = parseInt($field.getAttribute('minlength'), 10);
+        if (value.length < minLength) {
+          setError(name, `Must be at least ${minLength} characters`);
+          return;
+        }
+      }
+
+      // Max length validation
+      if ($field.hasAttribute('maxlength')) {
+        const maxLength = parseInt($field.getAttribute('maxlength'), 10);
+        if (value.length > maxLength) {
+          setError(name, `Must be no more than ${maxLength} characters`);
+          return;
+        }
+      }
+
+      // Min value validation (for number, range, date, etc.)
+      if ($field.hasAttribute('min')) {
+        const min = $field.getAttribute('min');
+        if (type === 'number' || type === 'range') {
+          if (parseFloat(value) < parseFloat(min)) {
+            setError(name, `Must be at least ${min}`);
+            return;
+          }
+        } else if (type === 'date' || type === 'datetime-local') {
+          if (new Date(value) < new Date(min)) {
+            setError(name, `Must be on or after ${min}`);
+            return;
+          }
+        }
+      }
+
+      // Max value validation
+      if ($field.hasAttribute('max')) {
+        const max = $field.getAttribute('max');
+        if (type === 'number' || type === 'range') {
+          if (parseFloat(value) > parseFloat(max)) {
+            setError(name, `Must be no more than ${max}`);
+            return;
+          }
+        } else if (type === 'date' || type === 'datetime-local') {
+          if (new Date(value) > new Date(max)) {
+            setError(name, `Must be on or before ${max}`);
+            return;
+          }
+        }
+      }
+
+      // Pattern validation
+      if ($field.hasAttribute('pattern')) {
+        const pattern = new RegExp(`^${$field.getAttribute('pattern')}$`);
+        if (!pattern.test(value)) {
+          const title = $field.getAttribute('title') || 'Please match the requested format';
+          setError(name, title);
+          return;
+        }
       }
     });
   }
 
   /**
-   * Hide submitting state on buttons
+   * Display all field errors in the DOM
    */
-  hideSubmittingState() {
-    // Restore original button content
-    this.form.querySelectorAll('button[type="submit"]').forEach(button => {
-      const originalState = this.originalButtonStates.get(button);
-      if (originalState) {
-        button.innerHTML = originalState.innerHTML;
-      }
-    });
+  _displayFieldErrors() {
+    for (const [fieldName, message] of Object.entries(this._fieldErrors)) {
+      this._showFieldError(fieldName, message);
+    }
   }
 
   /**
-   * Show success button text after successful submission
+   * Show error on a specific field
    */
-  showSuccessButtonText() {
-    if (!this.config.submitButtonSuccessText) return;
+  _showFieldError(fieldName, message) {
+    const $field = this.$form.querySelector(`[name="${fieldName}"]`);
+    if (!$field) {
+      return;
+    }
 
-    // Update submit buttons with success text
-    this.form.querySelectorAll('button[type="submit"]').forEach(button => {
-      // Find the button-text span if it exists
-      const buttonTextSpan = button.querySelector('.button-text');
-      if (buttonTextSpan) {
-        buttonTextSpan.textContent = this.config.submitButtonSuccessText;
+    // Add invalid class to field
+    $field.classList.add('is-invalid');
+
+    // Find or create feedback element
+    let $feedback = $field.parentElement.querySelector('.invalid-feedback');
+    if (!$feedback) {
+      $feedback = document.createElement('div');
+      $feedback.className = 'invalid-feedback';
+
+      // Insert after the field (or after the label for checkboxes)
+      if ($field.type === 'checkbox' || $field.type === 'radio') {
+        const $parent = $field.closest('.form-check') || $field.parentElement;
+        $parent.appendChild($feedback);
       } else {
-        // If no button-text span, update the entire button content
-        button.textContent = this.config.submitButtonSuccessText;
+        $field.parentElement.appendChild($feedback);
+      }
+    }
+
+    $feedback.textContent = message;
+    $feedback.style.display = 'block';
+  }
+
+  /**
+   * Clear error on a specific field
+   */
+  _clearFieldError(fieldName) {
+    delete this._fieldErrors[fieldName];
+
+    const $field = this.$form.querySelector(`[name="${fieldName}"]`);
+    if (!$field) {
+      return;
+    }
+
+    $field.classList.remove('is-invalid');
+
+    const $feedback = $field.parentElement.querySelector('.invalid-feedback');
+    if ($feedback) {
+      $feedback.style.display = 'none';
+    }
+  }
+
+  /**
+   * Clear all field errors
+   */
+  clearFieldErrors() {
+    for (const fieldName of Object.keys(this._fieldErrors)) {
+      this._clearFieldError(fieldName);
+    }
+    this._fieldErrors = {};
+  }
+
+  /**
+   * Focus the first field with an error
+   */
+  _focusFirstError() {
+    const firstFieldName = Object.keys(this._fieldErrors)[0];
+    if (!firstFieldName) {
+      return;
+    }
+
+    const $field = this.$form.querySelector(`[name="${firstFieldName}"]`);
+    if ($field) {
+      $field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $field.focus();
+    }
+  }
+
+  /**
+   * Programmatically set field errors and display them (for use in submit handler)
+   */
+  throwFieldErrors(errors) {
+    for (const [fieldName, message] of Object.entries(errors)) {
+      this._fieldErrors[fieldName] = message;
+    }
+    this._displayFieldErrors();
+    this._focusFirstError();
+    throw new Error('Validation failed');
+  }
+
+  /**
+   * Handle beforeunload event
+   */
+  _handleBeforeUnload(e) {
+    if (!this._isDirty) {
+      return;
+    }
+
+    // Standard way to trigger browser's "unsaved changes" dialog
+    e.preventDefault();
+    e.returnValue = '';
+  }
+
+  /**
+   * Handle pageshow event (bfcache restoration)
+   */
+  _handlePageShow(e) {
+    // Only handle if page was restored from bfcache
+    if (!e.persisted) {
+      return;
+    }
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Page restored from bfcache, current state:', this.state);
+    }
+    /* @dev-only:end */
+
+    // Reset form to ready if it was stuck in submitting state
+    if (this.state === 'submitting') {
+      this._showSpinner(false);
+      this.ready();
+    }
+  }
+
+  /**
+   * Set dirty state
+   */
+  setDirty(dirty) {
+    if (this._isDirty === dirty) {
+      return;
+    }
+
+    this._isDirty = dirty;
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Dirty state:', dirty);
+    }
+    /* @dev-only:end */
+  }
+
+  /**
+   * Set form state
+   */
+  _setState(newState) {
+    const previousState = this.state;
+    this.state = newState;
+    this.$form.setAttribute('data-form-state', newState);
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] State change', {
+        from: previousState,
+        to: newState,
+      });
+    }
+    /* @dev-only:end */
+
+    this._emit('statechange', { state: newState, previousState });
+  }
+
+  /**
+   * Enable/disable form controls
+   */
+  _setDisabled(disabled) {
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Set disabled:', disabled);
+    }
+    /* @dev-only:end */
+
+    this.$form.querySelectorAll('button, input, select, textarea').forEach(($el) => {
+      $el.disabled = disabled;
+    });
+  }
+
+  /**
+   * Show/hide spinner on submit buttons
+   */
+  _showSpinner(show) {
+    this.$form.querySelectorAll('button[type="submit"]').forEach(($btn) => {
+      if (show) {
+        // Store original content
+        $btn._originalHTML = $btn.innerHTML;
+        $btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${this.config.submittingText}`;
+      } else if ($btn._originalHTML) {
+        $btn.innerHTML = $btn._originalHTML;
       }
     });
   }
 
   /**
-   * Set nested property value using dot notation
+   * Show submitted text on submit buttons (when allowResubmit: false)
    */
-  setNestedValue(obj, path, value) {
+  _showSubmittedText() {
+    this.$form.querySelectorAll('button[type="submit"]').forEach(($btn) => {
+      const $buttonText = $btn.querySelector('.button-text');
+      if ($buttonText) {
+        $buttonText.textContent = this.config.submittedText;
+      } else {
+        $btn.textContent = this.config.submittedText;
+      }
+    });
+  }
+
+  /**
+   * Set nested value using dot notation (e.g., "user.address.city")
+   */
+  _setNested(obj, path, value) {
     const keys = path.split('.');
     const lastKey = keys.pop();
-
-    // Create nested structure if it doesn't exist
     let current = obj;
+
     for (const key of keys) {
       if (!current[key] || typeof current[key] !== 'object') {
         current[key] = {};
@@ -487,570 +674,215 @@ export class FormManager extends EventTarget {
       current = current[key];
     }
 
-    // Set the value
-    current[lastKey] = value;
-  }
-
-  /**
-   * Get nested property value using dot notation
-   */
-  getNestedValue(obj, path) {
-    const keys = path.split('.');
-    let current = obj;
-
-    for (const key of keys) {
-      if (current == null || typeof current !== 'object') {
-        return undefined;
+    // Handle multiple values (e.g., checkboxes with same name)
+    if (current[lastKey] !== undefined) {
+      if (!Array.isArray(current[lastKey])) {
+        current[lastKey] = [current[lastKey]];
       }
-      current = current[key];
+      current[lastKey].push(value);
+    } else {
+      current[lastKey] = value;
     }
-
-    return current;
   }
 
   /**
-   * Collect all form data
+   * Get nested value using dot notation
    */
-  collectFormData() {
-    const formData = new FormData(this.form);
+  _getNested(obj, path) {
+    return path.split('.').reduce((current, key) => {
+      return current && current[key] !== undefined ? current[key] : undefined;
+    }, obj);
+  }
+
+  /**
+   * Collect form data as plain object (supports dot notation for nested fields)
+   */
+  getData() {
+    const formData = new FormData(this.$form);
     const data = {};
 
+    // Count checkboxes per name to detect groups vs single
+    const checkboxCounts = {};
+    this.$form.querySelectorAll('input[type="checkbox"]').forEach(($cb) => {
+      checkboxCounts[$cb.name] = (checkboxCounts[$cb.name] || 0) + 1;
+    });
 
-    // Convert FormData to plain object with support for dot notation
     for (const [key, value] of formData.entries()) {
-      // Check if key contains dots for nested structure
-      if (key.includes('.')) {
-        // Handle nested structure
-        const existingValue = this.getNestedValue(data, key);
-        if (existingValue !== undefined) {
-          // Handle multiple values
-          if (Array.isArray(existingValue)) {
-            existingValue.push(value);
-          } else {
-            this.setNestedValue(data, key, [existingValue, value]);
-          }
-        } else {
-          this.setNestedValue(data, key, value);
-        }
-      } else {
-        // Handle flat structure (original behavior)
-        if (data[key]) {
-          if (Array.isArray(data[key])) {
-            data[key].push(value);
-          } else {
-            data[key] = [data[key], value];
-          }
-        } else {
-          data[key] = value;
-        }
+      // Skip checkboxes - we handle them separately
+      if (checkboxCounts[key]) {
+        continue;
       }
+      this._setNested(data, key, value);
     }
 
-    // Handle checkboxes that might not be in FormData when unchecked
-    this.form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-      const name = checkbox.name;
-      if (!checkbox.checked) {
-        // Check if value exists (for nested or flat)
-        const value = name.includes('.') ? this.getNestedValue(data, name) : data[name];
-        if (value === undefined) {
-          // For single checkboxes, set to false
-          if (!this.form.querySelectorAll(`input[type="checkbox"][name="${name}"]`)[1]) {
-            if (name.includes('.')) {
-              this.setNestedValue(data, name, false);
-            } else {
-              data[name] = false;
-            }
-          }
-        }
+    // Handle checkboxes
+    const processedGroups = new Set();
+    this.$form.querySelectorAll('input[type="checkbox"]').forEach(($cb) => {
+      const name = $cb.name;
+
+      // Single checkbox: true/false
+      if (checkboxCounts[name] === 1) {
+        this._setNested(data, name, $cb.checked);
+        return;
       }
+
+      // Checkbox group: object with value: true/false (only process once per group)
+      if (processedGroups.has(name)) {
+        return;
+      }
+      processedGroups.add(name);
+
+      const values = {};
+      this.$form.querySelectorAll(`input[type="checkbox"][name="${name}"]`).forEach(($groupCb) => {
+        values[$groupCb.value] = $groupCb.checked;
+      });
+      this._setNested(data, name, values);
     });
 
-    // Handle radio buttons
-    this.form.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-      const name = radio.name;
-      if (name.includes('.')) {
-        this.setNestedValue(data, name, radio.value);
-      } else {
-        data[name] = radio.value;
-      }
-    });
-
-    this.state.data = data;
     return data;
-  }
-
-  /**
-   * Get field value by element or name
-   */
-  getFieldValue(fieldOrName) {
-    const field = typeof fieldOrName === 'string'
-      ? this.form.querySelector(`[name="${fieldOrName}"]`)
-      : fieldOrName;
-
-    if (!field) return undefined;
-
-    if (field.type === 'checkbox') {
-      // For multiple checkboxes with same name, return array of checked values
-      const checkboxes = this.form.querySelectorAll(`input[type="checkbox"][name="${field.name}"]`);
-      if (checkboxes.length > 1) {
-        return Array.from(checkboxes)
-          .filter(cb => cb.checked)
-          .map(cb => cb.value);
-      }
-      return field.checked;
-    } else if (field.type === 'radio') {
-      return this.form.querySelector(`input[name="${field.name}"]:checked`)?.value;
-    } else {
-      return field.value;
-    }
-  }
-
-  /**
-   * Validate form data
-   */
-  validate(data) {
-    const errors = {};
-    let isValid = true;
-
-    // Log
-    /* @dev-only:start */
-    {
-      console.log(`[FormManager] Validating form ${this.form.id || 'form'}`, data);
-    }
-    /* @dev-only:end */
-
-    // Check required fields
-    this.form.querySelectorAll('[required]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        errors[field.name] = `${this.getFieldLabel(field)} is required`;
-        isValid = false;
-      }
-    });
-
-    // Check email fields
-    this.form.querySelectorAll('input[type="email"]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      if (value && !this.isValidEmail(value)) {
-        errors[field.name] = 'Please enter a valid email address';
-        isValid = false;
-      }
-    });
-
-    // Check pattern validation
-    this.form.querySelectorAll('[pattern]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      const pattern = new RegExp(field.pattern);
-      if (value && !pattern.test(value)) {
-        errors[field.name] = field.title || 'Invalid format';
-        isValid = false;
-      }
-    });
-
-    // Check minlength validation
-    this.form.querySelectorAll('[minlength]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      const minLength = parseInt(field.minLength);
-      if (value && value.length < minLength) {
-        errors[field.name] = `${this.getFieldLabel(field)} must be at least ${minLength} characters`;
-        isValid = false;
-      }
-    });
-
-    // Check maxlength validation
-    this.form.querySelectorAll('[maxlength]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      const maxLength = parseInt(field.maxLength);
-      if (value && value.length > maxLength) {
-        errors[field.name] = `${this.getFieldLabel(field)} must be no more than ${maxLength} characters`;
-        isValid = false;
-      }
-    });
-
-    // Check min validation for number inputs
-    this.form.querySelectorAll('input[type="number"][min]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      const min = parseFloat(field.min);
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue < min) {
-        errors[field.name] = `${this.getFieldLabel(field)} must be at least ${min}`;
-        isValid = false;
-      }
-    });
-
-    // Check max validation for number inputs
-    this.form.querySelectorAll('input[type="number"][max]').forEach(field => {
-      // Get value, handling nested fields with dot notation
-      const value = field.name.includes('.')
-        ? this.getNestedValue(data, field.name)
-        : data[field.name];
-
-      const max = parseFloat(field.max);
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue > max) {
-        errors[field.name] = `${this.getFieldLabel(field)} must be no more than ${max}`;
-        isValid = false;
-      }
-    });
-
-    // Custom validation
-    const customValidation = new CustomEvent('validate', {
-      detail: { data, errors },
-      cancelable: true
-    });
-    this.dispatchEvent(customValidation);
-
-    // Update isValid if custom validation added errors
-    this.state.isValid = isValid;
-    this.state.errors = errors;
-
-    // Log
-    /* @dev-only:start */
-    {
-      console.log(`[FormManager] Validation result for ${this.form.id || 'form'}`, { isValid, errors });
-    }
-    /* @dev-only:end */
-
-    return { isValid, errors };
-  }
-
-  /**
-   * Get field label
-   */
-  getFieldLabel(field) {
-    // Try to find associated label
-    const label = this.form.querySelector(`label[for="${field.id}"]`);
-    if (label) {
-      return label.textContent.replace('*', '').trim();
-    }
-
-    // Fallback to name attribute
-    return field.name.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  }
-
-  /**
-   * Email validation helper
-   */
-  isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  /**
-   * Show errors
-   */
-  showErrors(errors) {
-    // Clear previous errors
-    this.clearErrors();
-
-    let firstErrorField = null;
-
-    // Show field-specific errors
-    Object.entries(errors).forEach(([fieldName, error]) => {
-      const field = this.form.querySelector(`[name="${fieldName}"]`);
-      if (field) {
-        field.classList.add(this.config.fieldErrorClass);
-
-        // Track first error field for focus
-        if (!firstErrorField) {
-          firstErrorField = field;
-        }
-
-        // Show error message
-        const errorElement = document.createElement('div');
-        errorElement.className = 'invalid-feedback';
-        errorElement.textContent = error;
-
-        // Insert after field or field group
-        const insertAfter = field.closest('.input-group') || field;
-        insertAfter.parentNode.insertBefore(errorElement, insertAfter.nextSibling);
-      }
-    });
-
-    // Focus the first field with an error
-    if (firstErrorField) {
-      firstErrorField.focus();
-
-      // Scroll into view if needed
-      firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    // If there are errors that couldn't be attached to fields, show them in a notification
-    const unattachedErrors = Object.entries(errors).filter(([fieldName]) => {
-      return !this.form.querySelector(`[name="${fieldName}"]`);
-    });
-
-    if (unattachedErrors.length > 0) {
-      const errorMessage = unattachedErrors.map(([_, error]) => error).join(', ');
-      this.showNotification(errorMessage, 'danger');
-    }
-  }
-
-  /**
-   * Show notification (toast-style)
-   */
-  showNotification(message, type = 'info') {
-    const $notification = document.createElement('div');
-    $notification.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5 animation-slide-down`;
-    $notification.style.zIndex = '9999';
-    $notification.innerHTML = `
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-    document.body.appendChild($notification);
-
-    setTimeout(() => {
-      $notification.remove();
-    }, 5000);
-  }
-
-  /**
-   * Show single error message
-   */
-  showError(messageOrError) {
-    // Handle Error objects and strings
-    let message;
-
-    if (messageOrError instanceof Error) {
-      message = messageOrError.message;
-      console.error('FormManager Error:', messageOrError);
-    } else {
-      message = messageOrError;
-      console.error('FormManager Error:', message);
-    }
-
-    // Always use notification system
-    this.showNotification(message, 'danger');
-  }
-
-  /**
-   * Clear all errors
-   */
-  clearErrors() {
-    // Remove field error classes
-    this.form.querySelectorAll(`.${this.config.fieldErrorClass}`).forEach(field => {
-      field.classList.remove(this.config.fieldErrorClass);
-    });
-
-    // Remove error messages
-    this.form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-  }
-
-  /**
-   * Clear error for a specific field
-   */
-  clearFieldError(field) {
-    // Remove error class from field
-    field.classList.remove(this.config.fieldErrorClass);
-
-    // Remove error message for this field
-    const errorElement = field.parentElement.querySelector('.invalid-feedback') ||
-                        field.closest('.input-group')?.parentElement.querySelector('.invalid-feedback');
-    if (errorElement) {
-      errorElement.remove();
-    }
-
-    // Remove field from state errors
-    if (this.state.errors && field.name) {
-      delete this.state.errors[field.name];
-    }
   }
 
   /**
    * Show success message
    */
   showSuccess(message) {
-    // Always use notification system
-    this.showNotification(message, 'success');
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Show success:', message);
+    }
+    /* @dev-only:end */
+
+    showNotification(message, { type: 'success' });
   }
 
   /**
-   * Reset form
+   * Show error message
+   */
+  showError(message) {
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Show error:', message);
+    }
+    /* @dev-only:end */
+
+    showNotification(message, { type: 'danger' });
+  }
+
+  /**
+   * Reset the form
    */
   reset() {
-    this.form.reset();
-    this.state.isDirty = false;
-    this.state.data = {};
-    this.state.errors = {};
-    this.clearErrors();
-    this.setFormState('ready');
-  }
-
-  /**
-   * Set field value programmatically
-   */
-  setFieldValue(fieldName, value) {
-    const field = this.form.querySelector(`[name="${fieldName}"]`);
-    if (field) {
-      if (field.type === 'checkbox') {
-        field.checked = !!value;
-      } else if (field.type === 'radio') {
-        const radio = this.form.querySelector(`[name="${fieldName}"][value="${value}"]`);
-        if (radio) radio.checked = true;
-      } else {
-        field.value = value;
-      }
-
-      // Update internal state data with nested field support
-      if (fieldName.includes('.')) {
-        this.setNestedValue(this.state.data, fieldName, value);
-      } else {
-        this.state.data[fieldName] = value;
-      }
-
-      // Trigger change event
-      field.dispatchEvent(new Event('change', { bubbles: true }));
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] reset() called');
     }
+    /* @dev-only:end */
+
+    this.setDirty(false);
+    this.$form.reset();
+    this._setState('ready');
   }
 
   /**
-   * Get field value from state data
-   */
-  getValue(fieldName) {
-    // Handle nested fields with dot notation
-    return fieldName.includes('.')
-      ? this.getNestedValue(this.state.data, fieldName)
-      : this.state.data[fieldName];
-  }
-
-  /**
-   * Disable specific field
-   */
-  disableField(fieldName) {
-    const field = this.form.querySelector(`[name="${fieldName}"]`);
-    if (field) field.disabled = true;
-  }
-
-  /**
-   * Enable specific field
-   */
-  enableField(fieldName) {
-    const field = this.form.querySelector(`[name="${fieldName}"]`);
-    if (field) field.disabled = false;
-  }
-
-  /**
-   * Get current form data
-   */
-  getData() {
-    return this.collectFormData();
-  }
-
-  /**
-   * Flatten nested object to dot notation
-   */
-  flattenObject(obj, prefix = '') {
-    const flattened = {};
-
-    for (const [key, value] of Object.entries(obj)) {
-      const newKey = prefix ? `${prefix}.${key}` : key;
-
-      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
-        // Recursively flatten nested objects
-        Object.assign(flattened, this.flattenObject(value, newKey));
-      } else {
-        flattened[newKey] = value;
-      }
-    }
-
-    return flattened;
-  }
-
-  /**
-   * Set form values programmatically
-   * @param {Object} values - Object with field names as keys and values to set (supports nested objects)
-   */
-  setValues(values) {
-    if (!values || typeof values !== 'object') return;
-
-    // Flatten nested objects to dot notation
-    const flatValues = this.flattenObject(values);
-
-    Object.entries(flatValues).forEach(([name, value]) => {
-      // Find form elements by name or id
-      const element = this.form.querySelector(`[name="${name}"]`) ||
-                      this.form.querySelector(`#${name}`) ||
-                      this.form.querySelector(`#${name}-input`) ||
-                      this.form.querySelector(`#${name}-select`);
-
-      if (!element) return;
-
-      // Handle different element types
-      if (element.type === 'checkbox') {
-        element.checked = !!value;
-      } else if (element.type === 'radio') {
-        // For radio buttons, find the one with matching value
-        const radioGroup = this.form.querySelectorAll(`[name="${name}"]`);
-        radioGroup.forEach(radio => {
-          radio.checked = radio.value === value;
-        });
-      } else if (element.tagName === 'SELECT') {
-        // For select elements, set the value
-        element.value = value;
-        // If value doesn't exist in options, try to find by text
-        if (!element.value && value) {
-          const option = Array.from(element.options).find(opt =>
-            opt.text.toLowerCase() === value.toLowerCase()
-          );
-          if (option) element.value = option.value;
-        }
-      } else {
-        // For text inputs, textareas, etc.
-        element.value = value || '';
-      }
-
-      // Trigger change event to update form state
-      const event = new Event('change', { bubbles: true });
-      element.dispatchEvent(event);
-    });
-
-    // Update form state
-    this.state.data = this.collectFormData();
-  }
-
-  /**
-   * Get form state
-   */
-  getState() {
-    return { ...this.state };
-  }
-
-  /**
-   * Check if form is dirty
+   * Check if form has unsaved changes
    */
   isDirty() {
-    return this.state.isDirty;
+    return this._isDirty;
   }
 
   /**
-   * Check if form is valid
+   * Set form data from a nested object (supports dot notation field names)
    */
-  isValid() {
-    const validation = this.validate(this.collectFormData());
-    return validation.isValid;
+  setData(data) {
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] setData() called', data);
+    }
+    /* @dev-only:end */
+
+    // Flatten nested object to dot notation paths
+    const flatData = this._flattenObject(data);
+
+    // Set each field value
+    for (const [path, value] of Object.entries(flatData)) {
+      this._setFieldValue(path, value);
+    }
+  }
+
+  /**
+   * Flatten a nested object to dot notation paths
+   */
+  _flattenObject(obj, prefix = '') {
+    const result = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        // Check if this is a checkbox group (object with boolean values)
+        const isCheckboxGroup = Object.values(value).every((v) => typeof v === 'boolean');
+
+        if (isCheckboxGroup) {
+          // Keep as object for checkbox group handling
+          result[path] = value;
+        } else {
+          // Recurse into nested object
+          Object.assign(result, this._flattenObject(value, path));
+        }
+      } else {
+        result[path] = value;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Set a single field value by name (supports dot notation)
+   */
+  _setFieldValue(name, value) {
+    const $fields = this.$form.querySelectorAll(`[name="${name}"]`);
+
+    if ($fields.length === 0) {
+      /* @dev-only:start */
+      {
+        console.log('[Form-manager] setData: field not found:', name);
+      }
+      /* @dev-only:end */
+      return;
+    }
+
+    const $field = $fields[0];
+    const type = $field.type;
+
+    // Handle different input types
+    if (type === 'checkbox') {
+      if ($fields.length === 1) {
+        // Single checkbox: boolean value
+        $field.checked = !!value;
+      } else if (typeof value === 'object') {
+        // Checkbox group: object with value: boolean
+        $fields.forEach(($cb) => {
+          $cb.checked = !!value[$cb.value];
+        });
+      }
+    } else if (type === 'radio') {
+      // Radio group: set the one with matching value
+      $fields.forEach(($radio) => {
+        $radio.checked = $radio.value === value;
+      });
+    } else if ($field.tagName === 'SELECT') {
+      // Select: set value
+      $field.value = value;
+    } else {
+      // Text, email, textarea, etc.
+      $field.value = value;
+    }
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] setData: set field', { name, value, type });
+    }
+    /* @dev-only:end */
   }
 }

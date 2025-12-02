@@ -6,6 +6,10 @@ NEW TODO
 - FIx formmanager .getData() it keeps returning an empty object, make it work flawlessyly
 - It keeps testing whether there is a "." every time it reads or writes. just call the getNested and setNested functions and then check for the DOT inside those functions
 - form manager should NOT submit if the button that was clicked is disabled (class or attribute)
+- script that adds some helpful classes to the body or attributes to html maybe like
+  * data-device="mobile|tablet|desktop"
+  * data-browser="chrome|safari|firefox|edge|opera|other"
+  * data-os="windows|macos|linux|android|ios|other"
 
 Make an admin dashboard backend
 
@@ -94,8 +98,12 @@ REMAKE main/misc/embed-manager.html in UJ
 REMAKE the dashboard one in UJ
 FINISH redirec.js in UJ
 
-
-
+# Fix notifications
+* UJ 2.0 for a while was making a DUPLICATE notifaction in users/{uid}/notifications/{token} AND in notifications/{token}
+* We can SAFELY DELETE the users/{uid}/notifications collection
+* EX: https://console.firebase.google.com/project/replyify-app/firestore/databases/-default-/data/~2Fnotifications~2Fsubscriptions~2Fall
+* Also, there are residual notifications/subscriptions/all/{token} that need to be MIGRATED to the new format
+* EX: https://console.firebase.google.com/project/replyify-app/firestore/databases/-default-/data/~2Fnotifications~2Fsubscriptions~2Fall~2FczUMa9wW0n3FnjpKCL5Wet:APA91bFD9YpwBqtn0i6qVabxiNl1uqIl3Ka1ObNM9CWT5NjzjnlTnyCA7e0G3Y3GGzIEcJUPoDLnGBRP3xBob99EiWItKtOuWP3Sqb906zBYJGFENIyQOJIUw43tizN5lCSq6ICgVJsZ
 
 
 FIX THE settings like

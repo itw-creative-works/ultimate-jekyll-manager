@@ -123,47 +123,31 @@ function trackAddPaymentInfo(product, price, billingCycle, paymentMethod) {
 function setupEventListeners() {
   // Initialize FormManager
   formManager = new FormManager('#checkout-form', {
-    autoDisable: true, // Enable automatic form disabling during submission
-    showSpinner: true,
-    allowMultipleSubmissions: false, // Prevent multiple submissions
-    submitButtonLoadingText: 'Processing...'
+    autoReady: false, // We'll call ready() after initialization
+    allowResubmit: false,
+    submittingText: 'Processing...',
+    submittedText: 'Redirecting...',
   });
 
   // Listen for form field changes
-  formManager.addEventListener('change', (event) => {
-    const { fieldName, fieldValue, data } = event.detail;
-
+  formManager.on('change', ({ name, value }) => {
     // Handle billing cycle changes
-    if (fieldName === 'billing-cycle') {
-      handleBillingCycleChange(fieldValue, webManager);
-    }
-  });
-
-  // Handle non-submit button clicks
-  formManager.addEventListener('button', (event) => {
-    const { action } = event.detail;
-
-    if (action === 'apply-discount') {
-      applyDiscountCode(webManager);
+    if (name === 'billing-cycle') {
+      handleBillingCycleChange(value, webManager);
     }
   });
 
   // Handle form submission
-  formManager.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
+  formManager.on('submit', async ({ $submitButton }) => {
     // Get the submit button that was clicked
-    const submitButton = event.detail.submitButton;
-    if (!submitButton) {
-      formManager.showError('Please choose a payment method.');
-      return;
+    if (!$submitButton) {
+      throw new Error('Please choose a payment method.');
     }
 
     // Check if a payment method was selected
-    const paymentMethod = submitButton.getAttribute('data-payment-method');
+    const paymentMethod = $submitButton.getAttribute('data-payment-method');
     if (!paymentMethod) {
-      formManager.showError('Invalid payment method selected.');
-      return;
+      throw new Error('Invalid payment method selected.');
     }
 
     // Set payment method in raw
@@ -180,6 +164,14 @@ function setupEventListeners() {
     // Process the payment
     await completePurchase();
   });
+
+  // Setup apply discount button (not part of form submit)
+  const $applyDiscountBtn = document.querySelector('[data-action="apply-discount"]');
+  if ($applyDiscountBtn) {
+    $applyDiscountBtn.addEventListener('click', () => {
+      applyDiscountCode(webManager);
+    });
+  }
 
   // Switch account link (keep as is - not part of form)
   const $switchAccountLink = document.getElementById('switch-account');
@@ -274,13 +266,8 @@ async function completePurchase() {
   } catch (error) {
     console.error('Purchase error:', error);
 
-    // FormManager will handle button state restoration
-    formManager.setFormState('ready');
-
-    // Show user-friendly error message
-    const errorMessage = error.message || 'There was an error processing your payment. Please try again.';
-
-    formManager.showError(errorMessage);
+    // Re-throw to let FormManager handle error display and state restoration
+    throw error;
   }
 }
 
@@ -385,7 +372,7 @@ async function initializeCheckout() {
     setupEventListeners();
 
     // Set form to ready state
-    formManager.setFormState('ready');
+    formManager.ready();
 
     // Track begin_checkout event on page load
     const basePrice = raw.product.is_subscription

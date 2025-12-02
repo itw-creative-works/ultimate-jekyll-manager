@@ -63,6 +63,24 @@ module.exports = async function serve(complete) {
 
     // Write the config file
     jetpack.write('.temp/_config_browsersync.yml', `url: ${externalUrl}`);
+//     jetpack.write('.temp/_config_browsersync.yml', `
+// url: ${externalUrl}
+
+// web_manager:
+//   firebase:
+//     app:
+//       config:
+//         authDomain: "${new URL(externalUrl).host}"
+// `);
+//     jetpack.write('.temp/_config_browsersync.yml', `
+// url: ${externalUrl}
+
+// web_manager:
+//   firebase:
+//     app:
+//       config:
+//         authDomain: "${new URL(localUrl).host}"
+// `);
 
     // Set global variable to access browserSync in other files
     global.browserSync = browserSync;
