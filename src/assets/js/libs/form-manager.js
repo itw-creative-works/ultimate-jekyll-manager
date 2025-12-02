@@ -631,10 +631,19 @@ export class FormManager {
   }
 
   /**
+   * Get all submit buttons in the form
+   * Note: Uses button.type property instead of [type="submit"] selector
+   * because HTML minifiers may strip the attribute (it's the default)
+   */
+  _getSubmitButtons() {
+    return Array.from(this.$form.querySelectorAll('button')).filter($btn => $btn.type === 'submit');
+  }
+
+  /**
    * Show/hide spinner on submit buttons
    */
   _showSpinner(show) {
-    this.$form.querySelectorAll('button[type="submit"]').forEach(($btn) => {
+    this._getSubmitButtons().forEach(($btn) => {
       if (show) {
         // Store original content
         $btn._originalHTML = $btn.innerHTML;
@@ -649,7 +658,7 @@ export class FormManager {
    * Show submitted text on submit buttons (when allowResubmit: false)
    */
   _showSubmittedText() {
-    this.$form.querySelectorAll('button[type="submit"]').forEach(($btn) => {
+    this._getSubmitButtons().forEach(($btn) => {
       const $buttonText = $btn.querySelector('.button-text');
       if ($buttonText) {
         $buttonText.textContent = this.config.submittedText;
