@@ -272,11 +272,11 @@ async function fixPostsLayout() {
       modified = true;
     }
 
-    // 2. Change excerpt to description
+    // 2. Change excerpt to description (handles both root level and nested under post:)
     if (frontmatter.includes('excerpt:')) {
       frontmatter = frontmatter.replace(
-        /^excerpt:/m,
-        'description:'
+        /^(\s*)excerpt:/gm,
+        '$1description:'
       );
       modified = true;
     }
@@ -284,7 +284,7 @@ async function fixPostsLayout() {
     // 3. Remove affiliate-search-term line
     if (frontmatter.includes('affiliate-search-term:')) {
       frontmatter = frontmatter.replace(
-        /^affiliate-search-term:.*\r?\n/m,
+        /^(\s*)affiliate-search-term:.*\r?\n/m,
         ''
       );
       modified = true;
