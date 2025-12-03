@@ -216,7 +216,7 @@ faqs:
           Flash Sale
         </span>
         <span class="text-white-50">
-          ending in <span id="pricing-promo-countdown" class="fw-semibold text-white">--</span>
+          Ending in <span id="pricing-promo-countdown" class="fw-semibold text-white">--</span>
         </span>
         <span class="text-white-50">
           Use code <span id="pricing-promo-code" class="badge bg-white bg-opacity-25 px-2 py-1 fs-6">WELCOME15</span>
@@ -347,27 +347,27 @@ faqs:
                       </p>
                     {% endif %}
 
-                    <!-- Price per unit or placeholder text -->
+                    <!-- Price per unit (only shown when enabled) -->
                     {% if page.resolved.pricing.price_per_unit.enabled %}
-                      {% if plan.pricing.monthly > 0 %}
-                        {% for feature in plan.features %}
-                          {% if feature.id == page.resolved.pricing.price_per_unit.feature_id %}
-                            {% assign monthly_price_per_unit = plan.pricing.monthly | times: 1.0 | divided_by: feature.value | round: 2 %}
-                            {% assign annual_monthly_price = plan.pricing.annually | divided_by: 12.0 %}
-                            {% assign annual_price_per_unit = annual_monthly_price | divided_by: feature.value | round: 2 %}
-                            <p class="text-muted small mb-4">
+                      <p class="text-muted small mb-4">
+                        {% if plan.pricing.monthly > 0 %}
+                          {% for feature in plan.features %}
+                            {% if feature.id == page.resolved.pricing.price_per_unit.feature_id %}
+                              {% assign monthly_price_per_unit = plan.pricing.monthly | times: 1.0 | divided_by: feature.value | round: 2 %}
+                              {% assign annual_monthly_price = plan.pricing.annually | divided_by: 12.0 %}
+                              {% assign annual_price_per_unit = annual_monthly_price | divided_by: feature.value | round: 2 %}
                               <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.pricing.price_per_unit.label }}
-                            </p>
-                          {% endif %}
-                        {% endfor %}
-                      {% else %}
-                        <!-- Placeholder text for free plan to maintain consistent height -->
-                        <p class="text-muted small mb-4">Perfect for trying out</p>
-                      {% endif %}
+                            {% endif %}
+                          {% endfor %}
+                        {% else %}
+                          <!-- Placeholder text for free plan to maintain consistent height -->
+                          Perfect for trying out
+                        {% endif %}
+                      </p>
                     {% endif %}
 
                     <!-- Button -->
-                    <div class="d-grid mb-3">
+                    <div class="d-grid mb-3 {% unless page.resolved.pricing.price_per_unit.enabled %}mt-3{% endunless %}">
                       {% if plan.popular %}
                         {% assign btn_style = "btn-gradient-rainbow gradient-animated" %}
                       {% else %}

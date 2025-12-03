@@ -1,5 +1,5 @@
 // Libraries
-import authPages from '__main_assets__/js/libs/auth/pages.js';
+import authPages from '__main_assets__/js/libs/auth.js';
 
 // Module
 export default (Manager, options) => {

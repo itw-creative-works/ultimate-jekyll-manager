@@ -1,4 +1,6 @@
 // Libraries
+import { getSaleName } from '__main_assets__/js/libs/sale-name.js';
+
 let webManager = null;
 
 // Module
@@ -284,34 +286,12 @@ function setupPromoCountdown() {
     return;
   }
 
-  const now = new Date();
-  const month = now.getMonth();
-
-  const seasons = [
-    { name: 'Winter', months: [11, 0, 1], endMonth: 1, endDay: 28 },
-    { name: 'Spring', months: [2, 3, 4], endMonth: 4, endDay: 31 },
-    { name: 'Summer', months: [5, 6, 7], endMonth: 7, endDay: 31 },
-    { name: 'Fall', months: [8, 9, 10], endMonth: 10, endDay: 30 }
-  ];
-
-  const currentSeason = seasons.find(s => s.months.includes(month));
-
-  if (!currentSeason) {
-    return;
-  }
-
-  const seasonStartDate = new Date(now.getFullYear(), currentSeason.months[0], 1);
-  const seasonEndDate = new Date(now.getFullYear(), currentSeason.endMonth, currentSeason.endDay, 23, 59, 59);
-  const seasonDuration = seasonEndDate - seasonStartDate;
-  const seasonProgress = (now - seasonStartDate) / seasonDuration;
-
-  const isEndOfSeason = seasonProgress >= 0.7;
-  const saleName = isEndOfSeason ? `End of ${currentSeason.name} Sale` : `${currentSeason.name} Sale`;
+  const { saleName } = getSaleName();
 
   $promoTextEl.textContent = saleName;
 
   const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
-  const cycleStart = Math.floor(now.getTime() / twoDaysInMs) * twoDaysInMs;
+  const cycleStart = Math.floor(Date.now() / twoDaysInMs) * twoDaysInMs;
   const cycleEnd = cycleStart + twoDaysInMs;
 
   function updateCountdown() {

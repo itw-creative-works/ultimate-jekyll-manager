@@ -35,8 +35,8 @@ function setupNewsletterForm() {
   const formManager = new FormManager('#newsletter-form', {
     allowResubmit: false,
     resetOnSuccess: true,
-    submitButtonLoadingText: 'Subscribing...',
-    submitButtonSuccessText: 'Subscribed!',
+    submittingText: 'Subscribing...',
+    submittedText: 'Subscribed!',
   });
 
   formManager.on('submit', async ({ data }) => {
