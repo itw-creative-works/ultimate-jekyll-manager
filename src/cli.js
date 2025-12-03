@@ -8,6 +8,7 @@ const ALIASES = {
   clean: ['-c', '--clean'],
   'cloudflare-purge': ['-cf', 'purge', '--cloudflare-purge'],
   install: ['-i', 'i', '--install'],
+  repo: ['-r', '--repo'],
   setup: ['-s', '--setup'],
   version: ['-v', '--version'],
   // Tasks
