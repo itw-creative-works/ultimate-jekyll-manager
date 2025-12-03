@@ -105,6 +105,11 @@ FINISH redirec.js in UJ
 * Also, there are residual notifications/subscriptions/all/{token} that need to be MIGRATED to the new format
 * EX: https://console.firebase.google.com/project/replyify-app/firestore/databases/-default-/data/~2Fnotifications~2Fsubscriptions~2Fall~2FczUMa9wW0n3FnjpKCL5Wet:APA91bFD9YpwBqtn0i6qVabxiNl1uqIl3Ka1ObNM9CWT5NjzjnlTnyCA7e0G3Y3GGzIEcJUPoDLnGBRP3xBob99EiWItKtOuWP3Sqb906zBYJGFENIyQOJIUw43tizN5lCSq6ICgVJsZ
 
+# BEM API
+* Many places still use "payload.data.authenticationToken", we need to migrate to the "Bearer *" format (since WM sends that now)
+* Honestly, the whole API auth system needs to be rethought and redone: /Users/ian/Developer/Repositories/ITW-Creative-Works/backend-manager/src/manager/functions/core/actions/api
+  * Write tests and then refactor the whole thing
+* Had an idea to make backend-manager tetss for lots of stuff? where were the notes for that?
 
 FIX THE settings like
 * layout.settings.manager-configuration

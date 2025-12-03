@@ -15,11 +15,24 @@ pricing:
     enabled: true
     feature_id: "credits"  # Which feature to calculate price per unit for
     label: "credit"  # What to call the unit (e.g., "credit", "user", "GB")
+  definitions:
+    - id: "credits"
+      definition: "Credits are used to generate content. Each generation consumes 1 credit."
+    - id: "exports"
+      definition: "Export your creations in various formats. Watermarked exports include a small logo."
+    - id: "api_access"
+      definition: "Access our REST API to integrate with your own applications and workflows."
+    - id: "priority_support"
+      definition: "Get faster response times and dedicated support from our team."
+    - id: "team_collaboration"
+      definition: "Invite team members to collaborate on projects and share resources."
+    - id: "custom_branding"
+      definition: "Remove our branding and add your own logo to exports."
   plans:
     - id: "basic"
       name: "Basic"
       tagline: "best for getting started"
-      url: "/download"  # URL for free plan signup
+      url: "/dashboard"  # URL for free plan signup
       pricing:
         monthly: 0
         annually: 0
@@ -36,6 +49,7 @@ pricing:
     - id: "starter"
       name: "Starter"
       tagline: "best for individuals"
+      url: null
       pricing:
         monthly: 28
         annually: 276  # Total annual price (~20% off monthly)
@@ -60,6 +74,7 @@ pricing:
     - id: "pro"
       name: "Pro"
       tagline: "best for small businesses"
+      url: null
       popular: true
       pricing:
         monthly: 50
@@ -77,6 +92,7 @@ pricing:
     - id: "max"
       name: "Max"
       tagline: "best for growing businesses"
+      url: null
       pricing:
         monthly: 100
         annually: 960  # Total annual price (20% off monthly)
@@ -352,24 +368,27 @@ faqs:
 
                     <!-- Button -->
                     <div class="d-grid mb-3">
-                      {% if plan.id == "basic" %}
-                        <a href="{{ plan.url | default: '/account' }}" class="btn btn-adaptive btn-md fw-semibold px-2 fs-5">
-                          <!-- Get started for free -->
-                          Get Started
-                        </a>
+                      {% if plan.popular %}
+                        {% assign btn_style = "btn-gradient-rainbow gradient-animated" %}
                       {% else %}
-                        {% if plan.popular %}
-                          {% assign btn_style = "btn-gradient-rainbow gradient-animated" %}
-                        {% else %}
-                          {% assign btn_style = "btn-primary" %}
-                        {% endif %}
                         {% assign btn_style = "btn-primary" %}
+                      {% endif %}
+                      {% assign btn_style = "btn-primary" %}
+
+                      {% iftruthy plan.url %}
+                        <a href="{{ plan.url }}" class="btn {% if plan.pricing.monthly == 0 %}btn-adaptive{% else %}{{ btn_style }}{% endif %} btn-md fw-semibold px-2 fs-5">
+                          {% if plan.pricing.monthly == 0 %}
+                            Get Started
+                          {% else %}
+                            Get Free Trial
+                          {% endif %}
+                        </a>
+                      {% endiftruthy %}
+                      {% iffalsy plan.url %}
                         <button class="btn {{ btn_style }} btn-md fw-semibold px-2 fs-5" data-plan-id="{{ plan.id }}">
-                          <!-- Try {{ plan.name }} for 14 days -->
-                          <!-- Try free for 14 days -->
                           Get Free Trial
                         </button>
-                      {% endif %}
+                      {% endiffalsy %}
                     </div>
 
                     <!-- Billing info -->
@@ -391,14 +410,27 @@ faqs:
                       <ul class="list-unstyled mb-3">
                         {% for feature in plan.features %}
                           {% if common_feature_ids contains feature.id %}
+                            {% assign feature_definition = nil %}
+                            {% for def in page.resolved.pricing.definitions %}
+                              {% if def.id == feature.id %}
+                                {% assign feature_definition = def.definition %}
+                                {% break %}
+                              {% endif %}
+                            {% endfor %}
                             <li class="d-flex align-items-start mb-2">
                               <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                               <span>
                                 {% if feature.value == "Unlimited" %}
-                                  Unlimited {{ feature.name }}
+                                  Unlimited
                                 {% else %}
-                                  {{ feature.value | uj_commaify }} {{ feature.name }}
+                                  {{ feature.value | uj_commaify }}
                                 {% endif %}
+                                {% iftruthy feature_definition %}
+                                  <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ feature_definition }}">{{ feature.name }}</span>
+                                {% endiftruthy %}
+                                {% iffalsy feature_definition %}
+                                  {{ feature.name }}
+                                {% endiffalsy %}
                               </span>
                             </li>
                           {% endif %}
@@ -435,16 +467,29 @@ faqs:
                           <ul class="list-unstyled mb-0">
                             {% for feature in plan.features %}
                               {% unless common_feature_ids contains feature.id %}
+                                {% assign feature_definition = nil %}
+                                {% for def in page.resolved.pricing.definitions %}
+                                  {% if def.id == feature.id %}
+                                    {% assign feature_definition = def.definition %}
+                                    {% break %}
+                                  {% endif %}
+                                {% endfor %}
                                 <li class="d-flex align-items-start mb-2 {% if forloop.last %}mb-0{% endif %}">
                                   <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                                   <span>
                                     {% if feature.value == "24/7" %}
-                                      {{ feature.value }} {{ feature.name }}
+                                      {{ feature.value }}
                                     {% elsif feature.value == "Included" or feature.value == "Available" or feature.value == "Full" %}
-                                      {{ feature.name }}
+                                      <!-- No prefix for these values -->
                                     {% else %}
-                                      {{ feature.value | uj_commaify }} {{ feature.name }}
+                                      {{ feature.value | uj_commaify }}
                                     {% endif %}
+                                    {% iftruthy feature_definition %}
+                                      <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ feature_definition }}">{{ feature.name }}</span>
+                                    {% endiftruthy %}
+                                    {% iffalsy feature_definition %}
+                                      {{ feature.name }}
+                                    {% endiffalsy %}
                                   </span>
                                 </li>
                               {% endunless %}
@@ -541,8 +586,22 @@ faqs:
         </thead>
         <tbody>
           {% for feature_def in all_features %}
+            {% assign table_feature_definition = nil %}
+            {% for def in page.resolved.pricing.definitions %}
+              {% if def.id == feature_def.id %}
+                {% assign table_feature_definition = def.definition %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
             <tr>
-              <th scope="row">{{ feature_def.name }}</th>
+              <th scope="row">
+                {% iftruthy table_feature_definition %}
+                  <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ table_feature_definition }}">{{ feature_def.name }}</span>
+                {% endiftruthy %}
+                {% iffalsy table_feature_definition %}
+                  {{ feature_def.name }}
+                {% endiffalsy %}
+              </th>
               {% for plan in page.resolved.pricing.plans %}
                 <td>
                   {% assign has_feature = false %}

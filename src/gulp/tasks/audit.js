@@ -362,12 +362,36 @@ function format(messages) {
 }
 
 // Lighthouse audit functionality
+// ⚠️⚠️⚠️ LIGHTHOUSE BREAKS WEB-MANAGER @SENTRY/CORE VERSION CONFLICTS
+// So we lazy-load it only when needed
 async function runLighthouseAudit() {
   logger.log('📊 Starting Lighthouse audit...');
 
   // Lazy load Lighthouse dependencies (only when actually running audit)
+  // Lighthouse is not bundled to avoid @sentry/core version conflicts with web-manager
   chromeLauncher = require('chrome-launcher');
-  lighthouse = require('lighthouse').default || require('lighthouse');
+  try {
+    lighthouse = require('lighthouse').default || require('lighthouse');
+  } catch (e) {
+    // Lighthouse not installed - try to install it temporarily via npx
+    logger.log('📦 Lighthouse not found, installing temporarily...');
+    try {
+      // Use execSync to install lighthouse in node_modules temporarily
+      const { execSync } = require('child_process');
+      execSync('npm install --no-save lighthouse', {
+        cwd: rootPathProject,
+        stdio: 'inherit'
+      });
+      // Try requiring again after install
+      const lighthousePath = path.join(rootPathProject, 'node_modules', 'lighthouse');
+      lighthouse = require(lighthousePath).default || require(lighthousePath);
+      logger.log('✅ Lighthouse installed temporarily');
+    } catch (installError) {
+      logger.error('❌ Failed to install Lighthouse. Install it globally:');
+      logger.error('   npm install -g lighthouse');
+      return;
+    }
+  }
 
   let serverStarted = false;
   let auditUrl = null;
