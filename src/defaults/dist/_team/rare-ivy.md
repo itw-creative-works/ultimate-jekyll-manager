@@ -8,8 +8,8 @@ sitemap:
 member:
   id: rare-ivy
   name: "Rare Ivy"
-  position: "Content Creator"
-  description: "Rare is our in-house content creator, producing engaging videos, graphics, and social content that brings our brand to life."
+  position: "Content Production Manager"
+  description: "Rare produces videos, graphics, and social content that brings our brand story to life across all platforms."
   location: "Brooklyn, NY"
   skills:
     - "Video Production"

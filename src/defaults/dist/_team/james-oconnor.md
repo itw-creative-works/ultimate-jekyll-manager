@@ -8,8 +8,8 @@ sitemap:
 member:
   id: james-oconnor
   name: "James O'Connor"
-  position: "Sales Lead"
-  description: "James leads our sales efforts with enthusiasm and a consultative approach to understanding customer needs."
+  position: "VP of Sales"
+  description: "James drives our sales strategy, building relationships with businesses and developing our sales playbook."
   location: "Boston, MA"
   skills:
     - "B2B Sales"

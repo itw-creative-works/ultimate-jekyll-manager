@@ -9,7 +9,7 @@ member:
   id: sarah-rodriguez
   name: "Sarah Rodriguez"
   position: "Marketing Director"
-  description: "Sarah leads our marketing efforts with a data-driven approach and creative flair."
+  description: "Sarah leads our marketing strategy, combining data-driven growth tactics with creative brand storytelling."
   location: "Miami, FL"
   skills:
     - "Growth Marketing"

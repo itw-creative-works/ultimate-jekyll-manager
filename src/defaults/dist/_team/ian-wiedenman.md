@@ -8,8 +8,8 @@ sitemap:
 member:
   id: ian-wiedenman
   name: "Ian Wiedenman"
-  position: "CEO"
-  description: "Ian is the founder and CEO of our company. He has a passion for technology and is always looking for ways to improve our products."
+  position: "CEO & Founder"
+  description: "Ian founded and leads the company, driving product vision and building tools used by millions worldwide."
   location: "Los Angeles, CA"
   skills:
     - "Software Development"

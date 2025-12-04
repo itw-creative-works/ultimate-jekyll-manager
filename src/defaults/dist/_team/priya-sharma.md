@@ -9,7 +9,7 @@ member:
   id: priya-sharma
   name: "Priya Sharma"
   position: "Customer Success Manager"
-  description: "Priya ensures our customers get maximum value from our products and bridges the gap between user needs and product development."
+  description: "Priya champions customer success by onboarding users, gathering feedback, and advocating for their needs with our product team."
   location: "Chicago, IL"
   skills:
     - "Customer Relations"

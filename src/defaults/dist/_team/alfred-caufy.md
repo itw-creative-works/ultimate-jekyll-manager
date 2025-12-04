@@ -9,7 +9,7 @@ member:
   id: alfred-caufy
   name: "Alfred Caufy"
   position: "Lead Developer"
-  description: "Alfred leads our development team and is dedicated to crafting elegant solutions to complex problems."
+  description: "Alfred leads our development team, architecting scalable solutions and mentoring engineers on best practices."
   location: "San Francisco, CA"
   skills:
     - "JavaScript"

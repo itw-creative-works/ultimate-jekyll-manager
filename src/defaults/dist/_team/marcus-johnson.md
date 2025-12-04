@@ -8,8 +8,8 @@ sitemap:
 member:
   id: marcus-johnson
   name: "Marcus Johnson"
-  position: "Product Designer"
-  description: "Marcus is our lead Product Designer who crafts intuitive user experiences that delight our customers."
+  position: "Lead Product Designer"
+  description: "Marcus designs intuitive user experiences and maintains our design system to ensure consistent, scalable interfaces."
   location: "Austin, TX"
   skills:
     - "UI/UX Design"

@@ -9,7 +9,7 @@ member:
   id: christina-hill
   name: "Christina Hill"
   position: "Community Manager"
-  description: "Christina builds and nurtures our user community, fostering meaningful connections and conversations."
+  description: "Christina cultivates our user community through events, discussions, and gathering feedback to shape our products."
   location: "Seattle, WA"
   skills:
     - "Community Building"
