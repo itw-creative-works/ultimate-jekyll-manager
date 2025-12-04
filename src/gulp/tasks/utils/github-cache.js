@@ -93,13 +93,27 @@ class GitHubCache {
     const zip = new AdmZip(zipPath);
     zip.extractAllTo(extractDir, true);
 
-    // Find extracted root folder
-    const extractedRoot = jetpack.list(extractDir).find(name =>
-      name.startsWith(`${this.owner}-${this.repo}-`)
-    );
+    // Find extracted root folder - just look for the directory that was extracted
+    // GitHub zipball extracts to a single folder: {owner}-{repo}-{sha}
+    const dirContents = jetpack.list(extractDir);
+    const zipFileName = path.basename(zipPath);
+
+    this.logger.log(`📦 Zip file: ${zipFileName}`);
+    this.logger.log(`📂 Extract directory: ${extractDir}`);
+    this.logger.log(`📁 Directory contents: ${JSON.stringify(dirContents)}`);
+
+    const extractedRoot = dirContents.find(name => {
+      const fullPath = path.join(extractDir, name);
+      const isDir = jetpack.exists(fullPath) === 'dir';
+      const isNotZip = name !== zipFileName;
+      this.logger.log(`   - ${name}: isDir=${isDir}, isNotZip=${isNotZip}`);
+      return isNotZip && isDir;
+    });
+
+    this.logger.log(`✅ Found extracted root: ${extractedRoot || 'NONE'}`);
 
     if (!extractedRoot) {
-      throw new Error('Could not find extracted archive root folder');
+      throw new Error(`Could not find extracted archive folder in: ${JSON.stringify(dirContents)}`);
     }
 
     const extractedFullPath = path.join(extractDir, extractedRoot);

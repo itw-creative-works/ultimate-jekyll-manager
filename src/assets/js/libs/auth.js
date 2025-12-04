@@ -16,6 +16,9 @@ export default function (Manager) {
   // Handle DOM ready
   webManager.dom().ready()
   .then(async () => {
+    // Log
+    console.log('[Auth] Initialized. useAuthPopup:', useAuthPopup);
+
     // Check for authSignout parameter first
     await handleAuthSignout(webManager);
 
@@ -25,6 +28,9 @@ export default function (Manager) {
     // Check for redirect result from OAuth providers BEFORE enabling form
     // This prevents the form from appearing interactive while redirect is processing
     const hasRedirectResult = await handleRedirectResult();
+
+    // Log
+    console.log('[Auth] hasRedirectResult:', hasRedirectResult);
 
     // If redirect result was found, don't enable the form - user will be redirected
     if (hasRedirectResult) {
@@ -51,7 +57,7 @@ export default function (Manager) {
     const pagePath = document.documentElement.getAttribute('data-page-path');
 
     if (!pagePath) {
-      console.warn('No data-page-path attribute found on HTML element');
+      console.warn('[Auth] No data-page-path attribute found on HTML element');
       return;
     }
 
@@ -61,6 +67,15 @@ export default function (Manager) {
       initializeSignupForm();
     } else if (pagePath === '/reset') {
       initializeResetForm();
+    }
+  }
+
+  function stateChangeHandler({ state }) {
+    // Hide initializing spinners and show hidden elements when state changes from initializing
+    if (state !== 'initializing') {
+      formManager.$form.querySelectorAll('.form-initializing-spinner').forEach(($el) => {
+        $el.classList.add('d-none');
+      });
     }
   }
 
@@ -93,39 +108,42 @@ export default function (Manager) {
 
   // Initialize signin form
   function initializeSigninForm() {
-    formManager = new FormManager('#signin-form', {
+    formManager = new FormManager('#auth-form', {
       autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
       submittingText: 'Signing in...',
       submittedText: 'Signed In!',
     });
 
+    formManager.on('statechange', stateChangeHandler);
     formManager.on('validation', validateEmailProvider);
     formManager.on('submit', createAuthSubmitHandler('signin', handleEmailSignin));
   }
 
   // Initialize signup form
   function initializeSignupForm() {
-    formManager = new FormManager('#signup-form', {
+    formManager = new FormManager('#auth-form', {
       autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
       submittingText: 'Creating account...',
       submittedText: 'Account Created!',
     });
 
+    formManager.on('statechange', stateChangeHandler);
     formManager.on('validation', validateEmailProvider);
     formManager.on('submit', createAuthSubmitHandler('signup', handleEmailSignup));
   }
 
   // Initialize reset form
   function initializeResetForm() {
-    formManager = new FormManager('#reset-form', {
+    formManager = new FormManager('#auth-form', {
       autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
       submittingText: 'Sending...',
       submittedText: 'Email Sent!',
     });
 
+    formManager.on('statechange', stateChangeHandler);
     formManager.on('submit', ({ data }) => handlePasswordReset(data));
   }
 
@@ -139,14 +157,14 @@ export default function (Manager) {
       const result = await getRedirectResult(auth);
 
       // Log results for debugging
-      console.log('Redirect result:', result);
+      console.log('[Auth] Redirect result:', result);
 
       // If no result, return false to indicate no redirect was processed
       if (!result || !result.user) {
         return false;
       }
 
-      console.log('Successfully authenticated via redirect:', result.user.email);
+      console.log('[Auth] Successfully authenticated via redirect:', result.user.email);
 
       // Determine the provider from the result
       const providerId = result.providerId || result.user.providerData?.[0]?.providerId || 'unknown';
@@ -197,7 +215,8 @@ export default function (Manager) {
     }
 
     try {
-      console.log('Signing out user due to authSignout=true parameter');
+      // Log
+      console.log('[Auth] Signing out user due to authSignout=true parameter');
 
       // Sign out the user using webManager
       await webManager.auth().signOut();
@@ -206,7 +225,7 @@ export default function (Manager) {
       url.searchParams.delete('authSignout');
       window.history.replaceState({}, document.title, url.toString());
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('[Auth] Error signing out:', error);
     }
   }
 
@@ -223,7 +242,7 @@ export default function (Manager) {
     const isSubdomain = parts.length >= 3 && !hostname.includes('localhost') && !/^\d+\.\d+\.\d+\.\d+$/.test(hostname);
 
     // Log relevant info
-    console.log('checkSubdomainAuth - hostname:', hostname, 'parts:', parts, 'isSubdomain:', isSubdomain, 'allowSubdomainAuth:', allowSubdomainAuth);
+    console.log('[Auth] checkSubdomainAuth - hostname:', hostname, 'parts:', parts, 'isSubdomain:', isSubdomain, 'allowSubdomainAuth:', allowSubdomainAuth);
 
     // If subdomain auth is allowed, no need to redirect regardless of current domain
     if (allowSubdomainAuth) {
@@ -241,7 +260,7 @@ export default function (Manager) {
     currentUrl.hostname = apexDomain;
 
     // Log
-    console.log('Redirecting to apex domain for authentication:', currentUrl.href);
+    console.log('[Auth] Redirecting to apex domain for authentication:', currentUrl.href);
 
     // Perform the redirect
     window.location.href = currentUrl.href;
@@ -256,7 +275,7 @@ export default function (Manager) {
 
     // Quit if no authReturnUrl is provided
     if (!authReturnUrl) {
-      console.warn('No authReturnUrl provided in URL parameters.');
+      console.warn('[Auth] No authReturnUrl provided in URL parameters.');
       return;
     }
 
@@ -307,7 +326,7 @@ export default function (Manager) {
       if (error.code === 'auth/email-already-in-use') {
         // Try to sign in with the same credentials
         try {
-          console.log('Email already in use, attempting to sign in instead:', email);
+          console.log('[Auth] Email already in use, attempting to sign in instead:', email);
 
           const userCredential = await attemptEmailSignIn(email, password);
 
@@ -336,7 +355,7 @@ export default function (Manager) {
     const password = formData.password || '';
 
     // Log
-    console.log('Attempting email sign-in for:', email);
+    console.log('[Auth] Attempting email sign-in for:', email);
 
     // Sign in with email and password
     const userCredential = await attemptEmailSignIn(email, password);
@@ -452,7 +471,7 @@ export default function (Manager) {
         try {
           // Try popup
           const result = await signInWithPopup(auth, provider);
-          console.log('Successfully authenticated via popup:', result.user.email);
+          console.log('[Auth] Successfully authenticated via popup:', result.user.email);
 
           // Track based on whether this is a new user
           const isNewUser = result.additionalUserInfo?.isNewUser;
@@ -471,7 +490,7 @@ export default function (Manager) {
               popupError.code === 'auth/popup-closed-by-user' ||
               popupError.code === 'auth/cancelled-popup-request') {
 
-            console.log('Popup failed, falling back to redirect:', popupError.code);
+            console.log('[Auth] Popup failed, falling back to redirect:', popupError.code);
 
             // Fallback to redirect
             await signInWithRedirect(auth, provider);
@@ -484,7 +503,7 @@ export default function (Manager) {
         }
       } else {
         // Use redirect by default
-        console.log('Using redirect for authentication');
+        console.log('[Auth] Using redirect for authentication');
         await signInWithRedirect(auth, provider);
         // Note: This will redirect the user away from the page
         // The handleRedirectResult function will handle the result when they return

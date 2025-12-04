@@ -156,10 +156,11 @@ export class FormManager {
       $autofocusField.focus();
 
       // Move cursor to end of input if it has existing text
-      if (typeof $autofocusField.setSelectionRange === 'function') {
-        const len = $autofocusField.value.length;
-        $autofocusField.setSelectionRange(len, len);
-      }
+      // Disabled because throws errors on some inputs (eg email)
+      // if (typeof $autofocusField.setSelectionRange === 'function') {
+      //   const len = $autofocusField.value.length;
+      //   $autofocusField.setSelectionRange(len, len);
+      // }
     }
   }
 

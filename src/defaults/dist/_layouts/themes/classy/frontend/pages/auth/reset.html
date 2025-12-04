@@ -21,8 +21,11 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
         <p class="text-muted">Enter your email address and we'll send you a link to reset your password.</p>
       </div>
 
+      <!-- Spinner -->
+      {% capture initializing_spinner %}<span class="spinner-border spinner-border-sm me-2 form-initializing-spinner"></span>{% endcapture %}
+
       <!-- Reset Form -->
-      <form id="reset-form" autocomplete="on" novalidate>
+      <form id="auth-form" autocomplete="on" novalidate>
         <div class="mb-4 text-start">
           <label for="email" class="form-label fw-semibold">
             Email <span class="text-danger">*</span>
@@ -31,6 +34,7 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
         </div>
 
         <button type="submit" class="btn btn-success _btn-lg w-100 mb-4" data-provider="email" disabled>
+          {{ initializing_spinner }}
           {% uj_icon "paper-plane", "me-2" %}
           <span class="button-text">Send Reset Link</span>
         </button>
