@@ -98,10 +98,6 @@ REMAKE main/misc/embed-manager.html in UJ
 REMAKE the dashboard one in UJ
 FINISH redirec.js in UJ
 
-# Update git remote url
-* Check git remote get-url origin
-* Update to correct one if necessary (imagemin wont work unless tis is accurate)
-
 # Fix notifications
 * UJ 2.0 for a while was making a DUPLICATE notifaction in users/{uid}/notifications/{token} AND in notifications/{token}
 * We can SAFELY DELETE the users/{uid}/notifications collection

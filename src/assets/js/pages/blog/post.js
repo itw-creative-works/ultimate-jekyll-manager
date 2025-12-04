@@ -40,11 +40,19 @@ function insertBlogPostAds() {
   }
 
   // Find valid positions to insert ads (every 4 paragraphs)
+  // But ensure the last ad isn't too close to the end of the article
   const positions = [];
+  const minParagraphsAfterLastAd = 2; // Ensure at least 2 paragraphs after the last ad
 
   for (let i = 0; i < $paragraphs.length; i++) {
     // Only consider every 4th paragraph
     if ((i + 1) % 4 !== 0) {
+      continue;
+    }
+
+    // Skip if this position is too close to the end of the article
+    const paragraphsRemaining = $paragraphs.length - 1 - i;
+    if (paragraphsRemaining < minParagraphsAfterLastAd) {
       continue;
     }
 
@@ -101,6 +109,7 @@ function insertBlogPostAds() {
 
     // Set data-lazy attribute
     $adContainer.setAttribute('data-lazy', `@script ${JSON.stringify(lazyConfig)}`);
+    $adContainer.classList.add('my-4');
 
     // Insert after the target paragraph
     targetParagraph.parentNode.insertBefore($adContainer, targetParagraph.nextSibling);

@@ -42,6 +42,7 @@ module.exports = async function (options) {
   options.updateBundle = options.updateBundle !== 'false';
   options.publishGitHubToken = options.publishGitHubToken !== 'false';
   options.updateGitHubPages = options.updateGitHubPages !== 'false';
+  options.deduplicatePosts = options.deduplicatePosts !== 'false';
 
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
@@ -124,6 +125,11 @@ module.exports = async function (options) {
     // Check which locality we are using
     if (options.updateBundle && !Manager.isServer()) {
       await updateBundle();
+    }
+
+    // Deduplicate posts (remove duplicate posts with same slug but different dates)
+    if (options.deduplicatePosts) {
+      await deduplicatePosts();
     }
   } catch (e) {
     // Throw error
@@ -599,7 +605,7 @@ async function updateGitHubPages(options) {
       owner,
       repo,
       source: sourceConfig,
-    };
+  };
 
     // Add custom domain if available and not github.io domain
     if (customDomain && !customDomain.includes('github.io')) {
@@ -652,5 +658,119 @@ async function updateGitHubPages(options) {
   } catch (error) {
     logger.error(`❌ Failed to update GitHub Pages: ${error.message}`);
     // Don't throw - this is not critical for setup to continue
+  }
+}
+
+// Deduplicate posts - removes duplicate posts with same slug but different dates
+// Keeps the ORIGINAL (oldest) post and removes newer duplicates
+async function deduplicatePosts() {
+  logger.log('🔍 Checking for duplicate posts...');
+
+  // Find all post files in src/_posts
+  const postsGlob = 'src/_posts/**/*.{md,markdown,html}';
+  const postFiles = glob(postsGlob, { nodir: true });
+
+  if (postFiles.length === 0) {
+    logger.log('No posts found');
+    return;
+  }
+
+  logger.log(`Found ${postFiles.length} post files`);
+
+  // Group posts by slug (filename without date prefix)
+  const postsBySlug = {};
+
+  for (const filePath of postFiles) {
+    const filename = path.basename(filePath);
+
+    // Jekyll post format: YYYY-MM-DD-slug.ext
+    const match = filename.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.(md|markdown|html)$/);
+
+    if (!match) {
+      continue;
+    }
+
+    const [, dateStr, slug, ext] = match;
+    const date = new Date(dateStr);
+
+    if (!postsBySlug[slug]) {
+      postsBySlug[slug] = [];
+    }
+
+    postsBySlug[slug].push({
+      filePath,
+      filename,
+      date,
+      dateStr,
+      slug,
+      ext,
+    });
+  }
+
+  // Find duplicates and keep only the ORIGINAL (oldest)
+  let removedCount = 0;
+  const duplicates = [];
+
+  for (const [slug, posts] of Object.entries(postsBySlug)) {
+    if (posts.length <= 1) {
+      continue;
+    }
+
+    // Sort by date ascending (oldest first)
+    posts.sort((a, b) => a.date - b.date);
+
+    // Keep the oldest (original), mark the rest for removal
+    const [original, ...newer] = posts;
+
+    logger.log(`Found ${posts.length} posts with slug "${slug}":`);
+    logger.log(`  ✅ Keeping original: ${original.filename} (${original.dateStr})`);
+
+    for (const post of newer) {
+      logger.log(`  ❌ Removing duplicate: ${post.filename} (${post.dateStr})`);
+
+      // Remove the duplicate post file
+      try {
+        jetpack.remove(post.filePath);
+        removedCount++;
+
+        // Also remove the associated images folder (src/assets/images/blog/post-SLUG)
+        const imageFolder = `src/assets/images/blog/post-${post.slug}`;
+        if (jetpack.exists(imageFolder)) {
+          jetpack.remove(imageFolder);
+          logger.log(`  🗑️  Removed image folder: ${imageFolder}`);
+        }
+
+        duplicates.push({
+          kept: original.filename,
+          removed: post.filename,
+          removedPath: post.filePath,
+          slug,
+        });
+      } catch (error) {
+        logger.error(`Failed to remove ${post.filePath}:`, error);
+      }
+    }
+  }
+
+  // Log summary
+  if (removedCount > 0) {
+    logger.log(`✅ Removed ${removedCount} duplicate post(s)`);
+
+    // Save report
+    const reportDir = path.join(rootPathProject, '.temp/deduplicate');
+    jetpack.dir(reportDir);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const reportPath = path.join(reportDir, `duplicates-${timestamp}.json`);
+
+    jetpack.write(reportPath, JSON.stringify({
+      timestamp: new Date().toISOString(),
+      removedCount,
+      duplicates,
+    }, null, 2));
+
+    logger.log(`Report saved to: ${reportPath}`);
+  } else {
+    logger.log('✅ No duplicate posts found');
   }
 }
