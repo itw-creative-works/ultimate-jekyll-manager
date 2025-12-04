@@ -6,7 +6,7 @@
     {% capture logo_text %}{{ data.logo.text | default: site.brand.name | uj_liquify }}{% endcapture %}
     {% capture logo_class %}{{ data.logo.class }}{% endcapture %}
 
-    <a class="navbar-brand d-inline-flex align-items-center" href="{{ logo_href }}">
+    <a class="navbar-brand d-inline-flex align-items-center py-0" href="{{ logo_href }}">
       {% iftruthy logo_src %}
         <div class="avatar avatar-md me-2 {{ logo_class }}">
           <img src="{{ logo_src }}" alt="{{ logo_text }} Logo"/>
@@ -31,12 +31,12 @@
           <div class="dropdown animation-slide-up ms-2 d-inline-flex" data-wm-bind="@show auth.user" hidden>
             <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
               <span class="d-flex align-items-center">
-                <span class="position-relative d-inline-block">
+                <span class="position-relative d-inline-flex">
                   <span class="avatar avatar-sm rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden d-inline-flex">
                     <img src="{{ site.uj.placeholder.src }}" data-wm-bind="@attr src auth.user.photoURL" alt="{{ site.brand.name }} profile picture"/>
                   </span>
                   <!-- Active status indicator -->
-                  <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white avatar avatar-2xs rounded-circle mb-1">
+                  <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white avatar avatar-2xs rounded-circle mb-0">
                     <span class="visually-hidden">Active status</span>
                   </span>
                 </span>
@@ -188,12 +188,12 @@
               <div class="dropdown ms-lg-3 animation-slide-up d-inline-flex" data-wm-bind="@show auth.user" hidden>
                 <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
                   <span class="d-flex align-items-center">
-                    <span class="position-relative d-inline-block">
+                    <span class="position-relative d-inline-flex">
                       <span class="avatar avatar-md rounded-circle bg-secondary bg-opacity-10 border d-flex align-items-center justify-content-center overflow-hidden d-inline-flex">
                         <img src="{{ site.uj.placeholder.src }}" data-wm-bind="@attr src auth.user.photoURL" alt="{{ site.brand.name }} profile picture"/>
                       </span>
                       <!-- Active status indicator -->
-                      <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white avatar avatar-2xs rounded-circle mb-2">
+                      <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white avatar avatar-2xs rounded-circle mb-0">
                         <span class="visually-hidden">Active status</span>
                       </span>
                     </span>

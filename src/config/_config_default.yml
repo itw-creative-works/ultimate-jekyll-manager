@@ -1,7 +1,7 @@
 # Ultimate Jekyll Properties
 uj:
   cache_breaker: null
-  environment: "production"
+  # environment: "production" # DEPRECATED: use jekyll.environment instead
 
 # Theme
 theme:

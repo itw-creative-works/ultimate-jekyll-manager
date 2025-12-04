@@ -27,31 +27,13 @@ layout: themes/[ site.theme.id ]/frontend/core/base
           <!-- Social Links -->
           {% iftruthy page.member.links %}
             <div class="d-flex justify-content-center gap-2 mb-4">
-              {% iftruthy page.member.links.website %}
-                <a href="{{ page.member.links.website }}" class="btn btn-outline-primary avatar avatar-lg rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                  {% uj_icon "globe", "" %}
+              {% for link in page.member.links %}
+                {% assign link_icon = link.id %}
+                {% if link.id == "website" %}{% assign link_icon = "globe" %}{% endif %}
+                <a href="{{ link.url }}" class="btn btn-outline-primary avatar avatar-lg rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener" title="{{ link.title }}">
+                  {% uj_icon link_icon, "" %}
                 </a>
-              {% endiftruthy %}
-              {% iftruthy page.member.links.linkedin %}
-                <a href="{{ page.member.links.linkedin }}" class="btn btn-outline-primary avatar avatar-lg rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                  {% uj_icon "linkedin", "" %}
-                </a>
-              {% endiftruthy %}
-              {% iftruthy page.member.links.instagram %}
-                <a href="{{ page.member.links.instagram }}" class="btn btn-outline-primary avatar avatar-lg rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                  {% uj_icon "instagram", "" %}
-                </a>
-              {% endiftruthy %}
-              {% iftruthy page.member.links.twitter %}
-                <a href="{{ page.member.links.twitter }}" class="btn btn-outline-primary avatar avatar-lg rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                  {% uj_icon "twitter", "" %}
-                </a>
-              {% endiftruthy %}
-              {% iftruthy page.member.links.github %}
-                <a href="{{ page.member.links.github }}" class="btn btn-outline-primary avatar avatar-lg rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                  {% uj_icon "github", "" %}
-                </a>
-              {% endiftruthy %}
+              {% endfor %}
             </div>
           {% endiftruthy %}
 
@@ -107,7 +89,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
                     {% uj_icon "briefcase", "text-light fs-2" %}
                   </div>
                   <h4 class="mb-2">Skills</h4>
-                  <p class="text-muted mb-0">{{ page.member.skills }}</p>
+                  <p class="text-muted mb-0">{{ page.member.skills | join: ", " }}</p>
                 </div>
               </div>
             </div>
@@ -121,7 +103,7 @@ layout: themes/[ site.theme.id ]/frontend/core/base
                     {% uj_icon "heart", "text-light fs-2" %}
                   </div>
                   <h4 class="mb-2">Hobbies</h4>
-                  <p class="text-muted mb-0">{{ page.member.hobbies }}</p>
+                  <p class="text-muted mb-0">{{ page.member.hobbies | join: ", " }}</p>
                 </div>
               </div>
             </div>

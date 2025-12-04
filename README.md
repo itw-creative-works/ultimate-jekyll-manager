@@ -231,6 +231,23 @@ These utilities are particularly useful for:
 - Constraining forms, cards, and modals to reasonable sizes
 - Maintaining design consistency with Bootstrap's grid system
 
+### HTML Element Attributes
+
+The `<html>` element has data attributes for JavaScript/CSS targeting:
+
+| Attribute | Values |
+|-----------|--------|
+| `data-theme-id` | Theme ID (e.g., `classy`) |
+| `data-theme-target` | `frontend`, `backend`, `docs` |
+| `data-bs-theme` | `light`, `dark` |
+| `data-page-path` | Page permalink (e.g., `/about`) |
+| `data-asset-path` | Custom asset path or empty |
+| `data-environment` | `development`, `production` |
+| `data-platform` | `windows`, `mac`, `linux`, `ios`, `android`, `chromeos`, `unknown` |
+| `data-device` | `mobile` (<768px), `tablet` (768-1199px), `desktop` (>=1200px) |
+| `data-runtime` | `web`, `extension`, `electron`, `node` |
+| `aria-busy` | `true` (loading), `false` (ready) |
+
 ### Page Loading Protection System
 
 Ultimate Jekyll includes an automatic protection system that prevents users from clicking buttons before JavaScript is fully loaded, eliminating race conditions and errors.

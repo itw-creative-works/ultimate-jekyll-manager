@@ -56,7 +56,8 @@
 .navbar {
   &.navbar-floating {
     border-radius: 1rem;
-    padding: 0.75rem 1rem;
+    // padding: 0.75rem;
+    padding: 1rem;
     background: transparent !important;
     border: 1px solid rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;

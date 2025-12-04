@@ -1,3 +1,4 @@
 # Ultimate Jekyll Properties
-uj:
-  environment: "development"
+# DEPRECATD THIS (USE jekyll.environment INSTEAD)
+# uj:
+  # environment: "development"

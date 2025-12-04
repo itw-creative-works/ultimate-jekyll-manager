@@ -17,6 +17,11 @@ layout: null
   data-page-path="{{ page.canonical.path }}"
   data-asset-path="{{ page.resolved.asset_path }}"
 
+  data-environment="{{ jekyll.environment | default: 'development' }}"
+  data-platform=""
+  data-device=""
+  data-runtime=""
+
   data-page-loading="true"
   aria-busy="true"
   >

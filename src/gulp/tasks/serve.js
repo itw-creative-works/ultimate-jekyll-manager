@@ -33,12 +33,15 @@ module.exports = async function serve(complete) {
     https: await getHttpsConfig(), // Enable HTTPS with mkcert or self-signed certificates
     server: {
       baseDir: '_site',
+      routes: {
+        '/src': 'src'  // Allow serving from src/ for media fallback
+      },
       middleware: [
         // require('compression')({
         //   threshold: 0, // Compress all files regardless of size
         //   level: 9 // Maximum compression (1-9)
         // }),
-        processRequestMiddleware
+        processRequestMiddleware,
       ],
     },
   }
@@ -214,6 +217,58 @@ async function processRequestMiddleware(req, res, next) {
   // If the file has no ext, log it
   if (!path.extname(pathname)) {
     logger.log(`Serving ${pathname}`);
+  }
+
+  // Fallback for media files: serve from src/ if not in _site/
+  // This handles cases where imagemin hasn't run and optimized variants don't exist
+  const isMedia = pathname.startsWith('/assets/images/') || pathname.startsWith('/assets/videos/');
+  if (isMedia) {
+    const startTime = Date.now();
+    const cleanPath = pathname.split('?')[0];
+    const siteFilePath = path.join(rootPathProject, '_site', cleanPath);
+
+    // If file exists in _site, serve normally
+    if (jetpack.exists(siteFilePath)) {
+      logger.log(`[media] Found in _site: ${cleanPath} (${Date.now() - startTime}ms)`);
+      return next();
+    }
+
+    // Try to find the original file in src/
+    // First, try the exact path
+    let srcFilePath = path.join(rootPathProject, 'src', cleanPath);
+
+    // If not found, try stripping imagemin suffixes (-320px, -640px, -1024px) and .webp extension
+    if (!jetpack.exists(srcFilePath)) {
+      let originalPath = cleanPath;
+
+      // Remove size suffix (e.g., -320px, -640px, -1024px)
+      originalPath = originalPath.replace(/-\d+px(\.[^.]+)$/, '$1');
+
+      // If it's a .webp, try original extensions
+      if (originalPath.endsWith('.webp')) {
+        const basePath = originalPath.replace(/\.webp$/, '');
+        const possibleExts = ['.jpg', '.jpeg', '.png', '.gif'];
+
+        for (const ext of possibleExts) {
+          const testPath = path.join(rootPathProject, 'src', basePath + ext);
+          if (jetpack.exists(testPath)) {
+            srcFilePath = testPath;
+            break;
+          }
+        }
+      } else {
+        srcFilePath = path.join(rootPathProject, 'src', originalPath);
+      }
+    }
+
+    // Serve from src if found
+    if (jetpack.exists(srcFilePath)) {
+      const relativeSrcPath = path.relative(rootPathProject, srcFilePath);
+      logger.log(`[media] Serving from src: ${cleanPath} -> ${relativeSrcPath} (${Date.now() - startTime}ms)`);
+      req.url = '/' + relativeSrcPath;
+    } else {
+      logger.log(`[media] Not found: ${cleanPath} (${Date.now() - startTime}ms)`);
+    }
   }
 
   // Run middleware:request hook to allow custom URL rewriting

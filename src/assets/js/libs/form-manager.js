@@ -154,6 +154,12 @@ export class FormManager {
     const $autofocusField = this.$form.querySelector('[autofocus]');
     if ($autofocusField && !$autofocusField.disabled) {
       $autofocusField.focus();
+
+      // Move cursor to end of input if it has existing text
+      if (typeof $autofocusField.setSelectionRange === 'function') {
+        const len = $autofocusField.value.length;
+        $autofocusField.setSelectionRange(len, len);
+      }
     }
   }
 

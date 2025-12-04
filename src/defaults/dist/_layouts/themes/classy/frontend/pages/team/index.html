@@ -38,8 +38,8 @@ company_values:
 <section class="pt-0">
   <div class="container">
     <div class="text-center mb-5">
-      <h2 class="h2 mb-3">Leadership Team</h2>
-      <p class="fs-5 text-muted">The visionaries and experts driving our mission forward</p>
+      <h2 class="h2 mb-3">The people behind the <span class="text-accent">magic</span></h2>
+      <p class="fs-5 text-muted">Get to know the talented individuals driving {{ site.brand.name }} forward</p>
     </div>
 
     <div class="row g-4 justify-content-center">
@@ -65,31 +65,13 @@ company_values:
 
               {% iftruthy member.member.links %}
                 <div class="d-flex justify-content-center gap-2">
-                  {% iftruthy member.member.links.website %}
-                    <a href="{{ member.member.links.website }}" class="btn btn-outline-primary btn-sm avatar avatar-md rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                      {% uj_icon "globe", "" %}
+                  {% for link in member.member.links %}
+                    {% assign link_icon = link.id %}
+                    {% if link.id == "website" %}{% assign link_icon = "globe" %}{% endif %}
+                    <a href="{{ link.url }}" class="btn btn-outline-primary btn-sm avatar avatar-md rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener" title="{{ link.title }}">
+                      {% uj_icon link_icon, "" %}
                     </a>
-                  {% endiftruthy %}
-                  {% iftruthy member.member.links.linkedin %}
-                    <a href="{{ member.member.links.linkedin }}" class="btn btn-outline-primary btn-sm avatar avatar-md rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                      {% uj_icon "linkedin", "" %}
-                    </a>
-                  {% endiftruthy %}
-                  {% iftruthy member.member.links.instagram %}
-                    <a href="{{ member.member.links.instagram }}" class="btn btn-outline-primary btn-sm avatar avatar-md rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                      {% uj_icon "instagram", "" %}
-                    </a>
-                  {% endiftruthy %}
-                  {% iftruthy member.member.links.twitter %}
-                    <a href="{{ member.member.links.twitter }}" class="btn btn-outline-primary btn-sm avatar avatar-md rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                      {% uj_icon "twitter", "" %}
-                    </a>
-                  {% endiftruthy %}
-                  {% iftruthy member.member.links.github %}
-                    <a href="{{ member.member.links.github }}" class="btn btn-outline-primary btn-sm avatar avatar-md rounded-circle d-flex align-items-center justify-content-center" target="_blank" rel="nofollow noopener">
-                      {% uj_icon "github", "" %}
-                    </a>
-                  {% endiftruthy %}
+                  {% endfor %}
                 </div>
               {% endiftruthy %}
             </div>

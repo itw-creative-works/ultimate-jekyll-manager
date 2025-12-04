@@ -17,9 +17,11 @@ module.exports = async function () {
     // Run migration tasks
     await migratePosts();
     await migrateAssets();
+    await migrateBlogImages();
     await fixPostsLayout();
     await fixPostFilenames();
     await cleanupOldDirectories();
+    await cleanupDeprecatedAuthors();
 
     // Log completion
     logger.log(logger.format.green('✓ Migration complete!'));
@@ -216,6 +218,27 @@ async function migrateAssets() {
   }
 }
 
+async function migrateBlogImages() {
+  const sourcePath = path.join(process.cwd(), 'src', 'assets', '_src', 'images', 'blog', 'posts');
+  const targetPath = path.join(process.cwd(), 'src', 'assets', 'images', 'blog');
+
+  if (!jetpack.exists(sourcePath)) {
+    logger.log('No src/assets/_src/images/blog/posts directory found - skipping blog images migration');
+    return;
+  }
+
+  logger.log('Migrating blog images to src/assets/images/blog...');
+
+  // Ensure target directory exists
+  jetpack.dir(targetPath);
+
+  // Copy contents (overwrite) then remove source
+  jetpack.copy(sourcePath, targetPath, { overwrite: true });
+  jetpack.remove(sourcePath);
+
+  logger.log(logger.format.green('✓ Blog images migrated'));
+}
+
 async function fixPostsLayout() {
   const postsPath = path.join(process.cwd(), 'src', '_posts');
 
@@ -290,7 +313,21 @@ async function fixPostsLayout() {
       modified = true;
     }
 
-    // 4. Remove ad unit includes from content
+    // 4. Migrate post.author from old format to new format (first-last)
+    const authorMigrations = {
+      'alex': 'alex-raeburn',
+      'ian': 'ian-wiedenman',
+    };
+
+    Object.entries(authorMigrations).forEach(([oldAuthor, newAuthor]) => {
+      const authorRegex = new RegExp(`^(\\s*author:\\s*)(['"]?)${oldAuthor}\\2\\s*$`, 'gm');
+      if (frontmatter.match(authorRegex)) {
+        frontmatter = frontmatter.replace(authorRegex, `$1${newAuthor}`);
+        modified = true;
+      }
+    });
+
+    // 5. Remove ad unit includes from content
     const adUnitRegex = /{%\s*include\s+\/master\/modules\/adunits\/adsense-in-article\.html\s+index="[^"]*"\s*%}/g;
     const cleanedContent = restOfContent.replace(adUnitRegex, '');
 
@@ -388,6 +425,7 @@ async function cleanupOldDirectories() {
   const directoriesToCheck = [
     { path: path.join(process.cwd(), 'assets'), name: 'assets' },
     { path: path.join(process.cwd(), '_posts'), name: '_posts' },
+    { path: path.join(process.cwd(), 'src', 'assets', '_src'), name: 'src/assets/_src' },
   ];
 
   logger.log('Checking for empty old directories to clean up...');
@@ -420,5 +458,38 @@ async function cleanupOldDirectories() {
     logger.log(logger.format.green(`✓ Cleaned up ${deletedCount} empty director${deletedCount === 1 ? 'y' : 'ies'}`));
   } else {
     logger.log('No empty directories to clean up');
+  }
+}
+
+async function cleanupDeprecatedAuthors() {
+  // Deprecated author directories that used first-name only format
+  const deprecatedAuthors = ['ian', 'alex'];
+
+  const directoriesToDelete = deprecatedAuthors.map((author) => ({
+    path: path.join(process.cwd(), 'src', 'assets', 'images', 'team', author),
+    name: `team/${author}`,
+  }));
+
+  logger.log('Checking for deprecated author directories to remove...');
+
+  let deletedCount = 0;
+
+  directoriesToDelete.forEach(({ path: dirPath, name }) => {
+    const exists = jetpack.exists(dirPath);
+
+    if (!exists) {
+      return;
+    }
+
+    // Delete the directory and all its contents
+    jetpack.remove(dirPath);
+    logger.log(`  ✓ Deleted deprecated ${name} directory`);
+    deletedCount++;
+  });
+
+  if (deletedCount > 0) {
+    logger.log(logger.format.green(`✓ Removed ${deletedCount} deprecated author director${deletedCount === 1 ? 'y' : 'ies'}`));
+  } else {
+    logger.log('No deprecated author directories found');
   }
 }

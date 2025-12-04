@@ -32,7 +32,7 @@ pricing:
     - id: "basic"
       name: "Basic"
       tagline: "best for getting started"
-      url: "/dashboard"  # URL for free plan signup
+      url: "/dashboard"  # URL to get started
       pricing:
         monthly: 0
         annually: 0
@@ -206,9 +206,10 @@ faqs:
 
 <!-- Promo Banner -->
 <div id="pricing-promo-banner" class="position-fixed top-0 start-0 w-100 text-light text-center bg-body animation-slide-down" style="z-index: 1050;" hidden>
-  <div class="bg-primary-soft py-2">
+  <div class="bg-primary-soft py-2 position-relative">
+    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 mt-2 me-2" aria-label="Close" onclick="this.closest('#pricing-promo-banner').hidden=true;document.querySelector('.navbar-wrapper').style.marginTop=''"></button>
     <div class="container-fluid">
-      <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+      <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap pe-4">
         <span id="pricing-promo-badge" class="badge bg-gradient-rainbow px-2 py-1 fs-6 animation-wiggle">
           15% OFF!
         </span>

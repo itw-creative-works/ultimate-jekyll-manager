@@ -81,6 +81,8 @@ async function jekyll(complete) {
 
     // Build Jekyll
     const command = [
+      // Set JEKYLL_ENV to production when in build mode
+      Manager.isBuildMode() ? 'JEKYLL_ENV=production' : '',
       // Jekyll command
       'bundle exec jekyll build',
       '--source dist',

@@ -779,6 +779,25 @@ Track events directly without existence checks. All three tracking calls should 
 **Development Mode:**
 In development mode, all tracking calls are intercepted and logged to the console for debugging. See `src/assets/js/libs/dev.js` for implementation.
 
+## HTML Element Attributes
+
+The `<html>` element has data attributes for JavaScript/CSS targeting:
+
+| Attribute | Values |
+|-----------|--------|
+| `data-theme-id` | Theme ID (e.g., `classy`) |
+| `data-theme-target` | `frontend`, `backend`, `docs` |
+| `data-bs-theme` | `light`, `dark` |
+| `data-page-path` | Page permalink (e.g., `/about`) |
+| `data-asset-path` | Custom asset path or empty |
+| `data-environment` | `development`, `production` |
+| `data-platform` | `windows`, `mac`, `linux`, `ios`, `android`, `chromeos`, `unknown` |
+| `data-device` | `mobile` (<768px), `tablet` (768-1199px), `desktop` (>=1200px) |
+| `data-runtime` | `web`, `extension`, `electron`, `node` |
+| `aria-busy` | `true` (loading), `false` (ready) |
+
+**Detection source:** `web-manager/src/modules/utilities.js`
+
 ## Audit Workflow
 
 When fixing issues identified by the audit task (`src/gulp/tasks/audit.js`):

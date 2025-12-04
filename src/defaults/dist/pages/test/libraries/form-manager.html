@@ -24,21 +24,21 @@ sitemap: false
               <div class="col-md-6">
                 <div class="mb-3">
                   <label for="main-name" class="form-label">user.name</label>
-                  <input type="text" class="form-control" id="main-name" name="user.name" value="Ian">
+                  <input type="text" class="form-control" id="main-name" name="user.name" value="Ian" disabled autofocus>
                 </div>
                 <div class="mb-3">
                   <label for="main-email" class="form-label">user.email</label>
-                  <input type="email" class="form-control" id="main-email" name="user.email" value="ian@example.com">
+                  <input type="email" class="form-control" id="main-email" name="user.email" value="ian@example.com" disabled>
                 </div>
                 <div class="mb-3">
                   <label for="main-city" class="form-label">user.address.city</label>
-                  <input type="text" class="form-control" id="main-city" name="user.address.city" value="NYC">
+                  <input type="text" class="form-control" id="main-city" name="user.address.city" value="NYC" disabled>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="mb-3">
                   <label for="main-outcome" class="form-label">Simulate Outcome</label>
-                  <select class="form-select" id="main-outcome" name="settings.outcome">
+                  <select class="form-select" id="main-outcome" name="settings.outcome" disabled>
                     <option value="success">Success</option>
                     <option value="error">Error (throw Error)</option>
                   </select>
@@ -46,43 +46,43 @@ sitemap: false
                 <div class="mb-3">
                   <label class="form-label d-block">preferences.notifications (radio group)</label>
                   <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" id="notif-all" name="preferences.notifications" value="all" checked>
+                    <input type="radio" class="form-check-input" id="notif-all" name="preferences.notifications" value="all" checked disabled>
                     <label class="form-check-label" for="notif-all">All</label>
                   </div>
                   <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" id="notif-important" name="preferences.notifications" value="important">
+                    <input type="radio" class="form-check-input" id="notif-important" name="preferences.notifications" value="important" disabled>
                     <label class="form-check-label" for="notif-important">Important</label>
                   </div>
                   <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" id="notif-none" name="preferences.notifications" value="none">
+                    <input type="radio" class="form-check-input" id="notif-none" name="preferences.notifications" value="none" disabled>
                     <label class="form-check-label" for="notif-none">None</label>
                   </div>
                 </div>
                 <div class="mb-3">
                   <label class="form-label d-block">preferences.features (checkbox group)</label>
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="feat-darkmode" name="preferences.features" value="darkmode">
+                    <input type="checkbox" class="form-check-input" id="feat-darkmode" name="preferences.features" value="darkmode" disabled>
                     <label class="form-check-label" for="feat-darkmode">Dark Mode</label>
                   </div>
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="feat-analytics" name="preferences.features" value="analytics">
+                    <input type="checkbox" class="form-check-input" id="feat-analytics" name="preferences.features" value="analytics" disabled>
                     <label class="form-check-label" for="feat-analytics">Analytics</label>
                   </div>
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="feat-beta" name="preferences.features" value="beta">
+                    <input type="checkbox" class="form-check-input" id="feat-beta" name="preferences.features" value="beta" disabled>
                     <label class="form-check-label" for="feat-beta">Beta Features</label>
                   </div>
                 </div>
                 <div class="mb-3 form-check">
-                  <input type="checkbox" class="form-check-input" id="main-subscribe" name="settings.subscribe">
+                  <input type="checkbox" class="form-check-input" id="main-subscribe" name="settings.subscribe" disabled>
                   <label class="form-check-label" for="main-subscribe">settings.subscribe (single checkbox)</label>
                 </div>
               </div>
             </div>
             <div class="d-flex gap-2">
-              <button type="submit" data-action="save" class="btn btn-primary">Save</button>
-              <button type="submit" data-action="draft" class="btn btn-outline-secondary">Save as Draft</button>
-              <button type="button" id="main-set-data" class="btn btn-outline-info">Set Data</button>
+              <button type="submit" data-action="save" class="btn btn-primary" disabled>Save</button>
+              <button type="submit" data-action="draft" class="btn btn-outline-secondary" disabled>Save as Draft</button>
+              <button type="button" id="main-set-data" class="btn btn-outline-info" disabled>Set Data</button>
             </div>
           </form>
           <div class="mt-3 d-flex gap-3">
@@ -110,21 +110,21 @@ sitemap: false
           <form id="test-form-validation">
             <div class="mb-3">
               <label for="validation-name" class="form-label">Name (required)</label>
-              <input type="text" class="form-control" id="validation-name" name="name" required>
+              <input type="text" class="form-control" id="validation-name" name="name" required disabled>
             </div>
             <div class="mb-3">
               <label for="validation-email" class="form-label">Email (required, valid format)</label>
-              <input type="email" class="form-control" id="validation-email" name="email" required>
+              <input type="email" class="form-control" id="validation-email" name="email" required disabled>
             </div>
             <div class="mb-3">
               <label for="validation-age" class="form-label">Age (required, must be 18+)</label>
-              <input type="number" class="form-control" id="validation-age" name="age" required min="1">
+              <input type="number" class="form-control" id="validation-age" name="age" required min="1" disabled>
             </div>
             <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="validation-terms" name="terms" required>
+              <input type="checkbox" class="form-check-input" id="validation-terms" name="terms" required disabled>
               <label class="form-check-label" for="validation-terms">I agree to the terms (required)</label>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" disabled>Submit</button>
           </form>
           <div class="mt-2">
             <small class="text-muted" id="validation-status">Status: ready</small>
@@ -144,9 +144,9 @@ sitemap: false
           <form id="test-form-contact">
             <div class="mb-3">
               <label for="contact-message" class="form-label">Message</label>
-              <textarea class="form-control" id="contact-message" name="message" rows="2">Hello!</textarea>
+              <textarea class="form-control" id="contact-message" name="message" rows="2" disabled>Hello!</textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Send Message</button>
+            <button type="submit" class="btn btn-primary" disabled>Send Message</button>
           </form>
           <div class="mt-2">
             <small class="text-muted" id="contact-status">Status: ready</small>
@@ -166,9 +166,9 @@ sitemap: false
           <form id="test-form-manual">
             <div class="mb-3">
               <label for="manual-data" class="form-label">Data</label>
-              <input type="text" class="form-control" id="manual-data" name="data">
+              <input type="text" class="form-control" id="manual-data" name="data" disabled>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" disabled>Submit</button>
           </form>
           <div class="mt-2">
             <small class="text-muted" id="manual-status">Status: initializing</small>

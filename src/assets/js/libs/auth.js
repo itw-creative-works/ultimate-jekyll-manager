@@ -19,16 +19,25 @@ export default function (Manager) {
     // Check for authSignout parameter first
     await handleAuthSignout(webManager);
 
-    // Initialize the appropriate form based on the page (needs to be done early for error handling)
+    // Initialize the appropriate form based on the page (with autoReady: false)
     initializePageForm();
 
-    // Check for redirect result from OAuth providers
-    await handleRedirectResult();
+    // Check for redirect result from OAuth providers BEFORE enabling form
+    // This prevents the form from appearing interactive while redirect is processing
+    const hasRedirectResult = await handleRedirectResult();
+
+    // If redirect result was found, don't enable the form - user will be redirected
+    if (hasRedirectResult) {
+      return;
+    }
 
     // Check subdomain auth restrictions and redirect if needed
     if (checkSubdomainAuth()) {
       return;
     }
+
+    // No redirect pending - enable the form
+    formManager.ready();
 
     // Update auth return URL in all auth-related links
     updateAuthReturnUrl();
@@ -85,6 +94,7 @@ export default function (Manager) {
   // Initialize signin form
   function initializeSigninForm() {
     formManager = new FormManager('#signin-form', {
+      autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
       submittingText: 'Signing in...',
       submittedText: 'Signed In!',
@@ -97,6 +107,7 @@ export default function (Manager) {
   // Initialize signup form
   function initializeSignupForm() {
     formManager = new FormManager('#signup-form', {
+      autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
       submittingText: 'Creating account...',
       submittedText: 'Account Created!',
@@ -109,6 +120,7 @@ export default function (Manager) {
   // Initialize reset form
   function initializeResetForm() {
     formManager = new FormManager('#reset-form', {
+      autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
       submittingText: 'Sending...',
       submittedText: 'Email Sent!',
@@ -129,9 +141,9 @@ export default function (Manager) {
       // Log results for debugging
       console.log('Redirect result:', result);
 
-      // If no result, just return
+      // If no result, return false to indicate no redirect was processed
       if (!result || !result.user) {
-        return;
+        return false;
       }
 
       console.log('Successfully authenticated via redirect:', result.user.email);
@@ -151,6 +163,9 @@ export default function (Manager) {
         trackLogin(providerId, result.user);
         formManager.showSuccess('Successfully signed in!');
       }
+
+      // Return true to indicate redirect was successfully processed
+      return true;
     } catch (error) {
       // Only capture unexpected errors to Sentry
       if (!isUserError(error.code)) {
@@ -167,6 +182,9 @@ export default function (Manager) {
       } else if (error.code && error.code !== 'auth/cancelled-popup-request') {
         formManager.showError(`Authentication error: ${error.message}`);
       }
+
+      // Return false on error so form becomes interactive for user to try again
+      return false;
     }
   }
 

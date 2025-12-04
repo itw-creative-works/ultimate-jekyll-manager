@@ -65,7 +65,7 @@
 <!-- Configuration -->
 <script type="text/javascript">
   var Configuration = {
-    environment: "{{ site.uj.environment }}",
+    environment: "{{ jekyll.environment }}",
     buildTime: {{ site.uj.cache_breaker }},
     brand: {{ page.resolved.brand | jsonify }},
     advertising: {{ page.resolved.advertising | jsonify }},
