@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.130",
+  "version": "0.0.137",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -97,7 +97,7 @@
     "sass": "^1.94.2",
     "spellchecker": "^3.7.1",
     "through2": "^4.0.2",
-    "web-manager": "^4.0.30",
+    "web-manager": "^4.0.31",
     "webpack": "^5.103.0",
     "wonderful-fetch": "^1.3.4",
     "wonderful-version": "^1.3.2",
