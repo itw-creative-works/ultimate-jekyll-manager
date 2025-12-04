@@ -314,15 +314,16 @@ async function fixPostsLayout() {
     }
 
     // 4. Migrate post.author from old format to new format (first-last)
+    const alexAuthors = ['alex-raeburn', 'rare-ivy', 'christina-hill'];
     const authorMigrations = {
-      'alex': 'alex-raeburn',
-      'ian': 'ian-wiedenman',
+      'alex': () => alexAuthors[Math.floor(Math.random() * alexAuthors.length)],
+      'ian': () => 'ian-wiedenman',
     };
 
-    Object.entries(authorMigrations).forEach(([oldAuthor, newAuthor]) => {
+    Object.entries(authorMigrations).forEach(([oldAuthor, getNewAuthor]) => {
       const authorRegex = new RegExp(`^(\\s*author:\\s*)(['"]?)${oldAuthor}\\2\\s*$`, 'gm');
       if (frontmatter.match(authorRegex)) {
-        frontmatter = frontmatter.replace(authorRegex, `$1${newAuthor}`);
+        frontmatter = frontmatter.replace(authorRegex, `$1${getNewAuthor()}`);
         modified = true;
       }
     });
