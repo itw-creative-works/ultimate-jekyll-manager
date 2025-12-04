@@ -13,6 +13,9 @@ const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
+// Constants
+const LOUD = process.env.UJ_LOUD_LOGS === 'true';
+
 // Glob
 const input = [
   // Files to include
@@ -75,7 +78,9 @@ function customTransform() {
     const relativePath = path.relative(file.base, file.path).replace(/\\/g, '/');
 
     // Log
-    logger.log(`Processing file: ${relativePath}`);
+    if (LOUD) {
+      logger.log(`Processing file: ${relativePath}`);
+    }
 
     // Change path if it starts with 'pages/'
     // if (relativePath.startsWith('pages/')) {

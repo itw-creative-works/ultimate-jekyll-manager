@@ -99,7 +99,9 @@ async function jekyll(complete) {
         Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
       ].join(','),
       '--incremental',
-      Manager.isBuildMode() ? ' --profile' : '',
+      (Manager.isBuildMode() || argv.profile) ? ' --profile' : '',
+      // Limit posts in development for faster builds (use --all-posts to disable)
+      (!Manager.isBuildMode() && !argv['all-posts']) ? '--limit_posts 15' : '',
       // '--disable-disk-cache',
     ]
 

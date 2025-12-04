@@ -18,6 +18,9 @@ const config = Manager.getConfig('project');
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
+// Constants
+const LOUD = process.env.UJ_LOUD_LOGS === 'true';
+
 // Load ultimate-jekyll-manager.json config
 const ujConfigPath = path.join(rootPathPackage, 'dist/defaults/config/ultimate-jekyll-manager.json');
 const ujConfig = jetpack.exists(ujConfigPath) ? JSON5.parse(jetpack.read(ujConfigPath)) : {};
@@ -465,7 +468,11 @@ function customTransform() {
 
     // Skip if instructed
     if (options.skip || (!options.overwrite && exists && !options.merge && !options.mergeLines)) {
-      logger.log(`Skipping file: ${relativePath}`);
+      // Log if loud is enabled
+      if (LOUD) {
+        logger.log(`Skipping file: ${relativePath}`);
+      }
+
       return callback();
     }
 
