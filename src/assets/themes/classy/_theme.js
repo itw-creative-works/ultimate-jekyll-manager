@@ -14,8 +14,8 @@ window.bootstrap = bootstrap;
 
 // Import navbar scroll functionality
 import setupNavbarScroll from './js/navbar-scroll.js';
-// Import logo scroll functionality
-import setupLogoScroll from './js/logo-scroll.js';
+// Import infinite scroll functionality (used by logo scroll, testimonials, etc.)
+import { setupInfiniteScroll } from './js/infinite-scroll.js';
 // Import tooltip initialization
 import initializeTooltips from './js/initialize-tooltips.js';
 
@@ -23,7 +23,7 @@ import initializeTooltips from './js/initialize-tooltips.js';
 domReady().then(() => {
   // Classy Theme Initializations
   setupNavbarScroll();
-  setupLogoScroll();
+  setupInfiniteScroll();
 
   // Generic Bootstrap initializations
   initializeTooltips();
