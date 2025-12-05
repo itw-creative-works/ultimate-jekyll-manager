@@ -46,7 +46,7 @@ pricing:
           name: "Exports"
           value: "Watermarked"
           icon: "download"
-        # Unique features
+        # Additional features
         - id: "storage"
           name: "Logo Storage"
           value: "7 days"
@@ -69,7 +69,7 @@ pricing:
           name: "Exports"
           value: "Unlimited"
           icon: "download"
-        # Unique features
+        # Additional features
         - id: "api_access"
           name: "API Access"
           value: "Full"
@@ -97,7 +97,7 @@ pricing:
           name: "Exports"
           value: "Unlimited"
           icon: "download"
-        # Unique features
+        # Additional features
 
     - id: "max"
       name: "Max"
@@ -116,7 +116,7 @@ pricing:
           name: "Exports"
           value: "Unlimited"
           icon: "download"
-        # Unique features
+        # Additional features
         - id: "team_collaboration"
           name: "Team Collaboration"
           value: "Included"
@@ -450,7 +450,7 @@ faqs:
                         {% endfor %}
                       </ul>
 
-                      <!-- Show unique features for the first (Basic) plan -->
+                      <!-- Show Additional features for the first (Basic) plan -->
                       {% if forloop.index == 1 %}
                         {% assign has_unique_basic = false %}
                         {% for feature in plan.features %}
@@ -523,7 +523,7 @@ faqs:
                           </em>
                         </div>
 
-                        <!-- Additional/unique features if they exist -->
+                        <!-- Additional/Additional features if they exist -->
                         {% if has_additional %}
                           <ul class="list-unstyled mb-0">
                             {% for feature in plan.features %}
