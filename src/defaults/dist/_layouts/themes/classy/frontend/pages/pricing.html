@@ -438,6 +438,54 @@ faqs:
                         {% endfor %}
                       </ul>
 
+                      <!-- Show unique features for the first (Basic) plan -->
+                      {% if forloop.index == 1 %}
+                        {% assign has_unique_basic = false %}
+                        {% for feature in plan.features %}
+                          {% unless common_feature_ids contains feature.id %}
+                            {% assign has_unique_basic = true %}
+                            {% break %}
+                          {% endunless %}
+                        {% endfor %}
+
+                        {% if has_unique_basic %}
+                          <div class="text-muted small mb-2">
+                            <em>What you get:</em>
+                          </div>
+                          <ul class="list-unstyled mb-0">
+                            {% for feature in plan.features %}
+                              {% unless common_feature_ids contains feature.id %}
+                                {% assign feature_definition = nil %}
+                                {% for def in page.resolved.pricing.definitions %}
+                                  {% if def.id == feature.id %}
+                                    {% assign feature_definition = def.definition %}
+                                    {% break %}
+                                  {% endif %}
+                                {% endfor %}
+                                <li class="d-flex align-items-start mb-2 {% if forloop.last %}mb-0{% endif %}">
+                                  <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
+                                  <span>
+                                    {% if feature.value == "24/7" %}
+                                      {{ feature.value }}
+                                    {% elsif feature.value == "Included" or feature.value == "Available" or feature.value == "Full" %}
+                                      <!-- No prefix for these values -->
+                                    {% else %}
+                                      {{ feature.value | uj_commaify }}
+                                    {% endif %}
+                                    {% iftruthy feature_definition %}
+                                      <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ feature_definition }}">{{ feature.name }}</span>
+                                    {% endiftruthy %}
+                                    {% iffalsy feature_definition %}
+                                      {{ feature.name }}
+                                    {% endiffalsy %}
+                                  </span>
+                                </li>
+                              {% endunless %}
+                            {% endfor %}
+                          </ul>
+                        {% endif %}
+                      {% endif %}
+
                       <!-- Show "Everything in previous plan" for non-Basic plans -->
                       {% if forloop.index > 1 %}
                         <!-- Check if there are additional features -->

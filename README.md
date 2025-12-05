@@ -59,6 +59,14 @@ npm start -- --debug=true
 ```bash
 npm start -- --ujPluginDevMode=true
 ```
+* `--profile` - Enables Jekyll build profiling to see how long each phase takes.
+```bash
+npm start -- --profile
+```
+* `--all-posts` - Disables the development post limit (15 posts) and builds with all posts. Useful when you need to test with full blog content.
+```bash
+npm start -- --all-posts
+```
 
 ### Other ENV variables
 ```bash
