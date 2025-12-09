@@ -7,15 +7,11 @@ let webManager = null;
 // Module
 export default (Manager) => {
   return new Promise(async function (resolve) {
-    console.log('[Homepage] Module loading...');
-
     // Shortcuts
     webManager = Manager.webManager;
 
     // Initialize when DOM is ready
     await webManager.dom().ready();
-
-    console.log('[Homepage] DOM ready');
 
     // Bootstrap tabs handle all the tab switching automatically via data-bs-toggle="tab"
     // We just need to pause videos when switching tabs for better UX

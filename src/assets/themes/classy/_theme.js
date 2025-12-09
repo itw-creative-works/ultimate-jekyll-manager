@@ -18,6 +18,8 @@ import setupNavbarScroll from './js/navbar-scroll.js';
 import { setupInfiniteScroll } from './js/infinite-scroll.js';
 // Import tooltip initialization
 import initializeTooltips from './js/initialize-tooltips.js';
+// Import hero demo form initialization
+import initHeroDemoForm from './js/hero-demo-form.js';
 
 // Initialize theme components when DOM is ready
 domReady().then(() => {
@@ -27,4 +29,7 @@ domReady().then(() => {
 
   // Generic Bootstrap initializations
   initializeTooltips();
+
+  // Initialize hero demo form if present
+  initHeroDemoForm();
 });

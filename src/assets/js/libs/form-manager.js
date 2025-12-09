@@ -13,7 +13,7 @@
 
 // Libraries
 import { ready as domReady } from 'web-manager/modules/dom.js';
-import { showNotification } from 'web-manager/modules/utilities.js';
+import { showNotification, getDeviceType } from 'web-manager/modules/utilities.js';
 
 export class FormManager {
   constructor(selector, options = {}) {
@@ -150,9 +150,9 @@ export class FormManager {
     this._setState('ready');
     this._setDisabled(false);
 
-    // Focus the field with autofocus attribute if it exists
+    // Focus the field with autofocus attribute if it exists (desktop only)
     const $autofocusField = this.$form.querySelector('[autofocus]');
-    if ($autofocusField && !$autofocusField.disabled) {
+    if ($autofocusField && !$autofocusField.disabled && getDeviceType() === 'desktop') {
       $autofocusField.focus();
 
       // Move cursor to end of input if it has existing text

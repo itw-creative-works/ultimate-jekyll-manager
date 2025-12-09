@@ -357,25 +357,20 @@
 // ============================================
 // Adaptive Inverse Buttons
 // ============================================
-// .btn-adaptive-inverse {
-//   @extend .btn-light;
-//   // color: $dark !important;
+.btn-adaptive-inverse {
+  @extend .btn-light;
+}
 
-//   // &:hover {
-//   //   background: $dark !important;
-//   //   color: white !important;
-//   // }
-// }
+[data-bs-theme="dark"] .btn-adaptive-inverse {
+  @extend .btn-dark;
+}
+.btn-outline-adaptive-inverse {
+  @extend .btn-outline-light;
+}
 
-// [data-bs-theme="dark"] .btn-adaptive-inverse {
-//   @extend .btn-dark;
-//   // color: white !important;
-
-//   // &:hover {
-//   //   background: white !important;
-//   //   color: $dark !important;
-//   // }
-// }
+[data-bs-theme="dark"] .btn-outline-adaptive-inverse {
+  @extend .btn-outline-dark;
+}
 
 // ============================================
 // Gradient Rainbow Button

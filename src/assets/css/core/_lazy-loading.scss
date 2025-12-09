@@ -12,6 +12,19 @@ img[data-lazy] {
   height: auto; // Maintain aspect ratio
 }
 
+// Hide video/audio elements until loaded to prevent ugly native controls showing during shimmer
+[data-lazy-load-container].lazy-loading video,
+[data-lazy-load-container].lazy-loading audio {
+  opacity: 0;
+}
+
+// Show video/audio elements once loaded with fade-in
+[data-lazy-load-container].lazy-loaded video,
+[data-lazy-load-container].lazy-loaded audio {
+  opacity: 1;
+  transition: opacity 0.25s ease-in;
+}
+
 // ============================================
 // Loading States
 // ============================================
