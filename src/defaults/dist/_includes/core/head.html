@@ -186,13 +186,22 @@
 {% iftruthy page.resolved.theme.css.bundle %}
   <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/{{ page.resolved.theme.css.bundle }}.bundle.css?cb={{ site.uj.cache_breaker }}"/>
 {% endiftruthy %}
+
 <!-- Otherwise, fetch main bundle -->
 {% iffalsy page.resolved.theme.css.bundle %}
   <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
 {% endiffalsy %}
+
 <!-- Then, fetch any page specific bundles -->
 {% iffile page-css-path %}
   <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-path }}?cb={{ site.uj.cache_breaker }}"/>
+
+  <!-- Dev log -->
+  {% if jekyll.environment == "development" %}
+    <script>
+      console.info("Page-specific css loading: #main{{ page-css-path }}");
+    </script>
+  {% endif %}
 {% endiffile %}
 
 <!-- Style - Scripts are Disabled -->

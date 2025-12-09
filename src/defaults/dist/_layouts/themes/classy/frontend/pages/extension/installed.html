@@ -1,0 +1,188 @@
+---
+### ALL PAGES ###
+layout: themes/[ site.theme.id ]/frontend/core/cover
+
+### PAGE CONFIG ###
+# Hero Section
+hero:
+  headline: "Extension installed,"
+  headline_accent: "now let's pin it!"
+  description: "One more step to get the most out of {{ site.brand.name }}"
+
+# Steps
+steps:
+  - number: 1
+    title: "Click the puzzle piece"
+    description: "Find the Extensions icon in your browser toolbar"
+  - number: 2
+    title: "Pin {{ site.brand.name }}"
+    description: "Click the pin icon to keep it visible"
+---
+
+<!-- Arrow pointing to top-right -->
+<div class="extension-arrow-container position-fixed d-flex flex-column align-items-end z-3">
+  <span class="extension-arrow-label badge bg-primary fs-6 px-3 py-2 shadow text-nowrap">
+    {% uj_icon "hand-pointer", "me-2" %}
+    Click here first!
+  </span>
+  <div class="extension-arrow text-primary mt-2 me-2">
+    <svg width="60" height="80" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Curved arrow pointing up-right -->
+      <path d="M30 75 Q35 40 50 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <!-- Arrowhead -->
+      <path d="M42 5 L50 15 L38 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Main content -->
+<section class="col-12 col-md-10 col-lg-8 col-xl-7">
+  <div class="card border-0 shadow-lg">
+    <div class="card-body p-4 p-md-5">
+      <!-- Success Icon -->
+      <div class="text-center mb-4" data-lazy="@class animation-slide-up">
+        <div class="extension-success-icon bg-success avatar avatar-xl rounded-circle d-inline-flex align-items-center justify-content-center">
+          {% uj_icon "check", "fs-2 text-light" %}
+        </div>
+      </div>
+
+      <!-- Headline -->
+      <div class="text-center mb-5" data-lazy="@class animation-slide-up">
+        <h1 class="h2 fw-bold mb-3">
+          {{ page.resolved.hero.headline }}
+          <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
+        </h1>
+        <p class="fs-5 text-muted mb-0">{{ page.resolved.hero.description }}</p>
+      </div>
+
+      <!-- Step 1: Click puzzle piece -->
+      <div class="extension-step mb-3" data-step="1">
+        <div class="d-flex align-items-start gap-4">
+          <div class="flex-shrink-0">
+            <span class="avatar avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fs-5">1</span>
+          </div>
+          <div class="flex-grow-1 text-start">
+            <h4 class="mb-2">{{ page.resolved.steps[0].title }}</h4>
+            <p class="text-muted mb-3">{{ page.resolved.steps[0].description }}</p>
+
+            <!-- Visual: Browser toolbar with puzzle piece -->
+            <div class="extension-visual bg-body-tertiary rounded-4 p-4">
+              <div class="extension-toolbar d-flex align-items-center justify-content-end gap-2 bg-body rounded-3 p-2 border">
+                <!-- Mock URL bar -->
+                <div class="extension-url-bar flex-grow-1 bg-body-secondary rounded px-3 py-1 small text-muted me-2 text-truncate">
+                  {{ site.url }}
+                </div>
+                <!-- Extension icons -->
+                <button type="button" class="btn btn-sm btn-secondary opacity-50" disabled>
+                  {% uj_icon "shield", "fa-sm" %}
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary opacity-50" disabled>
+                  {% uj_icon "bookmark", "fa-sm" %}
+                </button>
+                <!-- Puzzle piece - highlighted -->
+                <div class="extension-puzzle-target position-relative">
+                  <button type="button" class="btn btn-sm btn-primary">
+                    {% uj_icon "puzzle-piece", "fa-sm" %}
+                  </button>
+                  <div class="click-indicator position-absolute top-50 start-50">
+                    <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                    <div class="pointer-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+                        <path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/>
+                        <path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="extension-step-divider d-flex justify-content-center mb-3">
+        {% uj_icon "arrow-down", "fs-3 text-muted" %}
+      </div>
+
+      <!-- Step 2: Pin the extension -->
+      <div class="extension-step" data-step="2">
+        <div class="d-flex align-items-start gap-4">
+          <div class="flex-shrink-0">
+            <span class="avatar avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fs-5">2</span>
+          </div>
+          <div class="flex-grow-1 text-start">
+            <h4 class="mb-2">{{ page.resolved.steps[1].title }}</h4>
+            <p class="text-muted mb-3">{{ page.resolved.steps[1].description }}</p>
+
+            <!-- Visual: Extension dropdown with pin -->
+            <div class="extension-visual bg-body-tertiary rounded-4 p-4">
+              <div class="extension-dropdown bg-body rounded-3 border shadow-sm overflow-hidden mx-auto">
+                <!-- Dropdown header -->
+                <div class="extension-dropdown-header d-flex align-items-center justify-content-between p-2 border-bottom bg-body-secondary">
+                  <span class="small fw-bold">Extensions</span>
+                  <button type="button" class="btn btn-sm p-0 opacity-50" disabled>
+                    {% uj_icon "gear", "fa-sm" %}
+                  </button>
+                </div>
+                <!-- Extension list -->
+                <div class="extension-dropdown-list p-2">
+                  <!-- Other extension (dimmed) -->
+                  <div class="extension-dropdown-item d-flex align-items-center gap-3 p-2 rounded opacity-50">
+                    <div class="extension-item-icon bg-body-secondary rounded p-1 d-flex align-items-center justify-content-center">
+                      {% uj_icon "shield", "fa-xs" %}
+                    </div>
+                    <span class="small flex-grow-1">AdBlocker</span>
+                    <button type="button" class="btn btn-sm p-1" disabled>
+                      {% uj_icon "thumbtack", "fa-xs text-muted" %}
+                    </button>
+                  </div>
+                  <!-- Our extension (highlighted) -->
+                  <div class="extension-dropdown-item d-flex align-items-center gap-3 p-2 rounded bg-primary bg-opacity-10 border border-primary">
+                    <div class="extension-item-icon rounded p-1 d-flex align-items-center justify-content-center">
+                      <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="extension-brandmark" alt="{{ site.brand.name }}"/>
+                    </div>
+                    <span class="small flex-grow-1 fw-bold">{{ site.brand.name }}</span>
+                    <!-- Pin button - highlighted with click animation -->
+                    <div class="extension-pin-target position-relative">
+                      <button type="button" class="btn btn-sm btn-primary p-1">
+                        {% uj_icon "thumbtack", "fa-xs" %}
+                      </button>
+                      <div class="click-indicator position-absolute top-50 start-50">
+                        <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                        <div class="pointer-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+                            <path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/>
+                            <path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success message -->
+      <div class="extension-success-message mt-5 pt-4 border-top">
+        <div class="d-flex align-items-center justify-content-center gap-3 text-success">
+          {% uj_icon "circle-check", "fs-4" %}
+          <span class="fs-5 fw-semibold">That's it! You're all set.</span>
+        </div>
+      </div>
+
+      <!-- CTA Button -->
+      <div class="text-center mt-4" data-lazy="@class animation-slide-up">
+        <a href="/" class="btn btn-primary btn-lg px-5">
+          {% uj_icon "arrow-right", "me-2" %}
+          Start Using {{ site.brand.name }}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ content | uj_content_format }}

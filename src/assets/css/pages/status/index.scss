@@ -1,0 +1,174 @@
+/**
+ * Status Page Styles
+ *
+ * Uses Bootstrap semantic colors:
+ * - success for operational (green)
+ * - warning for degraded (amber)
+ * - danger for major outage (red)
+ * - info for maintenance (blue)
+ */
+
+// Status Pulse - size for the blinking dot (uses global animation-pulse class)
+.status-pulse {
+  width: 8px;
+  height: 8px;
+}
+
+// Status Banner - gradient backgrounds based on status
+.status-banner {
+  &.status-operational {
+    background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.1) 0%, rgba(var(--bs-success-rgb), 0.05) 100%);
+    border-left: 4px solid var(--bs-success) !important;
+  }
+
+  &.status-degraded {
+    background: linear-gradient(135deg, rgba(var(--bs-warning-rgb), 0.1) 0%, rgba(var(--bs-warning-rgb), 0.05) 100%);
+    border-left: 4px solid var(--bs-warning) !important;
+  }
+
+  &.status-major {
+    background: linear-gradient(135deg, rgba(var(--bs-danger-rgb), 0.1) 0%, rgba(var(--bs-danger-rgb), 0.05) 100%);
+    border-left: 4px solid var(--bs-danger) !important;
+  }
+
+  &.status-maintenance {
+    background: linear-gradient(135deg, rgba(var(--bs-info-rgb), 0.1) 0%, rgba(var(--bs-info-rgb), 0.05) 100%);
+    border-left: 4px solid var(--bs-info) !important;
+  }
+}
+
+// Uptime Bars - custom component, no Bootstrap equivalent
+// Responsive: Show 30 bars on mobile, 60 on tablet, 90 on desktop
+.uptime-bars {
+  height: 32px;
+  flex-wrap: nowrap;
+
+  @media (max-width: 767.98px) {
+    height: 24px;
+    gap: 1px !important;
+
+    // Hide first 60 bars on mobile (show last 30)
+    .uptime-bar:nth-child(-n+60) {
+      display: none;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    height: 28px;
+
+    // Hide first 30 bars on tablet (show last 60)
+    .uptime-bar:nth-child(-n+30) {
+      display: none;
+    }
+  }
+}
+
+.uptime-bar {
+  flex: 1 1 0;
+  min-width: 0;
+
+  &.status-operational { background-color: var(--bs-success); }
+  &.status-degraded { background-color: var(--bs-warning); }
+  &.status-major { background-color: var(--bs-danger); }
+  &.status-maintenance { background-color: var(--bs-info); }
+  &.status-unknown { background-color: var(--bs-secondary-bg); }
+
+  &:hover {
+    transform: scaleY(1.2);
+    opacity: 0.8;
+  }
+}
+
+// Uptime Bar Legend
+.uptime-bar-legend {
+  width: 16px;
+  height: 16px;
+
+  &.status-operational { background-color: var(--bs-success); }
+  &.status-degraded { background-color: var(--bs-warning); }
+  &.status-major { background-color: var(--bs-danger); }
+  &.status-maintenance { background-color: var(--bs-info); }
+}
+
+// Incident & Maintenance Cards - border colors
+.incident-card,
+.maintenance-card {
+  border-left: 4px solid var(--bs-border-color) !important;
+
+  &.status-operational,
+  &.status-resolved { border-left-color: var(--bs-success) !important; }
+  &.status-degraded { border-left-color: var(--bs-warning) !important; }
+  &.status-major { border-left-color: var(--bs-danger) !important; }
+  &.status-maintenance { border-left-color: var(--bs-info) !important; }
+}
+
+// Incident Timeline - custom component
+.incident-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--bs-border-color);
+  }
+
+  .timeline-item {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 0.5rem;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--bs-secondary-bg);
+      border: 2px solid var(--bs-border-color);
+      transform: translateX(-3px);
+    }
+
+    &.status-investigating::before {
+      background-color: var(--bs-warning);
+      border-color: var(--bs-warning);
+    }
+    &.status-identified::before {
+      background-color: var(--bs-danger);
+      border-color: var(--bs-danger);
+    }
+    &.status-monitoring::before {
+      background-color: var(--bs-info);
+      border-color: var(--bs-info);
+    }
+    &.status-resolved::before {
+      background-color: var(--bs-success);
+      border-color: var(--bs-success);
+    }
+  }
+}
+
+// Tooltip for uptime bars - custom floating element
+.uptime-tooltip {
+  position: fixed;
+  z-index: 1000;
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow);
+  pointer-events: none;
+  white-space: nowrap;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+
+    &.status-operational { background-color: var(--bs-success); }
+    &.status-degraded { background-color: var(--bs-warning); }
+    &.status-major { background-color: var(--bs-danger); }
+    &.status-maintenance { background-color: var(--bs-info); }
+  }
+}

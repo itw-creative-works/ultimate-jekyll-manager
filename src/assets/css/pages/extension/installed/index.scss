@@ -1,0 +1,240 @@
+// Extension Installed Page Styles
+// Only custom styles that cannot be achieved with Bootstrap
+
+// Success icon animation
+.extension-success-icon {
+  animation: success-appear 0.6s ease-out;
+}
+
+body {
+  color: red !important;
+}
+
+@keyframes success-appear {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Arrow container positioning and animation
+.extension-arrow-container {
+  top: 80px;
+  right: 40px;
+  animation: arrow-container-appear 0.5s ease-out 0.3s both;
+
+  @media (max-width: 991px) {
+    right: 20px;
+    top: 70px;
+  }
+
+  @media (max-width: 576px) {
+    right: 10px;
+    top: 60px;
+
+    .extension-arrow svg {
+      width: 50px;
+      height: 70px;
+    }
+  }
+}
+
+@keyframes arrow-container-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Arrow bounce animation
+.extension-arrow {
+  animation: arrow-bounce 1.5s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+// Label glow animation
+.extension-arrow-label {
+  animation: label-glow 2s ease-in-out infinite;
+}
+
+@keyframes label-glow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(var(--bs-primary-rgb), 0.7);
+  }
+}
+
+// URL bar min width
+.extension-url-bar {
+  min-width: 100px;
+}
+
+// Extension dropdown width
+.extension-dropdown {
+  width: 280px;
+
+  @media (max-width: 576px) {
+    width: 100%;
+  }
+}
+
+// Icon/brandmark sizing
+.extension-item-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.extension-brandmark {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+// ============================================================================
+// Click Indicator Animation (same pattern as download page)
+// ============================================================================
+
+.click-indicator {
+  pointer-events: none;
+
+  .pointer-icon {
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .click-pulse {
+    width: 30px;
+    height: 30px;
+    top: -2px;
+    left: -2px;
+    opacity: 0;
+  }
+}
+
+// Step 1: Puzzle piece - mouse moves to target, clicks, snaps back
+.extension-puzzle-target {
+  .click-indicator {
+    .pointer-icon {
+      animation: puzzle-mouse-move 2.5s ease-out infinite;
+    }
+
+    .click-pulse {
+      animation: puzzle-click-pulse 2.5s ease-out infinite;
+    }
+  }
+}
+
+@keyframes puzzle-mouse-move {
+  // Start off-screen (bottom-right)
+  0% {
+    transform: translate(40px, 30px);
+  }
+  // Arrive at target (cursor tip on button)
+  30% {
+    transform: translate(-5px, -12px);
+  }
+  // Stay on target during clicks
+  70% {
+    transform: translate(-5px, -12px);
+  }
+  // Snap back instantly
+  70.1%, 100% {
+    transform: translate(40px, 30px);
+  }
+}
+
+@keyframes puzzle-click-pulse {
+  0%, 35% {
+    opacity: 0;
+    transform: translate(-5px, -12px) scale(0.5);
+  }
+  40%, 50% {
+    opacity: 0.8;
+    transform: translate(-5px, -12px) scale(1.3);
+  }
+  55%, 65% {
+    opacity: 0.8;
+    transform: translate(-5px, -12px) scale(1.3);
+  }
+  70%, 100% {
+    opacity: 0;
+    transform: translate(-5px, -12px) scale(0.5);
+  }
+}
+
+// Step 2: Pin button - mouse moves to target, clicks, snaps back (delayed)
+.extension-pin-target {
+  .click-indicator {
+    .pointer-icon {
+      animation: pin-mouse-move 2.5s ease-out infinite 1.5s;
+    }
+
+    .click-pulse {
+      animation: pin-click-pulse 2.5s ease-out infinite 1.5s;
+    }
+  }
+}
+
+@keyframes pin-mouse-move {
+  // Start off-screen (bottom-right)
+  0% {
+    transform: translate(35px, 25px);
+  }
+  // Arrive at target (cursor tip on button)
+  30% {
+    transform: translate(-5px, -12px);
+  }
+  // Stay on target during clicks
+  70% {
+    transform: translate(-5px, -12px);
+  }
+  // Snap back instantly
+  70.1%, 100% {
+    transform: translate(35px, 25px);
+  }
+}
+
+@keyframes pin-click-pulse {
+  0%, 35% {
+    opacity: 0;
+    transform: translate(-5px, -12px) scale(0.5);
+  }
+  40%, 50% {
+    opacity: 0.8;
+    transform: translate(-5px, -12px) scale(1.3);
+  }
+  55%, 65% {
+    opacity: 0.8;
+    transform: translate(-5px, -12px) scale(1.3);
+  }
+  70%, 100% {
+    opacity: 0;
+    transform: translate(-5px, -12px) scale(0.5);
+  }
+}

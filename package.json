@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.144",
+  "version": "0.0.146",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -73,6 +73,7 @@
     "chalk": "^5.6.2",
     "cheerio": "^1.1.2",
     "chrome-launcher": "^1.2.1",
+    "dotenv": "^17.2.3",
     "fast-xml-parser": "^5.3.2",
     "fs-jetpack": "^5.1.0",
     "glob": "^13.0.0",
