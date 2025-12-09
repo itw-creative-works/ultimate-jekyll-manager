@@ -229,18 +229,20 @@ prerender_icons:
           </h5>
 
           <div class="mb-3">
-            <label class="form-label">Auto-submit Date & Time</label>
+            <span class="form-label d-block">Auto-submit Date & Time</span>
             <small class="d-block text-muted mb-2">
               Leave empty to send immediately, or schedule for later
             </small>
             <div class="row">
               <div class="col-md-5">
+                <label for="schedule-date" class="visually-hidden">Schedule date</label>
                 <input type="date"
                        class="form-control"
                        name="schedule.date"
                        id="schedule-date">
               </div>
               <div class="col-md-4">
+                <label for="schedule-time" class="visually-hidden">Schedule time</label>
                 <input type="time"
                        class="form-control"
                        name="schedule.time"

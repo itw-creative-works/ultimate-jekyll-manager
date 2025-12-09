@@ -46,7 +46,8 @@ By vising {{ brand }}, you agree to comply.
 
 ## This is an input
 <div class="form-group">
-  <input type="email" name="slap_honey" class="form-control" placeholder="Your Email">
+  <label for="test-email" class="visually-hidden">Your email</label>
+  <input type="email" id="test-email" name="slap_honey" class="form-control" placeholder="Your Email">
 </div>
 
 ## This button has a title

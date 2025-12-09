@@ -822,12 +822,12 @@ cta:
 
           <div class="position-relative mb-3">
             <div class="mb-1">
-              <h6 class="mb-0">2. Navigate to Downloads</h6>
+              <h6 class="mb-0" id="linux-step-2-label">2. Navigate to Downloads</h6>
               <small class="text-muted">Run the command below</small>
             </div>
             <div class="bg-body-tertiary rounded-4 p-4 overflow-hidden position-relative">
               <div class="input-group">
-                <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-1" value="cd ~/Downloads" readonly>
+                <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-1" value="cd ~/Downloads" readonly aria-labelledby="linux-step-2-label">
                 <button type="button" class="btn btn-outline-adaptive copy-command-btn">
                   {% uj_icon "copy", "me-2" %}
                   <span class="button-text d-none d-sm-inline">Copy</span>
@@ -838,14 +838,14 @@ cta:
 
           <div class="position-relative mb-3">
             <div class="mb-1">
-              <h6 class="mb-0">3. Install the package</h6>
+              <h6 class="mb-0" id="linux-step-3-label">3. Install the package</h6>
               <small class="text-muted">Run the appropriate command for your distribution</small>
             </div>
             <div class="bg-body-tertiary rounded-4 p-4 overflow-hidden position-relative">
               <div class="mb-3">
-                <small class="text-muted d-block mb-2 fw-bold">For Debian/Ubuntu:</small>
+                <small class="text-muted d-block mb-2 fw-bold" id="linux-debian-label">For Debian/Ubuntu:</small>
                 <div class="input-group">
-                  <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-2" value="sudo dpkg -i {{ site.brand.name | downcase }}_amd64.deb" readonly>
+                  <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-2" value="sudo dpkg -i {{ site.brand.name | downcase }}_amd64.deb" readonly aria-labelledby="linux-debian-label">
                   <button type="button" class="btn btn-outline-adaptive copy-command-btn">
                     {% uj_icon "copy", "me-2" %}
                     <span class="button-text d-none d-sm-inline">Copy</span>
@@ -853,9 +853,9 @@ cta:
                 </div>
               </div>
               <div>
-                <small class="text-muted d-block mb-2 fw-bold">For Fedora/RHEL:</small>
+                <small class="text-muted d-block mb-2 fw-bold" id="linux-fedora-label">For Fedora/RHEL:</small>
                 <div class="input-group">
-                  <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-3" value="sudo rpm -i {{ site.brand.name | downcase }}_amd64.rpm" readonly>
+                  <input type="text" class="form-control font-monospace bg-dark text-light border-0" name="linux-command-3" value="sudo rpm -i {{ site.brand.name | downcase }}_amd64.rpm" readonly aria-labelledby="linux-fedora-label">
                   <button type="button" class="btn btn-outline-adaptive copy-command-btn">
                     {% uj_icon "copy", "me-2" %}
                     <span class="button-text d-none d-sm-inline">Copy</span>

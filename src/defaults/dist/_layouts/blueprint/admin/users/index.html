@@ -65,12 +65,12 @@ meta:
       <span class="input-group-text">
         {% uj_icon "magnifying-glass", "fa-sm" %}
       </span>
-      <input type="text" class="form-control" placeholder="Search users by name, email, or ID...">
+      <input type="text" class="form-control" id="user-search" placeholder="Search users by name, email, or ID..." aria-label="Search users">
     </div>
   </div>
   <div class="col-md-6">
     <div class="d-flex gap-2 justify-content-end">
-      <select class="form-select" style="width: auto;">
+      <select class="form-select" id="user-sort" style="width: auto;" aria-label="Sort users">
         <option>Sort by: Date Created</option>
         <option>Sort by: Name</option>
         <option>Sort by: Last Active</option>
@@ -92,7 +92,7 @@ meta:
         <thead>
           <tr>
             <th>
-              <input class="form-check-input" type="checkbox">
+              <input class="form-check-input" type="checkbox" id="select-all-users" aria-label="Select all users">
             </th>
             <th>User</th>
             <th>Role</th>
@@ -106,7 +106,7 @@ meta:
           {% for i in (1..10) %}
           <tr>
             <td>
-              <input class="form-check-input" type="checkbox">
+              <input class="form-check-input" type="checkbox" aria-label="Select user {{ i }}">
             </td>
             <td>
               <div class="d-flex align-items-center">

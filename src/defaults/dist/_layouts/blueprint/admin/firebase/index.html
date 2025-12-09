@@ -80,8 +80,8 @@ meta:
       </div>
       <div class="card-body">
         <div class="mb-3">
-          <label class="form-label small">Where</label>
-          <select class="form-select form-select-sm">
+          <label for="query-field" class="form-label small">Where</label>
+          <select class="form-select form-select-sm" id="query-field">
             <option>Select field...</option>
             <option>email</option>
             <option>name</option>
@@ -90,7 +90,8 @@ meta:
           </select>
         </div>
         <div class="mb-3">
-          <select class="form-select form-select-sm">
+          <label for="query-operator" class="visually-hidden">Operator</label>
+          <select class="form-select form-select-sm" id="query-operator" aria-label="Comparison operator">
             <option>==</option>
             <option>!=</option>
             <option>&gt;</option>
@@ -100,7 +101,8 @@ meta:
           </select>
         </div>
         <div class="mb-3">
-          <input type="text" class="form-control form-control-sm" placeholder="Value">
+          <label for="query-value" class="visually-hidden">Value</label>
+          <input type="text" class="form-control form-control-sm" id="query-value" placeholder="Value" aria-label="Query value">
         </div>
         <button class="btn btn-sm btn-adaptive w-100">
           {% uj_icon "magnifying-glass", "fa-sm me-2" %}
@@ -126,7 +128,7 @@ meta:
               <span class="input-group-text">
                 {% uj_icon "magnifying-glass", "fa-sm" %}
               </span>
-              <input type="text" class="form-control" placeholder="Search documents...">
+              <input type="text" class="form-control" id="document-search" placeholder="Search documents..." aria-label="Search documents">
             </div>
             <div class="btn-group btn-group-sm">
               <button class="btn btn-outline-adaptive active">
@@ -148,7 +150,7 @@ meta:
             <thead class="table-light">
               <tr>
                 <th style="width: 30px;">
-                  <input class="form-check-input" type="checkbox">
+                  <input class="form-check-input" type="checkbox" id="select-all-documents" aria-label="Select all documents">
                 </th>
                 <th>Document ID</th>
                 <th>email</th>
@@ -162,7 +164,7 @@ meta:
               {% for i in (1..15) %}
               <tr>
                 <td>
-                  <input class="form-check-input" type="checkbox">
+                  <input class="form-check-input" type="checkbox" aria-label="Select document {{ i }}">
                 </td>
                 <td class="font-monospace small">
                   {% if i < 10 %}usr00{{ i }}{% else %}usr0{{ i }}{% endif %}abc123xyz

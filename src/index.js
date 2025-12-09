@@ -11,6 +11,13 @@ class Manager {
   // Initialize
   async initialize() {
     try {
+      // Log the page URL
+      /* @dev-only:start */
+      {
+        console.log(`Initializing page:`, window.location.href);
+      }
+      /* @dev-only:end */
+
       // Initiate the web manager
       this.webManager = new WebManager();
 
