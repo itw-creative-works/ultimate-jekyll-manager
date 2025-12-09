@@ -33,6 +33,10 @@ module.exports = async function serve(complete) {
     https: await getHttpsConfig(), // Enable HTTPS with mkcert or self-signed certificates
     server: {
       baseDir: '_site',
+      serveStaticOptions: {
+        extensions: ['html'],  // Try .html extension automatically
+        redirect: false,       // Don't add trailing slashes
+      },
       routes: {
         '/src': 'src'  // Allow serving from src/ for media fallback
       },
@@ -215,6 +219,7 @@ async function processRequestMiddleware(req, res, next) {
   req.body = {};
 
   // If the file has no ext, log it
+    // logger.log(`----- ${pathname}`);
   if (!path.extname(pathname)) {
     logger.log(`Serving ${pathname}`);
   }
@@ -340,43 +345,18 @@ async function processRequestMiddleware(req, res, next) {
     });
   }
 
-  // Check if the URL is missing a trailing slash and does not have an extension
-  // console.log('---URL 1', req.url);
-  if (
-    (!pathname.endsWith('/') || pathname.endsWith('/blog/'))
-    && !path.extname(pathname)
-  ) {
-    // Get the new URL
-    const strippedPath = pathname.replace(/\/$/, '');
-    const newURL = `${strippedPath}.html`;
+  // Rewrite URLs to .html when needed
+  // serveStaticOptions handles simple cases, but not:
+  // - When a directory exists with the same name (e.g., /updates → /updates.html)
+  // - When the path looks like it has an extension but doesn't exist (e.g., /updates/v0.0.1)
+  const cleanPathname = pathname.split('?')[0].split('#')[0].replace(/\/$/, '');
+  const originalPath = path.join(rootPathProject, '_site', cleanPathname);
+  const htmlPath = path.join(rootPathProject, '_site', `${cleanPathname}.html`);
+  const originalExists = jetpack.exists(originalPath);
 
-    // Log
-    // logger.log(`Rewriting ${pathname} to ${newURL}`);
-
-    // Rewrite it to serve the .html extension
-    req.url = newURL;
+  if (originalExists !== 'file' && jetpack.exists(htmlPath) === 'file') {
+    req.url = `${cleanPathname}.html`;
   }
-  // console.log('---URL 2', req.url);
-
-  // Special LOCAL case: Rewrite /blog to blog.html since Jekyll fucks it up locally (probably due to pagination)
-  // Disaboed because we moved it to the jekyll task
-  // if (pathname === '/blog') {
-  //   req.url = '/blog/index.html';
-  // }
-
-  // Strip query parameters and hash fragments from the URL for file path lookup
-  const cleanUrl = req.url.split('?')[0].split('#')[0];
-  const rawFilePath = path.join(rootPathProject, '_site', cleanUrl);
-
-  // Special LOCAL case: Serve 404.html if the file does not exist
-  if (!jetpack.exists(rawFilePath) && rawFilePath.endsWith('.html')) {
-    // Log
-    logger.log(`File not found: ${req.url}. Serving 404.html instead.`);
-    req.url = '/404.html';
-  }
-
-  // LOG REQUEST
-  // logger.log(`Serving file: ${req.url}`);
 
   // Continue
   return next();

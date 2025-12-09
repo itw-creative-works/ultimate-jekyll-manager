@@ -45,6 +45,10 @@ web_manager:
     {%- continue -%}
   {%- endif -%}
 
+  {%- if page.draft -%}
+    {%- continue -%}
+  {%- endif -%}
+
   {%- if page.url contains '.js' or page.url contains '.xml' or page.url contains '.json' -%}
     {%- continue -%}
   {%- endif -%}
@@ -88,6 +92,10 @@ web_manager:
               {%- endif -%}
 
               {%- if page.resolved.sitemap.include == false or page.layout_data.sitemap.include == false -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              {%- if page.draft -%}
                 {%- continue -%}
               {%- endif -%}
 

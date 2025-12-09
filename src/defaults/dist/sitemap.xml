@@ -40,6 +40,10 @@ sitemap:
       {%- continue -%}
     {%- endif -%}
 
+    {%- if page.draft -%}
+      {%- continue -%}
+    {%- endif -%}
+
     {%- if page.url contains '.js' -%}
       {%- continue -%}
     {%- endif -%}
