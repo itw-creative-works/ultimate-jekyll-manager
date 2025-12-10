@@ -83,5 +83,7 @@ assets/images/font-awesome/slab-press-regular
 assets/images/font-awesome/slab-regular
 assets/images/font-awesome/whiteboard-semibold
 
+_logos/
+
 # MCP
 .playwright-mcp
