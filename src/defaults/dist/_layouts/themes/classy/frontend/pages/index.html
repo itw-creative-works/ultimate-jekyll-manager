@@ -346,8 +346,10 @@ cta:
 {% capture hero_cta_buttons %}
   {% assign primary_btn_class = page.resolved.hero.primary_button.class | default: "btn-adaptive" %}
   {% assign secondary_btn_class = page.resolved.hero.secondary_button.class | default: "btn-outline-adaptive" %}
-  {% assign show_primary = page.resolved.hero.primary_button.enabled | default: true %}
-  {% assign show_secondary = page.resolved.hero.secondary_button.enabled | default: true %}
+  {% assign show_primary = page.resolved.hero.primary_button.enabled %}
+  {% assign show_secondary = page.resolved.hero.secondary_button.enabled %}
+  {% if show_primary == nil %}{% assign show_primary = true %}{% endif %}
+  {% if show_secondary == nil %}{% assign show_secondary = true %}{% endif %}
   {% if show_primary or show_secondary %}
     <div class="d-flex flex-row flex-wrap gap-3 justify-content-center {% if is_side_layout %}justify-content-lg-start{% endif %}">
       {% if show_primary %}
