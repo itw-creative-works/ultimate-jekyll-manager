@@ -346,16 +346,24 @@ cta:
 {% capture hero_cta_buttons %}
   {% assign primary_btn_class = page.resolved.hero.primary_button.class | default: "btn-adaptive" %}
   {% assign secondary_btn_class = page.resolved.hero.secondary_button.class | default: "btn-outline-adaptive" %}
-  <div class="d-flex flex-row flex-wrap gap-3 justify-content-center {% if is_side_layout %}justify-content-lg-start{% endif %}">
-    <a href="{{ page.resolved.hero.primary_button.href }}" class="btn {{ primary_btn_class }} btn-lg py-3 {% if is_side_layout %}px-4{% else %}px-5{% endif %}">
-      {% uj_icon page.resolved.hero.primary_button.icon, "me-2" %}
-      {{ page.resolved.hero.primary_button.text }}
-    </a>
-    <a href="{{ page.resolved.hero.secondary_button.href }}" class="btn {{ secondary_btn_class }} btn-lg py-3 {% if is_side_layout %}px-4{% else %}px-5{% endif %}">
-      {% uj_icon page.resolved.hero.secondary_button.icon, "me-2" %}
-      {{ page.resolved.hero.secondary_button.text }}
-    </a>
-  </div>
+  {% assign show_primary = page.resolved.hero.primary_button.enabled | default: true %}
+  {% assign show_secondary = page.resolved.hero.secondary_button.enabled | default: true %}
+  {% if show_primary or show_secondary %}
+    <div class="d-flex flex-row flex-wrap gap-3 justify-content-center {% if is_side_layout %}justify-content-lg-start{% endif %}">
+      {% if show_primary %}
+        <a href="{{ page.resolved.hero.primary_button.href }}" class="btn {{ primary_btn_class }} btn-lg py-3 {% if is_side_layout %}px-4{% else %}px-5{% endif %}">
+          {% uj_icon page.resolved.hero.primary_button.icon, "me-2" %}
+          {{ page.resolved.hero.primary_button.text }}
+        </a>
+      {% endif %}
+      {% if show_secondary %}
+        <a href="{{ page.resolved.hero.secondary_button.href }}" class="btn {{ secondary_btn_class }} btn-lg py-3 {% if is_side_layout %}px-4{% else %}px-5{% endif %}">
+          {% uj_icon page.resolved.hero.secondary_button.icon, "me-2" %}
+          {{ page.resolved.hero.secondary_button.text }}
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
 {% endcapture %}
 
 <section class="bg-gradient-rainbow gradient-animated gradient-grain text-light overflow-hidden position-relative min-vh-80 d-flex align-items-center rounded-bottom-4 shadow-lg">
