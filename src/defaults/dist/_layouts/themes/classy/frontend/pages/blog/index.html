@@ -83,9 +83,9 @@ newsletter_cta:
               <!-- Category Badge -->
               {% if post.post.categories[0] %}
                 <div class="mb-2">
-                  <span class="badge bg-primary-soft text-primary">
+                  <a href="{{ site.url }}/blog/categories/{{ post.post.categories[0] | slugify }}" class="badge bg-primary-soft text-primary text-decoration-none">
                     {{ post.post.categories[0] | uj_title_case }}
-                  </span>
+                  </a>
                 </div>
               {% endif %}
 
@@ -221,11 +221,86 @@ newsletter_cta:
     </div>
 
     <!-- In-Feed Ad -->
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mb-5">
       <div class="col-12 col-lg-8" data-lazy="@class animation-slide-up">
         {% include modules/adunits/adsense.html type="in-feed" %}
       </div>
     </div>
+
+    <!-- Categories & Tags -->
+    {% comment %} Build unique categories list (max 10) {% endcomment %}
+    {% assign categories = '' | split: ',' %}
+    {% for post in site.posts %}
+      {% if categories.size >= 10 %}
+        {% break %}
+      {% endif %}
+      {% for category in post.post.categories %}
+        {% assign category_fixed = category | uj_title_case %}
+        {% unless categories contains category_fixed %}
+          {% assign categories = categories | push: category_fixed %}
+        {% endunless %}
+      {% endfor %}
+    {% endfor %}
+
+    {% comment %} Build unique tags list (max 10) {% endcomment %}
+    {% assign tags = '' | split: ',' %}
+    {% for post in site.posts %}
+      {% if tags.size >= 10 %}
+        {% break %}
+      {% endif %}
+      {% for tag in post.post.tags %}
+        {% assign tag_fixed = tag | uj_title_case %}
+        {% unless tags contains tag_fixed %}
+          {% assign tags = tags | push: tag_fixed %}
+        {% endunless %}
+      {% endfor %}
+    {% endfor %}
+
+    {% if categories.size > 0 or tags.size > 0 %}
+      <div class="row justify-content-center">
+        <div class="col-lg-10" data-lazy="@class animation-slide-up">
+          <!-- Categories -->
+          {% if categories.size > 0 %}
+            <div class="mb-5 text-center">
+              <h3 class="h5 mb-3">
+                {% uj_icon "folder", "me-2" %}
+                Categories
+              </h3>
+              <div>
+                {% for category in categories %}
+                  <a href="{{ site.url }}/blog/categories/{{ category | slugify }}" class="badge bg-primary-soft text-primary text-decoration-none me-1 mb-2">
+                    {{ category }}
+                  </a>
+                {% endfor %}
+                <a href="{{ site.url }}/blog/categories" class="badge bg-body-tertiary text-muted text-decoration-none ms-1 mb-2">
+                  View all {% uj_icon "arrow-right", "ms-1" %}
+                </a>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Tags -->
+          {% if tags.size > 0 %}
+            <div class="text-center">
+              <h3 class="h5 mb-3">
+                {% uj_icon "tags", "me-2" %}
+                Tags
+              </h3>
+              <div>
+                {% for tag in tags %}
+                  <a href="{{ site.url }}/blog/tags/{{ tag | slugify }}" class="badge bg-body-tertiary text-body text-decoration-none me-1 mb-2">
+                    {{ tag }}
+                  </a>
+                {% endfor %}
+                <a href="{{ site.url }}/blog/tags" class="badge bg-body-tertiary text-muted text-decoration-none ms-1 mb-2">
+                  View all {% uj_icon "arrow-right", "ms-1" %}
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 </section>
 

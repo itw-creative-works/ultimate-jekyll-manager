@@ -110,7 +110,7 @@ newsletter:
             {% endunless %}
           {% endfor %}
         {% for tag in tags %}
-          <a href="{{ site.url }}/blog?tag={{ tag }}" class="btn btn-adaptive btn-sm px-2 py-1 mb-2" style="font-size: 0.75rem;">{{ tag }}</a>
+          <a href="{{ site.url }}/blog/tags/{{ tag | slugify }}" class="btn btn-adaptive btn-sm px-2 py-1 mb-2" style="font-size: 0.75rem;">{% uj_icon "tag", "me-1" %}{{ tag }}</a>
         {% endfor %}
       </div>
     </div>
@@ -200,9 +200,9 @@ newsletter:
                       <!-- Category Badge -->
                       {% if post.post.categories[0] %}
                         <div class="mb-2">
-                          <span class="badge bg-primary-soft text-primary">
+                          <a href="{{ site.url }}/blog/categories/{{ post.post.categories[0] | slugify }}" class="badge bg-primary-soft text-primary text-decoration-none">
                             {{ post.post.categories[0] | uj_title_case }}
-                          </span>
+                          </a>
                         </div>
                       {% endif %}
 
