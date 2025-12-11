@@ -14,6 +14,15 @@ export default async function (Manager, options) {
   // Add Manager to global scope for easy access in modules
   window.Manager = Manager;
 
+  // Initialize the UJ library on webManager for programmatic access to UJ features
+  // This allows other modules to call webManager.uj().showExitPopup(), etc.
+  const ujLibrary = {};
+  webManager.uj = function() {
+    return ujLibrary;
+  };
+  // Also expose the internal object for modules to register their functions
+  webManager._ujLibrary = ujLibrary;
+
   // Log
   console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
 

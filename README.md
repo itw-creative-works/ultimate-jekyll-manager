@@ -355,6 +355,18 @@ prerender_icons:
 ---
 ```
 
+**Available Icon Sizes:**
+- `fa-2xs` - Extra extra small
+- `fa-xs` - Extra small
+- `fa-sm` - Small
+- `fa-md` - Medium (default base size)
+- `fa-lg` - Large
+- `fa-xl` - Extra large
+- `fa-2xl` - 2x extra large
+- `fa-3xl` - 3x extra large
+- `fa-4xl` - 4x extra large
+- `fa-5xl` - 5x extra large
+
 Icons are automatically rendered in the page HTML and can be retrieved by importing the library function.
 
 #### Authorized Fetch Library

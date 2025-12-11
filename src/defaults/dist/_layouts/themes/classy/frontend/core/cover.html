@@ -16,7 +16,10 @@ theme:
 <style>
   main.d-flex {
     display: flex !important;
-    min-height: calc(100vh);
+  }
+  .min-vh-100 {
+    min-height: 100vh !important; /* Fallback for older browsers */
+    min-height: 100dvh !important; /* Dynamic viewport height for mobile */
   }
 
   main.d-flex.align-items-center {

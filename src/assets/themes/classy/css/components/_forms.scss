@@ -7,54 +7,54 @@
 .input-group {
   > .form-control {
     border-radius: $classy-radius-lg;
-    
+
     &:not(:last-child) {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    
+
     &:not(:first-child) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
   }
-  
+
   // Buttons in input groups
   > .btn {
     border-radius: $classy-radius-lg;
-    
+
     &:not(:last-child) {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    
+
     &:not(:first-child) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
-    
+
     // Last button in group
     &:last-child {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
-    
+
     // First button in group
     &:first-child {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
   }
-  
+
   // Input group text
   > .input-group-text {
     border-radius: $classy-radius-lg;
-    
+
     &:not(:last-child) {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    
+
     &:not(:first-child) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -78,7 +78,7 @@
     background-color: var(--bs-body-bg);
   }
 
-  // Override Chrome/Safari autofill background color with subtle indicator
+  // // Override Chrome/Safari autofill background color with subtle indicator
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus {
@@ -109,16 +109,16 @@
 // ============================================
 .form-check-input {
   border-radius: $classy-radius-sm;
-  
+
   &[type="radio"] {
     border-radius: 50%;
   }
-  
+
   &:checked {
     background-color: $primary;
     border-color: $primary;
   }
-  
+
   &:focus {
     border-color: $primary;
     box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);

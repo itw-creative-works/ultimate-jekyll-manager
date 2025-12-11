@@ -319,6 +319,26 @@ Inserts Font Awesome icons:
 1. Icon name (string or variable, without "fa-" prefix)
 2. CSS classes (optional, defaults to "fa-3xl")
 
+**Available Icon Sizes:**
+- `fa-2xs` - Extra extra small
+- `fa-xs` - Extra small
+- `fa-sm` - Small
+- `fa-md` - Medium (default base size)
+- `fa-lg` - Large
+- `fa-xl` - Extra large
+- `fa-2xl` - 2x extra large
+- `fa-3xl` - 3x extra large
+- `fa-4xl` - 4x extra large
+- `fa-5xl` - 5x extra large
+
+**Size Examples:**
+```liquid
+{% uj_icon "check", "fa-sm" %}     <!-- Small inline icon -->
+{% uj_icon "star", "fa-lg" %}      <!-- Slightly larger -->
+{% uj_icon "rocket", "fa-2xl" %}   <!-- Hero/feature icons -->
+{% uj_icon "chart-pie", "fa-4xl" %}<!-- Large placeholder icons -->
+```
+
 #### `asset_path` Override
 Override default page-specific CSS/JS path derivation:
 
