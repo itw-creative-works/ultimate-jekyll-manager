@@ -449,6 +449,7 @@ initializing → ready ⇄ submitting → ready (or submitted)
 | `validation` | `{ data, setError }` | Custom validation before submit. Use `setError(fieldName, message)` to add errors. |
 | `change` | `{ field, name, value, data }` | Called when any field value changes. |
 | `statechange` | `{ state, previousState }` | Called when form state changes. |
+| `honeypot` | `{ data }` | Called when honeypot is triggered (for spam tracking). |
 
 **Validation:**
 
@@ -516,6 +517,16 @@ Produces:
     }
   }
 }
+```
+
+**Honeypot (Bot Detection):**
+
+FormManager automatically rejects submissions if a honeypot field is filled. Fields matching `[data-honey]` or `[name="honey"]` are excluded from `getData()` and trigger rejection if filled.
+
+```html
+<!-- Hidden from users via CSS -->
+<input type="text" name="honey" autocomplete="off" tabindex="-1"
+       style="position: absolute; left: -9999px;" aria-hidden="true">
 ```
 
 **Checkbox Handling:**

@@ -77,6 +77,12 @@ sitemap: false
                   <input type="checkbox" class="form-check-input" id="main-subscribe" name="settings.subscribe" disabled>
                   <label class="form-check-label" for="main-subscribe">settings.subscribe (single checkbox)</label>
                 </div>
+                <!-- Honeypot field for bot detection (fill to trigger rejection) -->
+                <div class="mb-3">
+                  <label for="main-honey" class="form-label">honey <span class="badge bg-warning text-dark">Honeypot</span></label>
+                  <input type="text" class="form-control" id="main-honey" name="honey" data-honey placeholder="Fill to trigger bot rejection" autocomplete="off" tabindex="-1" disabled>
+                  <small class="text-muted">Hidden in production; fill here to test rejection</small>
+                </div>
               </div>
             </div>
             <div class="d-flex gap-2">
@@ -172,6 +178,79 @@ sitemap: false
           </form>
           <div class="mt-2">
             <small class="text-muted" id="manual-status">Status: initializing</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test 5: Input Groups -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Test 5: Input Groups</h5>
+          <small class="text-muted">setInputGroup() filters getData() - fields without data-input-group are global</small>
+        </div>
+        <div class="card-body">
+          <form id="test-form-groups">
+            <div class="row">
+              <!-- Global settings (no data-input-group = always included) -->
+              <div class="col-md-4">
+                <h6 class="text-muted mb-3">Global Settings <span class="badge bg-secondary">Always included</span></h6>
+                <div class="mb-3">
+                  <label for="groups-name" class="form-label">settings.name</label>
+                  <input type="text" class="form-control" id="groups-name" name="settings.name" value="My Project" disabled>
+                </div>
+                <div class="mb-3">
+                  <label for="groups-theme" class="form-label">settings.theme</label>
+                  <select class="form-select" id="groups-theme" name="settings.theme" disabled>
+                    <option value="light">Light</option>
+                    <option value="dark" selected>Dark</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Group A fields -->
+              <div class="col-md-4">
+                <h6 class="text-primary mb-3">Group A <span class="badge bg-primary">data-input-group="a"</span></h6>
+                <div class="mb-3">
+                  <label for="groups-a-url" class="form-label">options.url</label>
+                  <input type="url" class="form-control" id="groups-a-url" name="options.url" data-input-group="a" value="https://example.com" disabled>
+                </div>
+                <div class="mb-3">
+                  <label for="groups-a-title" class="form-label">options.title</label>
+                  <input type="text" class="form-control" id="groups-a-title" name="options.title" data-input-group="a" value="My Link" disabled>
+                </div>
+              </div>
+
+              <!-- Group B fields -->
+              <div class="col-md-4">
+                <h6 class="text-success mb-3">Group B <span class="badge bg-success">data-input-group="b"</span></h6>
+                <div class="mb-3">
+                  <label for="groups-b-ssid" class="form-label">options.ssid</label>
+                  <input type="text" class="form-control" id="groups-b-ssid" name="options.ssid" data-input-group="b" value="MyWiFi" disabled>
+                </div>
+                <div class="mb-3">
+                  <label for="groups-b-password" class="form-label">options.password</label>
+                  <input type="text" class="form-control" id="groups-b-password" name="options.password" data-input-group="b" value="secret123" disabled>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+              <span class="text-muted me-2">Select group:</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm groups-filter-btn active" data-group="">All (no filter)</button>
+              <button type="button" class="btn btn-outline-primary btn-sm groups-filter-btn" data-group="a">Group A</button>
+              <button type="button" class="btn btn-outline-success btn-sm groups-filter-btn" data-group="b">Group B</button>
+              <button type="button" class="btn btn-outline-info btn-sm groups-filter-btn" data-group='["a", "b"]'>Both (a, b)</button>
+              <button type="submit" class="btn btn-primary btn-sm ms-auto" disabled>Get Data</button>
+            </div>
+          </form>
+          <div class="mt-3 d-flex gap-3">
+            <small class="text-muted" id="groups-status">Status: ready</small>
+            <small class="text-muted" id="groups-filter">Filter: none (all fields)</small>
+          </div>
+          <div class="mt-3">
+            <pre id="groups-output" class="bg-body-secondary p-2 rounded small" style="max-height: 200px; overflow: auto;">Click "Get Data" to see filtered results...</pre>
           </div>
         </div>
       </div>

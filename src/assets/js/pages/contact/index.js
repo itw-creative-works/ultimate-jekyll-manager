@@ -32,17 +32,15 @@ function setupForm() {
     resetOnSuccess: true,
   });
 
+  // Track honeypot triggers (spam detection)
+  formManager.on('honeypot', () => {
+    trackContactSpam();
+  });
+
   formManager.on('submit', async ({ data }) => {
     const slapformId = webManager.config.brand.contact['slapform-form-id'];
 
     console.log('Contact form submission:', data);
-
-    // Check honeypot fields (anti-spam)
-    if (data.url_check || data.slap_honey) {
-      console.warn('Honeypot field filled - potential spam');
-      trackContactSpam();
-      return;
-    }
 
     // Check if slapformId is missing
     if (!slapformId) {

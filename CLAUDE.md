@@ -629,7 +629,8 @@ initializing → ready ⇄ submitting → ready (or submitted)
   resetOnSuccess: false,     // Clear form fields after successful submission
   warnOnUnsavedChanges: false, // Warn user before leaving with unsaved changes
   submittingText: 'Processing...', // Text shown on submit button during submission
-  submittedText: 'Processed!'  // Text shown on submit button after success (when allowResubmit: false)
+  submittedText: 'Processed!', // Text shown on submit button after success (when allowResubmit: false)
+  inputGroup: null           // Filter getData() by data-input-group attribute (null = all fields)
 }
 ```
 
@@ -641,6 +642,7 @@ initializing → ready ⇄ submitting → ready (or submitted)
 | `validation` | `{ data, setError }` | Custom validation before submit |
 | `change` | `{ field, name, value, data }` | Field value changed |
 | `statechange` | `{ state, previousState }` | State transition |
+| `honeypot` | `{ data }` | Honeypot triggered (for spam tracking) |
 
 **Validation System:**
 
@@ -668,8 +670,10 @@ When the form transitions to `ready` state, FormManager automatically focuses th
 |--------|-------------|
 | `on(event, callback)` | Register event listener (chainable) |
 | `ready()` | Transition to ready state |
-| `getData()` | Get form data as nested object (supports dot notation) |
+| `getData()` | Get form data as nested object (supports dot notation, respects input group filter) |
 | `setData(obj)` | Set form values from nested object |
+| `setInputGroup(group)` | Set input group filter (string, array, or null) |
+| `getInputGroup()` | Get current input group filter |
 | `showSuccess(msg)` | Show success notification |
 | `showError(msg)` | Show error notification |
 | `reset()` | Reset form and go to ready state |
@@ -689,6 +693,55 @@ Results in:
 ```javascript
 { user: { address: { city: 'NYC' } } }
 ```
+
+**Input Groups:**
+
+Filter `getData()` to only return fields matching a specific group. Fields without `data-input-group` are "global" and always included.
+
+```html
+<!-- Global fields (no data-input-group) - always included -->
+<input name="settings.theme" value="dark">
+
+<!-- Group-specific fields -->
+<input name="options.url" data-input-group="url" value="https://example.com">
+<input name="options.ssid" data-input-group="wifi" value="MyWiFi">
+<input name="options.password" data-input-group="wifi" value="secret123">
+```
+
+```javascript
+// Set group filter (accepts string or array)
+formManager.setInputGroup('url');           // Single group
+formManager.setInputGroup(['url', 'wifi']); // Multiple groups
+formManager.setInputGroup(null);            // Clear filter (all fields)
+
+// Get current filter
+formManager.getInputGroup(); // Returns ['url'] or null
+
+// getData() respects the filter
+formManager.setInputGroup('wifi');
+formManager.getData();
+// Returns: { settings: { theme: 'dark' }, options: { ssid: 'MyWiFi', password: 'secret123' } }
+// Note: 'url' field excluded, global 'settings.theme' included
+```
+
+Can also be set via config:
+```javascript
+const fm = new FormManager('#form', { inputGroup: 'wifi' });
+```
+
+**Honeypot (Bot Detection):**
+
+FormManager automatically rejects submissions if a honeypot field is filled. Honeypot fields are hidden from users but bots fill them automatically.
+
+```html
+<!-- Hidden from users via CSS -->
+<input type="text" name="honey" autocomplete="off" tabindex="-1"
+       style="position: absolute; left: -9999px;" aria-hidden="true">
+```
+
+Fields matching `[data-honey]` or `[name="honey"]` are:
+- Excluded from `getData()` output
+- Checked during validation — if filled, submission is rejected with generic error
 
 **Checkbox Handling:**
 - **Single checkbox:** Returns `true`/`false`

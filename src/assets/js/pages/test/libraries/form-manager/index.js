@@ -21,6 +21,7 @@ export default (Manager) => {
     initTestFormValidation();
     initTestFormContact();
     initTestFormManual();
+    initTestFormGroups();
 
     // Resolve after initialization
     return resolve();
@@ -191,4 +192,56 @@ function initTestFormManual() {
     console.log('[Test 4] Now ready');
     formManager.ready();
   }, 2000);
+}
+
+// Test 5: Input Groups
+function initTestFormGroups() {
+  const formManager = new FormManager('#test-form-groups');
+  const $status = document.getElementById('groups-status');
+  const $filter = document.getElementById('groups-filter');
+  const $output = document.getElementById('groups-output');
+  const $filterBtns = document.querySelectorAll('.groups-filter-btn');
+
+  formManager.on('statechange', ({ state }) => {
+    $status.textContent = `Status: ${state}`;
+  });
+
+  // Filter button click handler
+  $filterBtns.forEach(($btn) => {
+    $btn.addEventListener('click', () => {
+      // Update active state
+      $filterBtns.forEach(($b) => $b.classList.remove('active'));
+      $btn.classList.add('active');
+
+      // Set the input group filter (parse data-group as JSON array or single string)
+      const groupAttr = $btn.dataset.group;
+      let group = null;
+      if (groupAttr) {
+        try {
+          group = JSON.parse(groupAttr);
+        } catch {
+          group = groupAttr; // Single string value
+        }
+      }
+      formManager.setInputGroup(group);
+
+      // Update filter display
+      const currentGroup = formManager.getInputGroup();
+      $filter.textContent = currentGroup
+        ? `Filter: ${JSON.stringify(currentGroup)}`
+        : 'Filter: none (all fields)';
+
+      console.log('[Test 5] Input group set to:', currentGroup);
+    });
+  });
+
+  formManager.on('submit', async ({ data }) => {
+    console.log('[Test 5] getData() result:', data);
+
+    // Show the filtered data
+    $output.textContent = JSON.stringify(data, null, 2);
+
+    // Don't actually submit - just show the data
+    formManager.showSuccess('getData() returned ' + Object.keys(data).length + ' top-level keys');
+  });
 }

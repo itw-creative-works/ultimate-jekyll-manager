@@ -15,6 +15,9 @@
 import { ready as domReady } from 'web-manager/modules/dom.js';
 import { showNotification, getDeviceType } from 'web-manager/modules/utilities.js';
 
+// Constants
+const HONEYPOT_SELECTOR = '[data-honey], [name="honey"]';
+
 export class FormManager {
   constructor(selector, options = {}) {
     // Get form element
@@ -35,6 +38,7 @@ export class FormManager {
       warnOnUnsavedChanges: false, // Warn user before leaving page with unsaved changes
       submittingText: 'Processing...', // Text shown on submit button during submission
       submittedText: 'Processed!', // Text shown on submit button after submission (when allowResubmit: false)
+      inputGroup: null, // Filter getData() to only include fields with matching data-input-group (null = all fields)
       ...options,
     };
 
@@ -48,6 +52,7 @@ export class FormManager {
       validation: [],
       submit: [],
       statechange: [],
+      honeypot: [],
     };
 
     // Field errors (populated during validation)
@@ -296,6 +301,21 @@ export class FormManager {
       console.log('[Form-manager] Running validation');
     }
     /* @dev-only:end */
+
+    // 0. Check honeypot fields first (bot detection)
+    if (this._isHoneypotFilled()) {
+      /* @dev-only:start */
+      {
+        console.log('[Form-manager] Honeypot triggered - rejecting submission');
+      }
+      /* @dev-only:end */
+
+      // Emit honeypot event for tracking
+      this._emit('honeypot', { data });
+
+      this.showError('Something went wrong. Please try again.');
+      return false;
+    }
 
     // Create setError helper for custom validation
     const setError = (fieldName, message) => {
@@ -712,29 +732,67 @@ export class FormManager {
 
   /**
    * Collect form data as plain object (supports dot notation for nested fields)
+   * Respects inputGroup filter when set - only includes fields matching the group
    */
   getData() {
-    const formData = new FormData(this.$form);
     const data = {};
 
-    // Count checkboxes per name to detect groups vs single
+    // Get all form fields
+    const $fields = this.$form.querySelectorAll('input, select, textarea');
+
+    // Count checkboxes per name to detect groups vs single (only for fields in group)
     const checkboxCounts = {};
-    this.$form.querySelectorAll('input[type="checkbox"]').forEach(($cb) => {
-      checkboxCounts[$cb.name] = (checkboxCounts[$cb.name] || 0) + 1;
+    $fields.forEach(($field) => {
+      if ($field.type === 'checkbox' && this._isFieldInGroup($field)) {
+        checkboxCounts[$field.name] = (checkboxCounts[$field.name] || 0) + 1;
+      }
     });
 
-    for (const [key, value] of formData.entries()) {
-      // Skip checkboxes - we handle them separately
-      if (checkboxCounts[key]) {
-        continue;
+    // Process non-checkbox fields
+    $fields.forEach(($field) => {
+      const name = $field.name;
+
+      // Skip fields without name
+      if (!name) {
+        return;
       }
-      this._setNested(data, key, value);
-    }
+
+      // Skip if field is not in current input group
+      if (!this._isFieldInGroup($field)) {
+        return;
+      }
+
+      // Skip honeypot fields (should never be in form data)
+      if ($field.matches(HONEYPOT_SELECTOR)) {
+        return;
+      }
+
+      // Skip checkboxes - we handle them separately
+      if ($field.type === 'checkbox') {
+        return;
+      }
+
+      // Skip radio buttons that aren't checked
+      if ($field.type === 'radio' && !$field.checked) {
+        return;
+      }
+
+      this._setNested(data, name, $field.value);
+    });
 
     // Handle checkboxes
     const processedGroups = new Set();
-    this.$form.querySelectorAll('input[type="checkbox"]').forEach(($cb) => {
+    $fields.forEach(($cb) => {
+      if ($cb.type !== 'checkbox') {
+        return;
+      }
+
       const name = $cb.name;
+
+      // Skip if field is not in current input group
+      if (!this._isFieldInGroup($cb)) {
+        return;
+      }
 
       // Single checkbox: true/false
       if (checkboxCounts[name] === 1) {
@@ -750,7 +808,10 @@ export class FormManager {
 
       const values = {};
       this.$form.querySelectorAll(`input[type="checkbox"][name="${name}"]`).forEach(($groupCb) => {
-        values[$groupCb.value] = $groupCb.checked;
+        // Only include checkboxes that are in the group
+        if (this._isFieldInGroup($groupCb)) {
+          values[$groupCb.value] = $groupCb.checked;
+        }
       });
       this._setNested(data, name, values);
     });
@@ -804,6 +865,83 @@ export class FormManager {
    */
   isDirty() {
     return this._isDirty;
+  }
+
+  /**
+   * Set the input group filter for getData()
+   * When set, getData() only returns fields matching the group (via data-input-group attribute)
+   * Fields without data-input-group or with empty value are considered "global" and always included
+   *
+   * @param {string|string[]|null} group - Group name(s) to filter by (e.g., 'url', ['url', 'wifi']), or null to disable filtering
+   * @returns {FormManager} - Returns this for chaining
+   */
+  setInputGroup(group) {
+    // Normalize to array or null
+    if (group === null || group === undefined || group === '') {
+      this.config.inputGroup = null;
+    } else if (Array.isArray(group)) {
+      this.config.inputGroup = group.map((g) => g.toLowerCase());
+    } else {
+      this.config.inputGroup = [group.toLowerCase()];
+    }
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] setInputGroup:', this.config.inputGroup);
+    }
+    /* @dev-only:end */
+
+    return this;
+  }
+
+  /**
+   * Get the current input group filter
+   * @returns {string[]|null}
+   */
+  getInputGroup() {
+    return this.config.inputGroup;
+  }
+
+  /**
+   * Check if any honeypot field has been filled (bot detection)
+   * Honeypot fields are hidden from users but bots fill them automatically
+   * @returns {boolean} - true if a honeypot field has a value (bot detected)
+   */
+  _isHoneypotFilled() {
+    const $honeypots = this.$form.querySelectorAll(HONEYPOT_SELECTOR);
+
+    for (const $field of $honeypots) {
+      if ($field.value && $field.value.trim() !== '') {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a field should be included based on input group filter
+   * @param {HTMLElement} $field - The field element to check
+   * @returns {boolean}
+   */
+  _isFieldInGroup($field) {
+    const allowedGroups = this.config.inputGroup;
+
+    // No filter set - include all fields
+    if (!allowedGroups) {
+      return true;
+    }
+
+    // Get field's group attribute
+    const fieldGroup = $field.getAttribute('data-input-group');
+
+    // No group attribute or empty = global field, always include
+    if (!fieldGroup || fieldGroup.trim() === '') {
+      return true;
+    }
+
+    // Check if field's group is in allowed groups
+    return allowedGroups.includes(fieldGroup.toLowerCase());
   }
 
   /**
