@@ -47,7 +47,6 @@ const watchInput = [
 
   // Page-specific js - watch for changes but don't compile as entry points
   `${rootPathPackage}/dist/assets/js/pages/**/*.js`,
-  'src/assets/js/pages/**/*.js',
 
   // Core JS - watch for changes but don't compile as entry points
   `${rootPathPackage}/dist/assets/js/**/*.js`,
@@ -55,6 +54,9 @@ const watchInput = [
   // Theme js - watch for changes but don't compile as entry points
   `${rootPathPackage}/dist/assets/themes/**/*.js`,
   'src/assets/themes/**/*.js',
+
+  // All project assets js - watch for changes but don't compile as entry points
+  'src/assets/js/**/*.js',
 
   // UJ Service worker
   `${rootPathPackage}/dist/service-worker.js`,

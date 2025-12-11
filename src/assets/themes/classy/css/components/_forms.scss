@@ -77,6 +77,17 @@
     box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
     background-color: var(--bs-body-bg);
   }
+
+  // Override Chrome/Safari autofill background color with subtle indicator
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bs-body-bg) inset !important;
+    -webkit-text-fill-color: var(--bs-body-color) !important;
+    caret-color: var(--bs-body-color);
+    border-color: $primary !important;
+    box-shadow: 0 0 0 1000px var(--bs-body-bg) inset, 0 0 0 2px rgba($primary, 0.15) !important;
+  }
 }
 
 // ============================================
