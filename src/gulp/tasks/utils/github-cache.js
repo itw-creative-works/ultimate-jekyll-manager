@@ -102,12 +102,17 @@ class GitHubCache {
     this.logger.log(`📂 Extract directory: ${extractDir}`);
     this.logger.log(`📁 Directory contents: ${JSON.stringify(dirContents)}`);
 
+    // GitHub zipball format: {owner}-{repo}-{sha}
+    // Match this pattern to avoid picking up other cache directories (like imagemin, translation)
+    const githubZipPattern = new RegExp(`^${this.owner}-${this.repo}-[a-f0-9]+$`, 'i');
+
     const extractedRoot = dirContents.find(name => {
       const fullPath = path.join(extractDir, name);
       const isDir = jetpack.exists(fullPath) === 'dir';
       const isNotZip = name !== zipFileName;
-      this.logger.log(`   - ${name}: isDir=${isDir}, isNotZip=${isNotZip}`);
-      return isNotZip && isDir;
+      const matchesGitHubPattern = githubZipPattern.test(name);
+      this.logger.log(`   - ${name}: isDir=${isDir}, isNotZip=${isNotZip}, matchesGitHubPattern=${matchesGitHubPattern}`);
+      return isNotZip && isDir && matchesGitHubPattern;
     });
 
     this.logger.log(`✅ Found extracted root: ${extractedRoot || 'NONE'}`);
