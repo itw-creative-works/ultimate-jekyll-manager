@@ -367,10 +367,11 @@ export class FormManager {
         return;
       }
 
-      // Skip if field is not in current input group (respects setInputGroup filter)
-      if (!this._isFieldInGroup($field)) {
-        return;
-      }
+      // // Skip if field is not in current input group (respects setInputGroup filter)
+      // UPDATE: THIS BROKE SOME THINGS
+      // if (!this._isFieldInGroup($field)) {
+      //   return;
+      // }
 
       // Skip if already has an error (from previous validation)
       if (this._fieldErrors[name]) {
