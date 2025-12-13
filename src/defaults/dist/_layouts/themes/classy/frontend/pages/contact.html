@@ -208,6 +208,10 @@ faqs:
                 <input type="text" class="form-control" name="honey" tabindex="-1" autocomplete="off">
               </div>
 
+              <!-- Hidden auth fields (auto-populated via bindings) -->
+              <input type="hidden" aria-hidden="true" name="auth.user.uid" data-wm-bind="@value auth.user.uid">
+              <input type="hidden" aria-hidden="true" name="auth.user.email" data-wm-bind="@value auth.user.email">
+
               <div class="mb-4">
                 <label for="email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
                 <input type="email" class="form-control form-control-lg" id="email" name="email"
