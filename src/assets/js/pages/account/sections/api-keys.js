@@ -65,7 +65,7 @@ function setupResetApiKeyForm() {
     }
 
     // Get server API URL
-    const serverApiURL = webManager.getApiUrl() + '/backend-manager';
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager`;
 
     // Make API call to reset API key
     const response = await authorizedFetch(serverApiURL, {

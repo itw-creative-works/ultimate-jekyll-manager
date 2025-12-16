@@ -6,10 +6,6 @@ NEW TODO
 - FIx formmanager .getData() it keeps returning an empty object, make it work flawlessyly
 - It keeps testing whether there is a "." every time it reads or writes. just call the getNested and setNested functions and then check for the DOT inside those functions
 - form manager should NOT submit if the button that was clicked is disabled (class or attribute)
-- script that adds some helpful classes to the body or attributes to html maybe like
-  * data-device="mobile|tablet|desktop"
-  * data-browser="chrome|safari|firefox|edge|opera|other"
-  * data-os="windows|macos|linux|android|ios|other"
 
 Make an admin dashboard backend
 

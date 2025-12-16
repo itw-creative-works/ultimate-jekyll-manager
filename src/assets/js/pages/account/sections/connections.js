@@ -16,7 +16,7 @@ const supportedProviders = ['google', 'discord', 'github', 'twitter', 'facebook'
 
 // Get API URL helper
 function getApiUrl() {
-  return webManager.getApiUrl() + '/backend-manager';
+  return `${webManager.getApiUrl()}/backend-manager`;
 }
 
 // Initialize connections section

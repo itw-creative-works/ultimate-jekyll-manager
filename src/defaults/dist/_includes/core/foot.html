@@ -39,7 +39,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="text-center">
+          <div class="d-flex flex-column align-items-center">
             <a href="{{ site.url }}" class="modal-exit-button btn btn-primary btn-lg px-5 shadow-sm mb-1" data-bs-dismiss="modal">
               {% uj_icon "arrow-right", "me-2" %}
               <span class="modal-exit-button-text">Show me more</span>
@@ -91,6 +91,7 @@
 <!-- Configuration -->
 <script type="text/javascript">
   var Configuration = {
+    runtime: "web",
     environment: "{{ jekyll.environment }}",
     buildTime: {{ site.uj.cache_breaker }},
     brand: {{ page.resolved.brand | jsonify }},

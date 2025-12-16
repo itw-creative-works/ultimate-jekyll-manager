@@ -340,7 +340,7 @@ function install(package, ver, location) {
 // Create CNAME
 async function createCname() {
   // Get the CNAME
-  const url = config.url || 'https://template.itwcreativeworks.com';
+  const url = config.url || 'https://ultimate-jekyll.itwcreativeworks.com';
   const host = new URL(url).host
 
   // Write to file

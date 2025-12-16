@@ -189,7 +189,7 @@ async function sendUserSignupMetadata(user, webManager) {
     };
 
     // Get server API URL
-    const serverApiURL = webManager.getApiUrl() + '/backend-manager';
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager`;
 
     // Make API call to send signup metadata
     const response = await authorizedFetch(serverApiURL, {

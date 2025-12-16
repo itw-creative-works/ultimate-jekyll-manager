@@ -45,15 +45,40 @@ const FILE_MAP = {
     skip: (file) => {
       // Get the name
       const name = path.basename(file.name, path.extname(file.name));
-      const htmlFilePath = path.join(file.destination, `${name}.html`);
-      const mdFilePath = path.join(file.destination, `${name}.md`);
-      const jsonFilePath = path.join(file.destination, `${name}.json`);
+
+      // file.destination is relative to project root (e.g., "src/pages")
+      // Check if consuming project has equivalent file
+      const htmlFilePath = path.join(rootPathProject, file.destination, `${name}.html`);
+      const mdFilePath = path.join(rootPathProject, file.destination, `${name}.md`);
+      const jsonFilePath = path.join(rootPathProject, file.destination, `${name}.json`);
       const htmlFileExists = jetpack.exists(htmlFilePath);
       const mdFileExists = jetpack.exists(mdFilePath);
       const jsonFileExists = jetpack.exists(jsonFilePath);
       const anyExists = htmlFileExists || mdFileExists || jsonFileExists;
 
-      // Skip if any of the files exist
+      // Skip if consuming project has an equivalent file
+      return anyExists;
+    },
+  },
+  'dist/**/*.{html,md,json}': {
+    skip: (file) => {
+      // Get the name and relative path within dist/
+      const name = path.basename(file.name, path.extname(file.name));
+
+      // file.destination is relative to project root (e.g., "dist/pages")
+      // We need to check if consuming project has equivalent in src/
+      // e.g., "dist/pages" -> "src/pages"
+      const srcPath = file.destination.replace(/^dist\//, 'src/');
+
+      const htmlFilePath = path.join(rootPathProject, srcPath, `${name}.html`);
+      const mdFilePath = path.join(rootPathProject, srcPath, `${name}.md`);
+      const jsonFilePath = path.join(rootPathProject, srcPath, `${name}.json`);
+      const htmlFileExists = jetpack.exists(htmlFilePath);
+      const mdFileExists = jetpack.exists(mdFilePath);
+      const jsonFileExists = jetpack.exists(jsonFilePath);
+      const anyExists = htmlFileExists || mdFileExists || jsonFileExists;
+
+      // Skip if consuming project has an equivalent file in src/
       return anyExists;
     },
   },

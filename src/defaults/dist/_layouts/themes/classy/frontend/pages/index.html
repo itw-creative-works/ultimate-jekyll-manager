@@ -454,7 +454,7 @@ cta:
     <div class="d-flex flex-wrap justify-content-center gap-2 gap-sm-3 mb-4" data-lazy="@class animation-slide-up">
       <ul class="nav nav-pills gap-2 gap-sm-3 border-0 w-100 justify-content-center" role="tablist">
         {% for tab in page.resolved.product_demo.tabs %}
-          <li class="nav-item flex-fill flex-sm-grow-0" role="presentation" style="max-width: 200px;">
+          <li class="nav-item" role="presentation">
             <button
               class="btn btn-lg btn-outline-adaptive w-100 {% if forloop.first %}active{% endif %}"
               id="{{ tab.id }}-tab"
