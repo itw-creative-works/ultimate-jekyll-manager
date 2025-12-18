@@ -62,7 +62,7 @@
                           {% endif %}
                           {{ child.label }}
                           {% if child.badge %}
-                            <span class="badge bg-{{ child.badge.color | default: 'primary' }} ms-auto">{{ child.badge.text }}</span>
+                            <span class="badge {{ child.badge.class | default: 'bg-primary' }} ms-auto">{{ child.badge.text }}</span>
                           {% endif %}
                         </a>
                       {% endiftruthy %}
@@ -92,7 +92,7 @@
                 {% endif %}
                 {{ link.label }}
                 {% if link.badge %}
-                  <span class="badge bg-{{ link.badge.color | default: 'primary' }} ms-auto">{{ link.badge.text }}</span>
+                  <span class="badge {{ link.badge.class | default: 'bg-primary' }} ms-auto">{{ link.badge.text }}</span>
                 {% endif %}
               </a>
             {% endiftruthy %}
@@ -178,7 +178,7 @@
                           {% endif %}
                           {{ child.label }}
                           {% if child.badge %}
-                            <span class="badge bg-{{ child.badge.color | default: 'primary' }} ms-auto">{{ child.badge.text }}</span>
+                            <span class="badge {{ child.badge.class | default: 'bg-primary' }} ms-auto">{{ child.badge.text }}</span>
                           {% endif %}
                         </a>
                       {% endiftruthy %}
@@ -207,7 +207,7 @@
                 {% endif %}
                 {{ link.label }}
                 {% if link.badge %}
-                  <span class="badge bg-{{ link.badge.color | default: 'primary' }} ms-auto">{{ link.badge.text }}</span>
+                  <span class="badge {{ link.badge.class | default: 'bg-primary' }} ms-auto">{{ link.badge.text }}</span>
                 {% endif %}
               </a>
             {% endiftruthy %}

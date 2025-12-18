@@ -253,7 +253,7 @@
               </div>
             {% else %}
               <!-- Regular button dropdown -->
-              {% capture action_class %}btn btn-{{ action.color }} dropdown-toggle {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+              {% capture action_class %}btn dropdown-toggle {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
               <div class="dropdown ms-lg-3">
                 <button class="{{ action_class }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
@@ -299,7 +299,7 @@
               </div>
             {% endif %}
           {% else %}
-            {% capture action_class %}btn btn-{{ action.color }} ms-lg-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+            {% capture action_class %}btn ms-lg-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
             {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             {% capture action_content %}
               <span class="d-inline-flex align-items-center">
@@ -329,7 +329,7 @@
           {% if action.type != 'account' %}
             {% if action.dropdown %}
               <!-- Regular button dropdown -->
-              {% capture action_class %}btn btn-{{ action.color }} dropdown-toggle w-100 mt-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+              {% capture action_class %}btn dropdown-toggle w-100 mt-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
               <div class="dropdown">
                 <button class="{{ action_class }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
@@ -374,7 +374,7 @@
                 </ul>
               </div>
             {% else %}
-              {% capture action_class %}btn btn-{{ action.color }} w-100 mt-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+              {% capture action_class %}btn w-100 mt-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
               {% capture action_content %}
                 <span class="d-inline-flex align-items-center">

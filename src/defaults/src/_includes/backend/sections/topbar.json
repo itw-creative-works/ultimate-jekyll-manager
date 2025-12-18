@@ -6,7 +6,7 @@
       label: 'Notifications',
       badge: {
         text: '3',
-        color: 'danger'
+        class: 'bg-danger'
       },
       dropdown: [
         {
@@ -14,7 +14,7 @@
           message: 'You have a new message from John',
           time: '5 min ago',
           icon: 'envelope',
-          icon_color: 'primary',
+          icon_class: 'text-primary',
           href: '/dashboard/messages',
           unread: true
         },
@@ -23,7 +23,7 @@
           message: 'Your account has been updated',
           time: '1 hour ago',
           icon: 'circle-check',
-          icon_color: 'success',
+          icon_class: 'text-success',
           href: '/dashboard/settings'
         },
         {

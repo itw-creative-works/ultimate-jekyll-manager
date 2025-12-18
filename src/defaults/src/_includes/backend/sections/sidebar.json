@@ -61,7 +61,7 @@
     //   icon: 'credit-card',
     //   badge: {
     //     text: 'Pro',
-    //     color: 'primary'
+    //     class: 'bg-primary'
     //   }
     // },
   ],

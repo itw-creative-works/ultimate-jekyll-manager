@@ -72,6 +72,9 @@ export default function (Manager) {
 
     const response = await authorizedFetch(serverApiURL, {
       method: 'POST',
+      timeout: 60000,
+      response: 'json',
+      tries: 2,
       body: {
         command: 'user:create-custom-token',
         payload: {},
@@ -79,7 +82,7 @@ export default function (Manager) {
     });
 
     // Extract token from response
-    const token = response?.data?.token;
+    const token = response?.token;
 
     if (!token) {
       throw new Error('No token received from server');

@@ -40,62 +40,40 @@ const config = {
   },
 };
 
-// Browser detection mapping
-const browserMap = {
-  chrome: /chrome|chromium|crios/i,
-  firefox: /firefox|fxios/i,
-  safari: /safari/i,
-  edge: /edg/i,
-  opera: /opera|opr/i,
-};
-
 // Setup browser detection and auto-select
 function setupBrowserDetection() {
-  const detectedBrowser = detectBrowser();
+  const detectedBrowser = webManager.utilities().getBrowser();
   console.log('Detected browser:', detectedBrowser);
 
+  // Listen for tab changes to scroll to download card
+  document.querySelectorAll(config.selectors.browserButtons).forEach($tab => {
+    $tab.addEventListener('shown.bs.tab', (event) => {
+      const browserId = event.target.id.replace('-tab', '');
+      scrollToDownloadCard(browserId);
+    });
+  });
+
   // Show loading state initially, then switch to detected browser
-  setTimeout(() => {
-    // Activate the detected browser tab using Bootstrap's tab API
-    const $detectedTab = document.querySelector(`#${detectedBrowser}-tab`);
-    if ($detectedTab) {
-      const tab = new bootstrap.Tab($detectedTab);
-      tab.show();
-    }
-  }, 800);
+  // Activate the detected browser tab using Bootstrap's tab API
+  const $detectedTab = document.querySelector(`#${detectedBrowser}-tab`);
+  if (!$detectedTab) {
+    return;
+  }
+
+  const tab = new bootstrap.Tab($detectedTab);
+  tab.show();
 }
 
-// Detect user's browser from user agent
-function detectBrowser() {
-  const userAgent = navigator.userAgent;
-
-  // Edge must be checked before Chrome (Edge includes "Chrome" in UA)
-  if (browserMap.edge.test(userAgent)) {
-    return 'edge';
+// Scroll to the download card for a given browser
+function scrollToDownloadCard(browserId) {
+  const $downloadCard = document.querySelector(`#${browserId}-pane .card`);
+  if (!$downloadCard) {
+    return;
   }
 
-  // Opera must be checked before Chrome (Opera includes "Chrome" in UA)
-  if (browserMap.opera.test(userAgent)) {
-    return 'opera';
-  }
-
-  // Chrome
-  if (browserMap.chrome.test(userAgent)) {
-    return 'chrome';
-  }
-
-  // Firefox
-  if (browserMap.firefox.test(userAgent)) {
-    return 'firefox';
-  }
-
-  // Safari must be checked last (Chrome and other browsers include "Safari" in UA)
-  if (browserMap.safari.test(userAgent) && !browserMap.chrome.test(userAgent)) {
-    return 'safari';
-  }
-
-  // Default to Chrome
-  return 'chrome';
+  setTimeout(() => {
+    $downloadCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
 }
 
 // Setup install button tracking
@@ -137,7 +115,7 @@ function trackInstallClick(browser, installUrl) {
 
 // Trigger install for testing (simulates clicking the install button)
 function triggerInstall(browser) {
-  const browserId = browser || detectBrowser();
+  const browserId = browser || webManager.utilities().getBrowser();
   const $button = document.querySelector(`.tab-pane[data-browser="${browserId}"] .btn-primary`);
 
   if (!$button) {

@@ -13,7 +13,6 @@
 
 // Libraries
 import { ready as domReady } from 'web-manager/modules/dom.js';
-import { showNotification, getDeviceType } from 'web-manager/modules/utilities.js';
 
 // Constants
 const HONEYPOT_SELECTOR = '[data-honey], [name="honey"]';
@@ -157,15 +156,8 @@ export class FormManager {
 
     // Focus the field with autofocus attribute if it exists (desktop only)
     const $autofocusField = this.$form.querySelector('[autofocus]');
-    if ($autofocusField && !$autofocusField.disabled && getDeviceType() === 'desktop') {
-      $autofocusField.focus();
-
-      // Move cursor to end of input if it has existing text
-      // Disabled because throws errors on some inputs (eg email)
-      // if (typeof $autofocusField.setSelectionRange === 'function') {
-      //   const len = $autofocusField.value.length;
-      //   $autofocusField.setSelectionRange(len, len);
-      // }
+    if ($autofocusField && !$autofocusField.disabled && window.Manager?.webManager?.utilities()?.getDeviceType() === 'desktop') {
+      this._focusField($autofocusField);
     }
   }
 
@@ -556,12 +548,35 @@ export class FormManager {
       return;
     }
 
-    const $field = this.$form.querySelector(`[name="${firstFieldName}"]`);
-    if ($field) {
-      $field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      $field.focus();
-    }
+    this._focusField(firstFieldName);
   }
+
+  /**
+   * Scroll to and focus a field if it exists
+   * @param {HTMLElement|string} field - Field element or field name
+   */
+  _focusField(field) {
+    // Resolve field element from name if string provided
+    const $field = typeof field === 'string'
+      ? this.$form.querySelector(`[name="${field}"]`)
+      : field;
+
+    if (!$field) {
+      return;
+    }
+
+    $field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $field.focus();
+
+    // Move cursor to end of input if it has existing text
+    // Disabled because throws errors on some inputs (eg email)
+    // if (typeof $autofocusField.setSelectionRange === 'function') {
+    //   const len = $autofocusField.value.length;
+    //   $autofocusField.setSelectionRange(len, len);
+    // }
+  }
+
+
 
   /**
    * Programmatically set field errors and display them (for use in submit handler)
@@ -834,7 +849,7 @@ export class FormManager {
     }
     /* @dev-only:end */
 
-    showNotification(message, { type: 'success' });
+    window.Manager?.webManager?.utilities()?.showNotification(message, { type: 'success' });
   }
 
   /**
@@ -847,7 +862,7 @@ export class FormManager {
     }
     /* @dev-only:end */
 
-    showNotification(message, { type: 'danger' });
+    window.Manager?.webManager?.utilities()?.showNotification(message, { type: 'danger' });
   }
 
   /**

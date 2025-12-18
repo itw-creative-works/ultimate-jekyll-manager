@@ -38,7 +38,7 @@
             <button class="btn btn-link position-relative p-2" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
               {% uj_icon action.icon | default: "bell", "fa-lg text-body" %}
               {% if action.badge %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-{{ action.badge.color | default: 'danger' }}">
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill {{ action.badge.class | default: 'bg-danger' }}">
                   {{ action.badge.text }}
                   <span class="visually-hidden">unread notifications</span>
                 </span>
@@ -67,7 +67,7 @@
                           <div class="d-flex">
                             {% if notification.icon %}
                               <div class="me-3">
-                                {% uj_icon notification.icon, "fa-lg text-{{ notification.icon_color | default: 'primary' }}" %}
+                                {% uj_icon notification.icon, "fa-lg {{ notification.icon_class | default: 'text-primary' }}" %}
                               </div>
                             {% endif %}
                             <div class="flex-fill">
@@ -87,7 +87,7 @@
                           <div class="d-flex">
                             {% if notification.icon %}
                               <div class="me-3">
-                                {% uj_icon notification.icon, "fa-lg text-{{ notification.icon_color | default: 'primary' }}" %}
+                                {% uj_icon notification.icon, "fa-lg {{ notification.icon_class | default: 'text-primary' }}" %}
                               </div>
                             {% endif %}
                             <div class="flex-fill">
@@ -188,7 +188,7 @@
           </div>
         {% elsif action.dropdown %}
           <!-- Generic Dropdown -->
-          {% capture action_class %}btn btn-{{ action.color | default: 'adaptive' }} {% if action.size %}btn-{{ action.size }}{% endif %} {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+          {% capture action_class %}btn {% if action.size %}btn-{{ action.size }}{% endif %} {% if action.class %}{{ action.class }}{% else %}btn-adaptive{% endif %}{% endcapture %}
           {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
           <div class="dropdown">
             <button class="{{ action_class }} dropdown-toggle" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
@@ -230,7 +230,7 @@
           </div>
         {% else %}
           <!-- Regular Button -->
-          {% capture action_class %}btn btn-{{ action.color | default: 'adaptive' }} {% if action.size %}btn-{{ action.size }}{% endif %} {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+          {% capture action_class %}btn {% if action.size %}btn-{{ action.size }}{% endif %} {% if action.class %}{{ action.class }}{% else %}btn-adaptive{% endif %}{% endcapture %}
           {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
           {% capture action_content %}
             {% if action.icon %}

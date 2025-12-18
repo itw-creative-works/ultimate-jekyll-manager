@@ -1,5 +1,5 @@
 // Libraries
-import fetch from 'wonderful-fetch';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 let webManager = null;
 
 // Module
@@ -67,10 +67,6 @@ async function handleOAuthCallback() {
       throw new Error('Missing provider in state');
     }
 
-    if (!stateParsed.authenticationToken) {
-      throw new Error('Missing authentication token');
-    }
-
     if (!stateParsed.serverUrl) {
       throw new Error('Missing server URL');
     }
@@ -80,7 +76,7 @@ async function handleOAuthCallback() {
     $provider.textContent = providerName;
 
     // Validate redirect URL
-    if (stateParsed.redirectUrl && !isValidRedirectUrl(stateParsed.redirectUrl)) {
+    if (stateParsed.redirectUrl && !webManager.isValidRedirectUrl(stateParsed.redirectUrl)) {
       throw new Error('Invalid redirect URL');
     }
 
@@ -101,13 +97,12 @@ async function handleOAuthCallback() {
     console.log('Tokenize payload:', payload);
 
     // Call server to complete OAuth flow
-    const response = await fetch(stateParsed.serverUrl, {
+    const response = await authorizedFetch(stateParsed.serverUrl, {
       method: 'POST',
       timeout: 60000,
       response: 'json',
       tries: 2,
       body: {
-        authenticationToken: stateParsed.authenticationToken,
         command: 'user:oauth2',
         payload: payload
       }
@@ -175,34 +170,6 @@ function showError(message) {
       // Use default
     }
   }
-}
-
-// Validate redirect URL
-function isValidRedirectUrl(url) {
-  try {
-    const parsed = new URL(url);
-    const current = new URL(window.location.href);
-
-    // Allow same origin or configured trusted domains
-    return parsed.origin === current.origin ||
-           isAllowedDomain(parsed.hostname);
-  } catch (e) {
-    return false;
-  }
-}
-
-// Check if domain is allowed
-function isAllowedDomain(hostname) {
-  // Add any trusted domains here
-  const allowedDomains = [
-    'localhost',
-    '127.0.0.1',
-    webManager?.config?.brand?.domain
-  ].filter(Boolean);
-
-  return allowedDomains.some(domain =>
-    hostname === domain || hostname.endsWith('.' + domain)
-  );
 }
 
 // Capitalize first letter

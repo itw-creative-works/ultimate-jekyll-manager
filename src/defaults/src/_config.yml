@@ -189,6 +189,7 @@ extension:
   opera: ""
   safari: ""
   edge: ""
+  brave: ""
 
 # Manifest
 manifest:

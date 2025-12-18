@@ -865,6 +865,7 @@ The `<html>` element has data attributes for JavaScript/CSS targeting:
 | `data-asset-path` | Custom asset path or empty |
 | `data-environment` | `development`, `production` |
 | `data-platform` | `windows`, `mac`, `linux`, `ios`, `android`, `chromeos`, `unknown` |
+| `data-browser` | `chrome`, `firefox`, `safari`, `edge`, `opera`, `brave` |
 | `data-device` | `mobile` (<768px), `tablet` (768-1199px), `desktop` (>=1200px) |
 | `data-runtime` | `web`, `extension`, `electron`, `node` |
 | `aria-busy` | `true` (loading), `false` (ready) |

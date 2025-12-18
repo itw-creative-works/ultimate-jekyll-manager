@@ -27,24 +27,28 @@ downloads:
   browsers:
     - id: "chrome"
       name: "Chrome"
-      icon: "chrome"
+      logo: "chrome"
       description: "Chrome 88+"
     - id: "firefox"
       name: "Firefox"
-      icon: "firefox-browser"
+      logo: "firefox"
       description: "Firefox 78+"
     - id: "edge"
       name: "Edge"
-      icon: "edge"
+      logo: "edge"
       description: "Edge 88+"
     - id: "opera"
       name: "Opera"
-      icon: "opera"
+      logo: "opera"
       description: "Opera 74+"
     - id: "safari"
       name: "Safari"
-      icon: "safari"
+      logo: "safari"
       description: "Safari 14+"
+    - id: "brave"
+      name: "Brave"
+      logo: "brave"
+      description: "Brave 1.25+"
 
 # Features Section
 features:
@@ -184,7 +188,7 @@ cta:
                   aria-controls="{{ browser.id }}-pane"
                   aria-selected="false"
                 >
-                  {% uj_icon browser.icon, "fa-3xl me-2" %}
+                  <span class="avatar avatar-sm me-2">{% uj_logo browser.logo %}</span>
                   {{ browser.name }}
                 </button>
               </li>
@@ -247,9 +251,7 @@ cta:
               <div class="card border-0 shadow-lg">
                 <div class="card-body p-5 text-center">
                   <div class="mb-4">
-                    <div class="avatar avatar-2xl rounded-circle bg-primary d-inline-flex align-items-center justify-content-center">
-                      {% uj_icon browser.icon, "display-4 text-light" %}
-                    </div>
+                    <span class="avatar avatar-2xl">{% uj_logo browser.logo %}</span>
                   </div>
                   <h2 class="h2 mb-1">{{ browser.name }}</h2>
                   <p class="text-muted fs-5 mb-4">{{ browser.description }}</p>

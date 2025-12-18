@@ -40,8 +40,7 @@
     {
       label: 'Sign Up',
       href: '/signup',
-      color: 'adaptive _gradient-rainbow',
-      class: '_gradient-animated _animation-wiggle',
+      class: 'btn-adaptive _gradient-rainbow _gradient-animated _animation-wiggle',
       icon: 'user-plus',
       attributes: [
         ['data-wm-bind', '@show !auth.user']
@@ -50,7 +49,7 @@
     // {
     //   label: 'Premium',
     //   href: '/pricing',
-    //   color: 'adaptive',
+    //   class: 'btn-adaptive',
     //   icon: 'crown',
     //   attributes: [
     //     ['data-wm-bind', '@show auth.account.subscription.product === basic'],

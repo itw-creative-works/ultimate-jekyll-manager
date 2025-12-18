@@ -194,6 +194,7 @@ async function sendUserSignupMetadata(user, webManager) {
     // Make API call to send signup metadata
     const response = await authorizedFetch(serverApiURL, {
       method: 'POST',
+      response: 'json',
       body: {
         command: 'user:sign-up',
         payload: payload

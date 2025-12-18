@@ -6,6 +6,8 @@ NEW TODO
 - FIx formmanager .getData() it keeps returning an empty object, make it work flawlessyly
 - It keeps testing whether there is a "." every time it reads or writes. just call the getNested and setNested functions and then check for the DOT inside those functions
 - form manager should NOT submit if the button that was clicked is disabled (class or attribute)
+- GLOBAL FIXES FOR ALL UJM PROJECTS: nav.json should ahve class only not color
+
 
 Make an admin dashboard backend
 

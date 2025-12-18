@@ -47,48 +47,37 @@ const config = {
 
 // Setup platform detection and auto-select
 function setupPlatformDetection() {
-  const detectedPlatform = detectPlatform();
+  const detectedPlatform = webManager.utilities().getPlatform();
   console.log('Detected platform:', detectedPlatform);
 
-  // Show loading state initially, then switch to detected platform
-  setTimeout(() => {
-    // Activate the detected platform tab using Bootstrap's tab API
-    const $detectedTab = document.querySelector(`#${detectedPlatform}-tab`);
-    if ($detectedTab) {
-      const tab = new bootstrap.Tab($detectedTab);
-      tab.show();
-    }
+  // Listen for tab changes to scroll to download card
+  document.querySelectorAll(config.selectors.platformButtons).forEach($tab => {
+    $tab.addEventListener('shown.bs.tab', (event) => {
+      const platformId = event.target.id.replace('-tab', '');
+      scrollToDownloadCard(platformId);
+    });
+  });
 
-    // trackPlatformDetection(detectedPlatform);
-  }, 800);
+  // Activate the detected platform tab using Bootstrap's tab API
+  const $detectedTab = document.querySelector(`#${detectedPlatform}-tab`);
+  if (!$detectedTab) {
+    return;
+  }
+
+  const tab = new bootstrap.Tab($detectedTab);
+  tab.show();
 }
 
-// Detect user's platform from user agent
-function detectPlatform() {
-  const userAgent = navigator.userAgent.toLowerCase();
-  const platform = navigator.platform.toLowerCase();
-
-  if (/android/.test(userAgent)) {
-    return 'android';
+// Scroll to the download card for a given platform
+function scrollToDownloadCard(platformId) {
+  const $downloadCard = document.querySelector(`#${platformId}-pane .card`);
+  if (!$downloadCard) {
+    return;
   }
 
-  if (/iphone|ipad|ipod/.test(userAgent)) {
-    return 'ios';
-  }
-
-  if (platform.includes('win')) {
-    return 'windows';
-  }
-
-  if (platform.includes('mac')) {
-    return 'mac';
-  }
-
-  if (platform.includes('linux')) {
-    return 'linux';
-  }
-
-  return 'windows';
+  setTimeout(() => {
+    $downloadCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
 }
 
 // Bootstrap's tab component handles all tab switching automatically via data-bs-toggle="tab"
@@ -206,7 +195,7 @@ function setupMobileEmailForms() {
       console.log('Mobile email form submitted:', { platform, email: data.email });
 
       // Get API endpoint
-      const apiEndpoint = webManager.getApiUrl() + '/backend-manager';
+      const apiEndpoint = `${webManager.getApiUrl()}/backend-manager`;
 
       // Send request using wonderful-fetch
       await fetch(apiEndpoint, {

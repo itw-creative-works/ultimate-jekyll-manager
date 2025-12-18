@@ -294,6 +294,12 @@ async function ensureCoreFiles() {
 function checkLocality() {
   const installedVersion = project.devDependencies[package.name];
 
+  // Check if installedVersion is truthy or throw error
+  if (!installedVersion) {
+    throw new Error(`No installed version of ${package.name} found in devDependencies.`);
+  }
+
+  // Log if local
   if (installedVersion.startsWith('file:')) {
     logger.warn(`⚠️⚠️⚠️ You are using the local version of ${package.name}. This WILL NOT WORK when published. ⚠️⚠️⚠️`);
   }
