@@ -251,13 +251,13 @@ collections:
 
 # Jekyll defaults
 defaults:
-- scope:
-    path: ""
-    type: team
-  values:
-    permalink: /team/:title
-- scope:
-    path: ""
-    type: updates
-  values:
-    permalink: /updates/:title
+  - scope:
+      path: ""
+      type: team
+    values:
+      permalink: /team/:title
+  - scope:
+      path: ""
+      type: updates
+    values:
+      permalink: /updates/:title
