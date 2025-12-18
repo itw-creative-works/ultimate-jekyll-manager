@@ -11,8 +11,12 @@ export default (Manager, options) => {
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
-    // Handle OAuth callback
-    handleOAuthCallback();
+    // Wait for auth state to be determined before handling OAuth callback
+    // This is REQUIRED because authorizedFetch needs auth.currentUser to be available
+    webManager.auth().listen({ once: true }, () => {
+      // Handle OAuth callback after auth state is known
+      handleOAuthCallback();
+    });
 
     // Resolve after initialization
     return resolve();

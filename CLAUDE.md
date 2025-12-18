@@ -613,6 +613,31 @@ const response = await authorizedFetch(url, options);
 - Automatic token injection as Authorization Bearer header
 - Centralized authentication handling
 
+**⚠️ IMPORTANT: Auth State Requirement**
+
+`authorizedFetch` requires Firebase Auth to have determined the current user's authentication state before being called. On fresh page loads (e.g., OAuth callback pages, deep links), Firebase Auth needs time to restore the session from IndexedDB/localStorage.
+
+**If called before auth state is determined, it will throw: `"No authenticated user found"`**
+
+**Solution:** Wait for auth state before calling `authorizedFetch`:
+
+```javascript
+// Wait for auth state to be determined (fires once auth is known)
+webManager.auth().listen({ once: true }, async () => {
+  // Now safe to use authorizedFetch
+  const response = await authorizedFetch(url, options);
+});
+```
+
+**When this matters:**
+- Pages that load and immediately need to make authenticated API calls
+- OAuth callback pages (user returns from external auth provider)
+- Deep links that require authenticated requests on load
+
+**When NOT needed:**
+- User-triggered actions (button clicks, form submissions) - by then auth state is always determined
+- Pages that wait for user interaction before making API calls
+
 **Reference:** `src/assets/js/libs/authorized-fetch.js`
 
 #### FormManager Library

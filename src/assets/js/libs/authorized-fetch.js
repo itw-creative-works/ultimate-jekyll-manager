@@ -20,6 +20,7 @@ export async function authorizedFetch(url, options = {}) {
   const user = auth.currentUser;
 
   if (!user) {
+    console.warn('Did we fully wait for auth state to be determined?');
     throw new Error('No authenticated user found');
   }
 
