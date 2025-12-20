@@ -27,6 +27,8 @@ webManager.dom().ready().then(() => {
     type: $currentScript.getAttribute('data-ad-type') || 'display',
     layout: $currentScript.getAttribute('data-ad-layout'),
     style: $currentScript.getAttribute('data-ad-style') || '',
+    size: $currentScript.getAttribute('data-ad-size') || '',
+    vertId: $currentScript.getAttribute('data-ad-vert-id') || '',
   };
 
   // Log the configuration for debugging
@@ -149,14 +151,21 @@ const createCustomAd = ($vertUnit, config) => {
   const iframeId = `vert-${window.__ujVertIdCounter = (window.__ujVertIdCounter || 0) + 1}`;
 
   // Build base URL for the ad content
-  const baseURL = qsDebug
-    ? 'http://localhost:4001/verts/main'
+  // Use local server if debug=true OR if we're in development mode
+  const baseURL = (qsDebug || webManager.isDevelopment())
+    ? `${window.location.protocol}//${window.location.host}/verts/main`
     : 'https://promo-server.itwcreativeworks.com/verts/main';
 
   // Build full URL with parameters
   const adURL = new URL(baseURL);
   adURL.searchParams.set('parentURL', window.location.href);
   adURL.searchParams.set('frameId', iframeId);
+  if (config.size) {
+    adURL.searchParams.set('size', config.size);
+  }
+  if (config.vertId) {
+    adURL.searchParams.set('loadVertId', config.vertId);
+  }
 
   // Set iframe attributes
   $iframe.id = iframeId;
