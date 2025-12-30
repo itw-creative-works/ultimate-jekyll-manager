@@ -4,6 +4,7 @@ import authModule from '__main_assets__/js/core/auth.js';
 import lazyLoadingModule from '__main_assets__/js/core/lazy-loading.js';
 import queryStringsModule from '__main_assets__/js/core/query-strings.js';
 import serviceWorkerModule from '__main_assets__/js/core/service-worker.js';
+import appearanceModule from '__main_assets__/js/core/appearance.js';
 import completeModule from '__main_assets__/js/core/complete.js';
 
 // Ultimate Jekyll Manager Module
@@ -32,6 +33,7 @@ export default async function (Manager, options) {
   lazyLoadingModule(Manager, options);
   queryStringsModule(Manager, options);
   serviceWorkerModule(Manager, options);
+  appearanceModule(Manager, options);
 
   // Conditionally loaded modules based on config (keep as dynamic imports)
   const conditionalModules = [

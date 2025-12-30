@@ -50,6 +50,42 @@
   </div>
 {%- endiftruthy -%}
 
+<!-- Script - Set preferred appearance -->
+<!-- This runs immediately to prevent flash of wrong theme -->
+<!-- Priority: 1) User saved preference, 2) Site preset, 3) System preference (if preset is 'system') -->
+<script type="text/javascript">
+  (function() {
+    'use strict';
+    var $html = document.documentElement;
+
+    // Get the preset value from Jekyll (set at build time)
+    var preset = $html.getAttribute('data-bs-theme');
+
+    // Try to read user's saved preference from _manager storage
+    // (same format as webManager.storage() uses)
+    var saved = null;
+    try {
+      var managerData = localStorage.getItem('_manager');
+      var parsedData = managerData ? JSON.parse(managerData) : null;
+      saved = parsedData && parsedData.appearance && parsedData.appearance.preference;
+    } catch (e) {}
+
+    // Use saved preference if available, otherwise fall back to preset
+    var preference = saved || preset;
+    var theme = preference;
+
+    // If preference is 'system', resolve to actual light/dark based on OS setting
+    if (preference === 'system') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    // Only update if different from preset (avoid unnecessary DOM write)
+    if (theme && theme !== preset) {
+      $html.setAttribute('data-bs-theme', theme);
+    }
+  })();
+</script>
+
 <!-- Script to prevent clicks on disabled elements during page load -->
 <script type="text/javascript">
   (function() {
