@@ -256,6 +256,35 @@ The `<html>` element has data attributes for JavaScript/CSS targeting:
 | `data-runtime` | `web`, `extension`, `electron`, `node` |
 | `aria-busy` | `true` (loading), `false` (ready) |
 
+### Appearance Switching
+
+Ultimate Jekyll supports dark/light/system theme switching with user preference persistence.
+
+**JavaScript API:**
+```javascript
+webManager.uj().appearance.get();        // Returns 'dark', 'light', 'system', or null
+webManager.uj().appearance.set('dark');  // Save and apply preference
+webManager.uj().appearance.toggle();     // Toggle dark/light
+webManager.uj().appearance.cycle();      // Cycle: dark → light → system
+```
+
+**HTML Dropdown Example:**
+```html
+<div class="dropdown">
+  <button class="btn dropdown-toggle" data-bs-toggle="dropdown">
+    <span data-appearance-icon="light" hidden>{% uj_icon "sun" %}</span>
+    <span data-appearance-icon="dark" hidden>{% uj_icon "moon-stars" %}</span>
+    <span data-appearance-icon="system" hidden>{% uj_icon "circle-half-stroke" %}</span>
+    <span data-appearance-current></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="#" data-appearance-set="light">Light</a></li>
+    <li><a href="#" data-appearance-set="dark">Dark</a></li>
+    <li><a href="#" data-appearance-set="system">System</a></li>
+  </ul>
+</div>
+```
+
 ### Page Loading Protection System
 
 Ultimate Jekyll includes an automatic protection system that prevents users from clicking buttons before JavaScript is fully loaded, eliminating race conditions and errors.
