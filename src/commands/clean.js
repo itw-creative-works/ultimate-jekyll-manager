@@ -1,7 +1,7 @@
 // Libraries
 const Manager = new (require('../build.js'));
 const logger = Manager.logger('clean');
-const path = require('path');
+const { execSync } = require('child_process');
 const jetpack = require('fs-jetpack');
 
 // Load package
@@ -32,8 +32,12 @@ module.exports = async function (options) {
   try {
     // Loop through dirs
     dirsToClean.forEach((dir) => {
-      // Remove
-      jetpack.remove(dir);
+      // Remove (use rm -rf on Unix for speed, fallback to jetpack on Windows)
+      if (process.platform !== 'win32') {
+        execSync(`rm -rf ${dir}`, { stdio: 'ignore' });
+      } else {
+        jetpack.remove(dir);
+      }
 
       // Create empty dir
       jetpack.dir(dir);

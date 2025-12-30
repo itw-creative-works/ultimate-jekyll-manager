@@ -140,8 +140,13 @@ function getSettings() {
         '__main_assets__': path.resolve(rootPathPackage, 'dist/assets'),
         '__project_assets__': path.resolve(process.cwd(), 'src/assets'),
 
-        // For importing the theme
-        '__theme__': path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
+        // For importing the theme - project theme takes priority over UJM theme
+        '__theme__': (() => {
+          const projectThemePath = path.resolve(rootPathProject, 'src/assets/themes', config.theme.id);
+          const ujmThemePath = path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id);
+          // Use project theme if it exists, otherwise fall back to UJM theme
+          return jetpack.exists(projectThemePath) ? projectThemePath : ujmThemePath;
+        })(),
       },
       // Add module resolution paths for local web-manager
       modules: [

@@ -100,8 +100,14 @@ function sass(complete) {
         // So we can use "@use 'ultimate-jekyll-manager' as *;"
         path.resolve(rootPathPackage, 'dist/assets/css'),
 
-        // So we can use "@use 'themes/{theme}' as *;" in the project
+        // Project theme FIRST (higher priority) - allows consuming projects to define custom themes
+        path.resolve(rootPathProject, 'src/assets/themes', config.theme.id),
+
+        // UJM theme as fallback - for built-in themes like "classy", "bootstrap"
         path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id),
+
+        // UJM themes root - allows themes to reference sibling themes (e.g., ../bootstrap)
+        path.resolve(rootPathPackage, 'dist/assets/themes'),
 
         // So we can load _pages.scss from the project's dist
         path.resolve(rootPathProject, 'dist/assets/css'),
@@ -132,9 +138,13 @@ function sass(complete) {
       // Exclude test pages that include components we don't normally use (would prevent PurgeCSS from working)
       `!${rootPathPackage}/dist/defaults/**/pages/test/**/*.{html,liquid,md}`,
 
-      // Include ONLY the active theme's files
+      // Include ONLY the active theme's files from UJM
       `${rootPathPackage}/dist/defaults/**/_includes/themes/${config.theme.id}/**/*.{html,liquid,md}`,
       `${rootPathPackage}/dist/defaults/**/_layouts/themes/${config.theme.id}/**/*.{html,liquid,md}`,
+
+      // Project theme layouts/includes (for project-defined themes)
+      `src/_layouts/themes/${config.theme.id}/**/*.{html,liquid,md}`,
+      `src/_includes/themes/${config.theme.id}/**/*.{html,liquid,md}`,
 
       // Project HTML
       'src/**/*.{html,liquid,md}',
@@ -144,7 +154,10 @@ function sass(complete) {
       `${rootPathPackage}/dist/assets/js/**/*.js`,
       `${rootPathPackage}/node_modules/web-manager/**/*.js`,
 
-      // Theme JS
+      // Project theme JS (for project-defined themes)
+      `src/assets/themes/${config.theme.id}/**/*.js`,
+
+      // UJM theme JS
       `${rootPathPackage}/dist/assets/themes/${config.theme.id}/**/*.js`,
 
       // Project JS
@@ -255,7 +268,16 @@ function sass(complete) {
             // Social
             /^social-share-/,
           ],
-          deep: [],
+          deep: [
+            // Preserve input state pseudo-selectors (checkbox, radio, etc.)
+            /:checked/,
+            /:disabled/,
+            /:enabled/,
+            /:focus/,
+            /:hover/,
+            /:valid/,
+            /:invalid/,
+          ],
           greedy: [],
           // Preserve keyframe animations
           keyframes: [

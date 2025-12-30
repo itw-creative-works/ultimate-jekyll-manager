@@ -814,6 +814,26 @@ fm.on('submit', async ({ data, $submitButton }) => {
 
 Ultimate Jekyll uses three tracking platforms: Google Analytics (gtag), Facebook Pixel (fbq), and TikTok Pixel (ttq).
 
+### ITM (Internal Tracking Medium)
+
+Internal tracking system modeled after UTM for cross-property user journey tracking.
+
+| Parameter | Purpose | Examples |
+|-----------|---------|----------|
+| `itm_source` | Platform/origin | `website`, `browser-extension`, `app`, `email` |
+| `itm_medium` | Delivery mechanism | `modal`, `prompt`, `banner`, `tooltip` |
+| `itm_campaign` | Specific campaign/feature | `exit-popup`, `premium-unlock`, `newsletter-signup` |
+| `itm_content` | Specific context | Page path, feature ID, variant |
+
+**Examples:**
+```
+# Website exit popup
+?itm_source=website&itm_medium=modal&itm_campaign=exit-popup&itm_content=/pricing
+
+# Extension premium unlock
+?itm_source=browser-extension&itm_medium=prompt&itm_campaign=premium-unlock&itm_content=bulk-export
+```
+
 ### Tracking Guidelines
 
 **IMPORTANT Rules:**
@@ -892,7 +912,7 @@ The `<html>` element has data attributes for JavaScript/CSS targeting:
 | `data-platform` | `windows`, `mac`, `linux`, `ios`, `android`, `chromeos`, `unknown` |
 | `data-browser` | `chrome`, `firefox`, `safari`, `edge`, `opera`, `brave` |
 | `data-device` | `mobile` (<768px), `tablet` (768-1199px), `desktop` (>=1200px) |
-| `data-runtime` | `web`, `extension`, `electron`, `node` |
+| `data-runtime` | `web`, `browser-extension`, `electron`, `node` |
 | `aria-busy` | `true` (loading), `false` (ready) |
 
 **Detection source:** `web-manager/src/modules/utilities.js`

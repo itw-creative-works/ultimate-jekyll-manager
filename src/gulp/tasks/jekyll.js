@@ -77,7 +77,7 @@ async function jekyll(complete) {
     }
 
     // Run buildpre hook
-    await hook('build:pre', index);
+    await hook('build/pre', index);
 
     // Build Jekyll
     const command = [
@@ -97,6 +97,8 @@ async function jekyll(complete) {
         Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
         // Add development config IF BUILD_MODE is not true
         Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
+        // Add project-level dev config IF it exists and BUILD_MODE is not true
+        (!Manager.isBuildMode() && jetpack.exists('dist/_config.dev.yml')) ? 'dist/_config.dev.yml' : '',
       ].join(','),
       '--incremental',
       (Manager.isBuildMode() || argv.profile) ? ' --profile' : '',
@@ -120,7 +122,7 @@ async function jekyll(complete) {
     await fixBlogIndex();
 
     // Run buildpost hook
-    await hook('build:post', index);
+    await hook('build/post', index);
 
     // Create build JSON with runtime config
     await createBuildJSON();

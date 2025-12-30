@@ -277,7 +277,7 @@ async function processRequestMiddleware(req, res, next) {
   }
 
   // Run middleware:request hook to allow custom URL rewriting
-  await hook('middleware:request', { req, res, pathname });
+  await hook('middleware/request', { req, res, pathname });
 
   // Process the post request
   if (pathname.match(/\/_process/)) {

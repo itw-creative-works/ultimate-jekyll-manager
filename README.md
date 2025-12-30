@@ -607,6 +607,26 @@ formManager.ready(); // Now form is interactive
 
 **Test Page:** Navigate to `/test/libraries/form-manager` to see FormManager in action with various configurations.
 
+### ITM (Internal Tracking Medium)
+
+Internal tracking system modeled after UTM for cross-property user journey tracking.
+
+| Parameter | Purpose | Examples |
+|-----------|---------|----------|
+| `itm_source` | Platform/origin | `website`, `browser-extension`, `app`, `email` |
+| `itm_medium` | Delivery mechanism | `modal`, `prompt`, `banner`, `tooltip` |
+| `itm_campaign` | Specific campaign/feature | `exit-popup`, `premium-unlock`, `newsletter-signup` |
+| `itm_content` | Specific context | Page path, feature ID, variant |
+
+**Examples:**
+```
+# Website exit popup
+?itm_source=website&itm_medium=modal&itm_campaign=exit-popup&itm_content=/pricing
+
+# Extension premium unlock
+?itm_source=browser-extension&itm_medium=prompt&itm_campaign=premium-unlock&itm_content=bulk-export
+```
+
 ### Icons
 * Fontawesome
   * https://fontawesome.com/search

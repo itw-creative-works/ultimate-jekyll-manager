@@ -43,6 +43,7 @@ module.exports = async function (options) {
   options.publishGitHubToken = options.publishGitHubToken !== 'false';
   options.updateGitHubPages = options.updateGitHubPages !== 'false';
   options.deduplicatePosts = options.deduplicatePosts !== 'false';
+  options.migrate = options.migrate !== 'false';
 
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
@@ -55,6 +56,11 @@ module.exports = async function (options) {
   try {
     // Log current working directory
     await logCWD();
+
+    // Run migrations
+    if (options.migrate) {
+      await migrate();
+    }
 
     // Detect GitHub repository early so it's available to all tasks/functions
     await detectGitHubRepository(logger);
@@ -174,7 +180,7 @@ async function updateManager() {
   // Check if we need to update
   if (!isUpToDate) {
     // Quit if major version difference
-    if (levelDifference === 'major') {
+    if (levelDifference === 'major' && installedVersion !== 'latest') {
       return logger.error(`Major version difference detected. Please update to ${latestVersion} manually.`);
     }
 
@@ -778,5 +784,59 @@ async function deduplicatePosts() {
     logger.log(`Report saved to: ${reportPath}`);
   } else {
     logger.log('✅ No duplicate posts found');
+  }
+}
+
+// Run migrations based on installed version
+async function migrate() {
+  const installedVersion = project.devDependencies[package.name] || '0.0.0';
+
+  // Skip if using local version
+  if (installedVersion.startsWith('file:')) {
+    return;
+  }
+
+  // Migrate hooks to nested structure (introduced in 0.0.185)
+  if (version.is(installedVersion, '<=', '1.0.0')) {
+    await migrateHooksToNestedStructure();
+  }
+}
+
+// Migrate old hook files to new nested structure
+async function migrateHooksToNestedStructure() {
+  const hooksDir = path.join(rootPathProject, 'hooks');
+
+  // Map of old file names to new paths
+  const migrations = [
+    { old: 'build:post.js', new: 'build/post.js' },
+    { old: 'build:pre.js', new: 'build/pre.js' },
+    { old: 'middleware:request.js', new: 'middleware/request.js' },
+  ];
+
+  let migratedCount = 0;
+
+  for (const migration of migrations) {
+    const oldPath = path.join(hooksDir, migration.old);
+    const newPath = path.join(hooksDir, migration.new);
+
+    // Check if old file exists
+    if (!jetpack.exists(oldPath)) {
+      continue;
+    }
+
+    // Check if new file already exists
+    if (jetpack.exists(newPath)) {
+      logger.warn(`⚠️  Cannot migrate ${migration.old}: ${migration.new} already exists`);
+      continue;
+    }
+
+    // Move the file
+    jetpack.move(oldPath, newPath);
+    logger.log(`✅ Migrated hook: ${migration.old} → ${migration.new}`);
+    migratedCount++;
+  }
+
+  if (migratedCount > 0) {
+    logger.log(`✅ Migrated ${migratedCount} hook file(s) to new nested structure`);
   }
 }
