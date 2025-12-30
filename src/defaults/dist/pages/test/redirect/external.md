@@ -5,13 +5,14 @@ permalink: /test/redirect/external
 
 ### REGULAR PAGES ###
 sitemap:
-  include: true
+  include: false
 meta:
   title: "External Redirect Test Page"
   description: "This is a test External Redirect page for the Ultimate Jekyll Manager."
   breadcrumb: "External Redirect Test Page"
   index: false
 
+### REDIRECT PAGES ###
 redirect:
   url: "https://google.com"
 ---

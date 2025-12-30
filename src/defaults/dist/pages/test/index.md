@@ -5,7 +5,7 @@ permalink: /test
 
 ### REGULAR PAGES ###
 sitemap:
-  include: true
+  include: false
 meta:
   title: "Test Page"
   description: "This is a test page for the Ultimate Jekyll Manager."

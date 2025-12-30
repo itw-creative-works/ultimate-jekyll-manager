@@ -5,7 +5,7 @@ permalink: /test/translation
 
 ### REGULAR PAGES ###
 sitemap:
-  include: true
+  include: false
 meta:
   title: "Test Translation Page"
   description: "This is a test Translation page for the Ultimate Jekyll Manager."
