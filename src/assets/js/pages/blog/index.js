@@ -103,10 +103,10 @@ function performSearch(query, $blogPosts, $searchResults) {
 
   $blogPosts.forEach(post => {
     const title = post.dataset.title?.toLowerCase() || '';
-    const excerpt = post.dataset.excerpt?.toLowerCase() || '';
+    const description = post.dataset.description?.toLowerCase() || '';
     const tags = post.dataset.tags?.toLowerCase() || '';
 
-    if (title.includes(query) || excerpt.includes(query) || tags.includes(query)) {
+    if (title.includes(query) || description.includes(query) || tags.includes(query)) {
       post.classList.remove('d-none');
       matchCount++;
     } else {

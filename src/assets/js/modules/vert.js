@@ -151,8 +151,8 @@ const createCustomAd = ($vertUnit, config) => {
   const iframeId = `vert-${window.__ujVertIdCounter = (window.__ujVertIdCounter || 0) + 1}`;
 
   // Build base URL for the ad content
-  // Use local server if debug=true OR if we're in development mode
-  const baseURL = (qsDebug || webManager.isDevelopment())
+  // Use local server if debug=true OR if we're in development mode AND on promo-server
+  const baseURL = (qsDebug || (webManager.isDevelopment() && webManager.config.brand.id === 'promo-server'))
     ? `${window.location.protocol}//${window.location.host}/verts/main`
     : 'https://promo-server.itwcreativeworks.com/verts/main';
 

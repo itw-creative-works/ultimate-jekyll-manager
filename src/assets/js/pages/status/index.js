@@ -4,6 +4,7 @@
 
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import fetch from 'wonderful-fetch';
 
 let webManager = null;
 
@@ -21,6 +22,7 @@ export default (Manager) => {
     initializeSubscribeForm();
     initializeTooltips();
     initializeRefreshTimer();
+    initializeBuildInfo();
 
     // Fetch status data (if configured)
     fetchStatusData();
@@ -30,7 +32,7 @@ export default (Manager) => {
   });
 };
 
-// Configuration
+// Configuration - maps status levels to Bootstrap classes
 const config = {
   selectors: {
     statusBanner: '#status-banner',
@@ -41,12 +43,39 @@ const config = {
     incidentsList: '#incidents-list',
     incidentsEmpty: '#incidents-empty',
     subscribeForm: '#status-subscribe-form',
+    buildInfoLoading: '#build-info-loading',
+    buildInfoContent: '#build-info-content',
+    buildInfoError: '#build-info-error',
+    buildTime: '#build-time',
+    buildTimeAgo: '#build-time-ago',
+    buildEnvironment: '#build-environment',
+    buildPackages: '#build-packages',
+    buildRepo: '#build-repo',
   },
+  // Maps status levels to Bootstrap bg-* classes
   statusClasses: {
-    operational: 'status-operational',
-    degraded: 'status-degraded',
-    major: 'status-major',
-    maintenance: 'status-maintenance',
+    operational: 'bg-success',
+    degraded: 'bg-warning',
+    major: 'bg-danger',
+    maintenance: 'bg-info',
+  },
+  // Maps status levels to Bootstrap border-* classes
+  borderClasses: {
+    operational: 'border-success',
+    degraded: 'border-warning',
+    major: 'border-danger',
+    maintenance: 'border-info',
+    resolved: 'border-success',
+    investigating: 'border-warning',
+    identified: 'border-danger',
+    monitoring: 'border-info',
+  },
+  // Maps incident status to data-status attribute values
+  dataStatusMap: {
+    investigating: 'warning',
+    identified: 'danger',
+    monitoring: 'info',
+    resolved: 'success',
   },
   statusLabels: {
     operational: 'Operational',
@@ -81,13 +110,13 @@ function showUptimeTooltip(e, $bar, index, totalDays) {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
 
-  // Get status from the bar's class
+  // Get status from the bar's Bootstrap bg-* class
   let status = 'operational';
-  if ($bar.classList.contains('status-degraded')) {
+  if ($bar.classList.contains('bg-warning')) {
     status = 'degraded';
-  } else if ($bar.classList.contains('status-major')) {
+  } else if ($bar.classList.contains('bg-danger')) {
     status = 'major';
-  } else if ($bar.classList.contains('status-maintenance')) {
+  } else if ($bar.classList.contains('bg-info')) {
     status = 'maintenance';
   }
 
@@ -213,6 +242,148 @@ function initializeRefreshTimer() {
 
     $timer.textContent = seconds;
   }, 1000);
+}
+
+// Initialize build info section
+async function initializeBuildInfo() {
+  const $loading = document.querySelector(config.selectors.buildInfoLoading);
+  const $content = document.querySelector(config.selectors.buildInfoContent);
+  const $error = document.querySelector(config.selectors.buildInfoError);
+
+  if (!$loading || !$content) {
+    return;
+  }
+
+  try {
+    // Fetch build.json
+    const data = await fetch(`${window.location.origin}/build.json`, {
+      response: 'json',
+    });
+
+    console.log('Build info data:', data);
+
+    // Normalize the data structure
+    const buildData = {
+      timestamp: data.timestamp || null,
+      environment: data.environment || (data.serving ? 'development' : 'production'),
+      packages: data.packages || null,
+      repo: data.repo || null,
+    };
+
+    // Test older dates
+    // buildData.timestamp = Date.now() - 1000 * 60 * 60 * 24 * 7;
+
+    displayBuildInfo(buildData);
+    $loading.classList.add('d-none');
+    $content.classList.remove('d-none');
+  } catch (error) {
+    console.error('Failed to load build info:', error);
+    $loading.classList.add('d-none');
+    if ($error) {
+      $error.classList.remove('d-none');
+    }
+  }
+}
+
+// Display build information
+function displayBuildInfo(data) {
+  const $time = document.querySelector(config.selectors.buildTime);
+  const $timeAgo = document.querySelector(config.selectors.buildTimeAgo);
+  const $environment = document.querySelector(config.selectors.buildEnvironment);
+  const $packages = document.querySelector(config.selectors.buildPackages);
+  const $repo = document.querySelector(config.selectors.buildRepo);
+
+  // Build time
+  if ($time && data.timestamp) {
+    const buildDate = new Date(data.timestamp);
+    $time.textContent = buildDate.toLocaleString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  // Time ago (and keep it updated every second)
+  if ($timeAgo && data.timestamp) {
+    updateTimeAgo($timeAgo, data.timestamp);
+    setInterval(() => updateTimeAgo($timeAgo, data.timestamp), 1000);
+  }
+
+  // Environment
+  if ($environment && data.environment) {
+    const envText = data.environment.charAt(0).toUpperCase() + data.environment.slice(1);
+    const envClass = data.environment === 'production' ? 'text-success' : 'text-warning';
+    $environment.innerHTML = `<span class="${envClass}">${escapeHtml(envText)}</span>`;
+  }
+
+  // Packages
+  if ($packages && data.packages) {
+    const packageBadges = Object.entries(data.packages)
+      .map(([name, version]) => {
+        return `<span class="badge bg-body-secondary text-body fw-normal">${escapeHtml(name)}: <span class="fw-semibold">${escapeHtml(version)}</span></span>`;
+      })
+      .join('');
+    $packages.innerHTML = packageBadges;
+  }
+
+  // Repository
+  if ($repo && data.repo) {
+    const repoUrl = `https://github.com/${data.repo.user}/${data.repo.name}`;
+    $repo.innerHTML = `<a href="${repoUrl}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">${escapeHtml(data.repo.user)}/${escapeHtml(data.repo.name)}</a>`;
+  }
+}
+
+// Update relative time display
+function updateTimeAgo($element, timestamp) {
+  const buildDate = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - buildDate;
+  const totalSeconds = Math.floor(diffMs / 1000);
+
+  if (totalSeconds <= 0) {
+    $element.textContent = 'Just now';
+    return;
+  }
+
+  // Calculate each unit
+  const years = Math.floor(totalSeconds / (365 * 24 * 60 * 60));
+  const months = Math.floor((totalSeconds % (365 * 24 * 60 * 60)) / (30 * 24 * 60 * 60));
+  const days = Math.floor((totalSeconds % (30 * 24 * 60 * 60)) / (24 * 60 * 60));
+  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const seconds = totalSeconds % 60;
+
+  // Build parts - once we start, include all remaining units
+  const parts = [];
+  let started = false;
+
+  if (years > 0) {
+    parts.push(`${years}y`);
+    started = true;
+  }
+  if (started || months > 0) {
+    parts.push(`${months}mo`);
+    started = true;
+  }
+  if (started || days > 0) {
+    parts.push(`${days}d`);
+    started = true;
+  }
+  if (started || hours > 0) {
+    parts.push(`${hours}h`);
+    started = true;
+  }
+  if (started || minutes > 0) {
+    parts.push(`${minutes}m`);
+    started = true;
+  }
+  parts.push(`${seconds}s`);
+
+  $element.textContent = parts.join(' ') + ' ago';
 }
 
 // Fetch status data from API (if configured)
@@ -360,7 +531,7 @@ function updateMaintenance(maintenanceItems) {
 
   // Build maintenance cards
   const html = maintenanceItems.map(item => `
-    <div class="card maintenance-card border-0 bg-body-tertiary mb-3 status-maintenance">
+    <div class="card maintenance-card border-0 bg-body-tertiary mb-3 border-info">
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <h4 class="h5 fw-semibold mb-0">${escapeHtml(item.title)}</h4>
@@ -409,7 +580,7 @@ function updateIncidents(incidents) {
 
   // Build incident cards
   const html = incidents.map(incident => `
-    <div class="card incident-card border-0 bg-body-tertiary mb-3 status-${incident.status}">
+    <div class="card incident-card border-0 bg-body-tertiary mb-3 ${config.borderClasses[incident.status] || ''}">
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
           <h4 class="h5 fw-semibold mb-0">${escapeHtml(incident.title)}</h4>
@@ -421,7 +592,7 @@ function updateIncidents(incidents) {
         ${incident.updates && incident.updates.length > 0 ? `
           <div class="incident-timeline mt-3">
             ${incident.updates.map(update => `
-              <div class="timeline-item status-${update.status} pb-3">
+              <div class="timeline-item pb-3" data-status="${config.dataStatusMap[update.status] || ''}">
                 <div class="small text-muted mb-1">${formatDateTime(update.created_at)}</div>
                 <div class="small">${escapeHtml(update.message)}</div>
               </div>

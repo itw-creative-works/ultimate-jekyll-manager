@@ -1,3 +1,6 @@
+// Libraries
+import merge from 'lodash/merge.js';
+
 // Exit Popup Module
 export default function (Manager, options) {
   // Shortcuts
@@ -19,40 +22,38 @@ export default function (Manager, options) {
 
   // Wait for DOM to be ready
   webManager.dom().ready().then(() => {
-    // Setup mouse leave detection without needing the element yet
-    setupMouseLeaveDetection();
+    // Setup exit intent detection without needing the element yet
+    setupExitIntentDetection();
   });
 
-  // Make this available on window object in DEV mode for testing
-  /* @dev-only:start */
-  {
-    window.showExitPopup = showExitPopup;
-  }
-  /* @dev-only:end */
+  // Register showExitPopup on the UJ library for programmatic access
+  // Usage: webManager.uj().showExitPopup()
 
-  function updateModalContent($modal) {
+  webManager._ujLibrary.showExitPopup = showExitPopup;
+
+  function updateModalContent($modal, effectiveConfig) {
     // Update title
     const $title = $modal.querySelector('.modal-exit-title');
-    if ($title && config.title) {
-      $title.textContent = config.title;
+    if ($title && effectiveConfig.title) {
+      $title.textContent = effectiveConfig.title;
     }
 
     // Update main message
     const $message = $modal.querySelector('.modal-exit-message');
-    if ($message && config.message) {
-      $message.textContent = config.message;
+    if ($message && effectiveConfig.message) {
+      $message.textContent = effectiveConfig.message;
     }
 
     // Update offer title
     const $offerTitleText = $modal.querySelector('.modal-exit-offer-title-text');
-    if ($offerTitleText && config.offerTitle) {
-      $offerTitleText.textContent = config.offerTitle;
+    if ($offerTitleText && effectiveConfig.offerTitle) {
+      $offerTitleText.textContent = effectiveConfig.offerTitle;
     }
 
     // Update offer description
     const $offerDesc = $modal.querySelector('.modal-exit-offer-description');
-    if ($offerDesc && config.offerDescription) {
-      $offerDesc.textContent = config.offerDescription;
+    if ($offerDesc && effectiveConfig.offerDescription) {
+      $offerDesc.textContent = effectiveConfig.offerDescription;
     }
 
     // Update main button
@@ -74,16 +75,16 @@ export default function (Manager, options) {
 
     // Update "Maybe later" link text if configured
     const $dismissLink = $modal.querySelector('.modal-exit-dismiss');
-    if ($dismissLink && config.dismissText) {
-      $dismissLink.textContent = config.dismissText;
+    if ($dismissLink && effectiveConfig.dismissText) {
+      $dismissLink.textContent = effectiveConfig.dismissText;
     }
 
     // Remove hidden attribute to make modal available
     $modal.removeAttribute('hidden');
   }
 
-  function setupMouseLeaveDetection() {
-    // Detect when mouse leaves document
+  function setupExitIntentDetection() {
+    // 1. Mouse leave detection (desktop) - leaving from the top
     document.addEventListener('mouseleave', (e) => {
       /* @dev-only:start */
       // {
@@ -91,19 +92,88 @@ export default function (Manager, options) {
       // }
       /* @dev-only:end */
 
-      // Only trigger if:
-      // 1. We should show the popup (based on timing/session)
-      // 2. Mouse is leaving from the top (Y <= 0 means exiting from top)
+      // Only trigger if mouse is leaving from the top (Y <= 0)
       if (shouldShow && e.clientY <= 0) {
         showExitPopup();
       }
     });
+
+    // 2. Window blur detection - user switches tabs or clicks outside browser
+    window.addEventListener('blur', () => {
+      /* @dev-only:start */
+      // {
+      //   console.log('Window blur detected:', shouldShow);
+      // }
+      /* @dev-only:end */
+
+      if (shouldShow) {
+        showExitPopup();
+      }
+    });
+
+    // // 3. Back button detection - user attempts to navigate back
+    // // Push a dummy state so we can detect when user tries to go back
+    // history.pushState({ exitPopup: true }, '');
+    // window.addEventListener('popstate', () => {
+    //   /* @dev-only:start */
+    //   // {
+    //   //   console.log('Popstate detected:', shouldShow);
+    //   // }
+    //   /* @dev-only:end */
+
+    //   if (shouldShow) {
+    //     // Re-push state to prevent actual navigation
+    //     history.pushState({ exitPopup: true }, '');
+    //     showExitPopup();
+    //   }
+    // });
+
+    // // 4. Mobile exit intent - rapid scroll up toward the top of the page
+    // let lastScrollY = window.scrollY;
+    // let scrollVelocity = 0;
+    // let lastScrollTime = Date.now();
+
+    // window.addEventListener('scroll', () => {
+    //   const now = Date.now();
+    //   const deltaTime = now - lastScrollTime;
+    //   const deltaY = lastScrollY - window.scrollY; // Positive = scrolling up
+
+    //   // Calculate velocity (pixels per ms)
+    //   scrollVelocity = deltaTime > 0 ? deltaY / deltaTime : 0;
+
+    //   /* @dev-only:start */
+    //   // {
+    //   //   if (scrollVelocity > 1) {
+    //   //     console.log('Scroll velocity:', scrollVelocity, 'scrollY:', window.scrollY);
+    //   //   }
+    //   // }
+    //   /* @dev-only:end */
+
+    //   // Trigger if:
+    //   // - Scrolling up rapidly (velocity > 2 pixels/ms)
+    //   // - Near the top of the page (within 100px)
+    //   // - Should show popup
+    //   if (shouldShow && scrollVelocity > 2 && window.scrollY < 100) {
+    //     showExitPopup();
+    //   }
+
+    //   lastScrollY = window.scrollY;
+    //   lastScrollTime = now;
+    // }, { passive: true });
   }
 
-  function showExitPopup() {
+  function showExitPopup(overrides) {
+    // Check if any modal is already open - don't stack modals
+    if (document.querySelector('.modal.show')) {
+      return;
+    }
+
+    // Deep merge overrides with config (without mutating original)
+    const effectiveConfig = merge({}, config, overrides);
+
     /* @dev-only:start */
     {
-      console.log('Showing exit popup:', config.title, 'after', timeSinceLastShown, 'ms since last shown');
+      console.log('Showing exit popup:', effectiveConfig.title, 'after', timeSinceLastShown, 'ms since last shown');
     }
     /* @dev-only:end */
 
@@ -120,8 +190,8 @@ export default function (Manager, options) {
       return;
     }
 
-    // Update modal content with config
-    updateModalContent($modalElement);
+    // Update modal content with effectiveConfig
+    updateModalContent($modalElement, effectiveConfig);
 
     // Check if Bootstrap is available
     if (!window.bootstrap || !window.bootstrap.Modal) {

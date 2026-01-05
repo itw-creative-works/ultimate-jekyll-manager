@@ -1,11 +1,11 @@
 /**
  * Status Page Styles
  *
- * Uses Bootstrap semantic colors:
- * - success for operational (green)
- * - warning for degraded (amber)
- * - danger for major outage (red)
- * - info for maintenance (blue)
+ * Uses Bootstrap semantic colors via bg-* classes:
+ * - bg-success for operational (green)
+ * - bg-warning for degraded (amber)
+ * - bg-danger for major outage (red)
+ * - bg-info for maintenance (blue)
  */
 
 // Status Pulse - size for the blinking dot (uses global animation-pulse class)
@@ -14,25 +14,25 @@
   height: 8px;
 }
 
-// Status Banner - gradient backgrounds based on status
+// Status Banner - gradient backgrounds based on Bootstrap color classes
 .status-banner {
-  &.status-operational {
-    background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.1) 0%, rgba(var(--bs-success-rgb), 0.05) 100%);
+  &.bg-success {
+    background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.1) 0%, rgba(var(--bs-success-rgb), 0.05) 100%) !important;
     border-left: 4px solid var(--bs-success) !important;
   }
 
-  &.status-degraded {
-    background: linear-gradient(135deg, rgba(var(--bs-warning-rgb), 0.1) 0%, rgba(var(--bs-warning-rgb), 0.05) 100%);
+  &.bg-warning {
+    background: linear-gradient(135deg, rgba(var(--bs-warning-rgb), 0.1) 0%, rgba(var(--bs-warning-rgb), 0.05) 100%) !important;
     border-left: 4px solid var(--bs-warning) !important;
   }
 
-  &.status-major {
-    background: linear-gradient(135deg, rgba(var(--bs-danger-rgb), 0.1) 0%, rgba(var(--bs-danger-rgb), 0.05) 100%);
+  &.bg-danger {
+    background: linear-gradient(135deg, rgba(var(--bs-danger-rgb), 0.1) 0%, rgba(var(--bs-danger-rgb), 0.05) 100%) !important;
     border-left: 4px solid var(--bs-danger) !important;
   }
 
-  &.status-maintenance {
-    background: linear-gradient(135deg, rgba(var(--bs-info-rgb), 0.1) 0%, rgba(var(--bs-info-rgb), 0.05) 100%);
+  &.bg-info {
+    background: linear-gradient(135deg, rgba(var(--bs-info-rgb), 0.1) 0%, rgba(var(--bs-info-rgb), 0.05) 100%) !important;
     border-left: 4px solid var(--bs-info) !important;
   }
 }
@@ -67,11 +67,7 @@
   flex: 1 1 0;
   min-width: 0;
 
-  &.status-operational { background-color: var(--bs-success); }
-  &.status-degraded { background-color: var(--bs-warning); }
-  &.status-major { background-color: var(--bs-danger); }
-  &.status-maintenance { background-color: var(--bs-info); }
-  &.status-unknown { background-color: var(--bs-secondary-bg); }
+  // Uses Bootstrap bg-* classes for colors
 
   &:hover {
     transform: scaleY(1.2);
@@ -79,27 +75,21 @@
   }
 }
 
-// Uptime Bar Legend
+// Uptime Bar Legend - uses Bootstrap bg-* classes for colors
 .uptime-bar-legend {
   width: 16px;
   height: 16px;
-
-  &.status-operational { background-color: var(--bs-success); }
-  &.status-degraded { background-color: var(--bs-warning); }
-  &.status-major { background-color: var(--bs-danger); }
-  &.status-maintenance { background-color: var(--bs-info); }
 }
 
-// Incident & Maintenance Cards - border colors
+// Incident & Maintenance Cards - border colors based on Bootstrap classes
 .incident-card,
 .maintenance-card {
   border-left: 4px solid var(--bs-border-color) !important;
 
-  &.status-operational,
-  &.status-resolved { border-left-color: var(--bs-success) !important; }
-  &.status-degraded { border-left-color: var(--bs-warning) !important; }
-  &.status-major { border-left-color: var(--bs-danger) !important; }
-  &.status-maintenance { border-left-color: var(--bs-info) !important; }
+  &.border-success { border-left-color: var(--bs-success) !important; }
+  &.border-warning { border-left-color: var(--bs-warning) !important; }
+  &.border-danger { border-left-color: var(--bs-danger) !important; }
+  &.border-info { border-left-color: var(--bs-info) !important; }
 }
 
 // Incident Timeline - custom component
@@ -133,19 +123,20 @@
       transform: translateX(-3px);
     }
 
-    &.status-investigating::before {
+    // Uses data attributes for timeline dot colors
+    &[data-status="warning"]::before {
       background-color: var(--bs-warning);
       border-color: var(--bs-warning);
     }
-    &.status-identified::before {
+    &[data-status="danger"]::before {
       background-color: var(--bs-danger);
       border-color: var(--bs-danger);
     }
-    &.status-monitoring::before {
+    &[data-status="info"]::before {
       background-color: var(--bs-info);
       border-color: var(--bs-info);
     }
-    &.status-resolved::before {
+    &[data-status="success"]::before {
       background-color: var(--bs-success);
       border-color: var(--bs-success);
     }
@@ -162,13 +153,9 @@
   pointer-events: none;
   white-space: nowrap;
 
+  // Status dot uses Bootstrap bg-* classes
   .status-dot {
     width: 8px;
     height: 8px;
-
-    &.status-operational { background-color: var(--bs-success); }
-    &.status-degraded { background-color: var(--bs-warning); }
-    &.status-major { background-color: var(--bs-danger); }
-    &.status-maintenance { background-color: var(--bs-info); }
   }
 }

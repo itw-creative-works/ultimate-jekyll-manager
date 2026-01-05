@@ -81,6 +81,8 @@ async function jekyll(complete) {
 
     // Build Jekyll
     const command = [
+      // Enable Ruby YJIT for faster builds
+      'RUBY_YJIT_ENABLE=1',
       // Set JEKYLL_ENV to production when in build mode
       Manager.isBuildMode() ? 'JEKYLL_ENV=production' : '',
       // Jekyll command

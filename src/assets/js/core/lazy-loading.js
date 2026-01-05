@@ -62,8 +62,16 @@ export default function (Manager, options) {
       // Stop observing this element
       observer.unobserve(element);
 
-      // Load the element
-      loadElement(element);
+      // Check if this is a video/audio parent with lazy sources
+      const tagName = element.tagName.toLowerCase();
+      if ((tagName === 'video' || tagName === 'audio') && element.dataset.lazySourcesReady) {
+        // Load all lazy sources for this video/audio
+        const $sources = element.querySelectorAll('source[data-lazy]');
+        $sources.forEach($source => loadElement($source));
+      } else {
+        // Load the element normally
+        loadElement(element);
+      }
     });
   }
 
@@ -138,8 +146,10 @@ export default function (Manager, options) {
   function loadSrc(element, value) {
     const tagName = element.tagName.toLowerCase();
 
-    // Add cache buster to URL
-    value = addCacheBuster(value);
+    // Add cache buster to URL (skip for iframes - external embeds don't support it)
+    if (tagName !== 'iframe') {
+      value = addCacheBuster(value);
+    }
 
     // For images, test load first
     if (tagName === 'img') {
@@ -183,8 +193,47 @@ export default function (Manager, options) {
       if (tagName === 'video') {
         element.load();
       }
+    }
+    // For source elements inside video/audio tags
+    else if (tagName === 'source') {
+      element.src = value;
+
+      // Find parent video or audio element
+      const $parent = element.closest('video, audio');
+      if ($parent) {
+        // Load the parent to pick up the new source
+        $parent.load();
+
+        // Find video container (if exists) to remove loading state
+        const $container = $parent.closest('[data-lazy-load-container]');
+
+        // Listen for parent's load event
+        $parent.addEventListener('loadeddata', () => {
+          markAsLoaded(element);
+
+          // Remove loading state from container
+          if ($container) {
+            $container.classList.remove(config.loadingClass);
+            $container.classList.add(config.loadedClass);
+          }
+        }, { once: true });
+
+        $parent.addEventListener('error', () => {
+          markAsError(`Failed to load source: ${value}`, element);
+
+          // Remove loading state from container on error too
+          if ($container) {
+            $container.classList.remove(config.loadingClass);
+            $container.classList.add(config.errorClass);
+          }
+        }, { once: true });
+      } else {
+        // No parent found, just mark as loaded
+        markAsLoaded(element);
+      }
+    }
     // For other elements, just set src
-    } else {
+    else {
       // Generic src setting
       element.src = value;
       markAsLoaded(element);
@@ -343,13 +392,38 @@ export default function (Manager, options) {
     // Find all elements matching our selector
     const elements = document.querySelectorAll(config.selector);
 
+    // Track which video/audio parents we've already set up
+    const observedParents = new Set();
+
     elements.forEach(element => {
       // Skip if already loaded
       if (loadedElements.has(element)) {
         return;
       }
 
-      // Start observing
+      // For source elements in video/audio, observe the parent instead
+      const tagName = element.tagName.toLowerCase();
+      if (tagName === 'source') {
+        const $parent = element.closest('video, audio, picture');
+
+        // For picture elements, just observe the source normally
+        if ($parent && $parent.tagName.toLowerCase() === 'picture') {
+          observer.observe(element);
+          return;
+        }
+
+        // For video/audio, observe the parent and load all sources when it comes into view
+        if ($parent && !observedParents.has($parent)) {
+          observedParents.add($parent);
+          observer.observe($parent);
+
+          // Store reference to all lazy sources
+          $parent.dataset.lazySourcesReady = 'true';
+        }
+        return;
+      }
+
+      // Start observing normally
       observer.observe(element);
     });
   }

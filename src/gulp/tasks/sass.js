@@ -13,6 +13,7 @@ const { template } = require('node-powertools');
 const yaml = require('js-yaml');
 const postcss = require('gulp-postcss');
 const purgeCss = require('@fullhuman/postcss-purgecss').default;
+const through2 = require('through2');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -125,6 +126,7 @@ function sass(complete) {
   // Apply PurgeCSS if enabled
   if (ENABLE_PURGECSS) {
     logger.log('PurgeCSS enabled - removing unused CSS');
+    const purgeCssStartTime = performance.now();
 
     // Define content patterns for PurgeCSS
     const contentPatterns = [
@@ -193,109 +195,125 @@ function sass(complete) {
     // });
 
     // Apply PurgeCSS
-    stream = stream.pipe(postcss([
-      purgeCss({
-        content: contentPatterns,
-        // Safelist patterns for dynamic classes
-        safelist: {
-          standard: [
-            // Bootstrap JavaScript components
-            /^modal-/,
-            /^bs-/,
-            /^data-bs-/,
-            /^carousel-/,
-            /^collapse/,
-            /^dropdown-/,
-            /^offcanvas-/,
-            /^tooltip-/,
-            /^popover-/,
-            /^toast-/,
-            /^show$/,
-            /^showing$/,
-            /^hide$/,
-            /^fade$/,
-            /^active$/,
-            /^disabled$/,
+    const purgeCssPlugin = purgeCss({
+      content: contentPatterns,
+      // Safelist patterns for dynamic classes
+      safelist: {
+        standard: [
+          // Bootstrap JavaScript components
+          /^modal-/,
+          /^bs-/,
+          /^data-bs-/,
+          /^carousel-/,
+          /^collapse/,
+          /^dropdown-/,
+          /^offcanvas-/,
+          /^tooltip-/,
+          /^popover-/,
+          /^toast-/,
+          /^show$/,
+          /^showing$/,
+          /^hide$/,
+          /^fade$/,
+          /^active$/,
+          /^disabled$/,
 
-            // Accordion specific
-            /^accordion/,
-            /^collapsed$/,
-            /^collapsing$/,
+          // Accordion specific
+          /^accordion/,
+          /^collapsed$/,
+          /^collapsing$/,
 
-            // Common dynamic classes
-            /^is-/,
-            /^has-/,
-            /^was-/,
+          // Common dynamic classes
+          /^is-/,
+          /^has-/,
+          /^was-/,
 
-            // Animations
-            /^animation-/,
+          // Animations
+          /^animation-/,
 
-            // Utilities that might be added dynamically
-            /^[mp][trblxy]?-[0-9]+$/,
-            /^text-/,
-            /^bg-/,
-            /^border-/,
-            /^rounded-/,
-            /^shadow-/,
-            /^d-/,
-            /^flex-/,
-            /^justify-/,
-            /^align-/,
-            /^order-/,
-            /^overflow-/,
-            /^position-/,
-            /^w-/,
-            /^h-/,
-            /^mw-/,
-            /^mh-/,
-            /^min-/,
-            /^max-/,
+          // Utilities that might be added dynamically
+          /^[mp][trblxy]?-[0-9]+$/,
+          /^text-/,
+          /^bg-/,
+          /^border-/,
+          /^rounded-/,
+          /^shadow-/,
+          /^d-/,
+          /^flex-/,
+          /^justify-/,
+          /^align-/,
+          /^order-/,
+          /^overflow-/,
+          /^position-/,
+          /^w-/,
+          /^h-/,
+          /^mw-/,
+          /^mh-/,
+          /^min-/,
+          /^max-/,
 
-            // Utilities
-            /^ratio-/,
-            /^object-/,
+          // Utilities
+          /^ratio-/,
+          /^object-/,
 
-            // Libraries
-            // Cookies
-            /^cookie-consent-/,
+          // Libraries
+          // Cookies
+          /^cookie-consent-/,
 
-            // Font Awesome
-            /^fa-/,
+          // Font Awesome
+          /^fa-/,
 
-            // Lazy
-            /^lazy-/,
+          // Lazy
+          /^lazy-/,
 
-            // Social
-            /^social-share-/,
-          ],
-          deep: [
-            // Preserve input state pseudo-selectors (checkbox, radio, etc.)
-            /:checked/,
-            /:disabled/,
-            /:enabled/,
-            /:focus/,
-            /:hover/,
-            /:valid/,
-            /:invalid/,
-          ],
-          greedy: [],
-          // Preserve keyframe animations
-          keyframes: [
-            /^spinner-/,
-            // /^accordion/,
-            // /^fade-/,
-            // /^slide-/,
-            // /^collapse/
-          ]
+          // Social
+          /^social-share-/,
+        ],
+        deep: [
+          // Preserve input state pseudo-selectors (checkbox, radio, etc.)
+          /:checked/,
+          /:disabled/,
+          /:enabled/,
+          /:focus/,
+          /:hover/,
+          /:valid/,
+          /:invalid/,
+        ],
+        greedy: [],
+        // Preserve keyframe animations
+        keyframes: [
+          /^spinner-/,
+          // /^accordion/,
+          // /^fade-/,
+          // /^slide-/,
+          // /^collapse/
+        ]
+      },
+      // Don't remove CSS variables
+      variables: true,
+      // Keep keyframes
+      keyframes: true,
+      // Keep font-face rules
+      fontFace: true
+    });
+
+    // Pipe postcss and log timing when all files complete
+    let purgeCssLogged = false;
+    stream = stream
+      .pipe(postcss([purgeCssPlugin]))
+      .pipe(through2.obj(
+        function (file, enc, cb) {
+          cb(null, file);
         },
-        // Don't remove CSS variables
-        variables: true,
-        // Keep keyframes
-        keyframes: true,
-        // Keep font-face rules
-        fontFace: true
-      })
-    ]));
+        function (cb) {
+          if (!purgeCssLogged) {
+            purgeCssLogged = true;
+            const purgeCssTime = ((performance.now() - purgeCssStartTime) / 1000).toFixed(2);
+            logger.log(`PurgeCSS completed in ${purgeCssTime}s`);
+          }
+          cb();
+        }
+      ));
   }
 
   // Process

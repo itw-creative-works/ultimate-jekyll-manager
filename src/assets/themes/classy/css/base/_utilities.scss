@@ -2,7 +2,7 @@
 // Custom helper classes and theme-specific utilities
 
 // ============================================
-// Shadow Utilities
+// Shadow Utilities (Classy-specific)
 // ============================================
 .shadow-xs { box-shadow: $classy-shadow-xs !important; }
 .shadow-sm { box-shadow: $classy-shadow-sm !important; }
@@ -12,17 +12,4 @@
 .shadow-2xl { box-shadow: $classy-shadow-2xl !important; }
 .shadow-glow { box-shadow: $classy-shadow-glow !important; }
 .shadow-none { box-shadow: none !important; }
-
-
-// ============================================
-// Cursor Utilities
-// ============================================
-.cursor-default { cursor: default !important; }
-.cursor-pointer { cursor: pointer !important; }
-.cursor-help { cursor: help !important; }
-.cursor-move { cursor: move !important; }
-.cursor-grab { cursor: grab !important; }
-.cursor-not-allowed { cursor: not-allowed !important; }
-.cursor-crosshair { cursor: crosshair !important; }
-// .cursor-wait { cursor: wait !important; }
 

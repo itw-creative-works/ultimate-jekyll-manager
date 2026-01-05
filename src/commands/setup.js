@@ -826,12 +826,11 @@ async function migrateHooksToNestedStructure() {
 
     // Check if new file already exists
     if (jetpack.exists(newPath)) {
-      logger.warn(`⚠️  Cannot migrate ${migration.old}: ${migration.new} already exists`);
-      continue;
+      logger.warn(`⚠️  Migrate ${migration.old}: ${migration.new} already exists`);
     }
 
     // Move the file
-    jetpack.move(oldPath, newPath);
+    jetpack.move(oldPath, newPath, { overwrite: true });
     logger.log(`✅ Migrated hook: ${migration.old} → ${migration.new}`);
     migratedCount++;
   }

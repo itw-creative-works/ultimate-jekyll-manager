@@ -1,6 +1,21 @@
-// Classy Avatar Components
-// Circular profile images with responsive sizing
-// Uses $avatar-sizes map from config
+// =============================================================================
+// Avatar Components
+// =============================================================================
+// Circular profile images with responsive sizing.
+// These are universal utilities available to all UJ themes.
+
+// ============================================
+// Avatar Size Map
+// ============================================
+$avatar-sizes: (
+  null: 3rem,    // default
+  xs: 1.5rem,
+  sm: 2rem,
+  md: 2.5rem,
+  lg: 3.5rem,
+  xl: 5rem,
+  xxl: 7.5rem
+) !default;
 
 // ============================================
 // Base Avatar Styles

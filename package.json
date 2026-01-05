@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.187",
+  "version": "0.0.197",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -32,7 +32,7 @@
   "engines": {
     "node": "22",
     "bundler": "2.4.21",
-    "ruby": "3.0.0"
+    "ruby": "4.0.0"
   },
   "repository": {
     "type": "git",

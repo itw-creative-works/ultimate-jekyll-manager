@@ -56,6 +56,12 @@ plugins:
   - jekyll-uj-powertools
   # - jekyll-truthyfalsy
 
+# Parallel
+parallel_build:
+  enabled: true          # Enable/disable parallel builds (default: true)
+  threads: 8             # Number of threads (default: number of CPU cores)
+  min_items: 1          # Minimum items before parallelizing (default: 10)
+
 # Exclude from processing
 exclude:
   - Gemfile

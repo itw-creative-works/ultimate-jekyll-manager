@@ -8,6 +8,8 @@ NEW TODO
 - form manager should NOT submit if the button that was clicked is disabled (class or attribute)
 - GLOBAL FIXES FOR ALL UJM PROJECTS: nav.json should ahve class only not color
 
+/authentication-required
+* ithink this is leftover from Electron Manager auth system??? but lots on proxifly. need to make a version of it for UJM2.0
 
 Make an admin dashboard backend
 

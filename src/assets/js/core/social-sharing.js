@@ -289,6 +289,8 @@ export default function (Manager, options) {
 
   // Tracking functions
   function trackShare(platformKey, shareConfig) {
+    const platformName = platforms[platformKey]?.name || platformKey;
+
     gtag('event', 'share', {
       method: platformKey,
       content_type: 'article',

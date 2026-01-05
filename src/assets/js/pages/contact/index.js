@@ -58,6 +58,7 @@ function setupForm() {
       company: data.company || '',
       subject: data.subject,
       message: data.message,
+      user: data.user || {},
     };
 
     // Get API endpoint from site config or use default

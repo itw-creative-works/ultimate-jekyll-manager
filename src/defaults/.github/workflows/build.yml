@@ -51,6 +51,9 @@ jobs:
       # - name: Run bundle install # TODO: [DEPRECATED] MIGRATE TO: bundle config set --local path 'vendor/bundle'
       #   run: |
       #     bundle install --path vendor/bundle
+      - name: Ensure Gemfile uses published gem (not local path)
+        run: |
+          sed -i 's|gem "jekyll-uj-powertools", path:.*|gem "jekyll-uj-powertools", "~> 1.0"|g' Gemfile
       - name: Run bundle install
         run: |
           bundle install
