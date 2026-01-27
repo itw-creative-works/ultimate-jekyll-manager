@@ -157,12 +157,9 @@ tracking:
   meta-pixel: null
   tiktok-pixel: null
 
-# Favicon
-favicon:
-  path: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/favicon"
-  safari-pinned-tab: "#5bbad5"
-  msapp-tile-color: "#da532c"
-  theme-color: "#ffffff"
+# reCAPTCHA
+recaptcha:
+  site-key: null
 
 # Cloudflare
 cloudflare:
@@ -190,6 +187,13 @@ extension:
   safari: ""
   edge: ""
   brave: ""
+
+# Favicon
+favicon:
+  path: "https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/favicon"
+  safari-pinned-tab: "#5bbad5"
+  msapp-tile-color: "#da532c"
+  theme-color: "#ffffff"
 
 # Manifest
 manifest:

@@ -9,12 +9,16 @@
 // ============================================
 $avatar-sizes: (
   null: 3rem,    // default
+  2xs: 0.5rem,
   xs: 1.5rem,
   sm: 2rem,
   md: 2.5rem,
   lg: 3.5rem,
   xl: 5rem,
-  xxl: 7.5rem
+  2xl: 7.5rem,
+  3xl: 10rem,
+  4xl: 12.5rem,
+  5xl: 15rem
 ) !default;
 
 // ============================================
