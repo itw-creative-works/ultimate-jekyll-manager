@@ -198,17 +198,13 @@ async function updateActiveSessions(account) {
 
   // Fetch other active sessions from server
   try {
-    const serverApiURL = `${webManager.getApiUrl()}/backend-manager`;
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/sessions`;
 
     const data = await authorizedFetch(serverApiURL, {
-      method: 'POST',
+      method: 'GET',
       timeout: 60000,
       response: 'json',
       tries: 2,
-      body: {
-        command: 'user:get-active-sessions',
-        payload: {},
-      },
     });
 
     // Process sessions from server response

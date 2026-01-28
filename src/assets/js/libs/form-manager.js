@@ -156,7 +156,7 @@ export class FormManager {
 
     // Focus the field with autofocus attribute if it exists (desktop only)
     const $autofocusField = this.$form.querySelector('[autofocus]');
-    if ($autofocusField && !$autofocusField.disabled && window.Manager?.webManager?.utilities()?.getDeviceType() === 'desktop') {
+    if ($autofocusField && !$autofocusField.disabled && window.Manager?.webManager?.utilities()?.getDevice() === 'desktop') {
       this._focusField($autofocusField);
     }
   }

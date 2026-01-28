@@ -110,11 +110,10 @@
 // Outline Button Overrides
 // ============================================
 [class*="btn-outline-"] {
-  background: transparent !important;
   border-width: 2px !important;
   border-style: solid !important;
 
-  &:not(:hover) {
+  &:not(:hover):not(:active):not(.active) {
     background: transparent !important;
   }
 }

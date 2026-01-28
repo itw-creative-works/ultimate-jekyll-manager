@@ -62,25 +62,15 @@ function setupDeleteAccountForm() {
       throw new Error('Account deletion cancelled. You must type "DELETE" exactly to confirm.');
     }
 
-    // Final confirmation
-    const finalConfirm = confirm('This is your last chance to cancel.\n\nAre you sure you want to permanently delete your account?');
-
-    if (!finalConfirm) {
-      throw new Error('Account deletion cancelled.');
-    }
-
     // Send delete request to server
-    const response = await authorizedFetch(webManager.getApiUrl(), {
-      method: 'POST',
+    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/user`, {
+      method: 'DELETE',
       timeout: 30000,
       response: 'json',
       tries: 2,
       body: {
-        command: 'user:delete',
-        payload: {
-          reason: data.reason || '',
-          confirmed: true,
-        },
+        reason: data.reason || '',
+        confirmed: true,
       },
     });
 

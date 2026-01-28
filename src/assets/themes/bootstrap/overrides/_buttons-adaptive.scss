@@ -3,93 +3,66 @@
 // =============================================================================
 // Buttons that automatically flip between light/dark styles based on theme.
 // These are universal utilities available to all UJ themes.
-// Note: Cannot use @extend with Bootstrap classes due to module scoping,
-// so we use CSS custom properties directly.
-
-// ============================================
-// Button Style Mixins (DRY)
-// ============================================
-@mixin btn-dark-styles {
-  --bs-btn-color: #fff;
-  --bs-btn-bg: var(--bs-dark);
-  --bs-btn-border-color: var(--bs-dark);
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #1c1c1c;
-  --bs-btn-hover-border-color: #1a1a1a;
-  --bs-btn-focus-shadow-rgb: 66, 70, 73;
-  --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #1a1a1a;
-  --bs-btn-active-border-color: #181818;
-  --bs-btn-disabled-color: #fff;
-  --bs-btn-disabled-bg: var(--bs-dark);
-  --bs-btn-disabled-border-color: var(--bs-dark);
-}
-
-@mixin btn-light-styles {
-  --bs-btn-color: #000;
-  --bs-btn-bg: var(--bs-light);
-  --bs-btn-border-color: var(--bs-light);
-  --bs-btn-hover-color: #000;
-  --bs-btn-hover-bg: #e9ecef;
-  --bs-btn-hover-border-color: #e2e6ea;
-  --bs-btn-focus-shadow-rgb: 211, 212, 213;
-  --bs-btn-active-color: #000;
-  --bs-btn-active-bg: #e2e6ea;
-  --bs-btn-active-border-color: #dae0e5;
-  --bs-btn-disabled-color: #000;
-  --bs-btn-disabled-bg: var(--bs-light);
-  --bs-btn-disabled-border-color: var(--bs-light);
-}
-
-@mixin btn-outline-dark-styles {
-  --bs-btn-color: var(--bs-dark);
-  --bs-btn-border-color: var(--bs-dark);
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: var(--bs-dark);
-  --bs-btn-hover-border-color: var(--bs-dark);
-  --bs-btn-focus-shadow-rgb: 33, 37, 41;
-  --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: var(--bs-dark);
-  --bs-btn-active-border-color: var(--bs-dark);
-  --bs-btn-disabled-color: var(--bs-dark);
-  --bs-btn-disabled-border-color: var(--bs-dark);
-}
-
-@mixin btn-outline-light-styles {
-  --bs-btn-color: var(--bs-light);
-  --bs-btn-border-color: var(--bs-light);
-  --bs-btn-hover-color: #000;
-  --bs-btn-hover-bg: var(--bs-light);
-  --bs-btn-hover-border-color: var(--bs-light);
-  --bs-btn-focus-shadow-rgb: 248, 249, 250;
-  --bs-btn-active-color: #000;
-  --bs-btn-active-bg: var(--bs-light);
-  --bs-btn-active-border-color: var(--bs-light);
-  --bs-btn-disabled-color: var(--bs-light);
-  --bs-btn-disabled-border-color: var(--bs-light);
-}
+// Uses CSS custom properties from _color-shades.scss for hover/active states.
 
 // ============================================
 // Solid Adaptive Buttons
 // ============================================
 // Dark button in light mode, light button in dark mode
 .btn-adaptive {
-  @include btn-dark-styles;
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--bs-dark);
+  --bs-btn-border-color: var(--bs-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-dark-hover);
+  --bs-btn-hover-border-color: var(--bs-dark-active);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-dark-active);
+  --bs-btn-active-border-color: var(--bs-dark-active);
 }
 
 [data-bs-theme="dark"] .btn-adaptive {
-  @include btn-light-styles;
+  --bs-btn-color: #000;
+  --bs-btn-bg: var(--bs-light);
+  --bs-btn-border-color: var(--bs-light);
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: var(--bs-light-hover);
+  --bs-btn-hover-border-color: var(--bs-light-active);
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: var(--bs-light-active);
+  --bs-btn-active-border-color: var(--bs-light-active);
 }
 
 // ============================================
 // Outline Adaptive Buttons
 // ============================================
 .btn-outline-adaptive {
-  @include btn-outline-dark-styles;
+  --bs-btn-color: var(--bs-dark);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--bs-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-dark);
+  --bs-btn-hover-border-color: var(--bs-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-dark);
+  --bs-btn-active-border-color: var(--bs-dark);
+
+  color: var(--bs-body-color);
+  border-color: var(--bs-dark);
 }
 
 [data-bs-theme="dark"] .btn-outline-adaptive {
-  @include btn-outline-light-styles;
+  --bs-btn-color: var(--bs-light);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--bs-light);
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: var(--bs-light);
+  --bs-btn-hover-border-color: var(--bs-light);
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: var(--bs-light);
+  --bs-btn-active-border-color: var(--bs-light);
+
+  border-color: var(--bs-light);
 }
 
 // ============================================
@@ -97,19 +70,59 @@
 // ============================================
 // The opposite of adaptive - light in light mode, dark in dark mode
 .btn-adaptive-inverse {
-  @include btn-light-styles;
+  --bs-btn-color: #000;
+  --bs-btn-bg: var(--bs-light);
+  --bs-btn-border-color: var(--bs-light);
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: var(--bs-light-hover);
+  --bs-btn-hover-border-color: var(--bs-light-active);
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: var(--bs-light-active);
+  --bs-btn-active-border-color: var(--bs-light-active);
 }
 
 [data-bs-theme="dark"] .btn-adaptive-inverse {
-  @include btn-dark-styles;
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--bs-dark);
+  --bs-btn-border-color: var(--bs-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-dark-hover);
+  --bs-btn-hover-border-color: var(--bs-dark-active);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-dark-active);
+  --bs-btn-active-border-color: var(--bs-dark-active);
 }
 
+// ============================================
+// Outline Inverse Adaptive Buttons
+// ============================================
 .btn-outline-adaptive-inverse {
-  @include btn-outline-light-styles;
+  --bs-btn-color: var(--bs-light);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--bs-light);
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: var(--bs-light);
+  --bs-btn-hover-border-color: var(--bs-light);
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: var(--bs-light);
+  --bs-btn-active-border-color: var(--bs-light);
+
+  color: var(--bs-body-color);
+  border-color: var(--bs-light);
 }
 
 [data-bs-theme="dark"] .btn-outline-adaptive-inverse {
-  @include btn-outline-dark-styles;
+  --bs-btn-color: var(--bs-dark);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--bs-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-dark);
+  --bs-btn-hover-border-color: var(--bs-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-dark);
+  --bs-btn-active-border-color: var(--bs-dark);
+
+  border-color: var(--bs-dark);
 }
 
 // ============================================

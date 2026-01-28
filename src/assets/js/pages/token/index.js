@@ -68,17 +68,13 @@ export default function (Manager) {
 
   // Generate custom token via backend-manager API
   async function generateCustomToken(webManager) {
-    const serverApiURL = `${webManager.getApiUrl()}/backend-manager`;
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/token`;
 
     const response = await authorizedFetch(serverApiURL, {
       method: 'POST',
       timeout: 60000,
       response: 'json',
       tries: 2,
-      body: {
-        command: 'user:create-custom-token',
-        payload: {},
-      },
     });
 
     // Extract token from response

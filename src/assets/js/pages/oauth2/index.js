@@ -100,16 +100,16 @@ async function handleOAuthCallback() {
 
     console.log('Tokenize payload:', payload);
 
+    // Build the RESTful URL (replace /backend-manager with /backend-manager/user/oauth2)
+    const serverUrl = stateParsed.serverUrl.replace(/\/backend-manager\/?$/, '/backend-manager/user/oauth2');
+
     // Call server to complete OAuth flow
-    const response = await authorizedFetch(stateParsed.serverUrl, {
+    const response = await authorizedFetch(serverUrl, {
       method: 'POST',
       timeout: 60000,
       response: 'json',
       tries: 2,
-      body: {
-        command: 'user:oauth2',
-        payload: payload
-      }
+      body: payload,
     });
 
     console.log('Tokenize response:', response);

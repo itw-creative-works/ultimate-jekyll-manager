@@ -59,9 +59,9 @@ export default function (Manager, options) {
     // Update main button
     const $button = $modal.querySelector('.modal-exit-button');
     const $buttonText = $modal.querySelector('.modal-exit-button-text');
-    if ($button && config.okButton) {
-      if ($buttonText && config.okButton.text) {
-        $buttonText.textContent = config.okButton.text;
+    if ($button && effectiveConfig.okButton) {
+      if ($buttonText && effectiveConfig.okButton.text) {
+        $buttonText.textContent = effectiveConfig.okButton.text;
       }
       if (config.okButton.link) {
         // Add UTM parameters to track exit popup conversions
@@ -70,6 +70,9 @@ export default function (Manager, options) {
         url.searchParams.set('utm_medium', 'popup');
         url.searchParams.set('utm_campaign', window.location.pathname);
         $button.href = url.toString();
+
+        // Remove data-bs-dismiss so the link navigation works properly
+        $button.removeAttribute('data-bs-dismiss');
       }
     }
 

@@ -16,7 +16,7 @@ const supportedProviders = ['google', 'discord', 'github', 'twitter', 'facebook'
 
 // Get API URL helper
 function getApiUrl() {
-  return `${webManager.getApiUrl()}/backend-manager`;
+  return `${webManager.getApiUrl()}/backend-manager/user/oauth2`;
 }
 
 // Initialize connections section
@@ -295,14 +295,11 @@ async function handleConnect(providerId) {
     response: 'json',
     tries: 2,
     body: {
-      command: 'user:oauth2',
-      payload: {
-        redirect: false,
-        provider: providerId,
-        state: 'authorize',
-        scope: scope,
-        referrer: window.location.href,
-      },
+      redirect: false,
+      provider: providerId,
+      state: 'authorize',
+      scope: scope,
+      referrer: window.location.href,
     },
   });
 
@@ -338,14 +335,11 @@ async function handleDisconnect(providerId) {
     response: 'json',
     tries: 2,
     body: {
-      command: 'user:oauth2',
-      payload: {
-        redirect: false,
-        provider: providerId,
-        state: 'deauthorize',
-        scope: scope,
-        referrer: window.location.href,
-      },
+      redirect: false,
+      provider: providerId,
+      state: 'deauthorize',
+      scope: scope,
+      referrer: window.location.href,
     },
   });
 

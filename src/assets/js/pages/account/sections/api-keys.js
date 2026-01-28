@@ -65,7 +65,7 @@ function setupResetApiKeyForm() {
     }
 
     // Get server API URL
-    const serverApiURL = `${webManager.getApiUrl()}/backend-manager`;
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/api-keys`;
 
     // Make API call to reset API key
     const response = await authorizedFetch(serverApiURL, {
@@ -73,9 +73,6 @@ function setupResetApiKeyForm() {
       timeout: 30000,
       response: 'json',
       tries: 2,
-      body: {
-        command: 'user:regenerate-api-keys',
-      },
     });
 
     if (!response.privateKey) {

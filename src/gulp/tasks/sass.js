@@ -218,6 +218,10 @@ function sass(complete) {
           /^active$/,
           /^disabled$/,
 
+          // Buttons
+          // /^btn-outline-adaptive$/,
+          // /^btn-adaptive$/,
+
           // Accordion specific
           /^accordion/,
           /^collapsed$/,

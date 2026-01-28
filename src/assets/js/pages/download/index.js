@@ -195,17 +195,14 @@ function setupMobileEmailForms() {
       console.log('Mobile email form submitted:', { platform, email: data.email });
 
       // Get API endpoint
-      const apiEndpoint = `${webManager.getApiUrl()}/backend-manager`;
+      const apiEndpoint = `${webManager.getApiUrl()}/backend-manager/general/email`;
 
       // Send request using wonderful-fetch
       await fetch(apiEndpoint, {
         method: 'POST',
         body: {
-          command: 'general:send-email',
-          payload: {
-            id: 'general:download-app-link',
-            email: data.email,
-          },
+          id: 'general:download-app-link',
+          email: data.email,
         },
         response: 'json',
         timeout: 30000,

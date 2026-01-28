@@ -13,6 +13,9 @@ export default function (Manager) {
   const url = new URL(window.location.href);
   const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== window.top;
 
+  // Fire wakeup call immediately to prevent cold start on signup API call (fire-and-forget)
+  // wakeupServer(webManager);
+
   // Handle DOM ready
   webManager.dom().ready()
   .then(async () => {
@@ -652,5 +655,14 @@ export default function (Manager) {
       content_type: 'product',
       content_name: 'Password Reset'
     });
+  }
+
+  // Wakeup server to prevent cold start on signup API call
+  function wakeupServer(webManager) {
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/signup?wakeup=true`;
+
+    fetch(serverApiURL, { method: 'POST' })
+      .then(() => console.log('[Auth] Server wakeup sent'))
+      .catch(() => {}); // Silently ignore errors
   }
 }

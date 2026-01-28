@@ -240,7 +240,7 @@ function transformDataForAPI(formData) {
 
 // Send notification via API
 async function sendNotification(payload) {
-  const functionsUrl = getAPIFunctionsUrl();
+  const functionsUrl = `${getAPIFunctionsUrl()}/admin/notification`;
 
   return authorizedFetch(functionsUrl, {
     method: 'POST',
@@ -248,28 +248,19 @@ async function sendNotification(payload) {
     response: 'json',
     tries: 1,
     log: true,
-    body: {
-      command: 'admin:send-notification',
-      payload: payload,
-    },
+    body: payload,
   });
 }
 
 // Fetch user statistics
 async function fetchUserStats() {
   try {
-    const response = await authorizedFetch(getAPIFunctionsUrl(), {
-      method: 'POST',
+    const response = await authorizedFetch(`${getAPIFunctionsUrl()}/admin/firestore?path=meta/stats`, {
+      method: 'GET',
       timeout: 60000,
       response: 'json',
       tries: 2,
       log: true,
-      body: {
-        command: 'admin:firestore-read',
-        payload: {
-          path: 'meta/stats',
-        },
-      },
     });
 
     // Extract user count from response
@@ -477,9 +468,7 @@ function clearAutoSubmitCountdown() {
 
 // Get API functions URL
 function getAPIFunctionsUrl() {
-  // Get functions URL from webManager and add the endpoint
-  //@TODO remove this when fixed api url
-  return `${webManager.getFunctionsUrl('prod')}/bm_api`;
+  return `${webManager.getApiUrl()}/backend-manager`;
 }
 
 // Tracking functions

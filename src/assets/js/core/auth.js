@@ -1,5 +1,8 @@
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
+// Constants
+const SIGNUP_MAX_AGE = 5 * 60 * 1000;
+
 // Auth Module
 export default function (Manager, options) {
   // Shortcuts
@@ -44,18 +47,6 @@ export default function (Manager, options) {
       // Handle authentication state changes and page policies
       if (user) {
         // User is authenticated
-
-        // Check if this is a new user account (created in last 5 minutes) and send metadata
-        const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
-        const fiveMinutes = 5 * 60 * 1000;
-
-        /* @dev-only:start */
-        {
-          // Log account age for debugging
-          const ageInMinutes = Math.floor(accountAge / 1000 / 60);
-          console.log('[Auth] Account age:', ageInMinutes, 'minutes');
-        }
-        /* @dev-only:end */
 
         // Send user signup metadata if account is new
         if (accountAge < fiveMinutes) {
@@ -167,13 +158,27 @@ function setAnalyticsUserId(user, webManager) {
 // Send user metadata to server (affiliate, UTM params, etc.)
 async function sendUserSignupMetadata(user, webManager) {
   try {
-    // Get affiliate data from storage
-    const affiliateData = webManager.storage().get('marketing.affiliate', null);
-    const utmData = webManager.storage().get('marketing.utm', null);
-    const signupSent = webManager.storage().get('marketing.signupSent', false);
+    // Skip on auth pages to avoid blocking redirect (metadata will be sent on destination page)
+    const pagePath = document.documentElement.getAttribute('data-page-path');
+    const authPages = ['/signin', '/signup', '/reset'];
+    if (authPages.includes(pagePath)) {
+      return;
+    }
 
-    // Only proceed if we haven't sent signup metadata yet
-    if (signupSent) {
+    // Check if this is a new user account (created in last X minutes)
+    const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
+    const signupProcessed = webManager.storage().get('flags.signupProcessed', null) === user.uid;
+
+    /* @dev-only:start */
+    {
+      // Log account age for debugging
+      const ageInMinutes = Math.floor(accountAge / 1000 / 60);
+      console.log('[Auth] Account age:', ageInMinutes, 'minutes, signupProcessed:', signupProcessed);
+    }
+    /* @dev-only:end */
+
+    // Only proceed if account is new and we haven't sent signup metadata yet
+    if (accountAge >= SIGNUP_MAX_AGE || signupProcessed) {
       return;
     }
 
@@ -189,23 +194,23 @@ async function sendUserSignupMetadata(user, webManager) {
     };
 
     // Get server API URL
-    const serverApiURL = `${webManager.getApiUrl()}/backend-manager`;
+    const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/signup`;
+
+    // Log
+    console.log('[Auth] Sending user metadata:', payload);
 
     // Make API call to send signup metadata
     const response = await authorizedFetch(serverApiURL, {
       method: 'POST',
       response: 'json',
-      body: {
-        command: 'user:sign-up',
-        payload: payload
-      }
+      body: payload,
     });
 
     // Log
     console.log('[Auth] User metadata sent successfully:', response);
 
-    // Mark signup as sent (keep the marketing data for reference)
-    webManager.storage().set('marketing.signupSent', true);
+    // Mark signup as sent for this user (keep the attribution data for reference)
+    webManager.storage().set('flags.signupProcessed', user.uid);
   } catch (error) {
     console.error('[Auth] Error sending user metadata:', error);
     // Don't throw - we don't want to block the signup flow
