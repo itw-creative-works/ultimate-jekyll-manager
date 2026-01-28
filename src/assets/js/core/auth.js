@@ -201,6 +201,7 @@ async function sendUserSignupMetadata(user, webManager) {
     const response = await authorizedFetch(serverApiURL, {
       method: 'POST',
       response: 'json',
+      tries: 3,
       body: payload,
     });
 

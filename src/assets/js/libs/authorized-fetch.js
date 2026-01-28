@@ -25,7 +25,7 @@ export async function authorizedFetch(url, options = {}) {
   }
 
   // Get the ID token - let it throw if it fails
-  const idToken = await user.getIdToken();
+  const idToken = await user.getIdToken(true);
 
   // Ensure headers object exists
   if (!requestOptions.headers) {
@@ -33,7 +33,7 @@ export async function authorizedFetch(url, options = {}) {
   }
 
   // Set the Authorization header with Bearer token
-  requestOptions.headers['Authorization'] = 'Bearer ' + idToken;
+  requestOptions.headers['Authorization'] = `Bearer ${idToken}`;
 
   // Make the request using wonderful-fetch
   return fetch(url, requestOptions);
