@@ -12,7 +12,7 @@ const filter = require('gulp-filter').default;
 const { template } = require('node-powertools');
 const yaml = require('js-yaml');
 const postcss = require('gulp-postcss');
-const purgeCss = require('@fullhuman/postcss-purgecss').default;
+const purgeCss = require('@fullhuman/postcss-purgecss');
 const through2 = require('through2');
 
 // Load package

@@ -7,7 +7,7 @@ const path = require('path');
 const jetpack = require('fs-jetpack');
 const wp = require('webpack');
 const ReplacePlugin = require('../plugins/webpack/replace.js');
-const StripDevBlocksPlugin = require('../plugins/webpack/strip-dev-blocks.js');
+const stripDevBlocksLoader = require.resolve('../loaders/webpack/strip-dev-blocks-loader.js');
 const yaml = require('js-yaml');
 const version = require('wonderful-version');
 
@@ -113,7 +113,6 @@ function getSettings() {
     // devtool: 'source-map',
     // devtool: false,
     plugins: [
-      new StripDevBlocksPlugin(),
       new ReplacePlugin(getTemplateReplaceOptions(), { type: 'template' }),
       // new wp.IgnorePlugin({
       //   resourceRegExp: /^\.\/locale$/,
@@ -221,24 +220,27 @@ function getSettings() {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-                // sourceMaps: false,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
                 sourceMaps: !Manager.actLikeProduction(),
-              presets: [
-                [require.resolve('@babel/preset-env', {
-                  paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
-                }), {
-                  exclude: [
-                    // Prevent lighthouse error in 2025 about Legacy JavaScript
-                    // 'es.array.from',
-                  ]
-                }]
-              ],
-              compact: Manager.isBuildMode(),
-            }
-          }
+                presets: [
+                  [require.resolve('@babel/preset-env', {
+                    paths: [path.resolve(process.cwd(), 'node_modules', package.name, 'node_modules')]
+                  }), {
+                    exclude: [
+                      // Prevent lighthouse error in 2025 about Legacy JavaScript
+                      // 'es.array.from',
+                    ]
+                  }]
+                ],
+                compact: Manager.isBuildMode(),
+              }
+            },
+            // Strip dev-only blocks before babel processes the file
+            stripDevBlocksLoader,
+          ]
         },
         // {
         //   test: /\.js$/,
