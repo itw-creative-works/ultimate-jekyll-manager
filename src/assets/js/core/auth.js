@@ -49,9 +49,7 @@ export default function (Manager, options) {
         // User is authenticated
 
         // Send user signup metadata if account is new
-        if (accountAge < fiveMinutes) {
-          await sendUserSignupMetadata(user, webManager);
-        }
+        await sendUserSignupMetadata(user, webManager);
 
         // Check if page requires user to be unauthenticated (e.g., signin page)
         if (policy === 'unauthenticated') {
