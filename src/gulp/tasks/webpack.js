@@ -7,7 +7,7 @@ const path = require('path');
 const jetpack = require('fs-jetpack');
 const wp = require('webpack');
 const ReplacePlugin = require('../plugins/webpack/replace.js');
-const stripDevBlocksLoader = require.resolve('../loaders/webpack/strip-dev-blocks-loader.js');
+const stripDevBlocksLoader = require.resolve('../loaders/webpack/strip-dev-blocks.js');
 const yaml = require('js-yaml');
 const version = require('wonderful-version');
 
