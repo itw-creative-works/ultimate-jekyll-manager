@@ -101,6 +101,9 @@ class GitHubCache {
     this.logger.log(`📦 Zip file: ${zipFileName}`);
     this.logger.log(`📂 Extract directory: ${extractDir}`);
     this.logger.log(`📁 Directory contents: ${JSON.stringify(dirContents)}`);
+    this.logger.log(`🔍 Debug - this.owner: ${this.owner}, this.repo: ${this.repo}`);
+    this.logger.log(`🔍 Debug - GITHUB_REPOSITORY env: ${process.env.GITHUB_REPOSITORY}`);
+    this.logger.log(`🔍 Debug - Pattern being used: ^${this.owner}-${this.repo}-[a-f0-9]+$`);
 
     // GitHub zipball format: {owner}-{repo}-{sha}
     // Match this pattern to avoid picking up other cache directories (like imagemin, translation)
