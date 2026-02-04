@@ -322,6 +322,7 @@ function setupPromoCountdown() {
 function adjustNavbarOffset() {
   const $promoBanner = document.getElementById('pricing-promo-banner');
   const $navbarWrapper = document.querySelector('.navbar-wrapper');
+  const $firstSection = document.querySelector('main > section:first-of-type');
 
   if (!$promoBanner || !$navbarWrapper) {
     return;
@@ -331,5 +332,14 @@ function adjustNavbarOffset() {
   $promoBanner.removeAttribute('hidden');
 
   const bannerHeight = $promoBanner.offsetHeight;
-  $navbarWrapper.style.marginTop = `${bannerHeight - 10}px`;
+  const bannerOffset = bannerHeight - 10;
+
+  // Push navbar down to make room for banner
+  $navbarWrapper.style.marginTop = `${bannerOffset}px`;
+
+  // Also increase first section padding to account for banner
+  if ($firstSection) {
+    const currentPadding = parseFloat(getComputedStyle($firstSection).paddingTop);
+    $firstSection.style.paddingTop = `${currentPadding + bannerOffset}px`;
+  }
 }

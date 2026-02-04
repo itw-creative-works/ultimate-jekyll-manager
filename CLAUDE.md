@@ -6,6 +6,8 @@ Ultimate Jekyll Manager is a template framework that consuming projects install 
 
 **Important:** This is NOT a standalone project. You cannot run `npm start` or `npm run build` directly in this repository.
 
+**DO NOT run `npm start`, `npm run build`, or any dev server commands.** The user already has a development server running in a consuming project. Running these commands here would either fail or create duplicate servers unnecessarily.
+
 ## Project Structure
 
 ### Directory Organization
@@ -22,7 +24,7 @@ Ultimate Jekyll Manager is a template framework that consuming projects install 
 
 ## Local Development
 
-The local development server URL is stored in `.temp/_config_browsersync.yml` in the consuming project's root directory. Read this file to determine the correct URL for browsing and testing.
+The local development server URL is stored in `.temp/_config_browsersync.yml` in the consuming project's root directory. Read this file to determine the correct URL for browsing and testing. By default, use "https://192.168.86.69:4000".
 
 ## Asset Organization
 
@@ -461,6 +463,26 @@ Ultimate Jekyll supports both light and dark modes. Use adaptive classes instead
 - `btn-outline-adaptive` - Adaptive outline button
 
 These classes automatically adapt to the current theme mode.
+
+### Cards Inside Colored Sections
+
+When placing cards inside sections with `bg-body-secondary` or `bg-body-tertiary`, cards will blend in because they share the same background color by default.
+
+**Solution:** Add `bg-body` to cards to create visual contrast:
+
+```html
+<!-- ❌ WRONG - Card blends with section background -->
+<section class="bg-body-secondary">
+  <div class="card">...</div>
+</section>
+
+<!-- ✅ CORRECT - Card stands out with contrasting background -->
+<section class="bg-body-secondary">
+  <div class="card bg-body">...</div>
+</section>
+```
+
+**Rule:** When a section uses `bg-body-secondary` or `bg-body-tertiary`, always add `bg-body` to child cards to ensure proper visual hierarchy.
 
 ## Page Loading Protection System
 

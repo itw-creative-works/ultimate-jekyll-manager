@@ -2,20 +2,10 @@
 // Standard spacing and layout rules
 
 // ============================================
-// Main Content Spacing
-// ============================================
-main {
-  padding-top: 6rem;
-  // padding-bottom: 2rem;
-
-  @media (min-width: 992px) {
-    padding-top: 3.5rem;
-  }
-}
-
-// ============================================
 // Section Spacing
 // ============================================
+// First section gets extra top padding to account for fixed navbar
+// This keeps section backgrounds flush with navbar (no gap/line)
 main {
   > section {
     padding-top: 4rem;
@@ -24,6 +14,16 @@ main {
     @media (min-width: 992px) {
       padding-top: 7rem;
       padding-bottom: 7rem;
+    }
+
+    // First section: add navbar height to top padding
+    // Using :first-of-type so it works even if other elements (like banners) come before
+    &:first-of-type {
+      padding-top: 10rem; // 6rem navbar + 4rem section
+
+      @media (min-width: 992px) {
+        padding-top: 10.5rem; // 3.5rem navbar + 7rem section
+      }
     }
   }
 }
@@ -129,11 +129,14 @@ main {
   }
 }
 
-// Vertical breakout - top (negative top margin to offset main padding of 6rem on mobile, 3.5rem on desktop)
+// Vertical breakout - top (pull section up behind navbar)
+// Use this when you want the section to extend behind the transparent navbar
 .section-breakout-top {
   margin-top: -6rem;
+  padding-top: 10rem !important; // 6rem navbar + 4rem section
 
   @media (min-width: 992px) {
     margin-top: -3.5rem;
+    padding-top: 10.5rem !important; // 3.5rem navbar + 7rem section
   }
 }
