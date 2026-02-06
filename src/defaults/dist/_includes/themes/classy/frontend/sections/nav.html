@@ -8,13 +8,19 @@
 
     <a class="navbar-brand d-inline-flex align-items-center py-0" href="{{ logo_href }}">
       {% iftruthy logo_src %}
-        <div class="avatar avatar-md me-2 {{ logo_class }}">
-          <img src="{{ logo_src }}" alt="{{ logo_text }} Logo"/>
-        </div>
+        {% if data.logo.type == 'wordmark' %}
+          <img src="{{ logo_src }}" alt="{{ logo_text }} Logo" class="{{ logo_class }}" style="height: 2rem; width: auto;"/>
+        {% else %}
+          <div class="avatar avatar-md me-2 {{ logo_class }}">
+            <img src="{{ logo_src }}" alt="{{ logo_text }} Logo"/>
+          </div>
+        {% endif %}
       {% endiftruthy %}
-      {% iftruthy logo_text %}
-        <span class="text-body">{{ logo_text }}</span>
-      {% endiftruthy %}
+      {% if data.logo.type != 'wordmark' %}
+        {% iftruthy logo_text %}
+          <span class="text-body">{{ logo_text }}</span>
+        {% endiftruthy %}
+      {% endif %}
     </a>
 
     <!-- Mobile controls wrapper -->

@@ -318,7 +318,7 @@ async function updateBundle() {
 
   // Log
   logger.log('Running bundle update...');
-  await execute('bundle update', { log: true })
+  await execute('bundle update --all', { log: true })
 }
 
 function install(package, ver, location) {

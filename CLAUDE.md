@@ -444,6 +444,18 @@ $el.innerHTML = `${iconHTML} Text`;
 
 ## CSS Guidelines
 
+### Section Padding in Custom Pages
+
+**DO NOT add padding classes to sections in custom frontend pages.**
+
+UJ handles section padding automatically via the theme's layout system. When creating or editing custom frontend pages:
+
+- ❌ DO NOT use `py-5`, `py-4`, `pt-5`, `pb-5`, `p-5`, etc. on `<section>` elements
+- ❌ DO NOT add vertical padding to sections manually
+- ✅ Let the UJ theme handle section spacing automatically
+
+**The ONLY exception:** Add padding if the user EXPLICITLY requests it for a specific section.
+
 ### Theme-Adaptive Classes
 
 **DO NOT USE:** `bg-light`, `bg-dark`, `text-light`, `text-dark`
