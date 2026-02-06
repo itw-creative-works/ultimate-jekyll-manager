@@ -40,7 +40,7 @@
     {
       label: 'Sign Up',
       href: '/signup',
-      class: 'btn-adaptive _gradient-rainbow _gradient-animated _animation-wiggle',
+      class: 'btn-adaptive',
       icon: 'user-plus',
       attributes: [
         ['data-wm-bind', '@show !auth.user']
