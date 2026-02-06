@@ -215,7 +215,8 @@ async function ensureBundlerVersion() {
 
   // Check if we need to update
   if (!isUpToDate) {
-    throw new Error(`Bundler version is out-of-date. Required version is ${requiredVersion}.`);
+    logger.log(`Bundler is out-of-date. Installing version ${requiredVersion}...`);
+    await execute(`gem install bundler -v ${requiredVersion}`, { log: true });
   }
 }
 
