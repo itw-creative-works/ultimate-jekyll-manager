@@ -246,22 +246,6 @@ pagination:
 
 # Jekyll collections
 collections:
-  team:
-    title: "Team Members"
-    output: true
-  updates:
-    title: "Updates"
-    output: true
 
 # Jekyll defaults
 defaults:
-  - scope:
-      path: ""
-      type: "team"
-    values:
-      permalink: "/team/:title"
-  - scope:
-      path: ""
-      type: "updates"
-    values:
-      permalink: "/updates/:title"

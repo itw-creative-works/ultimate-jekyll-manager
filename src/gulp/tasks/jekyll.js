@@ -7,6 +7,7 @@ const glob = require('glob').globSync;
 const path = require('path');
 const { execute, template } = require('node-powertools');
 const jetpack = require('fs-jetpack');
+const mergeJekyllConfigs = require('./utils/merge-jekyll-configs');
 
 // Templates
 const JSONP_TEMPLATE = `
@@ -79,6 +80,14 @@ async function jekyll(complete) {
     // Run buildpre hook
     await hook('build/pre', index);
 
+    // Merge UJM collections/defaults with project collections/defaults
+    const mergedConfigPath = mergeJekyllConfigs(
+      `./node_modules/${package.name}/dist/config/_config_default.yml`,
+      'dist/_config.yml',
+      '.temp/_config_collections.yml',
+      logger,
+    );
+
     // Build Jekyll
     const command = [
       // Enable Ruby YJIT for faster builds
@@ -95,13 +104,15 @@ async function jekyll(complete) {
         `./node_modules/${package.name}/dist/config/_config_default.yml`,
         // This is the user's project config file
         'dist/_config.yml',
+        // Merged collections/defaults (deep merge of UJM + project)
+        mergedConfigPath || '',
         // Add browsersync config IF BUILD_MODE is not true
         Manager.isBuildMode() ? '' : '.temp/_config_browsersync.yml',
         // Add development config IF BUILD_MODE is not true
         Manager.isBuildMode() ? '' : `./node_modules/${package.name}/dist/config/_config_development.yml`,
         // Add project-level dev config IF it exists and BUILD_MODE is not true
         (!Manager.isBuildMode() && jetpack.exists('dist/_config.dev.yml')) ? 'dist/_config.dev.yml' : '',
-      ].join(','),
+      ].filter(Boolean).join(','),
       '--incremental',
       (Manager.isBuildMode() || argv.profile) ? ' --profile' : '',
       // Limit posts in development for faster builds (use --all-posts to disable)
