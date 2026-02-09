@@ -94,6 +94,9 @@ collections:
   updates:
     title: "Updates"
     output: true
+  alternatives:
+    title: "Alternatives"
+    output: true
 
 # Jekyll defaults
 defaults:
@@ -107,3 +110,8 @@ defaults:
       type: "updates"
     values:
       permalink: "/updates/:title"
+  - scope:
+      path: ""
+      type: "alternatives"
+    values:
+      permalink: "/alternatives/:title"
