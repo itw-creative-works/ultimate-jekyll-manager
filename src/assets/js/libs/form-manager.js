@@ -95,6 +95,9 @@ export class FormManager {
     // Handle page restored from bfcache (e.g., back button after OAuth redirect)
     window.addEventListener('pageshow', (e) => this._handlePageShow(e));
 
+    // Initialize file drop zones
+    this._initFileDropZones();
+
     // Auto-transition to initialState when DOM is ready
     if (this.config.autoReady) {
       domReady().then(() => this._setInitialState());
@@ -280,6 +283,12 @@ export class FormManager {
     // Clear field error when user types in that field
     if (this._fieldErrors[e.target.name]) {
       this._clearFieldError(e.target.name);
+    }
+
+    // Clear file drop error when the file input inside a drop zone changes
+    const $zone = e.target.closest('[data-file-drop]');
+    if ($zone) {
+      $zone.classList.remove('file-drop-error');
     }
   }
 
@@ -537,6 +546,11 @@ export class FormManager {
       this._clearFieldError(fieldName);
     }
     this._fieldErrors = {};
+
+    // Clear file drop error states
+    this.$form.querySelectorAll('[data-file-drop].file-drop-error').forEach(($zone) => {
+      $zone.classList.remove('file-drop-error');
+    });
   }
 
   /**
@@ -962,6 +976,269 @@ export class FormManager {
 
     // Check if field's group is in allowed groups
     return allowedGroups.includes(fieldGroup.toLowerCase());
+  }
+
+  /**
+   * Initialize file drop zones within the form
+   * Scans for [data-file-drop] containers and attaches drag-and-drop behavior
+   */
+  _initFileDropZones() {
+    const $zones = this.$form.querySelectorAll('[data-file-drop]');
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] _initFileDropZones found', $zones.length, 'zones');
+    }
+    /* @dev-only:end */
+
+    $zones.forEach(($zone) => {
+      this._setupFileDropZone($zone);
+    });
+  }
+
+  /**
+   * Set up a single file drop zone
+   * @param {HTMLElement} $zone - The container with data-file-drop attribute
+   */
+  _setupFileDropZone($zone) {
+    const $input = $zone.querySelector('input[type="file"]');
+    if (!$input) {
+      return;
+    }
+
+    const mode = ($zone.getAttribute('data-file-drop') || '').toLowerCase();
+    const isPageMode = mode === 'page';
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] Setting up file drop zone', {
+        mode: isPageMode ? 'page' : 'local',
+        input: $input.name || $input.id,
+      });
+    }
+    /* @dev-only:end */
+
+    // Track drag enter/leave depth for reliable active state
+    let dragDepth = 0;
+
+    // Determine the drop target (zone or entire page)
+    const $dropTarget = isPageMode ? document.body : $zone;
+
+    // Helper: check if event landed on a different local drop zone (page mode only)
+    // If so, let that zone handle it instead
+    const isOverOtherZone = (e) => {
+      if (!isPageMode) {
+        return false;
+      }
+
+      const $closest = e.target.closest('[data-file-drop]');
+      return $closest && $closest !== $zone;
+    };
+
+    // Prevent default on dragover to allow drop
+    $dropTarget.addEventListener('dragover', (e) => {
+      if (isOverOtherZone(e)) {
+        return;
+      }
+
+      e.preventDefault();
+    });
+
+    // Track drag enter for active state
+    $dropTarget.addEventListener('dragenter', (e) => {
+      if (isOverOtherZone(e)) {
+        return;
+      }
+
+      e.preventDefault();
+      dragDepth++;
+
+      if (dragDepth === 1) {
+        $zone.classList.add('file-drop-active');
+      }
+    });
+
+    // Track drag leave for active state
+    $dropTarget.addEventListener('dragleave', (e) => {
+      if (isOverOtherZone(e)) {
+        return;
+      }
+
+      e.preventDefault();
+      dragDepth--;
+
+      if (dragDepth === 0) {
+        $zone.classList.remove('file-drop-active');
+      }
+    });
+
+    // Handle drop
+    $dropTarget.addEventListener('drop', (e) => {
+      if (isOverOtherZone(e)) {
+        return;
+      }
+
+      e.preventDefault();
+      dragDepth = 0;
+      $zone.classList.remove('file-drop-active');
+
+      this._handleFileDrop(e, $input, $zone);
+    });
+
+    // Click-to-browse: click anywhere on the zone opens the file picker
+    $zone.addEventListener('click', (e) => {
+      // Skip if clicking the input itself (avoid double-open)
+      if (e.target === $input) {
+        return;
+      }
+
+      $input.click();
+    });
+
+    // Update file name display when file is selected via browse dialog
+    $input.addEventListener('change', () => {
+      this._updateFileDropName($input, $zone);
+    });
+  }
+
+  /**
+   * Handle a file drop event
+   * @param {DragEvent} e - The drop event
+   * @param {HTMLInputElement} $input - The file input to assign files to
+   * @param {HTMLElement} $zone - The drop zone container
+   */
+  _handleFileDrop(e, $input, $zone) {
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    // Assign files to the input using DataTransfer
+    const dt = new DataTransfer();
+    const acceptAttr = $input.getAttribute('accept');
+    const isMultiple = $input.hasAttribute('multiple');
+
+    for (const file of files) {
+      // Filter by accept attribute if present
+      if (acceptAttr && !this._fileMatchesAccept(file, acceptAttr)) {
+        continue;
+      }
+
+      dt.items.add(file);
+
+      // Only take the first file if input is not multiple
+      if (!isMultiple) {
+        break;
+      }
+    }
+
+    // Show error if no valid files after filtering
+    if (dt.files.length === 0) {
+      $zone.classList.add('file-drop-error');
+      this.showError(`File type not accepted. Accepted: ${acceptAttr}`);
+      return;
+    }
+
+    $input.files = dt.files;
+
+    // Dispatch change event so existing handlers pick it up
+    $input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Update file name display
+    this._updateFileDropName($input, $zone);
+
+    /* @dev-only:start */
+    {
+      console.log('[Form-manager] File dropped', {
+        files: Array.from(dt.files).map((f) => f.name),
+        input: $input.name || $input.id,
+      });
+    }
+    /* @dev-only:end */
+  }
+
+  /**
+   * Update the file name display element in a drop zone
+   * @param {HTMLInputElement} $input - The file input
+   * @param {HTMLElement} $zone - The drop zone container
+   */
+  _updateFileDropName($input, $zone) {
+    const $name = $zone.querySelector('[data-file-drop-name]');
+    if (!$name) {
+      return;
+    }
+
+    const files = $input.files;
+    if (!files || files.length === 0) {
+      $name.textContent = 'No file selected';
+      $zone.classList.remove('file-drop-has-file');
+      return;
+    }
+
+    if (files.length === 1) {
+      $name.textContent = files[0].name;
+    } else {
+      $name.textContent = `${files.length} files selected`;
+    }
+
+    $zone.classList.add('file-drop-has-file');
+    $zone.classList.remove('file-drop-error');
+  }
+
+  /**
+   * Check if a file matches an accept attribute value
+   * @param {File} file - The file to check
+   * @param {string} accept - The accept attribute value (e.g., "image/*,.pdf")
+   * @returns {boolean}
+   */
+  _fileMatchesAccept(file, accept) {
+    const types = accept.split(',').map((t) => t.trim().toLowerCase());
+    const fileName = file.name.toLowerCase();
+    const fileType = (file.type || '').toLowerCase();
+
+    // Common extension-to-MIME-category map for when browser doesn't provide file.type
+    const extToCategory = {
+      '.jpg': 'image/', '.jpeg': 'image/', '.png': 'image/', '.gif': 'image/',
+      '.webp': 'image/', '.svg': 'image/', '.bmp': 'image/', '.ico': 'image/',
+      '.pdf': 'application/pdf',
+    };
+
+    for (const type of types) {
+      // Extension match (e.g., ".pdf")
+      if (type.startsWith('.')) {
+        if (fileName.endsWith(type)) {
+          return true;
+        }
+        continue;
+      }
+
+      // Wildcard MIME match (e.g., "image/*")
+      if (type.endsWith('/*')) {
+        const prefix = type.slice(0, -2) + '/';
+
+        // Check actual MIME type
+        if (fileType && fileType.startsWith(prefix)) {
+          return true;
+        }
+
+        // Fallback: check extension when browser doesn't provide MIME type
+        if (!fileType) {
+          const ext = '.' + fileName.split('.').pop();
+          const guessedCategory = extToCategory[ext] || '';
+          if (guessedCategory.startsWith(prefix)) {
+            return true;
+          }
+        }
+        continue;
+      }
+
+      // Exact MIME match (e.g., "application/pdf")
+      if (fileType === type) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

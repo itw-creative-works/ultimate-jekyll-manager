@@ -82,6 +82,7 @@
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: -0.02em;
+  margin-right: 0;
 
   // Logo with text
   .brand-logo {
@@ -121,6 +122,11 @@
 // Navigation Links
 // ============================================
 .navbar-nav {
+  // Add top spacing on mobile so first item doesn't touch the toggler bar
+  @media (max-width: 991.98px) {
+    margin-top: 0.5rem;
+  }
+
   .nav-link {
     font-weight: 500;
     font-size: 0.95rem;
@@ -393,9 +399,13 @@
   .breadcrumb-item {
     font-size: 0.875rem;
 
-    + .breadcrumb-item::before {
-      content: "→";
-      padding: 0 0.5rem;
+    + .breadcrumb-item {
+      padding-left: 0;
+
+      &::before {
+        content: "→";
+        padding: 0 0.5rem;
+      }
     }
 
     &.active {

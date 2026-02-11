@@ -13,11 +13,12 @@ meta:
   index: false
 ---
 
-<div class="container py-5">
-  <h1 class="mb-4">FormManager Test Page</h1>
-  <p class="text-muted mb-5">Testing different configurations of the FormManager library.</p>
+<section>
+  <div class="container">
+    <h1 class="mb-4">FormManager Test Page</h1>
+    <p class="text-muted mb-5">Testing different configurations of the FormManager library.</p>
 
-  <div class="row g-4">
+    <div class="row g-4">
 
     <!-- Test 1: Full Test (success/fail, nested, change events) -->
     <div class="col-lg-8">
@@ -264,5 +265,42 @@ meta:
       </div>
     </div>
 
+    <!-- Test 6: File Drop -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Test 6: File Drop</h5>
+          <small class="text-muted">data-file-drop (local) and data-file-drop="page"</small>
+        </div>
+        <div class="card-body">
+          <form id="test-form-file-drop">
+            <h6 class="text-muted mb-2">Local mode <span class="badge bg-secondary">default</span></h6>
+            <div class="p-4 text-center mb-3" data-file-drop>
+              <p class="mb-2">Drag & drop or click to browse</p>
+              <input type="file" class="form-control mx-auto" style="max-width: 300px;" name="localFile">
+              <p data-file-drop-name class="small mt-2 mb-0 text-muted">No file selected</p>
+            </div>
+            <h6 class="text-muted mb-2">Local mode + accept <span class="badge bg-warning text-dark">accept=".pdf"</span></h6>
+            <div class="p-4 text-center mb-3" data-file-drop>
+              <p class="mb-2">Drag & drop or click to browse (PDF only)</p>
+              <input type="file" class="form-control mx-auto" style="max-width: 300px;" name="pdfFile" accept=".pdf">
+              <p data-file-drop-name class="small mt-2 mb-0 text-muted">No file selected</p>
+            </div>
+            <h6 class="text-muted mb-2">Page mode <span class="badge bg-info">data-file-drop="page"</span></h6>
+            <div class="p-4 text-center mb-3" data-file-drop="page">
+              <p class="mb-2">Drop anywhere on the page</p>
+              <input type="file" class="form-control mx-auto" style="max-width: 300px;" name="pageFile">
+              <p data-file-drop-name class="small mt-2 mb-0 text-muted">No file selected</p>
+            </div>
+            <button type="submit" class="btn btn-primary" disabled>Submit</button>
+          </form>
+          <div class="mt-2">
+            <small class="text-muted" id="file-drop-status">Status: ready</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
   </div>
-</div>
+</section>

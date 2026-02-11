@@ -22,6 +22,7 @@ export default (Manager) => {
     initTestFormContact();
     initTestFormManual();
     initTestFormGroups();
+    initTestFormFileDrop();
 
     // Resolve after initialization
     return resolve();
@@ -195,6 +196,8 @@ function initTestFormManual() {
 }
 
 // Test 5: Input Groups
+// Test 6: File Drop (defined below initTestFormGroups)
+
 function initTestFormGroups() {
   const formManager = new FormManager('#test-form-groups');
   const $status = document.getElementById('groups-status');
@@ -243,5 +246,25 @@ function initTestFormGroups() {
 
     // Don't actually submit - just show the data
     formManager.showSuccess('getData() returned ' + Object.keys(data).length + ' top-level keys');
+  });
+}
+
+// Test 6: File Drop
+function initTestFormFileDrop() {
+  const formManager = new FormManager('#test-form-file-drop');
+  const $status = document.getElementById('file-drop-status');
+
+  formManager.on('statechange', ({ state }) => {
+    $status.textContent = `Status: ${state}`;
+  });
+
+  formManager.on('change', ({ name, value }) => {
+    console.log('[Test 6] Change:', name, '=', value);
+  });
+
+  formManager.on('submit', async ({ data }) => {
+    console.log('[Test 6] Submitting:', data);
+    await simulateApi(500);
+    formManager.showSuccess('File(s) submitted!');
   });
 }

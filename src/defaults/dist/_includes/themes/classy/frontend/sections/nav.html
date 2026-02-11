@@ -185,13 +185,13 @@
       </ul>
 
       <!-- Right-aligned Actions (desktop only) -->
-      <div class="d-none d-lg-inline-flex align-items-center">
+      <div class="d-none d-lg-inline-flex align-items-center gap-3">
         {% for action in data.actions %}
           {% if action.dropdown %}
             {% if action.type == 'account' %}
               <!-- Account dropdown with profile picture (desktop) -->
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
-              <div class="dropdown ms-lg-3 animation-slide-up d-inline-flex" data-wm-bind="@show auth.user" hidden>
+              <div class="dropdown animation-slide-up d-inline-flex" data-wm-bind="@show auth.user" hidden>
                 <button class="p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
                   <span class="d-flex align-items-center">
                     <span class="position-relative d-inline-flex">
@@ -261,7 +261,7 @@
               <!-- Regular button dropdown -->
               {% capture action_class %}btn dropdown-toggle {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
               {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
-              <div class="dropdown ms-lg-3">
+              <div class="dropdown">
                 <button class="{{ action_class }}" type="button" data-bs-toggle="dropdown" {{ action_attributes }}>
                   <span class="d-inline-flex align-items-center">
                     {% if action.icon %}
@@ -305,7 +305,7 @@
               </div>
             {% endif %}
           {% else %}
-            {% capture action_class %}btn ms-lg-3 {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
+            {% capture action_class %}btn {% if action.class %}{{ action.class }}{% endif %}{% endcapture %}
             {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
             {% capture action_content %}
               <span class="d-inline-flex align-items-center">

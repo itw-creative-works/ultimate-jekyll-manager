@@ -124,3 +124,27 @@
     box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
   }
 }
+
+// ============================================
+// File Drop Zones
+// ============================================
+[data-file-drop] {
+  cursor: pointer;
+  border: 2px dashed var(--bs-border-color) !important;
+  border-radius: $classy-radius-lg;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &.file-drop-active {
+    border-color: $primary !important;
+    background-color: rgba($primary, 0.05);
+  }
+
+  &.file-drop-has-file {
+    border-color: $success !important;
+    border-style: solid !important;
+  }
+
+  &.file-drop-error {
+    border-color: $danger !important;
+  }
+}
