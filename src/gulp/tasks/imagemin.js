@@ -10,6 +10,7 @@ const GitHubCache = require('./utils/github-cache');
 
 // Load package
 const rootPathProject = Manager.getRootPath('project');
+const ujmConfig = Manager.getUJMConfig();
 
 // Settings
 const CACHE_DIR = '.temp/cache/imagemin';
@@ -55,6 +56,12 @@ async function imagemin(complete) {
   // Skip in dev mode - only run during builds
   if (!Manager.isBuildMode()) {
     logger.log('⏭️ Skipping imagemin in dev mode');
+    return complete();
+  }
+
+  // Skip if disabled in config
+  if (ujmConfig?.imagemin?.enabled === false) {
+    logger.log('⏭️ Skipping imagemin - disabled in ultimate-jekyll-manager.json');
     return complete();
   }
 

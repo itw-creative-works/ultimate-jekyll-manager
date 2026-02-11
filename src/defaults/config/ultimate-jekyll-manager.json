@@ -2,6 +2,9 @@
   webpack: {
     target: 'default',
   },
+  imagemin: {
+    enabled: true,
+  },
   github: {
     workflows: {
       build: {
