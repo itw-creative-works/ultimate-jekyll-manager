@@ -12,6 +12,7 @@ const createTemplateTransform = require('./utils/template-transform');
 const package = Manager.getPackage('main');
 const project = Manager.getPackage('project');
 const config = Manager.getConfig('project');
+const ujmConfig = Manager.getUJMConfig();
 const rootPathPackage = Manager.getRootPath('main');
 const rootPathProject = Manager.getRootPath('project');
 
@@ -33,7 +34,8 @@ const input = [
   '!src/**/*.{css,scss,sass}',
   // Exlcude .DS_Store files
   '!**/.DS_Store',
-  // Exclude any temp files
+  // Additional patterns from ultimate-jekyll-manager.json
+  ...(ujmConfig?.distribute?.input || []),
 ];
 const output = 'dist';
 const delay = 250;
