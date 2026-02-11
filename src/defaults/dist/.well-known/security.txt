@@ -7,7 +7,7 @@ permalink: /.well-known/security.txt
 sitemap:
   include: false
 ---
-Contact: mailto:{{ site.brand.email }}
+Contact: mailto:{{ site.brand.contact.email }}
 Contact: {{ site.url }}/contact
 Preferred-Languages: en
 Canonical: {{ site.url }}/.well-known/security.txt
