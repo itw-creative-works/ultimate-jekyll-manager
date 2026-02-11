@@ -164,13 +164,12 @@ class GitHubCache {
     if (options.validFiles) {
       const orphanCheck = await this.checkForOrphans(options.validFiles);
       if (orphanCheck.hasOrphans) {
-        this.logger.log(`🗑️ Found ${orphanCheck.orphanedCount} orphaned files in cache`);
-        forceRecreate = true;
-        files = orphanCheck.validFiles;
-        // Re-add metadata after orphan check
-        if (jetpack.exists(metaPath) && !files.includes(metaPath)) {
-          files.push(metaPath);
+        this.logger.log(`🗑️ Found ${orphanCheck.orphanedCount} orphaned files in cache, removing...`);
+        // Delete orphaned files locally — git add -A will pick up the deletions
+        for (const orphan of orphanCheck.orphanedFiles) {
+          jetpack.remove(path.join(this.cacheDir, orphan));
         }
+        this.logger.log(`✅ Removed ${orphanCheck.orphanedCount} orphaned files`);
       }
     }
 
@@ -415,25 +414,21 @@ class GitHubCache {
         execSync(`git remote add origin https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git`, { cwd: this.cacheDir, stdio: 'ignore' });
         execSync(`git checkout -b ${this.branchName}`, { cwd: this.cacheDir, stdio: 'ignore' });
       } else if (!jetpack.exists(gitDir)) {
-        // If no git dir exists, clone the branch
+        // No .git dir — init locally and fetch the branch ref so we can push incrementally
+        // (files are already here from the ZIP fetch, no need to clone)
         this.logger.log(`📥 Initializing git in cache directory...`);
+        execSync('git init', { cwd: this.cacheDir, stdio: 'ignore' });
+        execSync(`git remote add origin https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git`, { cwd: this.cacheDir, stdio: 'ignore' });
 
-        // Save current files temporarily
-        const tempBackup = path.join(path.dirname(this.cacheDir), `${path.basename(this.cacheDir)}-backup-${Date.now()}`);
-        if (jetpack.exists(this.cacheDir)) {
-          jetpack.move(this.cacheDir, tempBackup);
-        }
-
-        // Clone the branch
-        execSync(
-          `git clone --depth 1 --branch ${this.branchName} https://${process.env.GH_TOKEN}@github.com/${this.owner}/${this.repo}.git "${this.cacheDir}"`,
-          { stdio: 'ignore' }
-        );
-
-        // Restore backed up files (overwriting cloned files)
-        if (jetpack.exists(tempBackup)) {
-          jetpack.copy(tempBackup, this.cacheDir, { overwrite: true });
-          jetpack.remove(tempBackup);
+        // Fetch just the branch ref so git knows the remote history
+        try {
+          execSync(`git fetch --depth 1 origin ${this.branchName}`, { cwd: this.cacheDir, stdio: 'ignore' });
+          execSync(`git checkout -b ${this.branchName}`, { cwd: this.cacheDir, stdio: 'ignore' });
+          // Reset to the fetched ref to establish history, then overlay our files
+          execSync(`git reset origin/${this.branchName}`, { cwd: this.cacheDir, stdio: 'ignore' });
+        } catch (e) {
+          // Branch might not exist yet remotely — just create it locally
+          execSync(`git checkout -b ${this.branchName}`, { cwd: this.cacheDir, stdio: 'ignore' });
         }
       } else {
         // Git dir exists, just pull latest
@@ -519,7 +514,7 @@ class GitHubCache {
   async checkForOrphans(validFiles) {
     const validSet = new Set(validFiles);
     const cacheFiles = jetpack.find(this.cacheDir, {
-      matching: '**/*',
+      matching: ['**/*', '!.git/**'],
       files: true,
       directories: false
     });
@@ -529,7 +524,7 @@ class GitHubCache {
 
     cacheFiles.forEach(file => {
       const relativePath = path.relative(this.cacheDir, file);
-      if (validSet.has(relativePath) || relativePath === 'meta.json') {
+      if (validSet.has(relativePath) || relativePath === 'meta.json' || relativePath === 'README.md') {
         validCacheFiles.push(file);
       } else {
         orphanedFiles.push(relativePath);

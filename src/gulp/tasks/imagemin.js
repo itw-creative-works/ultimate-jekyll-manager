@@ -52,6 +52,12 @@ async function imagemin(complete) {
   logger.log('Starting...');
   Manager.logMemory(logger, 'Start');
 
+  // Skip in dev mode - only run during builds
+  if (!Manager.isBuildMode()) {
+    logger.log('⏭️ Skipping imagemin in dev mode');
+    return complete();
+  }
+
   // Track timing
   const startTime = Date.now();
 
