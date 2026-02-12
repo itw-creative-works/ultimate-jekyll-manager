@@ -79,6 +79,54 @@ function displayConnections() {
     }
   });
 
+  // Show warning cards for enabled API providers missing from the HTML template
+  const $connectionsList = document.getElementById('connections-list');
+  Object.keys(availableProviders).forEach(providerId => {
+    const providerSettings = availableProviders[providerId];
+    const isEnabled = providerSettings && providerSettings.enabled !== false;
+
+    if (!isEnabled) {
+      return;
+    }
+
+    const $existing = document.getElementById(`connection-${providerId}`);
+    if ($existing) {
+      return;
+    }
+
+    // Provider is enabled in API but has no HTML element — create a warning card
+    hasEnabledProviders = true;
+    console.warn(`[Connections] Provider "${providerId}" is enabled in app config but missing from the account page template. Add it to the connections frontmatter list.`);
+
+    const warningId = `connection-${providerId}-unconfigured`;
+    if (document.getElementById(warningId)) {
+      return;
+    }
+
+    const providerName = providerId.charAt(0).toUpperCase() + providerId.slice(1);
+    const $warning = document.createElement('div');
+    $warning.id = warningId;
+    $warning.className = 'border-top px-0 py-3';
+    $warning.innerHTML = `
+      <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3">
+        <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 1.875em; font-size: 1.5rem;">
+            &#9888;
+          </div>
+          <div>
+            <h6 class="mb-0">${providerName}</h6>
+            <small class="text-warning d-block">Unsupported connection: "${providerId}". Update Ultimate Jekyll Manager to enable this provider.</small>
+          </div>
+        </div>
+        <div class="text-start text-sm-end flex-shrink-0">
+          <button class="btn btn-sm btn-outline-secondary" disabled>Unavailable</button>
+        </div>
+      </div>
+    `;
+
+    $connectionsList.appendChild($warning);
+  });
+
   const $empty = document.getElementById('connections-empty');
 
   if ($empty) {
