@@ -88,12 +88,12 @@
                   <li>
                     {% iftruthy child.href %}
                       <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                        {{ child_content | strip }}
+                        {{ child_content }}
                       </a>
                     {% endiftruthy %}
                     {% iffalsy child.href %}
                       <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                        {{ child_content | strip }}
+                        {{ child_content }}
                       </button>
                     {% endiffalsy %}
                   </li>
@@ -143,12 +143,12 @@
                     <li>
                       {% iftruthy child.href %}
                         <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                          {{ child_content | strip }}
+                          {{ child_content }}
                         </a>
                       {% endiftruthy %}
                       {% iffalsy child.href %}
                         <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                          {{ child_content | strip }}
+                          {{ child_content }}
                         </button>
                       {% endiffalsy %}
                     </li>
@@ -171,12 +171,12 @@
             <li class="nav-item">
               {% iftruthy link.href %}
                 <a class="{{ link_class }}" href="{{ link.href }}" {{ link_attributes }}>
-                  {{ link_content | strip }}
+                  {{ link_content }}
                 </a>
               {% endiftruthy %}
               {% iffalsy link.href %}
                 <button class="{{ link_class }}" type="button" {{ link_attributes }}>
-                  {{ link_content | strip }}
+                  {{ link_content }}
                 </button>
               {% endiffalsy %}
             </li>
@@ -244,12 +244,12 @@
                       <li>
                         {% iftruthy child.href %}
                           <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                            {{ child_content | strip }}
+                            {{ child_content }}
                           </a>
                         {% endiftruthy %}
                         {% iffalsy child.href %}
                           <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                            {{ child_content | strip }}
+                            {{ child_content }}
                           </button>
                         {% endiffalsy %}
                       </li>
@@ -290,12 +290,12 @@
                       <li>
                         {% iftruthy child.href %}
                           <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                            {{ child_content | strip }}
+                            {{ child_content }}
                           </a>
                         {% endiftruthy %}
                         {% iffalsy child.href %}
                           <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                            {{ child_content | strip }}
+                            {{ child_content }}
                           </button>
                         {% endiffalsy %}
                       </li>
@@ -317,12 +317,12 @@
             {% endcapture %}
             {% iftruthy action.href %}
               <a class="{{ action_class }}" href="{{ action.href }}" role="button" {{ action_attributes }}>
-                {{ action_content | strip }}
+                {{ action_content }}
               </a>
             {% endiftruthy %}
             {% iffalsy action.href %}
               <button class="{{ action_class }}" type="button" {{ action_attributes }}>
-                {{ action_content | strip }}
+                {{ action_content }}
               </button>
             {% endiffalsy %}
           {% endif %}
@@ -366,12 +366,12 @@
                       <li>
                         {% iftruthy child.href %}
                           <a class="{{ child_class }}" href="{{ child.href }}" {{ child_attributes }}>
-                            {{ child_content | strip }}
+                            {{ child_content }}
                           </a>
                         {% endiftruthy %}
                         {% iffalsy child.href %}
                           <button class="{{ child_class }}" type="button" {{ child_attributes }}>
-                            {{ child_content | strip }}
+                            {{ child_content }}
                           </button>
                         {% endiffalsy %}
                       </li>
@@ -392,12 +392,12 @@
               {% endcapture %}
               {% iftruthy action.href %}
                 <a class="{{ action_class }}" href="{{ action.href }}" role="button" {{ action_attributes }}>
-                  {{ action_content | strip }}
+                  {{ action_content }}
                 </a>
               {% endiftruthy %}
               {% iffalsy action.href %}
                 <button class="{{ action_class }}" type="button" {{ action_attributes }}>
-                  {{ action_content | strip }}
+                  {{ action_content }}
                 </button>
               {% endiffalsy %}
             {% endif %}
