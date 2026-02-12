@@ -702,7 +702,7 @@ faqs:
                     {% elsif feature_value == false %}
                       {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
                     {% elsif feature_value %}
-                      {{ feature_value }}
+                      {{ feature_value | uj_commaify }}
                     {% else %}
                       {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
                     {% endif %}
@@ -712,7 +712,7 @@ faqs:
                     {% elsif inherited_value == false %}
                       {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
                     {% elsif inherited_value %}
-                      {{ inherited_value }}
+                      {{ inherited_value | uj_commaify }}
                     {% else %}
                       {% uj_icon "times-circle", "text-muted fs-5 opacity-25" %}
                     {% endif %}

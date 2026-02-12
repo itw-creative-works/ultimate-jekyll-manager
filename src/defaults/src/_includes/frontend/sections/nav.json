@@ -23,15 +23,18 @@
       dropdown: [
         {
           label: 'Blog',
-          href: '/blog'
+          href: '/blog',
+          icon: 'newspaper'
         },
         {
           label: 'Team',
-          href: '/team'
+          href: '/team',
+          icon: 'users'
         },
         {
           label: 'Careers',
-          href: '/careers'
+          href: '/careers',
+          icon: 'briefcase'
         },
       ]
     },
