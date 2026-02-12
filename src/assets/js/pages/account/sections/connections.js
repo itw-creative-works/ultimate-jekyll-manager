@@ -12,7 +12,7 @@ let accountData = null;
 let connectionForms = new Map();
 
 // Supported providers (must match IDs in HTML)
-const supportedProviders = ['google', 'discord', 'github', 'twitter', 'facebook'];
+const supportedProviders = ['google', 'discord', 'github', 'twitter', 'facebook', 'spotify', 'apple', 'microsoft', 'linkedin', 'twitch', 'slack'];
 
 // Get API URL helper
 function getApiUrl() {
