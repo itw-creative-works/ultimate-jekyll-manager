@@ -81,6 +81,8 @@ const compiled = {};
 const MAIN_BUNDLE_PAGE_PARTIALS = false; // Set to true to merge pages into _page-specific.scss, false to compile separately
 // Enable PurgeCSS via environment variable or in production mode
 const ENABLE_PURGECSS = Manager.isBuildMode() || process.env.UJ_PURGECSS === 'true';
+// Load UJM config for user-defined PurgeCSS safelist
+const ujmConfig = Manager.getUJMConfig();
 
 // SASS Compilation Task
 function sass(complete) {
@@ -272,6 +274,9 @@ function sass(complete) {
 
           // Social
           /^social-share-/,
+
+          // User-defined safelist from ultimate-jekyll-manager.json
+          ...(ujmConfig?.sass?.purgecss?.safelist?.standard || []).map(s => new RegExp(s)),
         ],
         deep: [
           // Preserve input state pseudo-selectors (checkbox, radio, etc.)
@@ -282,8 +287,14 @@ function sass(complete) {
           /:hover/,
           /:valid/,
           /:invalid/,
+
+          // User-defined
+          ...(ujmConfig?.sass?.purgecss?.safelist?.deep || []).map(s => new RegExp(s)),
         ],
-        greedy: [],
+        greedy: [
+          // User-defined
+          ...(ujmConfig?.sass?.purgecss?.safelist?.greedy || []).map(s => new RegExp(s)),
+        ],
         // Preserve keyframe animations
         keyframes: [
           /^spinner-/,
@@ -291,6 +302,9 @@ function sass(complete) {
           // /^fade-/,
           // /^slide-/,
           // /^collapse/
+
+          // User-defined
+          ...(ujmConfig?.sass?.purgecss?.safelist?.keyframes || []).map(s => new RegExp(s)),
         ]
       },
       // Don't remove CSS variables

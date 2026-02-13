@@ -1,12 +1,22 @@
 {
+  distribute: {
+    input: [],
+  },
   webpack: {
     target: 'default',
   },
+  sass: {
+    purgecss: {
+      safelist: {
+        standard: [],
+        deep: [],
+        greedy: [],
+        keyframes: [],
+      },
+    },
+  },
   imagemin: {
     enabled: true,
-  },
-  distribute: {
-    input: [],
   },
   github: {
     workflows: {
