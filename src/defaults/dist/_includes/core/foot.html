@@ -100,6 +100,7 @@
     {% for item in page.resolved.web_manager %}
       {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
     {% endfor %}
+    env: {{ page.resolved.web_manager.env | jsonify }},
   };
 </script>
 

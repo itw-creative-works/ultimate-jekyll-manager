@@ -69,7 +69,13 @@ module.exports = async function serve(complete) {
     externalUrl = instance.options.get('urls').get('external');
 
     // Write the config file
-    jetpack.write('.temp/_config_browsersync.yml', `url: ${externalUrl}`);
+    jetpack.write('.temp/_config_browsersync.yml', [
+      `url: ${externalUrl}`,
+      '',
+      'web_manager:',
+      '  env:',
+      `    FIREBASE_EMULATOR_CONNECT: ${process.env.FIREBASE_EMULATOR_CONNECT === 'true'}`,
+    ].join('\n'));
 //     jetpack.write('.temp/_config_browsersync.yml', `
 // url: ${externalUrl}
 
