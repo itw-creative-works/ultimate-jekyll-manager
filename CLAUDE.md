@@ -26,6 +26,16 @@ Ultimate Jekyll Manager is a template framework that consuming projects install 
 
 The local development server URL is stored in `.temp/_config_browsersync.yml` in the consuming project's root directory. Read this file to determine the correct URL for browsing and testing. By default, use "https://192.168.86.69:4000".
 
+### Connecting to Local Firebase Emulators
+
+Set the `FIREBASE_EMULATOR_CONNECT` environment variable to `true` to connect the frontend to local Firebase services (Auth, Firestore, Functions, etc.):
+
+```bash
+FIREBASE_EMULATOR_CONNECT=true npm start
+```
+
+This value is written to `.temp/_config_browsersync.yml` under `web_manager.env.FIREBASE_EMULATOR_CONNECT` and made available to the frontend at build time.
+
 ## Asset Organization
 
 ### Ultimate Jekyll Manager Files (THIS project)

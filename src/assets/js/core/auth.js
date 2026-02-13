@@ -112,8 +112,8 @@ function redirect(url, returnUrl) {
 }
 
 // Add authReturnUrl to all signup/signin links so users return to the current page after auth
+// Uses click handler so the return URL always reflects the *current* location (e.g. after chat ID is added)
 function updateAuthLinks() {
-  const currentUrl = window.location.href;
   const authPaths = ['/signin', '/signup'];
 
   document.querySelectorAll('a[href]').forEach(($link) => {
@@ -122,8 +122,11 @@ function updateAuthLinks() {
 
       if (!authPaths.includes(href.pathname)) { return; }
 
-      href.searchParams.set('authReturnUrl', currentUrl);
-      $link.href = href.toString();
+      $link.addEventListener('click', (e) => {
+        const url = new URL($link.href, window.location.origin);
+        url.searchParams.set('authReturnUrl', window.location.href);
+        $link.href = url.toString();
+      });
     } catch (e) {}
   });
 }
