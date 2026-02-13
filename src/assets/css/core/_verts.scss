@@ -2,6 +2,20 @@
 // Styles for ad units (verts) and print visibility
 
 // ============================================
+// Sidebar Vert Constraint
+// ============================================
+
+// Limit vert height in backend/admin sidebars to prevent massive ads
+// DOESNT WORK WITH GOOGLE ADS?!
+// .sidebar vert-unit,
+// .sidebar .uj-vert-unit,
+// .offcanvas vert-unit,
+// .offcanvas .uj-vert-unit {
+//   max-height: 250px !important;
+//   overflow: hidden;
+// }
+
+// ============================================
 // Print Styles
 // ============================================
 
