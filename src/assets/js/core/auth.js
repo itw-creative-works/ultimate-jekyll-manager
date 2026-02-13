@@ -75,6 +75,9 @@ export default function (Manager, options) {
         if (policy === 'authenticated') {
           redirect(unauthenticated, window.location.href);
         }
+
+        // Append authReturnUrl to all signup/signin links so users return here after auth
+        updateAuthLinks();
       }
     });
   } catch (e) {
@@ -106,6 +109,23 @@ function redirect(url, returnUrl) {
 
   // Redirect to the new URL
   window.location.href = newURL;
+}
+
+// Add authReturnUrl to all signup/signin links so users return to the current page after auth
+function updateAuthLinks() {
+  const currentUrl = window.location.href;
+  const authPaths = ['/signin', '/signup'];
+
+  document.querySelectorAll('a[href]').forEach(($link) => {
+    try {
+      const href = new URL($link.href, window.location.origin);
+
+      if (!authPaths.includes(href.pathname)) { return; }
+
+      href.searchParams.set('authReturnUrl', currentUrl);
+      $link.href = href.toString();
+    } catch (e) {}
+  });
 }
 
 function setAnalyticsUserId(user, webManager) {
