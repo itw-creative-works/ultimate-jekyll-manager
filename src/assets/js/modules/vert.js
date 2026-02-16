@@ -11,6 +11,33 @@ const searchParams = new URLSearchParams(window.location.search);
 const qsDebug = searchParams.get('debug') === 'true';
 const qsLoud = searchParams.get('loud') === 'true';
 
+// Reveal a vert-unit by removing the initial hide styles
+const revealVertUnit = ($vertUnit) => {
+  if ($vertUnit) {
+    $vertUnit.style.removeProperty('overflow');
+    $vertUnit.style.removeProperty('max-height');
+  }
+};
+
+// Protect height-constrained ancestors from AdSense's height: auto !important override.
+// Walks up from the ad's script element and observes any ancestor with a fixed-height class.
+const HEIGHT_CLASSES = ['vh-100', 'h-100', 'min-vh-100'];
+const protectAncestorHeights = ($el) => {
+  let $current = $el?.parentElement;
+  while ($current && $current !== document.body) {
+    if (HEIGHT_CLASSES.some((cls) => $current.classList.contains(cls))) {
+      const $protected = $current;
+      console.log('[Vert] Protecting ancestor height:', $protected.className);
+      new MutationObserver(() => {
+        if ($protected.style.height) {
+          $protected.style.removeProperty('height');
+        }
+      }).observe($protected, { attributes: true, attributeFilter: ['style'] });
+    }
+    $current = $current.parentElement;
+  }
+};
+
 // Main initialization
 webManager.dom().ready().then(() => {
   // Get the current script element to extract configuration
@@ -87,6 +114,7 @@ const setupMessageHandler = () => {
       const $iframe = document.getElementById(payload.id);
       if ($iframe) {
         $iframe.style.height = payload.height + 'px';
+        revealVertUnit($iframe.closest('vert-unit'));
       }
     } else if (command === 'uj-vert-unit:click') {
       // Navigate to the URL when ad is clicked
@@ -121,6 +149,7 @@ const monitorAdFillStatus = ($vertUnit, config) => {
     // Handle filled status
     if (status === 'filled') {
       console.log('[Vert] Adsense is filled, no fallback needed');
+      revealVertUnit($vertUnit);
       return;
     }
 
@@ -173,7 +202,7 @@ const createCustomAd = ($vertUnit, config) => {
   $iframe.style.cssText = config.style;
   $iframe.setAttribute('sandbox', 'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
   $iframe.width = '100%';
-  $iframe.height = '100%';
+  $iframe.height = '0';
   $iframe.setAttribute('frameborder', '0');
   $iframe.setAttribute('marginwidth', '0');
   $iframe.setAttribute('marginheight', '0');
@@ -187,6 +216,9 @@ const createCustomAd = ($vertUnit, config) => {
   $vertUnit.innerHTML = '';
   $vertUnit.appendChild($iframe);
 
+  // Reveal the vert unit now that custom ad is loaded
+  revealVertUnit($vertUnit);
+
   // Retrigger bindings to apply plan visibility
   webManager.auth().listen({ once: true }, async () => {
     webManager.bindings().update();
@@ -198,12 +230,18 @@ const createCustomAd = ($vertUnit, config) => {
 
 // Function to create and insert the ad unit
 const createAdUnit = (config, $currentScript) => {
+  // Protect height-constrained ancestors before ads modify them
+  protectAncestorHeights($currentScript);
+
   // Create ad unit elements
   const $vertUnit = document.createElement('vert-unit');
 
   // Set attributes and classes
   $vertUnit.className = 'uj-vert-unit';
   $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product !== basic');
+
+  // Hide until ad is ready to prevent layout flash
+  $vertUnit.style.cssText = 'overflow:hidden; max-height:0;';
 
   // Create the ins element for AdSense
   const $ins = document.createElement('ins');
