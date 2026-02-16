@@ -97,13 +97,13 @@ jobs:
       - name: Run node build
         run: |
           UJ_BUILD_MODE=true UJ_IS_SERVER=true npx uj setup && npm run build
-      - name: Delete gh-pages branch
-        continue-on-error: true
-        run: |
-          curl -L \
-            -X DELETE \
-            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            https://api.github.com/repos/$GITHUB_REPOSITORY/git/refs/heads/gh-pages
+      # - name: Delete gh-pages branch
+      #   continue-on-error: true
+      #   run: |
+      #     curl -L \
+      #       -X DELETE \
+      #       -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+      #       https://api.github.com/repos/$GITHUB_REPOSITORY/git/refs/heads/gh-pages
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
