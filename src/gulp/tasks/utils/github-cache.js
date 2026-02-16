@@ -103,11 +103,12 @@ class GitHubCache {
     this.logger.log(`📁 Directory contents: ${JSON.stringify(dirContents)}`);
     this.logger.log(`🔍 Debug - this.owner: ${this.owner}, this.repo: ${this.repo}`);
     this.logger.log(`🔍 Debug - GITHUB_REPOSITORY env: ${process.env.GITHUB_REPOSITORY}`);
-    this.logger.log(`🔍 Debug - Pattern being used: ^${this.owner}-${this.repo}-[a-f0-9]+$`);
 
     // GitHub zipball format: {owner}-{repo}-{sha}
-    // Match this pattern to avoid picking up other cache directories (like imagemin, translation)
-    const githubZipPattern = new RegExp(`^${this.owner}-${this.repo}-[a-f0-9]+$`, 'i');
+    // After repo renames, the folder may use the old repo name, so match any
+    // directory starting with the owner and ending with a hex commit SHA
+    const githubZipPattern = new RegExp(`^${this.owner}-.+-[a-f0-9]{7,40}$`, 'i');
+    this.logger.log(`🔍 Debug - Pattern being used: ${githubZipPattern}`);
 
     const extractedRoot = dirContents.find(name => {
       const fullPath = path.join(extractDir, name);

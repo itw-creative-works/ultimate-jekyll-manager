@@ -41,15 +41,21 @@ async function detectGitHubRepository(logger = console) {
         // GitHub API automatically redirects to the current location of transferred repos
         const { data } = await octokit.repos.get({ owner, repo });
 
-        // Check if the repo was transferred (owner changed)
-        if (data.owner.login !== owner) {
-          logger.log(`🔄 Repository was transferred: ${owner}/${repo} → ${data.owner.login}/${repo}`);
-
-          // Update the local git remote to the new owner
+        // Check if the repo was transferred (owner changed) or renamed
+        if (data.owner.login !== owner || data.name !== repo) {
           const newOwner = data.owner.login;
+          const newRepo = data.name;
+
+          if (data.owner.login !== owner) {
+            logger.log(`🔄 Repository was transferred: ${owner}/${repo} → ${newOwner}/${newRepo}`);
+          } else {
+            logger.log(`🔄 Repository was renamed: ${owner}/${repo} → ${newOwner}/${newRepo}`);
+          }
+
+          // Update the local git remote
           const newUrl = result.includes('git@')
-            ? `git@github.com:${newOwner}/${repo}.git`
-            : `https://github.com/${newOwner}/${repo}.git`;
+            ? `git@github.com:${newOwner}/${newRepo}.git`
+            : `https://github.com/${newOwner}/${newRepo}.git`;
 
           try {
             await execute(`git remote set-url origin ${newUrl}`, { log: false });
@@ -59,6 +65,7 @@ async function detectGitHubRepository(logger = console) {
           }
 
           owner = newOwner;
+          repo = newRepo;
         }
       } catch (apiError) {
         // If API call fails, fall back to git remote value
