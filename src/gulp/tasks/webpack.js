@@ -219,7 +219,7 @@ function getSettings() {
       rules: [
         {
           test: /\.js$/,
-          exclude: /node_modules/,
+          exclude: (filePath) => /node_modules/.test(filePath) && !filePath.includes(`node_modules/${package.name}/`),
           use: [
             {
               loader: 'babel-loader',
