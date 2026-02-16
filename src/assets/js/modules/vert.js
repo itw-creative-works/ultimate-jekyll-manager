@@ -11,18 +11,6 @@ const searchParams = new URLSearchParams(window.location.search);
 const qsDebug = searchParams.get('debug') === 'true';
 const qsLoud = searchParams.get('loud') === 'true';
 
-// DISABLED: Hide/reveal system for vert units. Was causing in-house verts (promo-server fallback)
-// to not display because: (1) vert-unit starts hidden with max-height:0, (2) AdSense "ghost fills"
-// (reports filled but renders nothing) would reveal an empty container, (3) iframe height was set
-// to 0 and relied on promo-server sending dimensions back, but promo-server was sending height:0.
-// Re-enable once promo-server set-dimensions is fixed and ghost fill detection is added.
-// const revealVertUnit = ($vertUnit) => {
-//   if ($vertUnit) {
-//     $vertUnit.style.removeProperty('overflow');
-//     $vertUnit.style.removeProperty('max-height');
-//   }
-// };
-
 // Protect height-constrained ancestors from AdSense's height: auto !important override.
 // Walks up from the ad's script element and observes any ancestor with a fixed-height class.
 const HEIGHT_CLASSES = ['vh-100', 'h-100', 'min-vh-100'];
@@ -114,36 +102,8 @@ const setupMessageHandler = () => {
 
     // Handle commands
     if (command === 'uj-vert-unit:set-dimensions') {
-      // Update iframe dimensions dynamically
       const $iframe = document.getElementById(payload.id);
-      if ($iframe) {
-        // If promo-server reports 0 dimensions, it means the iframe hasn't been laid out yet
-        // (e.g., ad blocker cosmetic filters or element not in layout flow on initial load).
-        // Skip setting height to 0 and request a re-measurement after a delay.
-        if (!payload.height || !payload.width) {
-          // Track re-measure attempts per iframe
-          const reMeasureCount = ($iframe.__reMeasureCount || 0) + 1;
-          $iframe.__reMeasureCount = reMeasureCount;
-
-          // Give up after 5 attempts (total ~8s of retrying including promo-server's own retries)
-          if (reMeasureCount > 5) {
-            console.warn('[Vert] Giving up on re-measure after', reMeasureCount, 'attempts');
-            return;
-          }
-
-          console.warn('[Vert] Received 0 dimensions, requesting re-measure (attempt', reMeasureCount + '):', payload);
-          setTimeout(() => {
-            // Measure vert-unit width from parent and send it to iframe so it can
-            // use it as a fallback if its own self-measurement returns 0.
-            const $vertUnit = $iframe.closest('vert-unit');
-            const currentParentWidth = $vertUnit ? $vertUnit.offsetWidth : 0;
-            $iframe.contentWindow?.postMessage({
-              command: 'uj-vert-unit:re-measure',
-              payload: { parentWidth: currentParentWidth },
-            }, '*');
-          }, 500 * reMeasureCount);
-          return;
-        }
+      if ($iframe && payload.height) {
         $iframe.style.height = payload.height + 'px';
       }
     } else if (command === 'uj-vert-unit:click') {
@@ -179,8 +139,6 @@ const monitorAdFillStatus = ($vertUnit, config) => {
     // Handle filled status
     if (status === 'filled') {
       console.log('[Vert] Adsense is filled, no fallback needed');
-      // DISABLED: See revealVertUnit note above
-      // revealVertUnit($vertUnit);
       return;
     }
 
@@ -216,18 +174,10 @@ const createCustomAd = ($vertUnit, config) => {
     ? `${window.location.protocol}//${window.location.host}/verts/main`
     : 'https://promo-server.itwcreativeworks.com/verts/main';
 
-  // Measure the vert-unit's width from the parent page so the iframe knows its
-  // available width even if Rocket Loader or other deferrals prevent the iframe
-  // from self-measuring on initial load.
-  const parentWidth = $vertUnit.offsetWidth;
-
   // Build full URL with parameters
   const adURL = new URL(baseURL);
   adURL.searchParams.set('parentURL', window.location.href);
   adURL.searchParams.set('frameId', iframeId);
-  if (parentWidth) {
-    adURL.searchParams.set('parentWidth', parentWidth);
-  }
   if (config.size) {
     adURL.searchParams.set('size', config.size);
   }
@@ -241,7 +191,7 @@ const createCustomAd = ($vertUnit, config) => {
   $iframe.style.cssText = config.style;
   $iframe.setAttribute('sandbox', 'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation');
   $iframe.width = '100%';
-  $iframe.height = '100%'; // DISABLED: was '0' to rely on promo-server set-dimensions, but promo-server sends height:0
+  $iframe.height = '100%';
   $iframe.setAttribute('frameborder', '0');
   $iframe.setAttribute('marginwidth', '0');
   $iframe.setAttribute('marginheight', '0');
@@ -254,9 +204,6 @@ const createCustomAd = ($vertUnit, config) => {
   // Clear any existing content and insert the iframe
   $vertUnit.innerHTML = '';
   $vertUnit.appendChild($iframe);
-
-  // DISABLED: See revealVertUnit note above
-  // revealVertUnit($vertUnit);
 
   // Retrigger bindings to apply plan visibility
   webManager.auth().listen({ once: true }, async () => {
@@ -278,9 +225,6 @@ const createAdUnit = (config, $currentScript) => {
   // Set attributes and classes
   $vertUnit.className = 'uj-vert-unit';
   $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product.id !== basic');
-
-  // DISABLED: See revealVertUnit note above
-  // $vertUnit.style.cssText = 'overflow:hidden; max-height:0;';
 
   // Create the ins element for AdSense
   const $ins = document.createElement('ins');
