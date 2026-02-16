@@ -114,7 +114,7 @@
       <div class="mt-auto px-0">
         {% if data.bottom.ad.enabled %}
           <!-- Upsell Link -->
-          <a href="/pricing" class="d-block text-center text-muted small text-decoration-none mb-2" data-wm-bind="@show auth.account.subscription.product === basic" hidden>
+          <a href="/pricing" class="d-block text-center text-muted small text-decoration-none mb-2" data-wm-bind="@show auth.account.subscription.product.id === basic" hidden>
             Remove with {% uj_icon "crown", "fa-sm text-success" %} <span class="text-success">Premium</span>
           </a>
           <!-- Sidebar Ad -->
@@ -233,7 +233,7 @@
       <div class="mt-auto pt-3">
         {% if data.bottom.ad.enabled %}
           <!-- Upsell Link -->
-          <a href="/pricing" class="d-block text-center text-muted small text-decoration-none mb-2" data-wm-bind="@show auth.account.subscription.product === basic" hidden>
+          <a href="/pricing" class="d-block text-center text-muted small text-decoration-none mb-2" data-wm-bind="@show auth.account.subscription.product.id === basic" hidden>
             Remove with {% uj_icon "crown", "fa-sm text-success" %} <span class="text-success">Premium</span>
           </a>
           <!-- Mobile Sidebar Ad -->

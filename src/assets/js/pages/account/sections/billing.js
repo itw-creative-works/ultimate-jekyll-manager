@@ -30,7 +30,7 @@ function updatePlanInfo(account) {
 
   if ($planName) {
     // Get the product ID
-    const productId = subscription.product || 'basic';
+    const productId = subscription.product?.id || 'basic';
 
     // Look up the product name from appData
     let displayName = 'Free';
@@ -154,7 +154,7 @@ function updateUsageInfo(account) {
   if (!$container) return;
 
   // Get the user's current plan/product
-  const productId = subscription.product || 'basic';
+  const productId = subscription.product?.id || 'basic';
   const product = appData?.products?.[productId];
   const limits = product?.limits || {};
 

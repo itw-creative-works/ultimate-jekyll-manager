@@ -2,6 +2,17 @@
 // Styles for ad units (verts) and print visibility
 
 // ============================================
+// Base Styles
+// ============================================
+
+// Custom elements default to display:inline, which collapses to 0 width
+// when there's no text content. This causes AdSense and promo-server iframes
+// to render into a 0-width container when the ad is already in viewport on load.
+vert-unit {
+  display: block;
+}
+
+// ============================================
 // Sidebar Vert Constraint
 // ============================================
 

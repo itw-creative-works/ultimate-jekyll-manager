@@ -55,7 +55,7 @@
     //   class: 'btn-adaptive',
     //   icon: 'crown',
     //   attributes: [
-    //     ['data-wm-bind', '@show auth.account.subscription.product === basic'],
+    //     ['data-wm-bind', '@show auth.account.subscription.product.id === basic'],
     //     ['hidden', '']
     //   ]
     // },

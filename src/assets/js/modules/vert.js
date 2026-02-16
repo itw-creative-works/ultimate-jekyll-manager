@@ -117,9 +117,34 @@ const setupMessageHandler = () => {
       // Update iframe dimensions dynamically
       const $iframe = document.getElementById(payload.id);
       if ($iframe) {
+        // If promo-server reports 0 dimensions, it means the iframe hasn't been laid out yet
+        // (e.g., ad blocker cosmetic filters or element not in layout flow on initial load).
+        // Skip setting height to 0 and request a re-measurement after a delay.
+        if (!payload.height || !payload.width) {
+          // Track re-measure attempts per iframe
+          const reMeasureCount = ($iframe.__reMeasureCount || 0) + 1;
+          $iframe.__reMeasureCount = reMeasureCount;
+
+          // Give up after 5 attempts (total ~8s of retrying including promo-server's own retries)
+          if (reMeasureCount > 5) {
+            console.warn('[Vert] Giving up on re-measure after', reMeasureCount, 'attempts');
+            return;
+          }
+
+          console.warn('[Vert] Received 0 dimensions, requesting re-measure (attempt', reMeasureCount + '):', payload);
+          setTimeout(() => {
+            // Measure vert-unit width from parent and send it to iframe so it can
+            // use it as a fallback if its own self-measurement returns 0.
+            const $vertUnit = $iframe.closest('vert-unit');
+            const currentParentWidth = $vertUnit ? $vertUnit.offsetWidth : 0;
+            $iframe.contentWindow?.postMessage({
+              command: 'uj-vert-unit:re-measure',
+              payload: { parentWidth: currentParentWidth },
+            }, '*');
+          }, 500 * reMeasureCount);
+          return;
+        }
         $iframe.style.height = payload.height + 'px';
-        // DISABLED: See revealVertUnit note above
-        // revealVertUnit($iframe.closest('vert-unit'));
       }
     } else if (command === 'uj-vert-unit:click') {
       // Navigate to the URL when ad is clicked
@@ -191,10 +216,18 @@ const createCustomAd = ($vertUnit, config) => {
     ? `${window.location.protocol}//${window.location.host}/verts/main`
     : 'https://promo-server.itwcreativeworks.com/verts/main';
 
+  // Measure the vert-unit's width from the parent page so the iframe knows its
+  // available width even if Rocket Loader or other deferrals prevent the iframe
+  // from self-measuring on initial load.
+  const parentWidth = $vertUnit.offsetWidth;
+
   // Build full URL with parameters
   const adURL = new URL(baseURL);
   adURL.searchParams.set('parentURL', window.location.href);
   adURL.searchParams.set('frameId', iframeId);
+  if (parentWidth) {
+    adURL.searchParams.set('parentWidth', parentWidth);
+  }
   if (config.size) {
     adURL.searchParams.set('size', config.size);
   }
@@ -244,7 +277,7 @@ const createAdUnit = (config, $currentScript) => {
 
   // Set attributes and classes
   $vertUnit.className = 'uj-vert-unit';
-  $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product !== basic');
+  $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product.id !== basic');
 
   // DISABLED: See revealVertUnit note above
   // $vertUnit.style.cssText = 'overflow:hidden; max-height:0;';
