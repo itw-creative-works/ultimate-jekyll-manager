@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "0.0.251",
+  "version": "0.0.252",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -77,7 +77,7 @@
     "dotenv": "^17.3.1",
     "fast-xml-parser": "^5.3.6",
     "fs-jetpack": "^5.1.0",
-    "glob": "^13.0.3",
+    "glob": "^13.0.4",
     "gulp-clean-css": "^4.3.0",
     "gulp-filter": "^9.0.1",
     "gulp-postcss": "^10.0.0",
@@ -91,7 +91,7 @@
     "json5": "^2.2.3",
     "libsodium-wrappers": "^0.8.2",
     "lodash": "^4.17.23",
-    "minimatch": "^10.2.0",
+    "minimatch": "^10.2.1",
     "node-powertools": "^2.3.2",
     "npm-api": "^1.0.1",
     "postcss": "^8.5.6",

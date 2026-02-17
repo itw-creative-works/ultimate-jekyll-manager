@@ -154,6 +154,8 @@ async function imagemin(complete) {
       withMetadata: false,
       withoutEnlargement: false,
       skipOnEnlargement: false,
+      errorOnUnusedImage: false,
+      passThroughUnused: true,
     }))
     .pipe(dest(output))
     .on('data', (file) => {
@@ -306,6 +308,9 @@ async function determineFilesToProcess(files, meta, githubCache, stats) {
   const filesToProcess = [];
   const validCachePaths = new Set();
 
+  // File extensions that get responsive processing (multiple sizes + webp)
+  const RESPONSIVE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
+
   for (const file of files) {
     const relativePath = path.relative(rootPathProject, file);
     const hash = githubCache ? githubCache.calculateHash(file) : null;
@@ -315,16 +320,22 @@ async function determineFilesToProcess(files, meta, githubCache, stats) {
     const dirName = path.dirname(relativePath).replace(/^src\/assets\/images\/?/, '');
     const originalExt = path.extname(file).slice(1); // Remove the dot
 
+    // Only generate responsive outputs for supported formats
+    // Other formats (svg, gif, webp) pass through as-is
     const outputs = [];
-    PICTURE_SIZES.forEach(size => {
-      size.formats.forEach(format => {
-        if (format === 'original') {
-          outputs.push(`${baseName}${size.suffix}.${originalExt}`);
-        } else if (format === 'webp') {
-          outputs.push(`${baseName}${size.suffix}.webp`);
-        }
+    if (RESPONSIVE_EXTENSIONS.has(originalExt.toLowerCase())) {
+      PICTURE_SIZES.forEach(size => {
+        size.formats.forEach(format => {
+          if (format === 'original') {
+            outputs.push(`${baseName}${size.suffix}.${originalExt}`);
+          } else if (format === 'webp') {
+            outputs.push(`${baseName}${size.suffix}.webp`);
+          }
+        });
       });
-    });
+    } else {
+      outputs.push(`${baseName}.${originalExt}`);
+    }
 
     // Track as valid cache files
     outputs.forEach(name => validCachePaths.add(path.join('images', dirName, name)));
