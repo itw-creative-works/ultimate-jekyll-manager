@@ -178,9 +178,6 @@ const createCustomAd = ($vertUnit, config) => {
   const adURL = new URL(baseURL);
   adURL.searchParams.set('parentURL', window.location.href);
   adURL.searchParams.set('frameId', iframeId);
-  if (config.size) {
-    adURL.searchParams.set('size', config.size);
-  }
   if (config.vertId) {
     adURL.searchParams.set('loadVertId', config.vertId);
   }
@@ -214,6 +211,35 @@ const createCustomAd = ($vertUnit, config) => {
   console.log('[Vert] Custom ad unit created');
 };
 
+// Size presets (name → max-height in pixels)
+const SIZE_PRESETS = {
+  banner: 150,
+  leaderboard: 90,
+  rectangle: 250,
+  'large-rectangle': 600,
+  skyscraper: 600,
+};
+
+// Resolve size value from preset name or raw pixel number
+const resolveSize = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  // Check presets first
+  if (SIZE_PRESETS[value]) {
+    return SIZE_PRESETS[value] + 'px';
+  }
+
+  // Treat as raw pixel value
+  const num = parseInt(value, 10);
+  if (!isNaN(num)) {
+    return num + 'px';
+  }
+
+  return '';
+};
+
 // Function to create and insert the ad unit
 const createAdUnit = (config, $currentScript) => {
   // Protect height-constrained ancestors before ads modify them
@@ -225,6 +251,13 @@ const createAdUnit = (config, $currentScript) => {
   // Set attributes and classes
   $vertUnit.className = 'uj-vert-unit';
   $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product.id !== basic');
+
+  // Apply size constraint if specified
+  const maxHeight = resolveSize(config.size);
+  if (maxHeight) {
+    $vertUnit.style.maxHeight = maxHeight;
+    $vertUnit.style.overflow = 'hidden';
+  }
 
   // Create the ins element for AdSense
   const $ins = document.createElement('ins');

@@ -42,6 +42,8 @@
   {% assign full-width-responsive = "" %}
 {% endif %}
 
+{% assign vert-size = include.vert-size | default: "" %}
+
 <!-- Inject Ad -->
 {%- iftruthy page-adsense-client -%}
   <div data-lazy='@script {
@@ -54,6 +56,7 @@
       "data-ad-layout-key": "{{ layout-key }}",
       "data-ad-style": "{{ style }}",
       "data-ad-format": "{{ format }}",
+      "data-ad-size": "{{ vert-size }}",
       "data-full-width-responsive": "{{ full-width-responsive }}",
       "async": ""
     }

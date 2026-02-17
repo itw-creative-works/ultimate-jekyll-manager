@@ -314,6 +314,48 @@ Add the `.btn-action` class to protect custom elements that trigger important ac
 **Use `.btn-action` for:** API calls, form submissions, data modifications, payments, destructive actions
 **Don't use for:** Navigation, UI toggles, modals, accordions, harmless interactions
 
+### Ad Units (Verts)
+
+UJ provides ad unit includes that display Google AdSense ads with automatic fallback to in-house promo-server ads when AdSense is blocked or unfilled.
+
+#### AdSense Include (with fallback)
+```liquid
+{% include /modules/adunits/adsense.html type="in-article" %}
+{% include /modules/adunits/adsense.html type="display" vert-size="rectangle" %}
+{% include /modules/adunits/adsense.html type="display" vert-size="300" %}
+```
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `type` | `display` | Ad type: `display`, `in-article`, `in-feed`, `multiplex` |
+| `vert-size` | (unconstrained) | Max height preset or pixel value |
+| `slot` | From site config | Override the ad slot ID |
+| `style` | `""` | Custom inline CSS |
+
+#### Promo Server Include (direct, no AdSense)
+```liquid
+{% include /modules/adunits/promo-server.html vert-id="/verts/units/test/google" %}
+{% include /modules/adunits/promo-server.html vert-id="/verts/units/test/google" vert-size="banner" %}
+```
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `vert-id` | `""` | Path to the vert on promo-server |
+| `vert-size` | (unconstrained) | Max height preset or pixel value |
+| `style` | `""` | Custom inline CSS |
+
+#### Size Presets
+
+| Preset | Max Height | Typical Use |
+|--------|-----------|-------------|
+| `banner` | 150px | Horizontal banner ads |
+| `leaderboard` | 90px | Wide horizontal ads |
+| `rectangle` | 250px | Medium rectangle, in-content ads |
+| `large-rectangle` | 600px | Large rectangle, sidebar ads |
+| `skyscraper` | 600px | Tall sidebar ads |
+
+Raw pixel values also accepted: `vert-size="300"` → 300px max-height. Omit `vert-size` for unconstrained rendering.
+
 ### Special Query Parameters
 
 #### Authentication
