@@ -56,7 +56,7 @@
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     <li>
                       {% iftruthy child.href %}
-                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
+                        <a href="{{ child.href }}" class="link-body-emphasis d-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
@@ -67,7 +67,7 @@
                         </a>
                       {% endiftruthy %}
                       {% iffalsy child.href %}
-                        <button type="button" class="link-body-emphasis d-inline-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
+                        <button type="button" class="link-body-emphasis d-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
@@ -118,7 +118,7 @@
             Remove with {% uj_icon "crown", "fa-sm text-success" %} <span class="text-success">Premium</span>
           </a>
           <!-- Sidebar Ad -->
-          {% include /modules/adunits/adsense.html type="in-article" %}
+          {% include /modules/adunits/adsense.html type="in-article" vert-size="rectangle" %}
         {% endif %}
       </div>
     {% endif %}
@@ -176,7 +176,7 @@
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
                     <li>
                       {% iftruthy child.href %}
-                        <a href="{{ child.href }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
+                        <a href="{{ child.href }}" class="link-body-emphasis d-flex text-decoration-none rounded {{ child_active }}" {{ child_attributes }}>
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
@@ -187,7 +187,7 @@
                         </a>
                       {% endiftruthy %}
                       {% iffalsy child.href %}
-                        <button type="button" class="link-body-emphasis d-inline-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
+                        <button type="button" class="link-body-emphasis d-flex text-decoration-none rounded border-0 bg-transparent {% if child.class %}{{ child.class }}{% endif %}">
                           {% if child.icon %}
                             {% uj_icon child.icon, "fa-xl me-3" %}
                           {% endif %}
@@ -237,7 +237,7 @@
             Remove with {% uj_icon "crown", "fa-sm text-success" %} <span class="text-success">Premium</span>
           </a>
           <!-- Mobile Sidebar Ad -->
-          {% include /modules/adunits/adsense.html type="in-article" %}
+          {% include /modules/adunits/adsense.html type="in-article" vert-size="rectangle" %}
         {% endif %}
       </div>
     {% endif %}

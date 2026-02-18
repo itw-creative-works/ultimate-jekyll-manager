@@ -253,9 +253,9 @@ const createAdUnit = (config, $currentScript) => {
   $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product.id !== basic');
 
   // Apply size constraint if specified
-  const maxHeight = resolveSize(config.size);
-  if (maxHeight) {
-    $vertUnit.style.maxHeight = maxHeight;
+  if (config.size) {
+    $vertUnit.setAttribute('data-vert-size', config.size);
+    $vertUnit.style.maxHeight = resolveSize(config.size);
     $vertUnit.style.overflow = 'hidden';
   }
 

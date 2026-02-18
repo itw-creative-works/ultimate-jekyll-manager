@@ -501,12 +501,13 @@
   }
 }
 
-.btn-toggle-nav a {
+.btn-toggle-nav a,
+.btn-toggle-nav button {
   display: block;
   padding: .375rem .75rem;
   margin-top: .125rem;
   margin-left: 1.25rem;
-  margin-right: .5rem;
+  margin-right: 1.25rem;
   border-radius: .375rem;
   color: var(--bs-body-color);
   text-decoration: none;
@@ -551,7 +552,8 @@ nav {
 
 // Dark mode overrides for all sidebar links
 [data-bs-theme="dark"] {
-  .btn-toggle-nav a {
+  .btn-toggle-nav a,
+  .btn-toggle-nav button {
     &:hover,
     &:focus {
       background-color: rgba(255, 255, 255, 0.08);
