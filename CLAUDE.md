@@ -907,7 +907,7 @@ initializing → ready ⇄ submitting → ready (or submitted)
   initialState: 'ready',     // State after autoReady fires
   allowResubmit: true,       // Allow resubmission after success (false = 'submitted' state)
   resetOnSuccess: false,     // Clear form fields after successful submission
-  warnOnUnsavedChanges: false, // Warn user before leaving with unsaved changes
+  warnOnUnsavedChanges: true, // Warn user before leaving page with unsaved changes
   submittingText: 'Processing...', // Text shown on submit button during submission
   submittedText: 'Processed!', // Text shown on submit button after success (when allowResubmit: false)
   inputGroup: null           // Filter getData() by data-input-group attribute (null = all fields)

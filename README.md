@@ -674,7 +674,7 @@ formManager.ready(); // Now form is interactive
 | `initialState` | `'ready'` | State after autoReady fires |
 | `allowResubmit` | `true` | Allow form resubmission after success |
 | `resetOnSuccess` | `false` | Clear fields after successful submission |
-| `warnOnUnsavedChanges` | `false` | Show browser warning when leaving with unsaved changes |
+| `warnOnUnsavedChanges` | `true` | Show browser warning when leaving with unsaved changes |
 | `submittingText` | `'Processing...'` | Text shown on submit button during submission |
 
 **Test Page:** Navigate to `/test/libraries/form-manager` to see FormManager in action with various configurations.

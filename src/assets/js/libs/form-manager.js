@@ -34,7 +34,7 @@ export class FormManager {
       initialState: 'ready', // State to transition to when autoReady fires
       allowResubmit: true, // Allow resubmission after success (false = go to 'submitted' state)
       resetOnSuccess: false, // Clear form fields after successful submission
-      warnOnUnsavedChanges: false, // Warn user before leaving page with unsaved changes
+      warnOnUnsavedChanges: true, // Warn user before leaving page with unsaved changes
       submittingText: 'Processing...', // Text shown on submit button during submission
       submittedText: 'Processed!', // Text shown on submit button after submission (when allowResubmit: false)
       inputGroup: null, // Filter getData() to only include fields with matching data-input-group (null = all fields)
