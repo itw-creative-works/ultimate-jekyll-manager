@@ -11,6 +11,12 @@ export default function (Manager, options) {
   // Get auth policy
   const config = webManager.config.auth.config;
   const policy = config.policy;
+
+  // Skip auth module entirely if policy is disabled (e.g., vert iframes)
+  if (policy === 'disabled') {
+    return;
+  }
+
   const authenticated = config.redirects.authenticated;
   const unauthenticated = config.redirects.unauthenticated;
 
