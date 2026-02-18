@@ -11,15 +11,24 @@ const searchParams = new URLSearchParams(window.location.search);
 const qsDebug = searchParams.get('debug') === 'true';
 const qsLoud = searchParams.get('loud') === 'true';
 
-// Protect height-constrained ancestors from AdSense's height: auto !important override.
-// Walks up from the ad's script element and observes any ancestor with a fixed-height class.
+// AdSense aggressively overrides styles with height: auto !important on ancestor elements.
+// This protects height-constrained ancestors and the vert-unit itself from being tampered with.
 const HEIGHT_CLASSES = ['vh-100', 'h-100', 'min-vh-100'];
-const protectAncestorHeights = ($el) => {
+const protectFromAdSenseOverrides = ($el, $vertUnit, resolvedSize) => {
+  // Protect the vert-unit's max-height constraint
+  if (resolvedSize) {
+    new MutationObserver(() => {
+      if ($vertUnit.style.getPropertyValue('max-height') !== resolvedSize) {
+        $vertUnit.style.setProperty('max-height', resolvedSize, 'important');
+      }
+    }).observe($vertUnit, { attributes: true, attributeFilter: ['style'] });
+  }
+
+  // Protect height-constrained ancestors
   let $current = $el?.parentElement;
   while ($current && $current !== document.body) {
     if (HEIGHT_CLASSES.some((cls) => $current.classList.contains(cls))) {
       const $protected = $current;
-      console.log('[Vert] Protecting ancestor height:', $protected.className);
       new MutationObserver(() => {
         if ($protected.style.height) {
           $protected.style.removeProperty('height');
@@ -242,9 +251,6 @@ const resolveSize = (value) => {
 
 // Function to create and insert the ad unit
 const createAdUnit = (config, $currentScript) => {
-  // Protect height-constrained ancestors before ads modify them
-  protectAncestorHeights($currentScript);
-
   // Create ad unit elements
   const $vertUnit = document.createElement('vert-unit');
 
@@ -253,11 +259,16 @@ const createAdUnit = (config, $currentScript) => {
   $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product.id !== basic');
 
   // Apply size constraint if specified
+  let resolvedSize = '';
   if (config.size) {
+    resolvedSize = resolveSize(config.size);
     $vertUnit.setAttribute('data-vert-size', config.size);
-    $vertUnit.style.maxHeight = resolveSize(config.size);
-    $vertUnit.style.overflow = 'hidden';
+    $vertUnit.style.setProperty('max-height', resolvedSize, 'important');
+    $vertUnit.style.setProperty('overflow', 'hidden');
   }
+
+  // Protect vert-unit and height-constrained ancestors from AdSense style overrides
+  protectFromAdSenseOverrides($currentScript, $vertUnit, resolvedSize);
 
   // Create the ins element for AdSense
   const $ins = document.createElement('ins');
