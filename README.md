@@ -391,10 +391,13 @@ The prerendered icons library provides access to icons defined in page frontmatt
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 ```
 
-**Function: `getPrerenderedIcon(iconName)`**
+**Function: `getPrerenderedIcon(iconName, classes)`**
+
+A drop-in replacement for `uj_icon` in JavaScript contexts. The second argument works the same as `uj_icon`'s second argument.
 
 **Parameters:**
 - `iconName` (string) - Name of the icon to retrieve (matches `data-icon` attribute in frontmatter)
+- `classes` (string, optional) - CSS classes for the `<i>` wrapper (e.g. `"fa-md me-2"`). Without this, the icon has no size class.
 
 **Returns:**
 - (string) Icon HTML or empty string if not found
@@ -403,28 +406,28 @@ import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js
 ```javascript
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 
-// Get a pre-rendered icon
-const appleIcon = getPrerenderedIcon('apple');
+// With size + classes (same as {% uj_icon "apple", "fa-xl" %})
+$el.innerHTML = getPrerenderedIcon('apple', 'fa-xl');
 
-// Use in your page
-document.querySelector('.device-icon').innerHTML = appleIcon;
+// In a button (same as {% uj_icon "play", "fa-md me-1" %})
+$btn.innerHTML = `${getPrerenderedIcon('play', 'fa-md me-1')} Run Now`;
+
+// Without classes (no size class on the <i> wrapper)
+$el.innerHTML = getPrerenderedIcon('apple');
 ```
 
 **Setup:**
-Define icons in your page frontmatter:
+Define icons in your page frontmatter (names only, no classes):
 ```yaml
 ---
 prerender_icons:
   - name: "apple"
-    class: "fa-3xl"
   - name: "android"
-    class: "fa-2xl"
   - name: "chrome"
-    class: "fa-lg"
 ---
 ```
 
-**Available Icon Sizes:**
+**Available Icon Sizes (passed as second argument):**
 - `fa-2xs` - Extra extra small
 - `fa-xs` - Extra small
 - `fa-sm` - Small

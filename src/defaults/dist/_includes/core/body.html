@@ -42,9 +42,8 @@
   <div id="prerendered-icons" class="d-none" aria-hidden="true">
     {%- for icon in icons -%}
       {%- assign icon_name = icon.name | default: icon -%}
-      {%- assign icon_class = icon.class | default: "fa-3xl" -%}
-      <div data-icon="{{ icon_name }}" data-class="{{ icon_class }}">
-        {% uj_icon icon_name, icon_class %}
+      <div data-icon="{{ icon_name }}">
+        {% uj_icon icon_name, "" %}
       </div>
     {%- endfor -%}
   </div>

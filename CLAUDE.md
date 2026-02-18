@@ -447,16 +447,13 @@ When icons are part of the static HTML template, use `{% uj_icon %}` directly:
 
 When icons need to be dynamically inserted via JavaScript, pre-render them in frontmatter and access them via the library:
 
-**1. Add icons to page frontmatter:**
+**1. Add icons to page frontmatter (names only, no classes):**
 ```yaml
 ---
 prerender_icons:
   - name: "mobile"
-    class: "fa-sm me-1"
   - name: "envelope"
-    class: "fa-sm me-1"
   - name: "bell"
-    class: "fa-sm me-1"
 ---
 ```
 
@@ -465,10 +462,13 @@ prerender_icons:
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 ```
 
-**3. Use in your code:**
+**3. Use in your code (second argument works like uj_icon's second argument):**
 ```javascript
-const iconHTML = getPrerenderedIcon('mobile');
-$badge.innerHTML = `${iconHTML}Push Notification`;
+// With size + classes (same as {% uj_icon "mobile", "fa-sm me-1" %})
+$badge.innerHTML = `${getPrerenderedIcon('mobile', 'fa-sm me-1')} Push Notification`;
+
+// Without classes (no size class on the <i> wrapper)
+$el.innerHTML = getPrerenderedIcon('bell');
 ```
 
 **Use this when:**
@@ -487,8 +487,7 @@ $el.innerHTML = '<i class="bi bi-check-circle"></i> Text';
 $el.innerHTML = '<i class="fa-solid fa-check"></i> Text';
 
 // ✅ CORRECT - Use prerendered icons
-const iconHTML = getPrerenderedIcon('circle-check');
-$el.innerHTML = `${iconHTML} Text`;
+$el.innerHTML = `${getPrerenderedIcon('circle-check', 'fa-sm me-1')} Text`;
 ```
 
 ### Benefits
@@ -821,7 +820,11 @@ import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js
 
 **Usage:**
 ```javascript
-const iconHTML = getPrerenderedIcon('apple');
+// With classes (drop-in replacement for uj_icon)
+getPrerenderedIcon('apple', 'fa-md me-2');
+
+// Without classes (no size class)
+getPrerenderedIcon('apple');
 ```
 
 **Reference:** `src/assets/js/libs/prerendered-icons.js`

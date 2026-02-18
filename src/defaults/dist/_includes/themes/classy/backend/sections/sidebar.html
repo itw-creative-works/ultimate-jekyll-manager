@@ -1,5 +1,5 @@
 <!-- Desktop Sidebar -->
-<aside class="sidebar d-none d-lg-flex flex-column flex-shrink-0 bg-body-tertiary">
+<aside class="sidebar d-none d-xl-flex flex-column flex-shrink-0 bg-body-tertiary">
   <!-- Logo Section -->
   {% capture logo_href %}{% assign temp_href = data.logo.href | default: site.brand.href | default: '/dashboard' %}{% if temp_href and temp_href != '' and temp_href != 'null' %}{{ temp_href }}{% else %}javascript:void(0){% endif %}{% endcapture %}
   {% capture logo_src %}{% if data.logo.src %}{{ data.logo.src }}{% else %}{{ site.brand.images.brandmark | default: null }}{% endif %}{% endcapture %}

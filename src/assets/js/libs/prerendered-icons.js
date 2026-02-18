@@ -4,24 +4,32 @@
  */
 
 /**
- * Get pre-rendered icon by name from frontmatter icon system
+ * Get pre-rendered icon by name from frontmatter icon system.
+ * Drop-in replacement for uj_icon in JavaScript contexts.
+ *
  * @param {string} iconName - Name of the icon to retrieve (matches data-icon attribute)
+ * @param {string} [classes] - CSS classes for the <i> wrapper (e.g. "fa-md me-2"), like uj_icon's second argument.
  * @returns {string} Icon HTML or empty string if not found
  *
  * @example
  * import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
  *
- * // Get an icon
- * const appleIcon = getPrerenderedIcon('apple');
+ * // No size class
+ * getPrerenderedIcon('apple');
+ *
+ * // With size + classes (same as {% uj_icon "robot", "fa-md me-2" %})
+ * getPrerenderedIcon('robot', 'fa-md me-2');
  */
-export function getPrerenderedIcon(iconName) {
-  // Query the global prerendered icons container
+export function getPrerenderedIcon(iconName, classes) {
   const $iconTemplate = document.querySelector(`#prerendered-icons [data-icon="${iconName}"]`);
 
-  if ($iconTemplate) {
+  if (!$iconTemplate) {
+    return '';
+  }
+
+  if (!classes) {
     return $iconTemplate.innerHTML;
   }
 
-  // Return empty string if not found
-  return '';
+  return $iconTemplate.innerHTML.replace('class="fa"', `class="fa ${classes}"`);
 }

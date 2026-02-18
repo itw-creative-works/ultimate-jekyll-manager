@@ -593,8 +593,7 @@ function getDeviceIcon(device) {
     iconName = 'chrome';
   }
 
-  // Get the pre-rendered icon
-  return getPrerenderedIcon(iconName);
+  return getPrerenderedIcon(iconName, 'fa-xl');
 }
 
 // Format location from session data
