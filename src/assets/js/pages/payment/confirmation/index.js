@@ -5,7 +5,7 @@ import { initializeConfirmationUI, updateAllUI } from './modules/bindings.js';
 let webManager = null;
 
 /* Test URL
-  https://localhost:3000/payment/confirmation?order_id=ORD-TRIAL-123&product_id=pro&product_name=Pro%20Plan&amount=0&currency=USD&frequency=annually&payment_method=stripe&trial=true&track=true
+  https://localhost:3000/payment/confirmation?orderId=ORD-TRIAL-123&productId=pro&productName=Pro%20Plan&amount=0&currency=USD&frequency=annually&paymentMethod=stripe&trial=true&track=true
 */
 
 // Module
@@ -36,13 +36,13 @@ function loadOrderData() {
   const urlParams = new URLSearchParams(window.location.search);
 
   // Parse raw data from URL
-  const orderId = urlParams.get('order_id') || urlParams.get('transaction_id') || generateOrderNumber();
-  const productId = urlParams.get('product_id') || urlParams.get('product');
-  const productName = urlParams.get('product_name');
-  const total = parseFloat(urlParams.get('amount') || urlParams.get('total') || 0);
+  const orderId = urlParams.get('orderId') || generateOrderNumber();
+  const productId = urlParams.get('productId');
+  const productName = urlParams.get('productName');
+  const total = parseFloat(urlParams.get('amount') || 0);
   const currency = urlParams.get('currency') || 'USD';
-  const billingCycle = urlParams.get('frequency') || urlParams.get('billing_cycle');
-  const paymentMethod = urlParams.get('payment_method');
+  const billingCycle = urlParams.get('frequency');
+  const paymentMethod = urlParams.get('paymentMethod');
   const hasFreeTrial = urlParams.get('trial') === 'true';
 
   // Build billing cycle text
