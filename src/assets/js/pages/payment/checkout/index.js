@@ -1,186 +1,211 @@
-// Libraries
-import { raw } from './modules/state.js';
-import { fetchProductDetails, fetchTrialEligibility, warmupServer } from './modules/api.js';
-import { initializeRecaptcha } from './modules/recaptcha.js';
-import {
-  updateAllUI,
-  handleBillingCycleChange,
-  showError,
-  updatePaymentButtonVisibility,
-  initializeCheckoutUI
-} from './modules/ui-bindings.js';
-import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount-bindings.js';
-import { paymentManager } from './modules/processors-main.js';
+// Payment Checkout Page
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
-import {
-  generateCheckoutId,
-  buildPaymentIntentData,
-} from './modules/session.js';
-import { calculatePrices } from './modules/pricing.js';
+import { fetchAppConfig, fetchTrialEligibility, warmupServer, createPaymentIntent } from './modules/api.js';
+import { state, buildBindingsState, resolveProcessor } from './modules/state.js';
+import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount.js';
+import { initializeRecaptcha } from './modules/recaptcha.js';
+import { trackBeginCheckout, trackAddPaymentInfo } from './modules/tracking.js';
+
 let webManager = null;
 let formManager = null;
 
-// Constants
-const RECAPTCHA_SITE_KEY = '6LdxsmAnAAAAACbft_UmKZXJV_KTEiuG-7tfgJJ5';
-
 // Module export
-export default (Manager, options) => {
+export default (Manager) => {
   return new Promise(async function (resolve) {
-    // Set webManager
     webManager = Manager.webManager;
-
-    // Initialize when DOM is ready
     await webManager.dom().ready();
-
-    // Initialize checkout
     await initializeCheckout();
-
-    // Resolve
     return resolve();
   });
+};
+
+// Update UI via bindings (single source of truth)
+function updateUI() {
+  webManager.bindings().update(buildBindingsState(webManager));
 }
 
-// Analytics tracking functions
-function trackBeginCheckout(product, price, billingCycle) {
-  const items = [{
-    item_id: product.id,
-    item_name: product.name,
-    item_category: product.is_subscription ? 'subscription' : 'one-time',
-    item_variant: billingCycle,
-    price: price,
-    quantity: 1
-  }];
-
-  // Google Analytics 4
-  gtag('event', 'begin_checkout', {
-    currency: 'USD',
-    value: price,
-    items: items
-  });
-
-  // Facebook Pixel
-  fbq('track', 'InitiateCheckout', {
-    content_ids: [product.id],
-    content_name: product.name,
-    content_type: 'product',
-    currency: 'USD',
-    value: price,
-    num_items: 1
-  });
-
-  // TikTok Pixel
-  ttq.track('InitiateCheckout', {
-    content_id: product.id,
-    content_type: 'product',
-    content_name: product.name,
-    price: price,
-    quantity: 1,
-    currency: 'USD',
-    value: price
-  });
+// Show fatal error and hide checkout content
+function showError(message) {
+  state.error = { show: true, message };
+  updateUI();
 }
 
-function trackAddPaymentInfo(product, price, billingCycle, paymentMethod) {
-  const items = [{
-    item_id: product.id,
-    item_name: product.name,
-    item_category: product.is_subscription ? 'subscription' : 'one-time',
-    item_variant: billingCycle,
-    price: price,
-    quantity: 1
-  }];
+// Generate unique checkout session ID
+function generateCheckoutId() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const existing = urlParams.get('checkoutId');
+  if (existing) return existing;
 
-  // Google Analytics 4
-  gtag('event', 'add_payment_info', {
-    currency: 'USD',
-    value: price,
-    payment_type: paymentMethod,
-    items: items
-  });
-
-  // Facebook Pixel
-  fbq('track', 'AddPaymentInfo', {
-    content_ids: [product.id],
-    content_name: product.name,
-    content_type: 'product',
-    currency: 'USD',
-    value: price
-  });
-
-  // TikTok Pixel
-  ttq.track('AddPaymentInfo', {
-    content_id: product.id,
-    content_type: 'product',
-    content_name: product.name,
-    price: price,
-    quantity: 1,
-    currency: 'USD',
-    value: price
-  });
+  const timestamp = Date.now().toString(36);
+  const random1 = Math.random().toString(36).substring(2, 8);
+  const random2 = Math.random().toString(36).substring(2, 8);
+  return `CHK-${timestamp}-${random1}-${random2}`.toUpperCase();
 }
 
-// Setup event listeners using FormManager
-function setupEventListeners() {
-  // Initialize FormManager
+// Initialize checkout
+async function initializeCheckout() {
+  try {
+    // Generate session ID
+    state.checkoutId = generateCheckoutId();
+
+    // Parse URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product');
+    const frequency = urlParams.get('frequency') || 'annually';
+    const _dev_trialEligible = urlParams.get('_dev_trialEligible');
+
+    if (!productId) {
+      throw new Error('Product ID is missing from URL.');
+    }
+
+    // Set frequency from URL
+    if (frequency === 'monthly' || frequency === 'annually') {
+      state.frequency = frequency;
+    }
+
+    // Fire-and-forget server warmup
+    warmupServer(webManager);
+
+    // Parallel fetch: app config + trial eligibility + reCAPTCHA
+    const [appConfigResult, trialResult, recaptchaResult] = await Promise.allSettled([
+      fetchAppConfig(webManager),
+      fetchTrialEligibility(productId, webManager),
+      initializeRecaptcha(webManager.config?.recaptcha?.['site-key'], webManager),
+    ]);
+
+    // App config is required
+    if (appConfigResult.status === 'rejected') {
+      throw new Error(`Failed to load checkout. Please refresh and try again.`);
+    }
+
+    const appConfig = appConfigResult.value;
+    state.appConfig = appConfig;
+    state.processors = appConfig.payment?.processors || {};
+
+    // Find product
+    const product = appConfig.payment?.products?.find(p => p.id === productId);
+    if (!product) {
+      throw new Error(`Product "${productId}" not found.`);
+    }
+    state.product = product;
+
+    // Trial eligibility
+    let trialEligible = trialResult.status === 'fulfilled' ? trialResult.value : false;
+
+    // Dev override for trial
+    if (_dev_trialEligible && webManager.isDevelopment()) {
+      trialEligible = _dev_trialEligible === 'true';
+    }
+
+    // Only eligible if product also supports trials
+    state.trialEligible = trialEligible && (product.trial?.days > 0);
+
+    // Check payment methods are available
+    const hasPaymentMethods = !!(
+      state.processors?.stripe?.publishableKey
+      || state.processors?.chargebee?.site
+      || state.processors?.paypal?.clientId
+      || state.processors?.coinbase?.enabled
+    );
+
+    if (!hasPaymentMethods) {
+      showError('No payment methods are currently available. Please contact support for assistance.');
+      return;
+    }
+
+    // Log reCAPTCHA status
+    if (recaptchaResult.status === 'rejected') {
+      console.warn('reCAPTCHA initialization failed:', recaptchaResult.reason);
+    }
+
+    // Update UI with loaded data
+    updateUI();
+
+    // Setup form and events
+    setupForm();
+
+    // Sync radio button to match URL frequency
+    formManager.setData({ frequency: state.frequency });
+
+    // Track begin_checkout
+    trackBeginCheckout(state);
+
+    // Auto-apply welcome coupon
+    autoApplyWelcomeCoupon(formManager, updateUI);
+
+  } catch (error) {
+    console.error('Checkout initialization failed:', error);
+    showError(error.message || 'Failed to load checkout. Please refresh the page and try again.');
+  }
+}
+
+// Setup FormManager and event listeners
+function setupForm() {
   formManager = new FormManager('#checkout-form', {
-    autoReady: false, // We'll call ready() after initialization
+    autoReady: false,
     allowResubmit: false,
     submittingText: 'Processing...',
     submittedText: 'Redirecting...',
   });
 
-  // Listen for form field changes
+  // Frequency changes
   formManager.on('change', ({ name, value }) => {
-    // Handle billing cycle changes
-    if (name === 'billing-cycle') {
-      handleBillingCycleChange(value, webManager);
-    }
+    if (name !== 'frequency') return;
+    if (!value || value === state.frequency) return;
+
+    state.frequency = value;
+    updateUI();
   });
 
-  // Handle form submission
+  // Form submission (payment)
   formManager.on('submit', async ({ $submitButton }) => {
-    // Get the submit button that was clicked
     if (!$submitButton) {
       throw new Error('Please choose a payment method.');
     }
 
-    // Check if a payment method was selected
     const paymentMethod = $submitButton.getAttribute('data-payment-method');
     if (!paymentMethod) {
       throw new Error('Invalid payment method selected.');
     }
 
-    // Set payment method in raw
-    raw.paymentMethod = paymentMethod;
+    // Track payment info
+    trackAddPaymentInfo(state, paymentMethod);
 
-    // Track add_payment_info event when payment method is selected
-    const basePrice = raw.product.is_subscription
-      ? (raw.billingCycle === 'monthly' ? raw.product.price_monthly : raw.product.price_annually)
-      : raw.product.price;
+    // Resolve processor (card -> stripe/chargebee, paypal -> paypal, etc.)
+    const processor = resolveProcessor(paymentMethod);
 
-    trackAddPaymentInfo(raw.product, basePrice, raw.billingCycle, paymentMethod);
-    console.log('Tracked add_payment_info event:', paymentMethod);
+    // Create payment intent and redirect
+    const response = await createPaymentIntent({
+      webManager,
+      state,
+      processor,
+      formData: formManager.getData(),
+    });
 
-    // Process the payment
-    await completePurchase();
+    // Redirect to processor checkout
+    window.location.href = response.url;
+
+    // Never resolves -- we're navigating away
+    return new Promise(() => {});
   });
 
-  // Setup apply discount button (not part of form submit)
+  // Discount button
   const $applyDiscountBtn = document.querySelector('[data-action="apply-discount"]');
   if ($applyDiscountBtn) {
     $applyDiscountBtn.addEventListener('click', () => {
-      applyDiscountCode(webManager);
+      const data = formManager.getData();
+      applyDiscountCode(data.discount, updateUI);
     });
   }
 
-  // Switch account link (keep as is - not part of form)
+  // Switch account link
   const $switchAccountLink = document.getElementById('switch-account');
   if ($switchAccountLink) {
     const currentUrl = encodeURIComponent(window.location.href);
     $switchAccountLink.href = `/signin?authSignout=true&authReturnUrl=${currentUrl}`;
   }
 
-  // Help button - opens Chatsy
+  // Help button
   const $helpButton = document.getElementById('checkout-help-button');
   if ($helpButton) {
     $helpButton.addEventListener('click', (e) => {
@@ -188,211 +213,61 @@ function setupEventListeners() {
       chatsy.open();
     });
   }
-}
 
-// Complete purchase
-async function completePurchase() {
-  try {
-    // Get form data from FormManager
-    const formData = formManager.getData();
+  // Set form ready
+  formManager.ready();
 
-    // Store form data in raw
-    raw.formData = formData;
-
-    // Wait 1 second to simulate processing time
-    if (webManager.isDevelopment()) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
-    // Add custom validation if needed
-    if (!raw.paymentMethod) {
-      throw new Error('Please select a payment method');
-    }
-
-    // Build payment intent data according to API schema
-    const paymentIntentData = buildPaymentIntentData(webManager);
-
-    // Log the structured payment data
-    console.log('🟢 Payment intent data:', paymentIntentData);
-
-    // Calculate pricing for analytics
-    const prices = calculatePrices(raw);
-
-    // Store pre-payment analytics data
-    const analyticsData = {
-      transaction_id: raw.checkoutId,
-      value: prices.total,
-      currency: 'USD',
-      items: [{
-        item_name: raw.product.name,
-        price: prices.total,
-        quantity: 1
-      }]
+  /* @dev-only:start */
+  // Dev mode: expose debug helpers + dev tools panel
+  {
+    window._checkout = {
+      get state() { return JSON.parse(JSON.stringify(state)); },
+      get formData() { return formManager.getData(); },
+      get bindings() { return buildBindingsState(webManager); },
+      resolveProcessor: (method) => resolveProcessor(method || 'card'),
     };
+    console.log('%c[Checkout Dev] window._checkout available', 'color: #8B5CF6');
 
-    // Track initiate checkout event
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'begin_checkout', analyticsData);
-    }
-
-    // Store order data for confirmation page (legacy format for now)
-    const orderData = {
-      orderId: raw.checkoutId,
-      product: raw.product.name,
-      productId: raw.product.id,
-      total: prices.total,
-      subtotal: prices.subtotal,
-      discountPercent: raw.discountPercent,
-      billingCycle: raw.billingCycle,
-      hasFreeTrial: raw.product.has_free_trial,
-      paymentMethod: raw.paymentMethod,
-      email: webManager.auth().getUser().email,
-      timestamp: new Date().toISOString(),
-      formData: formData
-    };
-
-    sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
-
-    // Store the payment intent data in raw for processors to use
-    raw.paymentIntentData = paymentIntentData;
-
-    // Process payment with selected processor (will redirect)
-    await paymentManager.processPayment(raw.paymentMethod);
-
-    // This code won't run if redirect is successful
-    // If we get here, something went wrong
-    throw new Error('Payment redirect failed');
-
-  } catch (error) {
-    console.error('Purchase error:', error);
-
-    // Re-throw to let FormManager handle error display and state restoration
-    throw error;
+    initDevPanel();
   }
+  /* @dev-only:end */
 }
 
-// Initialize checkout with parallel API calls
-async function initializeCheckout() {
-  try {
-    // Initialize UI with loading states (replaces fullscreen loader)
-    initializeCheckoutUI();
+/* @dev-only:start */
+// Dev tools panel (dev mode only)
+function initDevPanel() {
+  const $panel = document.getElementById('checkout-dev-panel');
+  if (!$panel) return;
 
-    // Generate or retrieve checkout session ID
-    raw.checkoutId = generateCheckoutId();
-    console.log('Checkout session ID:', raw.checkoutId);
+  // Show the panel
+  $panel.hidden = false;
 
-    // Get product ID from URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('product');
-    const frequency = urlParams.get('frequency') || 'annually';
-    const _dev_appId = urlParams.get('_dev_appId');
-    const _dev_trialEligible = urlParams.get('_dev_trialEligible');
+  const products = state.appConfig?.payment?.products || [];
+  const params = new URLSearchParams(window.location.search);
 
-    // Product ID is required
-    if (!productId) {
-      throw new Error('Product ID is missing from URL.');
-    }
+  // Populate product dropdown
+  const $productSelect = $panel.querySelector('[data-dev-param="product"]');
+  products.forEach(p => {
+    const $option = document.createElement('option');
+    $option.value = p.id;
+    $option.textContent = `${p.name} (${p.type})`;
+    $productSelect.appendChild($option);
+  });
 
-    // Check for testing parameters
-    const appId = _dev_appId || webManager.config.brand.id;
+  // Set current values from URL
+  $panel.querySelectorAll('[data-dev-param]').forEach($el => {
+    const val = params.get($el.getAttribute('data-dev-param'));
+    if (val !== null) $el.value = val;
+  });
 
-    // Warmup server (fire and forget)
-    warmupServer(webManager);
-
-    // Fetch product details, trial eligibility, and initialize reCAPTCHA in parallel
-    const [productData, trialEligible, recaptchaInit] = await Promise.allSettled([
-      fetchProductDetails(appId, productId, webManager),
-      fetchTrialEligibility(appId, productId, webManager),
-      initializeRecaptcha(RECAPTCHA_SITE_KEY, webManager)
-    ]);
-
-    // Handle product fetch result
-    if (productData.status === 'rejected') {
-      throw new Error(`Failed to load product details for "${productId}". The product may not exist or there was a server error.`);
-    }
-
-    // Set product data
-    raw.product = productData.value;
-
-    // Create mutable trial eligibility result for testing
-    let trialEligibilityResult = trialEligible;
-
-    // Override trial eligibility for testing (only in development)
-    if (_dev_trialEligible && webManager.isDevelopment()) {
-      if (_dev_trialEligible === 'false') {
-        trialEligibilityResult = { status: 'fulfilled', value: false };
-      } else if (_dev_trialEligible === 'true') {
-        trialEligibilityResult = { status: 'fulfilled', value: true };
-      }
-    }
-
-    // Apply trial eligibility with server/test response
-    if (trialEligibilityResult.status === 'fulfilled') {
-      raw.product.has_free_trial = trialEligibilityResult.value && raw.product.has_free_trial;
-    }
-
-    // Initialize payment processors with API keys
-    if (raw.apiKeys) {
-      paymentManager.initialize(raw.apiKeys, webManager);
-    }
-
-    // Update payment button visibility based on available processors
-    updatePaymentButtonVisibility(paymentManager);
-
-    // Log available payment methods
-    const availableMethods = paymentManager.getAvailablePaymentMethods();
-    console.log('Available payment methods:');
-    availableMethods.forEach(method => {
-      console.log(`- ${method.name} (${method.processor})`);
+  // Apply & reload
+  document.getElementById('checkout-dev-apply').addEventListener('click', () => {
+    const newParams = new URLSearchParams();
+    $panel.querySelectorAll('[data-dev-param]').forEach($el => {
+      const val = $el.value.trim();
+      if (val) newParams.set($el.getAttribute('data-dev-param'), val);
     });
-
-    if (availableMethods.length === 0) {
-      console.error('No payment methods available! Check API keys configuration.');
-      showError('No payment methods are currently available. Please contact support for assistance.', webManager);
-      return; // Stop initialization since we can't proceed without payment methods
-    }
-
-    // Log reCAPTCHA initialization result
-    if (recaptchaInit.status === 'rejected') {
-      console.warn('reCAPTCHA initialization failed:', recaptchaInit.reason);
-    } else if (!recaptchaInit.value) {
-      console.warn('reCAPTCHA was not initialized (no site key or initialization failed)');
-    }
-
-    // Set billing cycle from URL parameter (before UI updates)
-    if (frequency === 'monthly' || frequency === 'annually') {
-      raw.billingCycle = frequency;
-      console.log('Setting billing cycle from URL:', frequency);
-    }
-
-    // Update UI with product details
-    updateAllUI(webManager);
-
-    // Set up event listeners and FormManager
-    setupEventListeners();
-
-    // Set form to ready state
-    formManager.ready();
-
-    // Track begin_checkout event on page load
-    const basePrice = raw.product.is_subscription
-      ? (raw.billingCycle === 'monthly' ? raw.product.price_monthly : raw.product.price_annually)
-      : raw.product.price;
-
-    trackBeginCheckout(raw.product, basePrice, raw.billingCycle);
-    console.log('Tracked begin_checkout event for:', raw.product.id);
-
-    // Auto-apply welcome coupon
-    autoApplyWelcomeCoupon(webManager);
-
-  } catch (error) {
-    console.error('Checkout initialization failed:', error);
-    showError(error.message || 'Failed to load checkout. Please refresh the page and try again.', webManager);
-  } finally {
-    // The bindings system handles loading states, no need for a separate preloader
-    // Auth listener is still useful for other purposes
-    webManager.auth().listen({}, () => {
-      console.log('Auth state updated');
-    });
-  }
+    window.location.search = newParams.toString();
+  });
 }
+/* @dev-only:end */

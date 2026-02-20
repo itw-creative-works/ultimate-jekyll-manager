@@ -128,18 +128,19 @@ function trackDownloadClick(platform, downloadName, downloadUrl) {
   gtag('event', 'download', {
     platform: platform,
     download_name: downloadName,
-    download_url: downloadUrl
+    download_url: downloadUrl,
   });
 
   fbq('trackCustom', 'Download', {
     content_name: downloadName,
     content_category: platform,
-    content_type: 'download'
+    content_type: 'download',
   });
 
   ttq.track('Download', {
+    content_id: `download-${platform}`,
+    content_type: 'product',
     content_name: downloadName,
-    content_type: platform
   });
 }
 

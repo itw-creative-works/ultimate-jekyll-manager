@@ -132,15 +132,16 @@ function trackNewsletterSignup() {
   gtag('event', 'newsletter_signup', {
     event_category: 'engagement',
     event_label: 'blog_page',
-    value: 1
+    value: 1,
   });
-  fbq('track', 'CompleteRegistration', {
+  fbq('track', 'Lead', {
     content_name: 'Newsletter',
-    status: 'success'
+    status: 'success',
   });
   ttq.track('Subscribe', {
+    content_id: 'newsletter-blog',
+    content_type: 'product',
     content_name: 'Newsletter',
-    status: 'success'
   });
 }
 
@@ -148,14 +149,15 @@ function trackBlogSearch(query) {
   gtag('event', 'search', {
     search_term: query,
     event_category: 'engagement',
-    event_label: 'blog_page'
+    event_label: 'blog_page',
   });
   fbq('track', 'Search', {
     search_string: query,
-    content_category: 'blog'
+    content_category: 'blog',
   });
   ttq.track('Search', {
-    query: query,
-    content_type: 'blog'
+    content_id: 'blog-search',
+    content_type: 'product',
+    search_string: query,
   });
 }

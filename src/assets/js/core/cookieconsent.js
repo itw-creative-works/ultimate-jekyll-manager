@@ -310,59 +310,66 @@ export default function (Manager, options) {
 
   // Tracking functions
   function trackCookieBannerShown() {
-    gtag('event', 'cookie_banner_shown', {
+    gtag('event', 'cookie_banner_show', {
       event_category: 'consent'
     });
-    fbq('trackCustom', 'CookieBannerShown');
+    fbq('trackCustom', 'CookieBannerShow');
     ttq.track('ViewContent', {
-      content_name: 'Cookie Banner'
+      content_id: 'cookie-banner-show',
+      content_type: 'product',
+      content_name: 'Cookie Banner Show'
     });
   }
 
   function trackCookieAccepted() {
-    gtag('event', 'cookie_consent_accepted', {
+    gtag('event', 'cookie_consent_accept', {
       event_category: 'consent',
       consent_type: config.type
     });
-    fbq('trackCustom', 'CookieConsentAccepted');
+    fbq('trackCustom', 'CookieConsentAccept');
     ttq.track('ClickButton', {
-      content_name: 'Cookie Consent Accept',
-      content_type: 'consent'
+      content_id: 'cookie-consent-accept',
+      content_type: 'product',
+      content_name: 'Cookie Consent Accept'
     });
   }
 
   function trackCookieDenied() {
-    gtag('event', 'cookie_consent_denied', {
+    gtag('event', 'cookie_consent_deny', {
       event_category: 'consent',
       consent_type: config.type
     });
-    fbq('trackCustom', 'CookieConsentDenied');
+    fbq('trackCustom', 'CookieConsentDeny');
     ttq.track('ClickButton', {
-      content_name: 'Cookie Consent Deny',
-      content_type: 'consent'
+      content_id: 'cookie-consent-deny',
+      content_type: 'product',
+      content_name: 'Cookie Consent Deny'
     });
   }
 
   function trackCookieAutoAccepted(trigger) {
-    gtag('event', 'cookie_consent_auto_accepted', {
+    gtag('event', 'cookie_consent_auto_accept', {
       event_category: 'consent',
       trigger: trigger
     });
-    fbq('trackCustom', 'CookieConsentAutoAccepted', {
+    fbq('trackCustom', 'CookieConsentAutoAccept', {
       trigger: trigger
     });
     ttq.track('ViewContent', {
-      content_name: 'Cookie Consent Auto Accept',
-      content_type: trigger
+      content_id: 'cookie-consent-auto-accept',
+      content_type: 'product',
+      content_name: 'Cookie Consent Auto Accept'
     });
   }
 
   function trackCookiePolicyReopened() {
-    gtag('event', 'cookie_policy_reopened', {
+    gtag('event', 'cookie_policy_reopen', {
       event_category: 'consent'
     });
-    fbq('trackCustom', 'CookiePolicyReopened');
+    fbq('trackCustom', 'CookiePolicyReopen');
     ttq.track('ClickButton', {
+      content_id: 'cookie-policy-reopen',
+      content_type: 'product',
       content_name: 'Cookie Policy Reopen'
     });
   }

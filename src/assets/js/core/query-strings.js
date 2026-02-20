@@ -12,14 +12,22 @@ export default function (Manager, options) {
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
 
+    // Get current attribution data
+    const attribution = webManager.storage().get('attribution', {});
+
     // Process affiliate/referral parameters
-    processAffiliateParams(urlParams);
+    processAffiliateParams(urlParams, attribution);
 
     // Process UTM parameters
-    processUTMParams(urlParams);
+    processUTMParams(urlParams, attribution);
+
+    // Save updated attribution if anything changed
+    if (Object.keys(attribution).length > 0) {
+      webManager.storage().set('attribution', attribution);
+    }
   }
 
-  function processAffiliateParams(urlParams) {
+  function processAffiliateParams(urlParams, attribution) {
     // Check for aff or ref parameter
     const affParam = urlParams.get('aff') || urlParams.get('ref');
 
@@ -28,19 +36,16 @@ export default function (Manager, options) {
       return;
     }
 
-    // Save to localStorage with timestamp
-    const affiliateData = {
+    // Save affiliate data to attribution object
+    attribution.affiliate = {
       code: affParam,
       timestamp: new Date().toISOString(),
       url: window.location.href,
       page: window.location.pathname
     };
-
-    // Use webManager storage to save affiliate data
-    webManager.storage().set('marketing.affiliate', affiliateData);
   }
 
-  function processUTMParams(urlParams) {
+  function processUTMParams(urlParams, attribution) {
     // Define UTM parameters to capture
     const utmParams = [
       'utm_source',
@@ -69,12 +74,11 @@ export default function (Manager, options) {
       return;
     }
 
-    // Add metadata
+    // Add metadata and save to attribution object
     utmData.timestamp = new Date().toISOString();
     utmData.url = window.location.href;
     utmData.page = window.location.pathname;
 
-    // Save to localStorage
-    webManager.storage().set('marketing.utm', utmData);
+    attribution.utm = utmData;
   }
 }

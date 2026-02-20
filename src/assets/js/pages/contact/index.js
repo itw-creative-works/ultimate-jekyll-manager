@@ -156,19 +156,22 @@ function setupFormScrolling() {
 // Tracking functions
 function trackContactSpam() {
   gtag('event', 'contact_form_spam', {
-    content_type: 'honeypot'
+    content_type: 'honeypot',
   });
 }
 
 function trackContactFormSubmit(subject) {
-  gtag('event', 'contact_form_submit', {
-    subject: subject
+  gtag('event', 'generate_lead', {
+    lead_source: 'contact_form',
+    subject: subject,
   });
   fbq('track', 'Lead', {
     content_name: 'Contact Form',
-    content_category: subject
+    content_category: subject,
   });
-  ttq.track('FormSubmit', {
+  ttq.track('Contact', {
+    content_id: 'contact-form',
+    content_type: 'product',
     content_name: 'Contact Form',
   });
 }

@@ -209,14 +209,13 @@ async function sendUserSignupMetadata(user, webManager) {
       return;
     }
 
+    // Get attribution data from storage
+    const attribution = webManager.storage().get('attribution', {});
+
     // Build the payload
     const payload = {
-      // @TODO: REMOVE ONCE LEGACY SERVER CODE IS GONE
-      affiliateCode: affiliateData?.code || '',
-
       // New structure
-      affiliateData: affiliateData || {},
-      utmData: utmData || {},
+      attribution: attribution,
       context: webManager.utilities().getContext(),
     };
 

@@ -1,64 +1,39 @@
-// Pricing calculations for checkout
-import { raw } from './state.js';
+// Pure pricing calculation -- no side effects, no state mutation
 
-// Calculate prices and return values for bindings
-// Takes raw data and returns formatted values
-export function calculatePrices(rawData = raw) {
-  // Return default values if product not loaded
-  if (!rawData.product) {
-    return {
-      subtotal: 0,
-      discountAmount: 0,
-      trialDiscountAmount: 0,
-      total: 0,
-      recurring: 0,
-      displayPrice: '$--'
-    };
+export function calculatePrices({ product, frequency, discountPercent, trialEligible }) {
+  if (!product) {
+    return { subtotal: 0, discountAmount: 0, trialDiscountAmount: 0, total: 0, recurring: 0 };
   }
 
+  const isSubscription = product.type === 'subscription';
+  const hasFreeTrial = isSubscription && trialEligible && (product.trial?.days > 0);
+
+  // Base price directly from API product
   let basePrice;
-  const isSubscription = rawData.product.is_subscription || false;
-  const hasFreeTrial = rawData.product.has_free_trial || false;
-
   if (isSubscription) {
-    basePrice = rawData.billingCycle === 'monthly'
-      ? (rawData.product.price_monthly || 0)
-      : (rawData.product.price_annually || 0);
+    basePrice = frequency === 'monthly'
+      ? (product.prices?.monthly?.amount || 0)
+      : (product.prices?.annually?.amount || 0);
   } else {
-    basePrice = rawData.product.price || 0;
+    // One-time: use amount if available, else fall back to monthly
+    basePrice = product.prices?.amount
+      || product.prices?.monthly?.amount
+      || 0;
   }
 
-  // Calculate subtotal
   const subtotal = basePrice;
+  const discountAmount = (subtotal * discountPercent) / 100;
+  const afterDiscount = subtotal - discountAmount;
 
-  // Calculate discount amount
-  const discountAmount = (subtotal * rawData.discountPercent) / 100;
-
-  // Calculate total after discount
-  const discountedTotal = subtotal - discountAmount;
-
-  // Calculate trial discount amount and final total
-  let total;
   let trialDiscountAmount = 0;
+  let total;
 
-  if (hasFreeTrial && isSubscription) {
-    // Free trial means $0 due today
-    trialDiscountAmount = discountedTotal;
+  if (hasFreeTrial) {
+    // Free trial = $0 due today, but recurring stays
+    trialDiscountAmount = afterDiscount;
     total = 0;
   } else {
-    total = discountedTotal;
-  }
-
-  // Calculate recurring amount (after discount but before trial)
-  const recurring = discountedTotal;
-
-  // Format display price for product
-  let displayPrice;
-  if (isSubscription) {
-    const period = rawData.billingCycle === 'monthly' ? '/mo' : '/yr';
-    displayPrice = `$${discountedTotal.toFixed(2)}${period}`;
-  } else {
-    displayPrice = `$${discountedTotal.toFixed(2)}`;
+    total = afterDiscount;
   }
 
   return {
@@ -66,7 +41,6 @@ export function calculatePrices(rawData = raw) {
     discountAmount,
     trialDiscountAmount,
     total,
-    recurring,
-    displayPrice
+    recurring: afterDiscount,
   };
 }

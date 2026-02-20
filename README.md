@@ -364,17 +364,17 @@ Raw pixel values also accepted: `vert-size="300"` → 300px max-height. Omit `ve
 #### Testing Parameters
 
 ##### Account Page (`/account`)
-* `_test_subscription`: Override subscription data for testing (e.g., `_test_subscription=premium`)
-* `_test_prefill=true`: Adds fake test data for development:
+* `_dev_subscription`: Override subscription data for testing (e.g., `_dev_subscription=premium`)
+* `_dev_prefill=true`: Adds fake test data for development:
   - Inserts fake referral data in the Referrals section
   - Inserts fake session data in the Security section (active sessions)
 
 ##### Checkout Page (`/payment/checkout`)
-* `_test_appId`: Override the application ID for testing (e.g., `_test_appId=test-app`)
-* `_test_trialEligible`: Force trial eligibility status:
-  - `_test_trialEligible=true`: User is eligible for trial
-  - `_test_trialEligible=false`: User is not eligible for trial
-* `_test_cardProcessor`: Force a specific payment processor for testing (e.g., `_test_cardProcessor=stripe` or `_test_cardProcessor=paypal`)
+* `_dev_appId`: Override the application ID for testing (e.g., `_dev_appId=test-app`)
+* `_dev_trialEligible`: Force trial eligibility status:
+  - `_dev_trialEligible=true`: User is eligible for trial
+  - `_dev_trialEligible=false`: User is not eligible for trial
+* `_dev_cardProcessor`: Force a specific card payment processor (e.g., `_dev_cardProcessor=stripe` or `_dev_cardProcessor=chargebee`)
 
 ## JavaScript API
 

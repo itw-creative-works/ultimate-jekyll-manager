@@ -1,66 +1,37 @@
-// Discount logic for checkout
-import { config, state } from './state.js';
-import { updateAllUI } from './ui.js';
+// Discount code logic for checkout
+import { state, DISCOUNT_CODES } from './state.js';
 
-// Hide all discount messages
-function hideAllDiscountMessages() {
-  document.getElementById('discount-message-loading').classList.add('d-none');
-  document.getElementById('discount-message-success').classList.add('d-none');
-  document.getElementById('discount-message-error').classList.add('d-none');
-}
+// Apply a discount code
+// updateUI callback decouples this from the bindings system
+export async function applyDiscountCode(code, updateUI) {
+  code = (code || '').trim().toUpperCase();
 
-// Apply discount code
-export function applyDiscountCode() {
-  const codeInput = document.getElementById('discount-code');
-  const applyBtn = document.getElementById('apply-discount');
-  const code = codeInput.value.trim().toUpperCase();
-
-  if (code === '') {
-    hideAllDiscountMessages();
-    document.getElementById('error-text').textContent = 'Please enter a discount code';
-    document.getElementById('discount-message-error').classList.remove('d-none');
+  if (!code) {
+    state.discountUI = { loading: false, success: false, error: true, message: 'Please enter a discount code' };
+    updateUI();
     return;
   }
 
-  // Show loading state
-  applyBtn.disabled = true;
-  applyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-  hideAllDiscountMessages();
-  document.getElementById('discount-message-loading').classList.remove('d-none');
+  // Show loading
+  state.discountUI = { loading: true, success: false, error: false, message: '' };
+  updateUI();
 
-  // Simulate API check with timeout
-  setTimeout(() => {
-    applyBtn.disabled = false;
-    applyBtn.textContent = 'Apply';
-    hideAllDiscountMessages();
+  // Simulate API delay (TODO: replace with real API call)
+  await new Promise(resolve => setTimeout(resolve, 800));
 
-    if (config.discountCodes[code]) {
-      state.discountPercent = config.discountCodes[code];
+  if (DISCOUNT_CODES[code]) {
+    state.discountPercent = DISCOUNT_CODES[code];
+    state.discountUI = { loading: false, success: true, error: false, message: `Discount applied: ${state.discountPercent}% off` };
+  } else {
+    state.discountPercent = 0;
+    state.discountUI = { loading: false, success: false, error: true, message: 'Invalid discount code' };
+  }
 
-      document.getElementById('confirmation-text').textContent = `Discount applied: ${state.discountPercent}% off`;
-      document.getElementById('discount-message-success').classList.remove('d-none');
-
-      // Update discount percent display
-      document.getElementById('discount-percent').textContent = `${state.discountPercent}%`;
-
-      updateAllUI();
-    } else {
-      document.getElementById('error-text').textContent = 'Invalid discount code';
-      document.getElementById('discount-message-error').classList.remove('d-none');
-
-      // Reset discount
-      state.discountPercent = 0;
-      updateAllUI();
-    }
-  }, 1000);
+  updateUI();
 }
 
 // Auto-apply welcome coupon
-export function autoApplyWelcomeCoupon() {
-  const discountInput = document.getElementById('discount-code');
-  if (discountInput) {
-    discountInput.value = 'WELCOME15';
-    // Automatically apply the coupon
-    applyDiscountCode();
-  }
+export function autoApplyWelcomeCoupon(formManager, updateUI) {
+  formManager.setData({ discount: 'WELCOME15' });
+  applyDiscountCode('WELCOME15', updateUI);
 }

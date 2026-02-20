@@ -304,9 +304,9 @@ export default function (Manager, options) {
     });
 
     ttq.track('Share', {
-      content_name: shareConfig.title,
-      content_url: shareConfig.url,
-      share_method: platformKey
+      content_id: `social-share-${platformKey}`,
+      content_type: 'product',
+      content_name: `Social Share ${platformName}`
     });
   }
 
@@ -321,7 +321,9 @@ export default function (Manager, options) {
     });
 
     ttq.track('ClickButton', {
-      content_name: 'Copy Link'
+      content_id: 'social-share-copy-link',
+      content_type: 'product',
+      content_name: 'Social Share Copy Link'
     });
   }
 };

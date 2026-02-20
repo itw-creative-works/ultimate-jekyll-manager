@@ -63,12 +63,13 @@ export default function (Manager, options) {
       if ($buttonText && effectiveConfig.okButton.text) {
         $buttonText.textContent = effectiveConfig.okButton.text;
       }
-      if (config.okButton.link) {
-        // Add UTM parameters to track exit popup conversions
-        const url = new URL(config.okButton.link, window.location.origin);
-        url.searchParams.set('utm_source', 'exit-popup');
-        url.searchParams.set('utm_medium', 'popup');
-        url.searchParams.set('utm_campaign', window.location.pathname);
+      if (effectiveConfig.okButton.link) {
+        // Add ITM parameters to track exit popup conversions
+        const url = new URL(effectiveConfig.okButton.link, window.location.origin);
+        url.searchParams.set('itm_source', 'website');
+        url.searchParams.set('itm_medium', 'modal');
+        url.searchParams.set('itm_campaign', 'exit-popup');
+        url.searchParams.set('itm_content', window.location.pathname);
         $button.href = url.toString();
 
         // Remove data-bs-dismiss so the link navigation works properly
@@ -250,20 +251,21 @@ export default function (Manager, options) {
 
   // Tracking functions
   function trackExitPopupShown() {
-    gtag('event', 'exit_popup_shown', {
+    gtag('event', 'exit_popup_show', {
       event_category: 'engagement',
       event_label: config.title,
       page_path: window.location.pathname
     });
 
-    fbq('trackCustom', 'ExitPopupShown', {
-      content_name: config.title,
+    fbq('trackCustom', 'ExitPopupShow', {
+      content_name: 'Exit Popup Show',
       page_path: window.location.pathname
     });
 
     ttq.track('ViewContent', {
-      content_name: 'Exit Popup',
-      content_type: config.title
+      content_id: 'exit-popup-show',
+      content_type: 'product',
+      content_name: 'Exit Popup Show'
     });
   }
 
@@ -280,24 +282,26 @@ export default function (Manager, options) {
     });
 
     ttq.track('ClickButton', {
-      content_name: 'Exit Popup CTA',
-      content_type: config.okButton?.text || 'OK'
+      content_id: 'exit-popup-click',
+      content_type: 'product',
+      content_name: 'Exit Popup Click'
     });
   }
 
   function trackExitPopupDismissed() {
-    gtag('event', 'exit_popup_dismissed', {
+    gtag('event', 'exit_popup_dismiss', {
       event_category: 'engagement',
       event_label: config.title
     });
 
-    fbq('trackCustom', 'ExitPopupDismissed', {
-      content_name: config.title
+    fbq('trackCustom', 'ExitPopupDismiss', {
+      content_name: 'Exit Popup Dismiss'
     });
 
     ttq.track('ViewContent', {
-      content_name: 'Exit Popup Dismissed',
-      content_type: config.title
+      content_id: 'exit-popup-dismiss',
+      content_type: 'product',
+      content_name: 'Exit Popup Dismiss'
     });
   }
 };

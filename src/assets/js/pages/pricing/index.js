@@ -198,8 +198,9 @@ function trackPricingToggle(billingType) {
     content_category: billingType
   });
   ttq.track('ViewContent', {
-    content_name: 'Pricing Toggle',
-    content_type: billingType
+    content_id: 'pricing-page',
+    content_type: 'product',
+    content_name: 'Pricing Toggle'
   });
 }
 
@@ -249,6 +250,8 @@ function trackEnterpriseContact() {
     content_name: 'Enterprise Plan'
   });
   ttq.track('Contact', {
+    content_id: 'enterprise-plan',
+    content_type: 'product',
     content_name: 'Enterprise Plan'
   });
 }

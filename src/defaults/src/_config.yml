@@ -133,6 +133,21 @@ web_manager:
       autoRequest: 1000 * 60
   validRedirectHosts: []
 
+# Payment
+payment:
+  processors:
+    stripe:
+      publishableKey: null
+    paypal:
+      clientId: null
+    chargebee:
+      site: null
+    coinbase:
+      enabled: false
+
+# OAuth2
+oauth2:
+
 # Socials
 socials:
   facebook: null

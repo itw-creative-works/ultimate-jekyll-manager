@@ -34,8 +34,9 @@ function updatePlanInfo(account) {
 
     // Look up the product name from appData
     let displayName = 'Free';
-    if (appData?.products?.[productId]) {
-      displayName = appData.products[productId].name || productId;
+    const product = appData?.payment?.products?.find(p => p.id === productId);
+    if (product) {
+      displayName = product.name || productId;
     } else if (productId !== 'basic') {
       // Fallback to capitalizing the product ID if no name found
       displayName = productId.charAt(0).toUpperCase() + productId.slice(1);
@@ -155,7 +156,7 @@ function updateUsageInfo(account) {
 
   // Get the user's current plan/product
   const productId = subscription.product?.id || 'basic';
-  const product = appData?.products?.[productId];
+  const product = appData?.payment?.products?.find(p => p.id === productId);
   const limits = product?.limits || {};
 
   // Clear container

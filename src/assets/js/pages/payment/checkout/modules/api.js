@@ -1,96 +1,99 @@
 // API calls for checkout
-import { config, state } from './state.js';
-import { getApiBaseUrl } from './constants.js';
 import fetch from 'wonderful-fetch';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import { getRecaptchaToken } from './recaptcha.js';
 
-// Fetch product details
-export async function fetchProductDetails(appId, productId, webManager) {
-  try {
-    // Get API base URL (uses dev server in development)
-    const apiBaseUrl = getApiBaseUrl(webManager, 'production');
+// Fetch app config (products + processors)
+export async function fetchAppConfig(webManager) {
+  const response = await fetch(`${webManager.getApiUrl()}/backend-manager/app`, {
+    response: 'json',
+  });
 
-    // Fetch from actual API endpoint
-    const response = await fetch(`${apiBaseUrl}/get-app`, {
-      response: 'json',
-      query: {
-        id: appId,
-      }
-    });
-
-    // Log
-    console.log('Fetched site configuration:', response);
-
-    // Store site config and API keys
-    config.siteConfig = response;
-    state.apiKeys = response.apiKeys;
-
-    // Extract product from the products object
-    const product = response.products[productId];
-    if (!product) {
-      throw new Error(`Product ${productId} not found`);
-    }
-
-    // Transform to expected format for backward compatibility
-    return {
-      id: productId,
-      name: product.name,
-      description: product.description || '',
-      price_monthly: product.pricing.monthly.price,
-      price_annually: product.pricing.annually.price,
-      is_subscription: product.type === 'subscription',
-      has_free_trial: product.trial > 0,
-      free_trial_days: product.trial,
-      // Store the full product data for later use
-      _raw: product
-    };
-  } catch (e) {
-    console.error('Error fetching product details:', e);
-    throw e;
-  }
+  console.log('Fetched app config:', response);
+  return response;
 }
 
-// Fetch trial eligibility from server
-export async function fetchTrialEligibility(appId, productId, webManager) {
+// Fetch trial eligibility
+export async function fetchTrialEligibility(productId, webManager) {
   try {
-    // Get API base URL (uses dev server in development)
-    const apiBaseUrl = getApiBaseUrl(webManager, 'development');
-
-    // API call to check trial eligibility
-    const response = await fetch(`${apiBaseUrl}/payment/trial-eligibility`, {
+    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/trial-eligibility`, {
       method: 'GET',
       response: 'json',
-      query: {
-        app: appId,
-        product: productId
-      }
+      query: { product: productId },
     });
 
     return response.eligible || false;
   } catch (e) {
-    console.warn('Trial eligibility check failed, assuming not eligible:', e);
-    return false; // Default to not eligible if API fails
+    console.warn('Trial eligibility check failed, assuming eligible:', e);
+    return true;
   }
 }
 
-// Warmup server by making a lightweight request to payment intent API
-export async function warmupServer(webManager) {
-  try {
-    // Get payment intent endpoint
-    const apiBaseUrl = getApiBaseUrl(webManager, 'development');
+// Fire-and-forget server warmup
+export function warmupServer(webManager) {
+  fetch(`${webManager.getApiUrl()}/backend-manager/payments/intent`, {
+    method: 'GET',
+    query: { wakeup: 'true' },
+  }).catch(() => {});
+}
 
-    // Fire and forget - no await needed
-    fetch(`${apiBaseUrl}/payment/intent`, {
-      method: 'GET',
-      query: {
-        wakeup: 'true'
-      }
-    }).catch(e => {
-      console.debug('Server warmup failed (non-critical):', e);
-    });
+// Create payment intent and return { url }
+export async function createPaymentIntent({ webManager, state, processor, formData }) {
+  // Get reCAPTCHA token
+  const recaptchaToken = await getRecaptchaToken('payment_intent');
 
-    console.debug('Server warmup initiated');
-  } catch (e) {
-    // Fail silently - this is non-critical
-    console.debug('Server warmup error (non-critical):', e);
+  // User info
+  const user = webManager.auth().getUser();
+
+  // Discount code from form data
+  const discountCode = state.discountPercent > 0
+    ? (formData.discount || '').trim().toUpperCase()
+    : undefined;
+
+  // Build payload (flat fields to match backend schema)
+  const payload = {
+    processor,
+    productId: state.product.id,
+    frequency: state.frequency,
+    trial: state.trialEligible,
+    auth: {
+      uid: user?.uid || '',
+      email: user?.email || '',
+    },
+    attribution: webManager.storage().get('attribution', {}),
+    cancelUrl: window.location.href,
+    verification: {
+      status: 'pending',
+      'g-recaptcha-response': recaptchaToken || '',
+    },
+  };
+
+  // Optional fields
+  if (discountCode) {
+    payload.discount = discountCode;
   }
+
+  if (formData) {
+    // Clean form data -- remove fields we handle explicitly
+    const supplemental = { ...formData };
+    delete supplemental.frequency;
+    delete supplemental.discount;
+    payload.supplemental = supplemental;
+  }
+
+  console.log('Sending payment intent:', { processor, productId: state.product.id, payload });
+
+  // POST to backend (authorized — attaches Firebase ID token)
+  const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/intent`, {
+    method: 'POST',
+    response: 'json',
+    body: payload,
+  });
+
+  if (!response.url) {
+    throw new Error('No checkout URL returned from server');
+  }
+
+  console.log('Payment intent created:', response);
+  return response;
 }

@@ -101,6 +101,7 @@
       {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
     {% endfor %}
     env: {{ page.resolved.web_manager.env | jsonify }},
+    recaptcha: {{ page.resolved.recaptcha | jsonify }},
   };
 </script>
 

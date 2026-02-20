@@ -123,14 +123,11 @@ async function fetchAppData() {
     try {
       // Get app ID from site configuration
       const appId = webManager.config.brand.id;
-      const apiBaseUrl = 'https://api.itwcreativeworks.com';
+      const serverApiURL = `${webManager.getApiUrl()}/backend-manager/app`;
 
       // Fetch app data
-      const response = await fetch(`${apiBaseUrl}/get-app`, {
+      const response = await fetch(serverApiURL, {
         response: 'json',
-        query: {
-          id: appId,
-        }
       });
 
       console.log('Fetched app data:', response);
@@ -338,7 +335,8 @@ function trackAccountSectionView(sectionId) {
     section: sectionId
   });
   ttq.track('ViewContent', {
-    content_name: `Account ${sectionId}`,
-    content_type: 'account_section'
+    content_id: `account-${sectionId}`,
+    content_type: 'product',
+    content_name: `Account ${sectionId}`
   });
 }

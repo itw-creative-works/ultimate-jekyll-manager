@@ -473,29 +473,20 @@ function getAPIFunctionsUrl() {
 
 // Tracking functions
 function trackNotificationSent(payload) {
-  // Google Analytics
-  if (typeof gtag !== 'undefined') {
-    gtag('event', 'notification_sent', {
-      notification_type: 'admin',
-      user_count: stats.filteredUsers,
-      channels: Object.keys(payload.channels || {}).filter(c => payload.channels[c]?.enabled).join(',')
-    });
-  }
+  gtag('event', 'notification_sent', {
+    notification_type: 'admin',
+    user_count: stats.filteredUsers,
+    channels: Object.keys(payload.channels || {}).filter(c => payload.channels[c]?.enabled).join(','),
+  });
 
-  // Facebook Pixel
-  if (typeof fbq !== 'undefined') {
-    fbq('trackCustom', 'AdminNotificationSent', {
-      users: stats.filteredUsers,
-      channels: Object.keys(payload.channels || {}).filter(c => payload.channels[c]?.enabled)
-    });
-  }
+  fbq('trackCustom', 'AdminNotificationSent', {
+    users: stats.filteredUsers,
+    channels: Object.keys(payload.channels || {}).filter(c => payload.channels[c]?.enabled),
+  });
 
-  // TikTok Pixel
-  if (typeof ttq !== 'undefined') {
-    ttq.track('SubmitForm', {
-      content_name: 'Admin Notification',
-      content_type: 'notification',
-      value: stats.filteredUsers
-    });
-  }
+  ttq.track('SubmitForm', {
+    content_id: 'admin-notification',
+    content_type: 'product',
+    content_name: 'Admin Notification',
+  });
 }
