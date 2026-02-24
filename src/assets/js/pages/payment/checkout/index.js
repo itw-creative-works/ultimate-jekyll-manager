@@ -75,7 +75,8 @@ async function initializeCheckout() {
 
     // App config is required
     if (appConfigResult.status === 'rejected') {
-      throw new Error(`Failed to load checkout. Please refresh and try again.`);
+      const reason = appConfigResult.reason?.message || appConfigResult.reason || 'Unknown error';
+      throw new Error(`Failed to load checkout app config: ${reason}`);
     }
 
     const appConfig = appConfigResult.value;

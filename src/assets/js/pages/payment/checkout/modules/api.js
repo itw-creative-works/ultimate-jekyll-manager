@@ -7,6 +7,7 @@ import { getRecaptchaToken } from './recaptcha.js';
 export async function fetchAppConfig(webManager) {
   const response = await fetch(`${webManager.getApiUrl()}/backend-manager/app`, {
     response: 'json',
+    tries: 2,
   });
 
   console.log('Fetched app config:', response);
@@ -87,6 +88,7 @@ export async function createPaymentIntent({ webManager, state, processor, formDa
   const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/intent`, {
     method: 'POST',
     response: 'json',
+    tries: 1,
     body: payload,
   });
 
