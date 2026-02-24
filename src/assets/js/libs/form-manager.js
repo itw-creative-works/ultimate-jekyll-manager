@@ -17,6 +17,20 @@ import { ready as domReady } from 'web-manager/modules/dom.js';
 // Constants
 const HONEYPOT_SELECTOR = '[data-honey], [name="honey"]';
 
+// Shared beforeunload handler (registered once, checks all instances)
+const _instances = new Set();
+let _beforeUnloadRegistered = false;
+
+function _sharedBeforeUnloadHandler(e) {
+  for (const instance of _instances) {
+    if (instance.config.warnOnUnsavedChanges && instance._isDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+      return;
+    }
+  }
+}
+
 export class FormManager {
   constructor(selector, options = {}) {
     // Get form element
@@ -57,8 +71,8 @@ export class FormManager {
     // Field errors (populated during validation)
     this._fieldErrors = {};
 
-    // Bind beforeunload handler so we can remove it later
-    this._beforeUnloadHandler = (e) => this._handleBeforeUnload(e);
+    // Track this instance for shared beforeunload handler
+    _instances.add(this);
 
     /* @dev-only:start */
     {
@@ -87,9 +101,10 @@ export class FormManager {
     this.$form.addEventListener('input', (e) => this._handleChange(e));
     this.$form.addEventListener('change', (e) => this._handleChange(e));
 
-    // Attach beforeunload handler if configured
-    if (this.config.warnOnUnsavedChanges) {
-      window.addEventListener('beforeunload', this._beforeUnloadHandler);
+    // Register shared beforeunload handler once (covers all instances)
+    if (!_beforeUnloadRegistered) {
+      _beforeUnloadRegistered = true;
+      window.addEventListener('beforeunload', _sharedBeforeUnloadHandler);
     }
 
     // Handle page restored from bfcache (e.g., back button after OAuth redirect)
@@ -602,19 +617,6 @@ export class FormManager {
     this._displayFieldErrors();
     this._focusFirstError();
     throw new Error('Validation failed');
-  }
-
-  /**
-   * Handle beforeunload event
-   */
-  _handleBeforeUnload(e) {
-    if (!this._isDirty) {
-      return;
-    }
-
-    // Standard way to trigger browser's "unsaved changes" dialog
-    e.preventDefault();
-    e.returnValue = '';
   }
 
   /**
