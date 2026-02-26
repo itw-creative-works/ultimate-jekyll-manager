@@ -130,17 +130,23 @@ function sass(complete) {
     logger.log('PurgeCSS enabled - removing unused CSS');
     const purgeCssStartTime = performance.now();
 
+    // Exclusion patterns for PurgeCSS content scanning
+    // NOTE: ! negation patterns DON'T work in PurgeCSS's content array because
+    // PurgeCSS passes each pattern to fast-glob individually (not as a batch),
+    // so negation patterns just return 0 files. Use skippedContentGlobs instead.
+    const skippedContentGlobs = [
+      // Exclude ALL theme directories (we re-include the active theme below)
+      `${rootPathPackage}/dist/defaults/**/_includes/themes/**`,
+      `${rootPathPackage}/dist/defaults/**/_layouts/themes/**`,
+
+      // Exclude test pages that reference components not used in production
+      `${rootPathPackage}/dist/defaults/**/pages/test/**/*.{html,liquid,md}`,
+    ];
+
     // Define content patterns for PurgeCSS
     const contentPatterns = [
-      // All Ultimate Jekyll defaults EXCEPT themes subdirectories
+      // All Ultimate Jekyll defaults (exclusions handled by skippedContentGlobs)
       `${rootPathPackage}/dist/defaults/**/*.{html,liquid,md}`,
-
-      // Explicitly exclude ALL theme directories, then include only the active theme
-      `!${rootPathPackage}/dist/defaults/**/_includes/themes/**`,
-      `!${rootPathPackage}/dist/defaults/**/_layouts/themes/**`,
-
-      // Exclude test pages that include components we don't normally use (would prevent PurgeCSS from working)
-      `!${rootPathPackage}/dist/defaults/**/pages/test/**/*.{html,liquid,md}`,
 
       // Include ONLY the active theme's files from UJM
       `${rootPathPackage}/dist/defaults/**/_includes/themes/${config.theme.id}/**/*.{html,liquid,md}`,
@@ -167,34 +173,6 @@ function sass(complete) {
       // Project JS
       'src/assets/js/**/*.js',
     ];
-
-    // // Log the files that will be analyzed
-    // logger.log('PurgeCSS content patterns:', contentPatterns);
-
-    // // Separate inclusion and exclusion patterns for glob
-    // const includePatterns = contentPatterns.filter(p => !p.startsWith('!'));
-    // const excludePatterns = contentPatterns.filter(p => p.startsWith('!')).map(p => p.substring(1));
-
-    // // Use glob to get the actual files (respecting exclusions)
-    // const allFiles = glob(includePatterns, { ignore: excludePatterns });
-
-    // logger.log(`PurgeCSS will analyze ${allFiles.length} total files:`);
-
-    // // Group files by type for better readability
-    // const fileGroups = {
-    //   'HTML/Liquid/MD files': allFiles.filter(f => /\.(html|liquid|md)$/.test(f)),
-    //   'JavaScript files': allFiles.filter(f => /\.js$/.test(f))
-    // };
-
-    // Object.entries(fileGroups).forEach(([groupName, files]) => {
-    //   if (files.length > 0) {
-    //     logger.log(`  ${groupName}: ${files.length} files`);
-    //     // Show first 5 files as examples
-    //     files.forEach(file => {
-    //       logger.log(`    - ${file}`);
-    //     });
-    //   }
-    // });
 
     // Apply PurgeCSS
     const purgeCssPlugin = purgeCss({
@@ -307,11 +285,16 @@ function sass(complete) {
           ...(ujmConfig?.sass?.purgecss?.safelist?.keyframes || []).map(s => new RegExp(s)),
         ]
       },
-      // Don't remove CSS variables
-      variables: true,
-      // Keep keyframes
+      // Exclusion patterns (! patterns don't work in content array, see note above)
+      skippedContentGlobs,
+      // PurgeCSS option naming: true = "yes, purge this category", false = "leave it alone"
+      // Disable CSS variable purging — page-specific CSS sets variables
+      // (e.g., --bs-btn-bg) that are only consumed by the main bundle,
+      // so per-file purging falsely removes them
+      variables: false,
+      // Purge unused @keyframes (safe — self-contained within a single file)
       keyframes: true,
-      // Keep font-face rules
+      // Purge unused @font-face rules
       fontFace: true
     });
 
