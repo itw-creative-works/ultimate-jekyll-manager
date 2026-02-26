@@ -198,9 +198,8 @@ function sass(complete) {
           /^active$/,
           /^disabled$/,
 
-          // Buttons
-          // /^btn-outline-adaptive$/,
-          // /^btn-adaptive$/,
+          // Buttons (dynamically swapped in JS: pricing, download, api-keys, referrals)
+          /^btn-/,
 
           // Accordion specific
           /^accordion/,
@@ -235,10 +234,15 @@ function sass(complete) {
           /^mh-/,
           /^min-/,
           /^max-/,
-
-          // Utilities
+          /^fw-/,
           /^ratio-/,
           /^object-/,
+          /^filter-/,
+
+          // Form validation & spinners (created dynamically by form-manager.js)
+          /^invalid-feedback$/,
+          /^spinner-/,
+          /^file-drop-/,
 
           // Libraries
           // Cookies
@@ -255,6 +259,11 @@ function sass(complete) {
 
           // Third-party injected elements
           /^grecaptcha/,
+          /^adsbygoogle$/,
+          /^uj-vert-unit$/,
+
+          // Page-specific dynamic classes
+          /^uptime-tooltip$/,
 
           // User-defined safelist from ultimate-jekyll-manager.json
           ...(ujmConfig?.sass?.purgecss?.safelist?.standard || []).map(s => new RegExp(s)),
