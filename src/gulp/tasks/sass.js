@@ -253,6 +253,9 @@ function sass(complete) {
           // Social
           /^social-share-/,
 
+          // Third-party injected elements
+          /^grecaptcha/,
+
           // User-defined safelist from ultimate-jekyll-manager.json
           ...(ujmConfig?.sass?.purgecss?.safelist?.standard || []).map(s => new RegExp(s)),
         ],
