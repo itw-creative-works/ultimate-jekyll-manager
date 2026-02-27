@@ -148,6 +148,15 @@ async function jekyll(complete) {
       launchBrowserSync();
     }
 
+    // Quick mode: trigger deferred asset compilation after first build
+    if (Manager.isQuickMode() && index === 0) {
+      logger.log('Quick mode: Triggering deferred asset compilation...');
+      Manager.triggerRebuild([
+        'src/assets/js/main.js',
+        'src/assets/css/main.scss',
+      ], logger);
+    }
+
     // Reload browser
     if (global.browserSync) {
       global.browserSync.reload();

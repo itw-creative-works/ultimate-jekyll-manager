@@ -98,6 +98,12 @@ Manager.isBuildMode = function () {
 }
 Manager.prototype.isBuildMode = Manager.isBuildMode;
 
+// isQuickMode
+Manager.isQuickMode = function () {
+  return process.env.UJ_QUICK === 'true';
+}
+Manager.prototype.isQuickMode = Manager.isQuickMode;
+
 // actLikeProduction - determines if we should act like production mode
 Manager.actLikeProduction = function () {
   return Boolean(Manager.isBuildMode() || process.env.UJ_AUDIT_FORCE === 'true');

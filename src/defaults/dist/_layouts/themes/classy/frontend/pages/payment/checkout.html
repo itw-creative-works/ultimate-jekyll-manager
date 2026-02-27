@@ -24,7 +24,8 @@ web_manager:
   <button type="submit" class="btn btn-adaptive btn-md d-flex align-items-center justify-content-center payment-button"
           data-payment-method="card"
           data-action="pay-card"
-          data-wm-bind="@show checkout.paymentMethods.card">
+          data-wm-bind="@show checkout.paymentMethods.card"
+          hidden>
     {% uj_icon "credit-card", "me-2 fa-3xl" %}
     <span class="fw-semibold">Credit/Debit</span>
   </button>
@@ -33,7 +34,8 @@ web_manager:
   <button type="submit" class="btn btn-paypal btn-md d-flex align-items-center justify-content-center payment-button"
           data-payment-method="paypal"
           data-action="pay-paypal"
-          data-wm-bind="@show checkout.paymentMethods.paypal">
+          data-wm-bind="@show checkout.paymentMethods.paypal"
+          hidden>
     <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-200px.png"
         alt="PayPal"
         height="28"
@@ -152,7 +154,7 @@ web_manager:
       </div> -->
 
       <!-- Main Checkout Form -->
-      <form id="checkout-form" autocomplete="on" novalidate>
+      <form id="checkout-form" autocomplete="on" novalidate onsubmit="return false">
         <!-- Content Row -->
         <div class="row d-lg-flex">
           <!-- Section 1: Billing Cycle & Customer Info -->

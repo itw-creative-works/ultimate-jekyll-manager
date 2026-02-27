@@ -314,6 +314,16 @@ Add the `.btn-action` class to protect custom elements that trigger important ac
 **Use `.btn-action` for:** API calls, form submissions, data modifications, payments, destructive actions
 **Don't use for:** Navigation, UI toggles, modals, accordions, harmless interactions
 
+#### Form Protection Standards
+
+All JS-managed forms use a layered protection strategy:
+
+1. **`onsubmit="return false"`** on every `<form>` managed by FormManager — prevents native submission before JS loads
+2. **Button initial state** — buttons dependent on async data start `hidden` (revealed by `data-wm-bind`); auth buttons start `disabled` (enabled by FormManager's `ready()`)
+3. **FormManager `autoReady`** — use `autoReady: false` when async work happens before form init, call `ready()` explicitly after
+
+**Exception:** Traditional forms with an `action` attribute that intentionally navigate should NOT include `onsubmit="return false"`.
+
 ### Ad Units (Verts)
 
 UJ provides ad unit includes that display Google AdSense ads with automatic fallback to in-house promo-server ads when AdSense is blocked or unfilled.

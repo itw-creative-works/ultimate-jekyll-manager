@@ -40,7 +40,7 @@ social_signin:
       {% capture initializing_spinner %}<span class="spinner-border spinner-border-sm me-2 form-initializing-spinner"></span>{% endcapture %}
 
       <!-- Sign In Form -->
-      <form id="auth-form" autocomplete="on" novalidate>
+      <form id="auth-form" autocomplete="on" novalidate onsubmit="return false">
         <!-- Hidden default submit button for Enter key -->
         <button type="submit" class="d-none" data-provider="email" aria-hidden="true" tabindex="-1"></button>
 

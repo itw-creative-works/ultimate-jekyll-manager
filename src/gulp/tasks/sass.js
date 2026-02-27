@@ -77,6 +77,9 @@ const output = 'dist/assets/css';
 const delay = 250;
 const compiled = {};
 
+// Flags
+let deferred = false;
+
 // Configuration
 const MAIN_BUNDLE_PAGE_PARTIALS = false; // Set to true to merge pages into _page-specific.scss, false to compile separately
 // Enable PurgeCSS via environment variable or in production mode
@@ -86,6 +89,13 @@ const ujmConfig = Manager.getUJMConfig();
 
 // SASS Compilation Task
 function sass(complete) {
+  // Quick mode: skip initial compilation, use stale cached bundles
+  if (Manager.isQuickMode() && !deferred) {
+    deferred = true;
+    logger.log('Quick mode: Skipping initial SASS compilation (using cached bundles)');
+    return complete();
+  }
+
   // Log
   logger.log('Starting...');
   Manager.logMemory(logger, 'Start');

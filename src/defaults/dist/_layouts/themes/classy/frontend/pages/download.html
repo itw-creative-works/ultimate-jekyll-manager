@@ -368,7 +368,7 @@ cta:
               {% else %}
                 {% if platform.id == "android" or platform.id == "ios" %}
                   <div class="mb-4 text-start">
-                    <form id="mobile-email-form-{{ platform.id }}" class="mobile-email-form" data-platform="{{ platform.id }}">
+                    <form id="mobile-email-form-{{ platform.id }}" class="mobile-email-form" data-platform="{{ platform.id }}" onsubmit="return false">
                       <label for="email-{{ platform.id }}" class="form-label">Email Address</label>
                       <div class="row g-3">
                         <div class="col-12 col-md-8">

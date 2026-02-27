@@ -73,6 +73,18 @@ async function initializeCheckout() {
       initializeRecaptcha(webManager.config?.recaptcha?.['site-key'], webManager),
     ]);
 
+    /* @dev-only:start */
+    {
+      const _dev_preDelay = urlParams.get('_dev_preDelay');
+      if (_dev_preDelay) {
+        const delayMs = parseInt(_dev_preDelay, 10) || 5000;
+        console.warn(`[Checkout Dev] Artificial pre-delay: ${delayMs}ms`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        console.warn('[Checkout Dev] Pre-delay complete');
+      }
+    }
+    /* @dev-only:end */
+
     // App config is required
     if (appConfigResult.status === 'rejected') {
       const reason = appConfigResult.reason?.message || appConfigResult.reason || 'Unknown error';

@@ -101,10 +101,8 @@
           && target.closest('button, input[type="submit"], input[type="button"], input[type="reset"], .btn-action')
         )
       ) {
-        // Log disabled click attempt in development
-        if (window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168')) {
-          console.log('Click prevented (disabled):', target);
-        }
+        // Log the click for debugging
+        console.log('Click prevented (disabled):', target);
 
         // Prevent all actions
         e.preventDefault();

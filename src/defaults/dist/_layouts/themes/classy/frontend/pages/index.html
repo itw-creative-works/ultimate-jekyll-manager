@@ -225,7 +225,7 @@ cta:
     <!-- Input Demo: Single input with button -->
     <div class="card bg-glassy border-0 {% unless is_side_layout %}mx-auto{% endunless %} {{ demo.options.class }}">
       <div class="card-body">
-        <form id="hero-demo-form" class="d-flex flex-column {% unless is_side_layout %}flex-sm-row justify-content-center{% endunless %} gap-3" {% iftruthy demo.options.redirect %}data-redirect="{{ demo.options.redirect }}"{% endiftruthy %}>
+        <form id="hero-demo-form" class="d-flex flex-column {% unless is_side_layout %}flex-sm-row justify-content-center{% endunless %} gap-3" {% iftruthy demo.options.redirect %}data-redirect="{{ demo.options.redirect }}"{% endiftruthy %} onsubmit="return false">
           <input
             type="{{ demo.options.input_type | default: 'text' }}"
             name="{{ demo.options.name | default: 'input' }}"
@@ -249,7 +249,7 @@ cta:
   {% elsif demo.type == "form" %}
     <!-- Form Demo: Multiple fields with card styling -->
     <div class="{% unless is_side_layout %}mx-auto{% endunless %} {{ demo.options.class }}">
-      <form id="hero-demo-form" {% iftruthy demo.options.redirect %}data-redirect="{{ demo.options.redirect }}"{% endiftruthy %}>
+      <form id="hero-demo-form" {% iftruthy demo.options.redirect %}data-redirect="{{ demo.options.redirect }}"{% endiftruthy %} onsubmit="return false">
         <div class="row g-3 {% unless is_side_layout %}justify-content-center{% endunless %}">
           {% assign autofocus_set = false %}
           {% for field in demo.options.fields %}

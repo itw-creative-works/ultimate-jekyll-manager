@@ -72,6 +72,9 @@ const copy = [
 
 const delay = 250;
 
+// Flags
+let deferred = false;
+
 // Bundle naming configuration
 const bundleNaming = {
   // Files that should have stable (non-hashed) names
@@ -275,6 +278,13 @@ function getSettings() {
 
 // Task
 function webpack(complete) {
+  // Quick mode: skip initial compilation, use stale cached bundles
+  if (Manager.isQuickMode() && !deferred) {
+    deferred = true;
+    logger.log('Quick mode: Skipping initial webpack compilation (using cached bundles)');
+    return complete();
+  }
+
   // Get settings (loads config at runtime)
   const settings = getSettings();
 

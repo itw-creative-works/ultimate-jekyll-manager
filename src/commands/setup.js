@@ -41,6 +41,19 @@ module.exports = async function (options) {
   options.deduplicatePosts = options.deduplicatePosts !== 'false';
   options.migrate = options.migrate !== 'false';
 
+  // Quick mode: skip slow/network operations
+  if (Manager.isQuickMode()) {
+    logger.log('Quick mode: Skipping slow setup operations');
+    options.checkManager = false;
+    options.checkNode = false;
+    options.checkRuby = false;
+    options.checkBundle = false;
+    options.checkPeerDependencies = false;
+    options.fetchFirebaseAuth = false;
+    options.publishGitHubToken = false;
+    options.deduplicatePosts = false;
+  }
+
   // Log
   logger.log(`Welcome to ${package.name} v${package.version}!`);
   logger.log(`options`, options);
