@@ -32,6 +32,7 @@ function setupDataRequestForm() {
 
   formManager = new FormManager('#data-request-form', {
     allowResubmit: false,
+    warnOnUnsavedChanges: false,
     submittingText: 'Submitting request...',
     submittedText: 'Request Submitted',
   });
@@ -197,7 +198,7 @@ function showRequestStatus(request) {
     $formTrigger.classList.add('d-none');
   }
 
-  const createdDate = new Date(request.createdAt).toLocaleDateString();
+  const createdDate = new Date(request.metadata.created.timestamp).toLocaleDateString();
 
   if (request.status === 'complete') {
     $statusTitle.textContent = 'Your data is ready';

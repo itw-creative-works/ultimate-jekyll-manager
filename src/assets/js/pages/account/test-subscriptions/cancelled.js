@@ -4,7 +4,7 @@ export default {
   id: 'sub_3CancelABCDEFGH',
   orderNumber: 'ORD-2024-003456',
   app: 'app_main',
-  product: 'basic',
+  product: 'pro',
   intent: 'pi_3CancelABCDEFGH',
 
   // Type and status
@@ -69,7 +69,7 @@ export default {
   cancellation: {
     requested: true,
     requestedAt: Date.now() - (10 * 24 * 60 * 60 * 1000), // 10 days ago
-    effectiveAt: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
+    effectiveAt: Math.floor(Date.now() / 1000) - (5 * 24 * 60 * 60), // 5 days ago (Unix seconds)
     reason: 'customer_request'
   },
 

@@ -28,6 +28,7 @@ function setupDeleteAccountForm() {
 
   formManager = new FormManager('#delete-account-form', {
     allowResubmit: false,
+    warnOnUnsavedChanges: false,
     submittingText: 'Deleting account...',
     submittedText: 'Account Deleted!',
   });

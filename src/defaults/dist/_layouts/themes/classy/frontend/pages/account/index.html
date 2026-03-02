@@ -21,6 +21,14 @@ prerender_icons:
   - name: "linux"
   - name: "chrome"
   - name: "desktop"
+  - name: "circle-check"
+  - name: "clock"
+  - name: "triangle-exclamation"
+  - name: "circle-xmark"
+  - name: "credit-card"
+  - name: "arrow-up-right-from-square"
+  - name: "rotate-right"
+  - name: "ban"
 
 ### PAGE CONFIG ###
 sections:
@@ -948,41 +956,116 @@ badges:
 
       <!-- Billing Section -->
       <section id="billing-section" class="account-section d-none">
-        <h2 class="h3 mb-4" >Billing and usage</h2>
+        <h2 class="h3 mb-4">Billing and usage</h2>
 
+        <!-- Plan Overview Card -->
         <div class="card mb-3">
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <h5 class="card-title mb-1 d-flex align-items-center">
-                  <span class="me-2">Current plan</span>
-                  <span id="plan-status"></span>
+                <h5 class="card-title mb-1 d-flex align-items-center flex-wrap gap-2">
+                  <span>Current plan</span>
+                  <span id="plan-status" class="badge bg-secondary">Loading...</span>
                 </h5>
-                <p class="card-text mb-0">
-                  You are currently on the <strong id="current-plan-name">Basic</strong> plan.
-                </p>
+                <p class="card-text mb-0" id="plan-description">Loading plan details...</p>
               </div>
             </div>
 
-            <div class="d-grid d-sm-block">
+            <!-- Billing details (next billing, amount) -->
+            <div id="billing-details" class="mb-3 d-none"></div>
+
+            <!-- State-specific alerts -->
+            <div id="billing-alerts" class="mb-3"></div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid d-sm-flex gap-2">
               <button id="upgrade-plan-btn" class="btn btn-success plan-action-btn d-none">
                 {% uj_icon "crown", "me-2" %}
                 <span class="button-text">Upgrade Plan</span>
               </button>
-              <button id="manage-plan-btn" class="btn btn-primary plan-action-btn d-none">
-                {% uj_icon "gear", "me-2" %}
-                <span class="button-text">Manage Plan</span>
+              <button id="change-plan-btn" class="btn btn-outline-adaptive plan-action-btn d-none">
+                {% uj_icon "arrow-right-arrow-left", "me-2" %}
+                <span class="button-text">Change Plan</span>
+              </button>
+              <button id="manage-billing-btn" class="btn btn-primary plan-action-btn d-none">
+                {% uj_icon "credit-card", "me-2" %}
+                <span class="button-text">Manage Billing</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="card">
+        <!-- Usage Metrics Card -->
+        <div class="card mb-3">
           <div class="card-body">
             <h5 class="card-title">Usage</h5>
             <div id="usage-metrics-container">
-              <!-- Usage metrics will be dynamically inserted here -->
               <div class="text-muted">Loading usage data...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cancel Subscription (only visible for paid users) -->
+        <div id="cancel-subscription-trigger" class="d-none text-center">
+          <hr>
+          <button type="button" class="btn btn-link btn-sm text-muted text-decoration-underline cancel-trigger-link" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion" aria-expanded="false" aria-controls="cancel-subscription-accordion">
+            Cancel subscription
+          </button>
+        </div>
+
+        <div class="collapse" id="cancel-subscription-accordion">
+          <div class="card card-form-border border-warning mt-4">
+            <div class="card-body">
+              <h5 class="card-title text-warning">
+                {% uj_icon "triangle-exclamation", "fa-lg me-2" %}
+                Cancel your subscription
+              </h5>
+
+              <p class="card-text small text-muted">
+                If you cancel, your subscription will remain active until the end of your current billing period. After that, you'll be downgraded to the free plan and will lose access to premium features. You can resubscribe at any time.
+              </p>
+
+              <form id="cancel-subscription-form" novalidate onsubmit="return false">
+                <!-- Cancellation Reasons (randomized by JS) -->
+                <div class="mb-3">
+                  <label class="form-label">Why are you cancelling?</label>
+                  <div id="cancel-reasons-container">
+                    <!-- Radio buttons injected by JS in random order -->
+                  </div>
+                </div>
+
+                <!-- Additional Feedback -->
+                <div class="mb-3">
+                  <label for="cancel-feedback" class="form-label">Anything else you'd like us to know?</label>
+                  <textarea class="form-control" id="cancel-feedback" name="feedback" rows="3" placeholder="Optional feedback to help us improve..."></textarea>
+                </div>
+
+                <!-- Required Confirmation -->
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="cancel-confirm-checkbox" required>
+                    <label class="form-check-label" for="cancel-confirm-checkbox">
+                      I confirm I want to cancel my subscription and agree to the <a href="/legal/terms" target="_blank">Terms of Service</a>. I understand my access will continue until the end of the current billing period, after which I'll be moved to the free plan.
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="row g-2">
+                  <div class="col-12 col-md-6 order-md-2">
+                    <button type="submit" class="btn btn-outline-danger w-100" id="cancel-subscription-btn" disabled>
+                      {% uj_icon "ban", "fa-sm me-2" %}
+                      <span class="button-text">Cancel Subscription</span>
+                    </button>
+                  </div>
+                  <div class="col-12 col-md-6 order-md-1">
+                    <button type="button" class="btn btn-primary w-100" id="keep-plan-btn" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion">
+                      {% uj_icon "circle-check", "fa-sm me-2" %}
+                      <span>Keep My Plan</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>

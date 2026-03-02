@@ -225,14 +225,16 @@ function updateRoleBadges(account) {
     }
   });
 
-  // Show premium badge if subscription is active
+  // Show premium badge if subscription is active AND on a paid plan
   const $premiumBadge = document.getElementById('badge-premium');
   if ($premiumBadge) {
+    const productId = subscription?.product?.id || subscription?.product || 'basic';
+    const isPaid = productId !== 'basic';
     const isActive = subscription?.status === 'active'
       || subscription?.status === 'trialing'
-      || subscription?.active === true;
+      || subscription?.access === true;
 
-    if (isActive) {
+    if (isActive && isPaid) {
       $premiumBadge.classList.remove('d-none');
     } else {
       $premiumBadge.classList.add('d-none');
