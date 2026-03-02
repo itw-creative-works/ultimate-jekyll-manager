@@ -18,11 +18,11 @@ export async function init(wm) {
 // Setup delete account form
 function setupDeleteAccountForm() {
   const $form = document.getElementById('delete-account-form');
-  const $checkbox = document.getElementById('delete-confirm-checkbox');
+  const $checkbox1 = document.getElementById('delete-confirm-checkbox');
+  const $checkbox2 = document.getElementById('delete-data-request-checkbox');
   const $deleteBtn = document.getElementById('delete-account-btn');
-  const $cancelBtn = document.getElementById('cancel-delete-btn');
 
-  if (!$form || !$checkbox || !$deleteBtn) {
+  if (!$form || !$checkbox1 || !$checkbox2 || !$deleteBtn) {
     return;
   }
 
@@ -32,23 +32,18 @@ function setupDeleteAccountForm() {
     submittedText: 'Account Deleted!',
   });
 
-  // Enable/disable delete button based on checkbox
-  $checkbox.addEventListener('change', (e) => {
-    $deleteBtn.disabled = !e.target.checked;
-  });
-
-  // Handle cancel button
-  if ($cancelBtn) {
-    $cancelBtn.addEventListener('click', () => {
-      // Navigate back to profile
-      window.location.hash = 'profile';
-    });
+  // Enable/disable delete button based on both checkboxes
+  function updateDeleteState() {
+    $deleteBtn.disabled = !($checkbox1.checked && $checkbox2.checked);
   }
 
+  $checkbox1.addEventListener('change', updateDeleteState);
+  $checkbox2.addEventListener('change', updateDeleteState);
+
   formManager.on('submit', async ({ data }) => {
-    // Check if checkbox is checked
-    if (!$checkbox.checked) {
-      throw new Error('Please confirm that you understand this action is permanent.');
+    // Check if both checkboxes are checked
+    if (!$checkbox1.checked || !$checkbox2.checked) {
+      throw new Error('Please confirm all acknowledgments before proceeding.');
     }
 
     // 1ms wait for dialog to appear properly

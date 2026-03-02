@@ -8,6 +8,7 @@ import * as teamSection from './sections/team.js';
 import * as referralsSection from './sections/referrals.js';
 import * as apiKeysSection from './sections/api-keys.js';
 import * as deleteSection from './sections/delete.js';
+import * as dataRequestSection from './sections/data-request.js';
 import * as connectionsSection from './sections/connections.js';
 let webManager = null;
 
@@ -47,6 +48,7 @@ const sectionModules = {
   referrals: referralsSection,
   'api-keys': apiKeysSection,
   delete: deleteSection,
+  'data-request': dataRequestSection,
   connections: connectionsSection
 };
 
@@ -62,9 +64,12 @@ async function initializeAccount() {
   // Setup navigation
   setupNavigation();
 
-  // Check if delete hash is present on initial load
+  // Check if delete/data-request hash is present on initial load
   if (window.location.hash === '#delete') {
     showDeleteOption();
+  }
+  if (window.location.hash === '#data-request') {
+    showDataRequestOption();
   }
 
   // Initialize all section modules
@@ -180,6 +185,10 @@ function loadAllSectionData(authState) {
     sectionModules.delete.loadData(account);
   }
 
+  if (sectionModules['data-request'] && sectionModules['data-request'].loadData) {
+    sectionModules['data-request'].loadData(account);
+  }
+
   if (sectionModules.connections.loadData) {
     sectionModules.connections.loadData(account, appData);
   }
@@ -219,9 +228,12 @@ function setupNavigation() {
 function handleHashChange() {
   const hash = window.location.hash.slice(1);
 
-  // Show delete nav item and mobile option if hash is delete
+  // Show hidden nav items based on hash
   if (hash === 'delete') {
     showDeleteOption();
+  }
+  if (hash === 'data-request') {
+    showDataRequestOption();
   }
 
   if (hash) {
@@ -259,6 +271,27 @@ function showDeleteOption() {
       option.value = 'delete';
       option.textContent = 'Delete Account';
       option.className = 'text-danger';
+      $mobileNavSelect.appendChild(option);
+    }
+  }
+}
+
+// Show data request option in navigation
+function showDataRequestOption() {
+  // Show desktop nav item
+  const $dataRequestNavItem = document.getElementById('data-request-nav-item');
+  if ($dataRequestNavItem) {
+    $dataRequestNavItem.classList.remove('d-none');
+  }
+
+  // Add mobile dropdown option if not exists
+  const $mobileNavSelect = document.getElementById('mobile-nav-select');
+  if ($mobileNavSelect) {
+    const dataRequestOption = $mobileNavSelect.querySelector('option[value="data-request"]');
+    if (!dataRequestOption) {
+      const option = document.createElement('option');
+      option.value = 'data-request';
+      option.textContent = 'Data Request';
       $mobileNavSelect.appendChild(option);
     }
   }

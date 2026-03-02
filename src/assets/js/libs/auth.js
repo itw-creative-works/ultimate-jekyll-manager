@@ -114,6 +114,7 @@ export default function (Manager) {
     formManager = new FormManager('#auth-form', {
       autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
+      warnOnUnsavedChanges: false,
       submittingText: 'Signing in...',
       submittedText: 'Signed In!',
     });
@@ -128,6 +129,7 @@ export default function (Manager) {
     formManager = new FormManager('#auth-form', {
       autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
+      warnOnUnsavedChanges: false,
       submittingText: 'Creating account...',
       submittedText: 'Account Created!',
     });
@@ -142,6 +144,7 @@ export default function (Manager) {
     formManager = new FormManager('#auth-form', {
       autoReady: false, // We'll call ready() after checking redirect result
       allowResubmit: false,
+      warnOnUnsavedChanges: false,
       submittingText: 'Sending...',
       submittedText: 'Email Sent!',
     });

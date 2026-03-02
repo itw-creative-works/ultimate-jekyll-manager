@@ -70,6 +70,7 @@ In the event of a change of control, if we sell or otherwise transfer part or th
 
 ### Your Choices About Your Information:
 Your account information and profile privacy settings can be updated or changed by visiting your account profile at [{{ site.url }}/account]({{ site.url }}/account) or by contacting {{ brand }} directly at [{{ site.url }}/contact]({{ site.url }}/contact).
+- You may request a copy of your personal data by visiting [{{ site.url }}/account]({{ site.url }}/account#data-request).
 - You may request to have your account deleted by visiting your account profile at [{{ site.url }}/account]({{ site.url }}/account#delete).
 - You may request to unsubscribe from emails by clicking the "unsubscribe" link inside the email.
 
@@ -80,7 +81,27 @@ When it comes to the collection of personal information from children under 13, 
 By opting in to receive SMS communications from {{ brand }}, you agree to receive marketing text messages, such as promotions and cart reminders, from us. Consent to receive marketing text messages is not a condition of any purchase. Message and data rates may apply, and the frequency of messages may vary. You may unsubscribe from receiving SMS messages at any time by replying “STOP” to any message or by clicking the unsubscribe link provided in our communications. For more information about our privacy practices, please refer to this Privacy Policy or our [Terms of Service]({{ site.url }}/terms/).
 
 ## Request Your Data to Be Removed or Deleted
-If you would like your personally identifiable information to be deleted from our database, you can request deletion here: [{{ site.url }}/account]({{ site.url }}/account#delete).
+Under applicable data protection regulations including the General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA), you have the right to request the deletion of the personal data we hold about you. Account deletion is a permanent, irreversible action that cannot be undone under any circumstances.
+
+To request deletion, visit your account page here: [{{ site.url }}/account]({{ site.url }}/account#delete). Please read the following important information before proceeding:
+
+* **Permanent and irreversible:** Once your account is deleted, all personal data associated with your account will be permanently removed from our systems. This includes your profile information, subscription and billing history, activity logs, API keys, OAuth2 connections, referral data, and all other stored information. There is no mechanism to recover any data after deletion.
+* **Active subscriptions:** You must cancel any active paid subscriptions before deleting your account. Accounts with active or suspended paid subscriptions cannot be deleted until the subscription is cancelled or expires.
+* **Pending data requests:** If you have a pending data request (Subject Access Request), it will be permanently cancelled upon account deletion. We will not be able to fulfill data requests after your account has been deleted. If you wish to obtain a copy of your data, you must complete the data request and download process **before** initiating account deletion.
+* **Immediate effect:** Account deletion takes effect immediately. You will be signed out of all active sessions and will no longer be able to access any services associated with your account.
+* **Third-party services:** While we will remove your data from our systems, we cannot guarantee the removal of data that has already been shared with or collected by third-party services you may have used in connection with your account. Please refer to the privacy policies of those services for information about their data retention practices.
+
+## Request a Copy of Your Data
+Under applicable data protection regulations including the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and other similar legislative frameworks, you may have the right to request a copy of the personal data we hold about you. This is commonly referred to as a Subject Access Request (SAR) or a Data Portability Request.
+
+To submit a data request, visit your account page here: [{{ site.url }}/account]({{ site.url }}/account#data-request). Please read the following important information before submitting your request:
+
+* **Processing time:** Data requests may take up to **14 business days** to process. The compilation and verification of your data is performed manually by our data processing team to ensure accuracy, completeness, and security.
+* **Download only — no email delivery:** For security purposes, your data will **not** be sent via email or any other communication channel. You must return to your account page to download your data once it is ready. We do not consider email to be a sufficiently secure medium for the transmission of personally identifiable information.
+* **Data unavailable after account deletion:** If you delete your account before downloading your data, all personal information will be permanently and irreversibly removed from our systems. We will not be able to fulfill any pending data requests after account deletion. If you wish to both request your data and delete your account, you must download your data **before** initiating account deletion.
+* **Download expiration:** Completed data requests will be available for download for 30 days after processing is complete. After this period, the request will expire and you will need to submit a new request.
+* **Request limits:** You are limited to one active data request at a time. After a completed request, there is a 30-day cooldown period before a new request can be submitted.
+* **Data format:** Your data will be provided as a downloadable JSON file containing your account information, authentication records, subscription history, activity data, and other personally identifiable information associated with your account.
 
 ## Acceptance of This Policy
 Use of our site signifies your acceptance of this policy. If you do not accept the policy then please do not use this site. When registering, we will further request your explicit acceptance of the privacy policy.
