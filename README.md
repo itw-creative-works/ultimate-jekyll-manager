@@ -374,7 +374,12 @@ Raw pixel values also accepted: `vert-size="300"` → 300px max-height. Omit `ve
 #### Testing Parameters
 
 ##### Account Page (`/account`)
-* `_dev_subscription`: Override subscription data for testing (e.g., `_dev_subscription=premium`)
+* `_dev_subscription`: Override subscription data for testing billing states. The product ID is automatically patched to match a real product from the backend. Available values:
+  - `_dev_subscription=active`: Active paid subscription
+  - `_dev_subscription=trialing`: Free trial in progress
+  - `_dev_subscription=suspended`: Payment failed, access revoked
+  - `_dev_subscription=cancellation-requested`: Active but cancellation pending
+  - `_dev_subscription=cancelled`: Subscription ended
 * `_dev_prefill=true`: Adds fake test data for development:
   - Inserts fake referral data in the Referrals section
   - Inserts fake session data in the Security section (active sessions)

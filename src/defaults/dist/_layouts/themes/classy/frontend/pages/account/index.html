@@ -964,7 +964,7 @@ badges:
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <h5 class="card-title mb-1 d-flex align-items-center flex-wrap gap-2">
-                  <span>Current plan</span>
+                  <span><span data-wm-bind="@text auth.account.subscription.product.name">Current</span> plan</span>
                   <span id="plan-status" class="badge bg-secondary">Loading...</span>
                 </h5>
                 <p class="card-text mb-0" id="plan-description">Loading plan details...</p>
@@ -979,15 +979,15 @@ badges:
 
             <!-- Action Buttons -->
             <div class="d-grid d-sm-flex gap-2">
-              <button id="upgrade-plan-btn" class="btn btn-success plan-action-btn d-none">
+              <button id="upgrade-plan-btn" class="btn btn-success plan-action-btn" data-wm-bind="@show auth.account.subscription.product.id === basic" hidden>
                 {% uj_icon "crown", "me-2" %}
                 <span class="button-text">Upgrade Plan</span>
               </button>
-              <button id="change-plan-btn" class="btn btn-outline-adaptive plan-action-btn d-none">
+              <button id="change-plan-btn" class="btn btn-outline-adaptive plan-action-btn" data-wm-bind="@show auth.account.subscription.product.id !== basic" hidden>
                 {% uj_icon "arrow-right-arrow-left", "me-2" %}
                 <span class="button-text">Change Plan</span>
               </button>
-              <button id="manage-billing-btn" class="btn btn-primary plan-action-btn d-none">
+              <button id="manage-billing-btn" class="btn btn-primary plan-action-btn" data-wm-bind="@show auth.account.subscription.product.id !== basic" hidden>
                 {% uj_icon "credit-card", "me-2" %}
                 <span class="button-text">Manage Billing</span>
               </button>
@@ -1006,8 +1006,7 @@ badges:
         </div>
 
         <!-- Cancel Subscription (only visible for paid users) -->
-        <div id="cancel-subscription-trigger" class="d-none text-center">
-          <hr>
+        <div id="cancel-subscription-trigger" class="text-center" data-wm-bind="@show auth.account.subscription.product.id !== basic" hidden>
           <button type="button" class="btn btn-link btn-sm text-muted text-decoration-underline cancel-trigger-link" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion" aria-expanded="false" aria-controls="cancel-subscription-accordion">
             Cancel subscription
           </button>
@@ -1043,17 +1042,18 @@ badges:
                 <!-- Required Confirmation -->
                 <div class="mb-3">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="cancel-confirm-checkbox" required>
+                    <input class="form-check-input" type="checkbox" id="cancel-confirm-checkbox" name="confirm_cancellation" required>
                     <label class="form-check-label" for="cancel-confirm-checkbox">
                       I confirm I want to cancel my subscription and agree to the <a href="/legal/terms" target="_blank">Terms of Service</a>. I understand my access will continue until the end of the current billing period, after which I'll be moved to the free plan.
                     </label>
+                    <div class="invalid-feedback">You must confirm before cancelling.</div>
                   </div>
                 </div>
 
                 <!-- Buttons -->
                 <div class="row g-2">
                   <div class="col-12 col-md-6 order-md-2">
-                    <button type="submit" class="btn btn-outline-danger w-100" id="cancel-subscription-btn" disabled>
+                    <button type="submit" class="btn btn-outline-danger w-100" id="cancel-subscription-btn">
                       {% uj_icon "ban", "fa-sm me-2" %}
                       <span class="button-text">Cancel Subscription</span>
                     </button>
@@ -1304,6 +1304,7 @@ badges:
                       <label class="form-check-label small" for="data-request-confirm-checkbox">
                         I understand that this request may take up to 14 business days to process and that I must return to this page to download my data. I acknowledge that data will not be sent to me via email or any other channel.
                       </label>
+                      <div class="invalid-feedback">You must acknowledge this before proceeding.</div>
                     </div>
                   </div>
 
@@ -1313,6 +1314,7 @@ badges:
                       <label class="form-check-label small" for="data-request-deletion-checkbox">
                         I understand that if I delete my account before downloading my data, the data will be permanently lost and cannot be recovered under any circumstances.
                       </label>
+                      <div class="invalid-feedback">You must acknowledge this before proceeding.</div>
                     </div>
                   </div>
 
@@ -1323,7 +1325,7 @@ badges:
 
                   <div class="row g-2">
                     <div class="col-12 col-md-6 order-md-2">
-                      <button type="submit" class="btn btn-outline-adaptive w-100" id="data-request-submit-btn" disabled>
+                      <button type="submit" class="btn btn-outline-adaptive w-100" id="data-request-submit-btn">
                         {% uj_icon "file-export", "fa-sm me-2" %}
                         <span class="button-text">Submit Data Request</span>
                       </button>
@@ -1397,19 +1399,21 @@ badges:
               <form id="delete-account-form" novalidate onsubmit="return false">
                 <div class="mb-3">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="delete-confirm-checkbox" required>
+                    <input class="form-check-input" type="checkbox" id="delete-confirm-checkbox" name="confirm_deletion" required>
                     <label class="form-check-label" for="delete-confirm-checkbox">
                       I understand that deleting my account is permanent and cannot be reversed. All my data, including personal information, subscription history, API keys, and stored content, will be permanently and irreversibly erased.
                     </label>
+                    <div class="invalid-feedback">You must acknowledge this before proceeding.</div>
                   </div>
                 </div>
 
                 <div class="mb-3">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="delete-data-request-checkbox" required>
+                    <input class="form-check-input" type="checkbox" id="delete-data-request-checkbox" name="confirm_data_loss" required>
                     <label class="form-check-label" for="delete-data-request-checkbox">
                       I acknowledge that any pending data requests will be cancelled and I will not be able to request or download a copy of my data after my account is deleted.
                     </label>
+                    <div class="invalid-feedback">You must acknowledge this before proceeding.</div>
                   </div>
                 </div>
 
@@ -1420,7 +1424,7 @@ badges:
 
                 <div class="row g-2">
                   <div class="col-12 col-md-6 order-md-2">
-                    <button type="submit" class="btn btn-outline-adaptive w-100" id="delete-account-btn" disabled>
+                    <button type="submit" class="btn btn-outline-adaptive w-100" id="delete-account-btn">
                       {% uj_icon "trash", "fa-sm me-2" %}
                       <span class="button-text">Delete My Account Permanently</span>
                     </button>

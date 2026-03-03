@@ -113,6 +113,17 @@ export class FormManager {
     // Initialize file drop zones
     this._initFileDropZones();
 
+    // Warn about fields missing name attributes (they will be invisible to validation and getData)
+    /* @dev-only:start */
+    {
+      this.$form.querySelectorAll('input, select, textarea').forEach(($field) => {
+        if (!$field.name && !$field.matches(HONEYPOT_SELECTOR) && $field.type !== 'hidden') {
+          console.warn('[Form-manager] Field missing "name" attribute — will be skipped by validation and getData():', $field);
+        }
+      });
+    }
+    /* @dev-only:end */
+
     // Auto-transition to initialState when DOM is ready
     if (this.config.autoReady) {
       domReady().then(() => this._setInitialState());

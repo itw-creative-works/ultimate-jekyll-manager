@@ -58,16 +58,13 @@ function updatePlanCard(account) {
   const $planStatus = document.getElementById('plan-status');
   const $planDescription = document.getElementById('plan-description');
 
-  // Determine product info
-  const productId = getProductId(subscription);
-  const isPaid = productId !== 'basic';
-  const displayName = getDisplayName(productId, isPaid);
-
-  // Set status badge and description
   if (!$planStatus || !$planDescription) {
     return;
   }
 
+  const productId = getProductId(subscription);
+  const isPaid = productId !== 'basic';
+  const displayName = getDisplayName(subscription);
   const status = getEffectiveStatus(subscription, isPaid);
 
   switch (status) {
@@ -77,42 +74,24 @@ function updatePlanCard(account) {
       $planDescription.innerHTML = `You are currently on the <strong>${displayName}</strong> plan. Upgrade to unlock premium features.`;
       break;
     }
+    case 'trialing':
+    case 'cancelling':
     case 'active': {
       $planStatus.className = 'badge bg-success';
       $planStatus.textContent = 'Active';
       $planDescription.innerHTML = `You are currently on the <strong>${displayName}</strong> plan.`;
       break;
     }
-    case 'trialing': {
-      const daysLeft = getTrialDaysLeft(subscription);
-      $planStatus.className = 'badge bg-info';
-      $planStatus.textContent = daysLeft > 0 ? `Trial (${daysLeft} days left)` : 'Trial';
-      $planDescription.innerHTML = `You're trialing the <strong>${displayName}</strong> plan.`;
-      break;
-    }
-    case 'cancelling': {
-      const daysLeft = getCancellationDaysLeft(subscription);
-      $planStatus.className = 'badge bg-warning text-body';
-      $planStatus.textContent = daysLeft > 0 ? `Cancelling (${daysLeft} days left)` : 'Cancelling';
-      $planDescription.innerHTML = `Your <strong>${displayName}</strong> plan is set to cancel. You still have access until the end of your billing period.`;
-      break;
-    }
-    case 'payment_issue': {
+    case 'suspended': {
       $planStatus.className = 'badge bg-danger';
-      $planStatus.textContent = 'Payment Issue';
-      $planDescription.innerHTML = `Your <strong>${displayName}</strong> plan has a payment issue. Please update your payment method to avoid losing access.`;
+      $planStatus.textContent = 'Suspended';
+      $planDescription.innerHTML = `Your <strong>${displayName}</strong> subscription has been suspended and access has been revoked due to a payment issue. Please update your payment method to restore access.`;
       break;
     }
     case 'cancelled': {
       $planStatus.className = 'badge bg-secondary';
       $planStatus.textContent = 'Cancelled';
       $planDescription.innerHTML = `Your <strong>${displayName}</strong> subscription has ended. Resubscribe to regain access to premium features.`;
-      break;
-    }
-    case 'expired': {
-      $planStatus.className = 'badge bg-secondary';
-      $planStatus.textContent = 'Expired';
-      $planDescription.innerHTML = `Your <strong>${displayName}</strong> subscription has expired. Subscribe again to regain access.`;
       break;
     }
     default: {
@@ -138,22 +117,14 @@ function updateAlerts(account) {
   const isPaid = productId !== 'basic';
   const status = getEffectiveStatus(subscription, isPaid);
 
-  // Payment issue alert
-  if (status === 'payment_issue') {
-    const message = subscription.paymentIssue?.message || 'Your payment method was declined.';
-    const attempts = subscription.paymentIssue?.attempts || 0;
-    const nextRetry = subscription.paymentIssue?.nextRetry;
-    let retryText = '';
-    if (nextRetry) {
-      retryText = ` Next retry: ${new Date(nextRetry).toLocaleDateString()}.`;
-    }
-
+  // Suspended (payment issue) alert
+  if (status === 'suspended') {
     $alerts.innerHTML += `
       <div class="alert alert-danger d-flex align-items-start">
         <span class="me-2 flex-shrink-0">${getPrerenderedIcon('triangle-exclamation', 'fa-md')}</span>
         <div>
-          <strong>Payment failed</strong> ${attempts > 1 ? `(${attempts} attempts)` : ''}
-          <p class="mb-0 small">${message}${retryText} Please update your payment method to keep your subscription active.</p>
+          <strong>Payment failed</strong>
+          <p class="mb-0 small">Your payment method was declined. Please update your payment method to keep your subscription active.</p>
         </div>
       </div>
     `;
@@ -161,9 +132,9 @@ function updateAlerts(account) {
 
   // Cancellation pending alert
   if (status === 'cancelling') {
-    const effectiveDate = subscription.cancellation?.effectiveAt;
-    const dateStr = effectiveDate
-      ? new Date(effectiveDate * 1000).toLocaleDateString()
+    const cancelTimestamp = subscription.cancellation?.date?.timestampUNIX;
+    const dateStr = cancelTimestamp && cancelTimestamp > 0
+      ? new Date(cancelTimestamp * 1000).toLocaleDateString()
       : 'the end of your billing period';
 
     $alerts.innerHTML += `
@@ -177,20 +148,22 @@ function updateAlerts(account) {
     `;
   }
 
-  // Trial ending soon alert (last 3 days)
+  // Free trial alert
   if (status === 'trialing') {
-    const daysLeft = getTrialDaysLeft(subscription);
-    if (daysLeft > 0 && daysLeft <= 3) {
-      $alerts.innerHTML += `
-        <div class="alert alert-info d-flex align-items-start">
-          <span class="me-2 flex-shrink-0">${getPrerenderedIcon('clock', 'fa-md')}</span>
-          <div>
-            <strong>Trial ending soon</strong>
-            <p class="mb-0 small">Your free trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Upgrade now to keep access to premium features.</p>
-          </div>
+    const trialEndUnix = subscription.trial?.expires?.timestampUNIX;
+    const endDate = trialEndUnix && trialEndUnix > 0
+      ? new Date(trialEndUnix * 1000).toLocaleDateString()
+      : null;
+
+    $alerts.innerHTML += `
+      <div class="alert alert-success d-flex align-items-start">
+        <span class="me-2 flex-shrink-0">${getPrerenderedIcon('circle-check', 'fa-md')}</span>
+        <div>
+          <strong>Free trial</strong>
+          <p class="mb-0 small">You're on a free trial${endDate ? ` that ends on <strong>${endDate}</strong>` : ''}. You won't be charged until your trial ends.</p>
         </div>
-      `;
-    }
+      </div>
+    `;
   }
 }
 
@@ -206,106 +179,65 @@ function updateBillingDetails(account) {
 
   const productId = getProductId(subscription);
   const isPaid = productId !== 'basic';
+  const status = getEffectiveStatus(subscription, isPaid);
 
-  // Only show billing details for paid subscriptions with billing info
-  if (!isPaid || !subscription.billing || subscription.paymentIssue?.hasIssue) {
+  // Only show billing details for paid, non-suspended, non-cancelled subscriptions
+  if (!isPaid || status === 'suspended' || status === 'cancelled') {
     $details.classList.add('d-none');
     return;
   }
 
-  const nextBilling = subscription.billing.nextBillingDate;
-  const amount = subscription.billing.amount;
-  const currency = subscription.billing.currency || 'usd';
-  const frequency = subscription.frequency || (subscription.billing.interval === 1 ? 'monthly' : 'annually');
+  const nextBillingUnix = subscription.expires?.timestampUNIX;
+  const amount = subscription.payment?.price;
+  const currency = appData?.payment?.currency || 'USD';
+  const frequency = subscription.payment?.frequency;
 
-  if (!nextBilling || !amount) {
+  if (!nextBillingUnix || nextBillingUnix <= 0 || !amount) {
     $details.classList.add('d-none');
     return;
   }
 
-  const nextDate = new Date(nextBilling * 1000).toLocaleDateString();
+  const nextDate = new Date(nextBillingUnix * 1000).toLocaleDateString();
   const formattedAmount = formatCurrency(amount, currency);
   const frequencyLabel = frequency === 'annually' || frequency === 'yearly' ? 'year' : 'month';
 
-  let html = '';
-
-  if (subscription.cancellation?.requested) {
-    // Cancellation pending — don't show "next billing"
-    html = '';
-  } else {
-    html = `
-      <div class="row small text-muted">
-        <div class="col-sm-6 mb-1">
-          <strong>Next billing:</strong> ${nextDate}
-        </div>
-        <div class="col-sm-6 mb-1">
-          <strong>Amount:</strong> ${formattedAmount} / ${frequencyLabel}
-        </div>
+  $details.innerHTML = `
+    <div class="row small text-muted">
+      <div class="col-sm-6 mb-1">
+        <strong>Next billing:</strong> ${nextDate}
       </div>
-    `;
-  }
-
-  if (html) {
-    $details.innerHTML = html;
-    $details.classList.remove('d-none');
-  } else {
-    $details.classList.add('d-none');
-  }
+      <div class="col-sm-6 mb-1">
+        <strong>Amount:</strong> ${formattedAmount} / ${frequencyLabel}
+      </div>
+    </div>
+  `;
+  $details.classList.remove('d-none');
 }
 
 // ─── Action Buttons ──────────────────────────────────────────
 
 function updateActionButtons(account) {
+  // Bindings handle the primary show/hide based on product.id (basic vs paid).
+  // JS only needs to refine for cancelled/suspended edge cases.
   const subscription = account.subscription || {};
   const productId = getProductId(subscription);
   const isPaid = productId !== 'basic';
   const status = getEffectiveStatus(subscription, isPaid);
-
-  // Hide all action buttons first
-  document.querySelectorAll('.plan-action-btn').forEach(btn => btn.classList.add('d-none'));
 
   const $upgradeBtn = document.getElementById('upgrade-plan-btn');
   const $changeBtn = document.getElementById('change-plan-btn');
   const $manageBtn = document.getElementById('manage-billing-btn');
   const $cancelTrigger = document.getElementById('cancel-subscription-trigger');
 
-  switch (status) {
-    case 'free':
-      if ($upgradeBtn) $upgradeBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.add('d-none');
-      break;
-
-    case 'active':
-      if ($changeBtn) $changeBtn.classList.remove('d-none');
-      if ($manageBtn) $manageBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.remove('d-none');
-      break;
-
-    case 'trialing':
-      if ($upgradeBtn) $upgradeBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.remove('d-none');
-      break;
-
-    case 'cancelling':
-      if ($manageBtn) $manageBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.add('d-none');
-      break;
-
-    case 'payment_issue':
-      if ($manageBtn) $manageBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.remove('d-none');
-      break;
-
-    case 'cancelled':
-    case 'expired':
-      if ($upgradeBtn) $upgradeBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.add('d-none');
-      break;
-
-    default:
-      if ($upgradeBtn) $upgradeBtn.classList.remove('d-none');
-      if ($cancelTrigger) $cancelTrigger.classList.add('d-none');
-      break;
+  if (status === 'cancelled') {
+    // Cancelled: show upgrade, hide change/manage/cancel
+    if ($upgradeBtn) $upgradeBtn.removeAttribute('hidden');
+    if ($changeBtn) $changeBtn.setAttribute('hidden', '');
+    if ($manageBtn) $manageBtn.setAttribute('hidden', '');
+    if ($cancelTrigger) $cancelTrigger.setAttribute('hidden', '');
+  } else if (status === 'suspended') {
+    // Suspended: hide change, keep manage + cancel visible (bindings handle)
+    if ($changeBtn) $changeBtn.setAttribute('hidden', '');
   }
 }
 
@@ -375,10 +307,7 @@ async function openStripePortal() {
 
 function setupCancellationForm() {
   const $form = document.getElementById('cancel-subscription-form');
-  const $checkbox = document.getElementById('cancel-confirm-checkbox');
-  const $submitBtn = document.getElementById('cancel-subscription-btn');
-
-  if (!$form || !$checkbox || !$submitBtn) {
+  if (!$form) {
     return;
   }
 
@@ -392,16 +321,7 @@ function setupCancellationForm() {
     submittedText: 'Subscription Cancelled',
   });
 
-  // Enable/disable submit based on checkbox
-  $checkbox.addEventListener('change', () => {
-    $submitBtn.disabled = !$checkbox.checked;
-  });
-
   cancelFormManager.on('submit', async ({ data }) => {
-    if (!$checkbox.checked) {
-      throw new Error('Please confirm the cancellation terms before proceeding.');
-    }
-
     // Get selected reason
     const $selectedReason = document.querySelector('input[name="cancel_reason"]:checked');
     const reason = $selectedReason?.value || '';
@@ -434,13 +354,15 @@ function setupCancellationForm() {
       }
     }, 3000);
 
-    // Update the UI to reflect cancellation
+    // Update the UI to reflect cancellation (using backend structure)
     if (currentAccount?.subscription) {
+      const expiresUnix = currentAccount.subscription.expires?.timestampUNIX || 0;
       currentAccount.subscription.cancellation = {
-        requested: true,
-        requestedAt: Date.now(),
-        effectiveAt: currentAccount.subscription.billing?.currentPeriodEnd || null,
-        reason: reason,
+        pending: true,
+        date: {
+          timestamp: new Date(expiresUnix * 1000).toISOString(),
+          timestampUNIX: expiresUnix,
+        },
       };
       updatePlanCard(currentAccount);
       updateAlerts(currentAccount);
@@ -476,9 +398,14 @@ function updateUsageInfo(account) {
     return;
   }
 
-  // Get the user's current plan/product
+  // Determine effective product for usage limits
+  // If subscription isn't actively paid, use basic plan limits
   const productId = getProductId(subscription);
-  const product = appData?.payment?.products?.find(p => p.id === productId);
+  const isPaid = productId !== 'basic';
+  const status = getEffectiveStatus(subscription, isPaid);
+  const hasActiveAccess = status === 'active' || status === 'trialing' || status === 'cancelling';
+  const effectiveProductId = (isPaid && hasActiveAccess) ? productId : 'basic';
+  const product = appData?.payment?.products?.find(p => p.id === effectiveProductId);
   const limits = product?.limits || {};
 
   // Clear container
@@ -538,13 +465,19 @@ function updateUsageInfo(account) {
 // ─── Helpers ─────────────────────────────────────────────────
 
 function getProductId(subscription) {
-  return subscription.product?.id || subscription.product || 'basic';
+  return subscription.product?.id || 'basic';
 }
 
-function getDisplayName(productId, isPaid) {
+function getDisplayName(subscription) {
+  // Use backend-provided product name first
+  if (subscription.product?.name && subscription.product.name !== 'Basic') {
+    return subscription.product.name;
+  }
+
+  // Fall back to appData product name
+  const productId = subscription.product?.id || 'basic';
   const product = appData?.payment?.products?.find(p => p.id === productId);
-  return product?.name
-    || (isPaid ? productId.charAt(0).toUpperCase() + productId.slice(1) : 'Free');
+  return product?.name || 'Free';
 }
 
 function getEffectiveStatus(subscription, isPaid) {
@@ -552,55 +485,35 @@ function getEffectiveStatus(subscription, isPaid) {
     return 'free';
   }
 
-  if (subscription.status === 'suspended' || subscription.paymentIssue?.hasIssue) {
-    return 'payment_issue';
+  if (subscription.status === 'suspended') {
+    return 'suspended';
   }
 
-  if (subscription.cancellation?.requested && subscription.status === 'active') {
+  if (subscription.cancellation?.pending && subscription.status === 'active') {
     return 'cancelling';
   }
 
-  if (subscription.status === 'active' || subscription.access === true) {
-    return 'active';
+  if (subscription.status === 'active' && subscription.trial?.claimed
+    && subscription.trial?.expires?.timestampUNIX > Math.floor(Date.now() / 1000)) {
+    return 'trialing';
   }
 
-  if (subscription.status === 'trialing') {
-    return 'trialing';
+  if (subscription.status === 'active') {
+    return 'active';
   }
 
   if (subscription.status === 'cancelled') {
     return 'cancelled';
   }
 
-  if (subscription.status === 'expired') {
-    return 'expired';
-  }
-
   return 'free';
 }
 
-function getTrialDaysLeft(subscription) {
-  const trialEnd = subscription.trial?.endedAt || subscription.trial?.expires?.timestamp;
-  if (!trialEnd) {
-    return 0;
-  }
-  return Math.max(0, Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24)));
-}
-
-function getCancellationDaysLeft(subscription) {
-  const effectiveAt = subscription.cancellation?.effectiveAt;
-  if (!effectiveAt) {
-    return 0;
-  }
-  // effectiveAt is in Unix seconds
-  return Math.max(0, Math.ceil((effectiveAt * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
-}
-
-function formatCurrency(amountInCents, currency) {
+function formatCurrency(amount, currency) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(amountInCents / 100);
+    currency: (currency || 'USD').toUpperCase(),
+  }).format(amount); // amount is already in display dollars
 }
 
 function formatMetricName(metricId) {

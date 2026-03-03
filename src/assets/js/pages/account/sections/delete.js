@@ -18,11 +18,7 @@ export async function init(wm) {
 // Setup delete account form
 function setupDeleteAccountForm() {
   const $form = document.getElementById('delete-account-form');
-  const $checkbox1 = document.getElementById('delete-confirm-checkbox');
-  const $checkbox2 = document.getElementById('delete-data-request-checkbox');
-  const $deleteBtn = document.getElementById('delete-account-btn');
-
-  if (!$form || !$checkbox1 || !$checkbox2 || !$deleteBtn) {
+  if (!$form) {
     return;
   }
 
@@ -33,20 +29,7 @@ function setupDeleteAccountForm() {
     submittedText: 'Account Deleted!',
   });
 
-  // Enable/disable delete button based on both checkboxes
-  function updateDeleteState() {
-    $deleteBtn.disabled = !($checkbox1.checked && $checkbox2.checked);
-  }
-
-  $checkbox1.addEventListener('change', updateDeleteState);
-  $checkbox2.addEventListener('change', updateDeleteState);
-
   formManager.on('submit', async ({ data }) => {
-    // Check if both checkboxes are checked
-    if (!$checkbox1.checked || !$checkbox2.checked) {
-      throw new Error('Please confirm all acknowledgments before proceeding.');
-    }
-
     // 1ms wait for dialog to appear properly
     await new Promise(resolve => setTimeout(resolve, 1));
 

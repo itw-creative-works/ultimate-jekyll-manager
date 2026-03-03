@@ -228,11 +228,9 @@ function updateRoleBadges(account) {
   // Show premium badge if subscription is active AND on a paid plan
   const $premiumBadge = document.getElementById('badge-premium');
   if ($premiumBadge) {
-    const productId = subscription?.product?.id || subscription?.product || 'basic';
+    const productId = subscription?.product?.id || 'basic';
     const isPaid = productId !== 'basic';
-    const isActive = subscription?.status === 'active'
-      || subscription?.status === 'trialing'
-      || subscription?.access === true;
+    const isActive = subscription?.status === 'active';
 
     if (isActive && isPaid) {
       $premiumBadge.classList.remove('d-none');

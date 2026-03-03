@@ -23,26 +23,26 @@ meta:
     <h5 class="mb-0">Create New User</h5>
   </div>
   <div class="card-body">
-    <form>
+    <form id="create-user-form" novalidate onsubmit="return false">
       <!-- Basic Information -->
       <h6 class="mb-3">Basic Information</h6>
       <div class="row mb-4">
         <div class="col-md-6 mb-3">
           <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="firstName" required>
+          <input type="text" class="form-control" id="firstName" name="user.firstName" required>
         </div>
         <div class="col-md-6 mb-3">
           <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="lastName" required>
+          <input type="text" class="form-control" id="lastName" name="user.lastName" required>
         </div>
         <div class="col-md-6 mb-3">
           <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-          <input type="email" class="form-control" id="email" required>
+          <input type="email" class="form-control" id="email" name="user.email" required>
           <div class="form-text">This will be used for login</div>
         </div>
         <div class="col-md-6 mb-3">
           <label for="phone" class="form-label">Phone Number</label>
-          <input type="tel" class="form-control" id="phone">
+          <input type="tel" class="form-control" id="phone" name="user.phone">
         </div>
       </div>
 
@@ -53,7 +53,7 @@ meta:
       <div class="row mb-4">
         <div class="col-md-6 mb-3">
           <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
-          <select class="form-select" id="role" required>
+          <select class="form-select" id="role" name="account.role" required>
             <option value="">Select a role...</option>
             <option value="admin">Administrator</option>
             <option value="manager">Manager</option>
@@ -62,7 +62,7 @@ meta:
         </div>
         <div class="col-md-6 mb-3">
           <label for="status" class="form-label">Status</label>
-          <select class="form-select" id="status">
+          <select class="form-select" id="status" name="account.status">
             <option value="active" selected>Active</option>
             <option value="inactive">Inactive</option>
             <option value="pending">Pending Verification</option>
@@ -71,7 +71,7 @@ meta:
         <div class="col-md-6 mb-3">
           <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
           <div class="input-group">
-            <input type="password" class="form-control" id="password" required>
+            <input type="password" class="form-control" id="password" name="account.password" required>
             <button class="btn btn-outline-secondary" type="button">
               {% uj_icon "eye", "fa-md" %}
             </button>
@@ -80,7 +80,7 @@ meta:
         </div>
         <div class="col-md-6 mb-3">
           <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-          <input type="password" class="form-control" id="confirmPassword" required>
+          <input type="password" class="form-control" id="confirmPassword" name="account.confirmPassword" required>
         </div>
       </div>
 
@@ -91,25 +91,25 @@ meta:
       <div class="row mb-4">
         <div class="col-12">
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canViewDashboard" checked>
+            <input class="form-check-input" type="checkbox" id="canViewDashboard" name="permissions.canViewDashboard" checked>
             <label class="form-check-label" for="canViewDashboard">
               Can view dashboard
             </label>
           </div>
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canManageUsers">
+            <input class="form-check-input" type="checkbox" id="canManageUsers" name="permissions.canManageUsers">
             <label class="form-check-label" for="canManageUsers">
               Can manage other users
             </label>
           </div>
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canViewReports" checked>
+            <input class="form-check-input" type="checkbox" id="canViewReports" name="permissions.canViewReports" checked>
             <label class="form-check-label" for="canViewReports">
               Can view reports
             </label>
           </div>
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canEditSettings">
+            <input class="form-check-input" type="checkbox" id="canEditSettings" name="permissions.canEditSettings">
             <label class="form-check-label" for="canEditSettings">
               Can edit system settings
             </label>
@@ -124,13 +124,13 @@ meta:
       <div class="row mb-4">
         <div class="col-12">
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="sendWelcome" checked>
+            <input class="form-check-input" type="checkbox" id="sendWelcome" name="options.sendWelcome" checked>
             <label class="form-check-label" for="sendWelcome">
               Send welcome email to user
             </label>
           </div>
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="requirePasswordChange">
+            <input class="form-check-input" type="checkbox" id="requirePasswordChange" name="options.requirePasswordChange">
             <label class="form-check-label" for="requirePasswordChange">
               Require password change on first login
             </label>
@@ -143,7 +143,7 @@ meta:
         <button type="button" class="btn btn-outline-adaptive" onclick="history.back()">Cancel</button>
         <button type="submit" class="btn btn-adaptive">
           {% uj_icon "check", "fa-md me-2" %}
-          Create User
+          <span class="button-text">Create User</span>
         </button>
       </div>
     </form>

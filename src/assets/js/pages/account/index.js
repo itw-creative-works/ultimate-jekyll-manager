@@ -83,6 +83,10 @@ async function initializeAccount() {
   webManager.auth().listen({ account: true }, async (state) => {
     console.log('Auth state with account data:', state);
 
+    // Load user data with the account information
+    // Wait for app data to be fetched before loading section data
+    await fetchAppData();
+
     /* @dev-only:start */
     {
       // Check for test subscription parameter
@@ -94,10 +98,16 @@ async function initializeAccount() {
           console.log(`Loading test subscription: ${testSubscription}`);
           const testModule = await import(`./test-subscriptions/${testSubscription}.js`);
 
-          // Override the account subscription with test data
+          // Merge test fields INTO the real subscription (preserves real product, payment, etc.)
           if (state.account) {
-            state.account.subscription = testModule.default;
-            console.log('Test subscription loaded:', testModule.default);
+            const real = state.account.subscription || {};
+            const test = testModule.default;
+            const merged = deepMerge(real, test);
+
+            // Write back so both JS and WM bindings see the same data
+            state.account.subscription = merged;
+
+            console.log('Test subscription merged:', merged);
           }
         } catch (error) {
           console.error(`Failed to load test subscription '${testSubscription}':`, error);
@@ -105,10 +115,6 @@ async function initializeAccount() {
       }
     }
     /* @dev-only:end */
-
-    // Load user data with the account information
-    // Wait for app data to be fetched before loading section data
-    await fetchAppData();
 
     loadAllSectionData(state);
 
@@ -357,6 +363,25 @@ function showSection(sectionId) {
   if (sectionModule && sectionModule.onShow) {
     sectionModule.onShow();
   }
+}
+
+// Deep merge utility (target fields are overwritten by source fields)
+function deepMerge(target, source) {
+  const result = { ...target };
+
+  Object.keys(source).forEach(key => {
+    const sourceVal = source[key];
+    const targetVal = target[key];
+
+    if (sourceVal && typeof sourceVal === 'object' && !Array.isArray(sourceVal)
+      && targetVal && typeof targetVal === 'object' && !Array.isArray(targetVal)) {
+      result[key] = deepMerge(targetVal, sourceVal);
+    } else {
+      result[key] = sourceVal;
+    }
+  });
+
+  return result;
 }
 
 // Tracking functions

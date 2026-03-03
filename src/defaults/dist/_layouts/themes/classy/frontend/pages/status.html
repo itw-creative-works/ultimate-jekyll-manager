@@ -255,7 +255,7 @@ build_info:
                 {% endiftruthy %}
               </div>
               <div class="col-lg-5">
-                <form id="status-subscribe-form" class="d-flex flex-column flex-sm-row gap-2" onsubmit="return false">
+                <form id="status-subscribe-form" class="d-flex flex-column flex-sm-row gap-2" novalidate onsubmit="return false">
                   <input
                     type="email"
                     class="form-control flex-grow-1"
@@ -267,7 +267,7 @@ build_info:
                   >
                   <button type="submit" class="btn btn-primary text-nowrap flex-shrink-0">
                     {% uj_icon page.resolved.updates.button.icon, "me-2" %}
-                    {{ page.resolved.updates.button.text }}
+                    <span class="button-text">{{ page.resolved.updates.button.text }}</span>
                   </button>
                 </form>
               </div>

@@ -30,7 +30,7 @@ prerender_icons:
   <div class="col-lg-8">
     <div class="card">
       <div class="card-body">
-        <form id="notification-form" novalidate>
+        <form id="notification-form" novalidate onsubmit="return false">
           <!-- Notification Content -->
           <h5 class="mb-3">
             Notification Content
@@ -276,9 +276,8 @@ prerender_icons:
           <!-- Submit Button -->
           <div class="d-grid gap-2">
             <button type="submit" class="btn btn-primary btn-lg">
-              <span class="spinner-border spinner-border-sm d-none" role="status"></span>
               {% uj_icon "paper-plane", "fa-md me-2" %}
-              Send Notification
+              <span class="button-text">Send Notification</span>
             </button>
           </div>
         </form>

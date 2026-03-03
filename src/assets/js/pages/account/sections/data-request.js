@@ -22,11 +22,7 @@ export async function init(wm) {
 // Setup data request form
 function setupDataRequestForm() {
   const $form = document.getElementById('data-request-form');
-  const $checkbox1 = document.getElementById('data-request-confirm-checkbox');
-  const $checkbox2 = document.getElementById('data-request-deletion-checkbox');
-  const $submitBtn = document.getElementById('data-request-submit-btn');
-
-  if (!$form || !$checkbox1 || !$checkbox2 || !$submitBtn) {
+  if (!$form) {
     return;
   }
 
@@ -37,19 +33,7 @@ function setupDataRequestForm() {
     submittedText: 'Request Submitted',
   });
 
-  // Enable/disable submit button based on both checkboxes
-  function updateSubmitState() {
-    $submitBtn.disabled = !($checkbox1.checked && $checkbox2.checked);
-  }
-
-  $checkbox1.addEventListener('change', updateSubmitState);
-  $checkbox2.addEventListener('change', updateSubmitState);
-
   formManager.on('submit', async ({ data }) => {
-    if (!$checkbox1.checked || !$checkbox2.checked) {
-      throw new Error('Please confirm all acknowledgments before submitting.');
-    }
-
     trackDataRequest('submit');
 
     const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/user/data-request`, {
