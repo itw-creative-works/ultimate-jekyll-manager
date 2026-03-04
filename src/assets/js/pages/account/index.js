@@ -10,6 +10,7 @@ import * as apiKeysSection from './sections/api-keys.js';
 import * as deleteSection from './sections/delete.js';
 import * as dataRequestSection from './sections/data-request.js';
 import * as connectionsSection from './sections/connections.js';
+import * as refundSection from './sections/refund.js';
 let webManager = null;
 
 // Module
@@ -49,7 +50,8 @@ const sectionModules = {
   'api-keys': apiKeysSection,
   delete: deleteSection,
   'data-request': dataRequestSection,
-  connections: connectionsSection
+  connections: connectionsSection,
+  refund: refundSection,
 };
 
 // Main initialization
@@ -70,6 +72,9 @@ async function initializeAccount() {
   }
   if (window.location.hash === '#data-request') {
     showDataRequestOption();
+  }
+  if (window.location.hash === '#refund') {
+    showRefundOption();
   }
 
   // Initialize all section modules
@@ -198,6 +203,10 @@ function loadAllSectionData(authState) {
   if (sectionModules.connections.loadData) {
     sectionModules.connections.loadData(account, appData);
   }
+
+  if (sectionModules.refund.loadData) {
+    sectionModules.refund.loadData(account);
+  }
 }
 
 // Setup navigation between sections
@@ -240,6 +249,9 @@ function handleHashChange() {
   }
   if (hash === 'data-request') {
     showDataRequestOption();
+  }
+  if (hash === 'refund') {
+    showRefundOption();
   }
 
   if (hash) {
@@ -298,6 +310,27 @@ function showDataRequestOption() {
       const option = document.createElement('option');
       option.value = 'data-request';
       option.textContent = 'Data Request';
+      $mobileNavSelect.appendChild(option);
+    }
+  }
+}
+
+// Show refund option in navigation
+function showRefundOption() {
+  // Show desktop nav item
+  const $refundNavItem = document.getElementById('refund-nav-item');
+  if ($refundNavItem) {
+    $refundNavItem.classList.remove('d-none');
+  }
+
+  // Add mobile dropdown option if not exists
+  const $mobileNavSelect = document.getElementById('mobile-nav-select');
+  if ($mobileNavSelect) {
+    const refundOption = $mobileNavSelect.querySelector('option[value="refund"]');
+    if (!refundOption) {
+      const option = document.createElement('option');
+      option.value = 'refund';
+      option.textContent = 'Refund';
       $mobileNavSelect.appendChild(option);
     }
   }

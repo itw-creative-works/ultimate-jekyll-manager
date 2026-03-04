@@ -29,6 +29,7 @@ prerender_icons:
   - name: "arrow-up-right-from-square"
   - name: "rotate-right"
   - name: "ban"
+  - name: "circle-info"
 
 ### PAGE CONFIG ###
 sections:
@@ -62,6 +63,9 @@ sections:
   - id: "delete"
     name: "Delete Account"
     icon: "trash"
+  - id: "refund"
+    name: "Refund"
+    icon: "rotate-left"
 
 connections:
   - id: "google"
@@ -138,6 +142,8 @@ badges:
     bg_color: "#ffc107"
 ---
 
+{% assign hidden_sections = "delete,data-request,refund" | split: "," %}
+
 <!-- Fixed Header -->
 <header class="position-fixed top-0 start-0 w-100 bg-body-secondary border-bottom shadow-sm" style="z-index: 1030;">
   <div class="container-fluid px-4">
@@ -164,13 +170,13 @@ badges:
         <div class="d-flex gap-2">
           <select class="form-select flex-grow-1" id="mobile-nav-select" aria-label="Select account section">
             {% for section in page.resolved.sections %}
-              {% unless section.id == 'delete' or section.id == 'data-request' %}
+              {% unless hidden_sections contains section.id %}
                 <option value="{{ section.id }}" {% if forloop.first %}selected{% endif %}>
                   {{ section.name }}
                 </option>
               {% endunless %}
             {% endfor %}
-            <!-- Delete and Data Request options will be added dynamically by JavaScript when needed -->
+            <!-- Hidden section options are added dynamically by JavaScript when needed -->
           </select>
           <button class="btn btn-danger auth-signout-btn">
             {% uj_icon "arrow-right-from-bracket", "fa-sm" %}
@@ -192,7 +198,7 @@ badges:
         <div class="card-body p-3">
           <ul class="nav nav-pills flex-column" id="account-nav" role="tablist" aria-label="Account sections">
             {% for section in page.resolved.sections %}
-              <li class="nav-item {% if section.id == 'delete' or section.id == 'data-request' %}d-none{% endif %}" id="{{ section.id }}-nav-item">
+              <li class="nav-item {% if hidden_sections contains section.id %}d-none{% endif %}" id="{{ section.id }}-nav-item">
                 <a class="nav-link d-flex align-items-center {% if forloop.first %}active{% endif %}"
                   href="#{{ section.id }}"
                   data-section="{{ section.id }}"
@@ -1013,10 +1019,10 @@ badges:
         </div>
 
         <div class="collapse" id="cancel-subscription-accordion">
-          <div class="card card-form-border border-warning mt-4">
+          <div class="card card-form-border border-danger mt-4">
             <div class="card-body">
-              <h5 class="card-title text-warning">
-                {% uj_icon "triangle-exclamation", "fa-lg me-2" %}
+              <h5 class="card-title text-danger">
+                {% uj_icon "ban", "fa-lg me-2" %}
                 Cancel your subscription
               </h5>
 
@@ -1053,7 +1059,7 @@ badges:
                 <!-- Buttons -->
                 <div class="row g-2">
                   <div class="col-12 col-md-6 order-md-2">
-                    <button type="submit" class="btn btn-outline-danger w-100" id="cancel-subscription-btn">
+                    <button type="submit" class="btn btn-outline-adaptive w-100" id="cancel-subscription-btn">
                       {% uj_icon "ban", "fa-sm me-2" %}
                       <span class="button-text">Cancel Subscription</span>
                     </button>
@@ -1220,8 +1226,8 @@ badges:
         <div class="card mb-4">
           <div class="card-body">
             <h5 class="card-title text-primary">
-              {% uj_icon "file-shield", "fa-lg me-2" %}
-              About Data Subject Access Requests
+              {% uj_icon "file-export", "fa-lg me-2" %}
+              Data request policy
             </h5>
             <p class="card-text small text-muted">
               Under applicable data protection regulations including the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and other similar legislative frameworks enacted by governmental bodies around the world, you may have the right to request a copy of the personal data we hold about you. This process is commonly referred to as a Subject Access Request (SAR) or a Data Portability Request. It is important that you understand the full scope, limitations, and procedural requirements of this request before proceeding. Please read the following information carefully and in its entirety before submitting a request.
@@ -1295,7 +1301,10 @@ badges:
           <div class="collapse" id="data-request-form-accordion">
             <div class="card card-form-border border-primary mt-4">
               <div class="card-body">
-                <h5 class="card-title text-primary">Confirm data request</h5>
+                <h5 class="card-title text-primary">
+                  {% uj_icon "file-export", "fa-lg me-2" %}
+                  Confirm data request
+                </h5>
 
                 <form id="data-request-form" novalidate onsubmit="return false">
                   <div class="mb-3">
@@ -1351,8 +1360,8 @@ badges:
         <div class="card mb-4">
           <div class="card-body">
             <h5 class="card-title text-danger">
-              {% uj_icon "triangle-exclamation", "fa-lg me-2" %}
-              About Account Deletion
+              {% uj_icon "trash", "fa-lg me-2" %}
+              Account deletion policy
             </h5>
             <p class="card-text small text-muted">
               Under applicable data protection regulations including the General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA), you have the right to request the deletion of the personal data we hold about you. Account deletion is a permanent, irreversible action that cannot be undone under any circumstances. Please read the following important information carefully before proceeding.
@@ -1361,7 +1370,7 @@ badges:
               <strong>Permanent and irreversible:</strong> Once your account is deleted, all personal data associated with your account will be permanently removed from our systems. This includes, but is not limited to, your profile information, subscription and billing history, activity logs, API keys, OAuth2 connections, referral data, saved preferences, and all other stored information. There is no mechanism to recover any data after deletion. Our support team cannot restore deleted accounts or retrieve any associated data, regardless of the circumstances.
             </p>
             <p class="card-text small text-muted">
-              <strong>Active subscriptions:</strong> You must cancel any active paid subscriptions before deleting your account. Accounts with active or suspended paid subscriptions cannot be deleted until the subscription is cancelled or expires. If you have a subscription that is currently in a billing cycle, you will need to wait for the cycle to complete or cancel the subscription first. No refunds will be issued for unused portions of cancelled subscriptions in connection with account deletion.
+              <strong>Active subscriptions:</strong> You must cancel any active paid subscriptions before deleting your account. Accounts with active or suspended paid subscriptions cannot be deleted until the subscription is cancelled or expires. If you have a subscription that is currently in a billing cycle, you will need to wait for the cycle to complete or cancel the subscription first. No refunds will be issued for unused portions of cancelled subscriptions in connection with account deletion. <strong>Deleting your account permanently forfeits your right to request a refund</strong>, as all payment records and subscription history will be irreversibly removed from our systems and we will no longer be able to verify or process any refund requests. If you wish to request a refund, you must do so <strong>before</strong> deleting your account.
             </p>
             <p class="card-text small text-muted">
               <strong>Pending data requests:</strong> If you have a pending data request (Subject Access Request), it will be permanently cancelled upon account deletion. We will not be able to fulfill data requests after your account has been deleted. If you wish to obtain a copy of your data, you must complete the data request and download process <strong>before</strong> initiating account deletion. You can request a copy of your data from the <a href="#data-request">data request section</a>.
@@ -1382,6 +1391,7 @@ badges:
               <li>All API keys, OAuth2 connections, and integrations will be revoked</li>
               <li>Access to all services, features, and platforms will be terminated immediately</li>
               <li>Any pending data requests will be cancelled and cannot be fulfilled</li>
+              <li>Your right to request a refund will be permanently forfeited</li>
               <li>This action cannot be reversed, appealed, or undone by our support team</li>
             </ul>
 
@@ -1394,9 +1404,17 @@ badges:
         <div class="collapse" id="delete-form-accordion">
           <div class="card card-form-border border-danger mt-4">
             <div class="card-body">
-              <h5 class="card-title text-danger">Confirm account deletion</h5>
+              <h5 class="card-title text-danger">
+                {% uj_icon "trash", "fa-lg me-2" %}
+                Confirm account deletion
+              </h5>
 
               <form id="delete-account-form" novalidate onsubmit="return false">
+                <div class="mb-3">
+                  <label for="delete-reason" class="form-label">Reason for leaving</label>
+                  <textarea class="form-control" id="delete-reason" name="reason" rows="3" placeholder="Help us improve by sharing why you're leaving..."></textarea>
+                </div>
+
                 <div class="mb-3">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="delete-confirm-checkbox" name="confirm_deletion" required>
@@ -1417,11 +1435,6 @@ badges:
                   </div>
                 </div>
 
-                <div class="mb-3">
-                  <label for="delete-reason" class="form-label">Reason for leaving</label>
-                  <textarea class="form-control" id="delete-reason" name="reason" rows="3" placeholder="Help us improve by sharing why you're leaving..."></textarea>
-                </div>
-
                 <div class="row g-2">
                   <div class="col-12 col-md-6 order-md-2">
                     <button type="submit" class="btn btn-outline-adaptive w-100" id="delete-account-btn">
@@ -1436,6 +1449,136 @@ badges:
                     </a>
                   </div>
                 </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Refund Section (Hidden by default) -->
+      <section id="refund-section" class="account-section d-none">
+        <h2 class="h3 mb-4">Request a refund</h2>
+
+        <!-- Refund policy info card -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title text-primary">
+              {% uj_icon "rotate-left", "fa-lg me-2" %}
+              Refund policy
+            </h5>
+            <p class="card-text small text-muted">
+              We understand that circumstances may change after making a purchase, and we want to ensure that our refund process is as transparent and fair as possible. Before submitting a refund request, please carefully read the following information in its entirety. By proceeding with a refund request, you acknowledge that you have read, understood, and agree to the terms and conditions outlined below. Our refund policy is governed by and subject to our <a href="/legal/terms" target="_blank">Terms of Service</a> and <a href="/legal/privacy" target="_blank">Privacy Policy</a>.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Eligibility requirements:</strong> To be eligible for a refund, your subscription must first be cancelled or have a pending cancellation. Refunds cannot be issued for active subscriptions that have not been cancelled. If you have not yet cancelled your subscription, you must do so before initiating a refund request. You can cancel your subscription from the <a href="#billing">billing section</a> of your account. We require cancellation prior to refund processing to ensure that the subscription lifecycle is properly terminated and that no further charges are incurred during the refund processing window.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Refund amount calculation:</strong> The amount of your refund is determined by how recently your most recent payment was processed. If your refund request is submitted within <strong>7 days</strong> of your last payment, you will receive a full refund of the entire payment amount. If your refund request is submitted after 7 days from the date of your last payment, you will receive a prorated refund calculated based on the remaining unused portion of your current billing period. The prorated amount is calculated proportionally based on the number of days remaining in your billing cycle relative to the total number of days in the cycle. <strong>Payments older than 6 months are not eligible for refunds under any circumstances.</strong> If your most recent payment was processed more than 6 months ago, your refund request will be automatically denied and cannot be overridden by our support team. All refund calculations are performed automatically by our payment processing system and are final.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Processing and timeline:</strong> Refunds are processed through your original payment method, which is the same payment instrument (credit card, debit card, or other payment method) that was used to make the original purchase. Once a refund has been approved and initiated on our end, the actual processing time depends on your financial institution and payment provider. In most cases, refunds will appear on your statement within <strong>5&ndash;10 business days</strong>, although some financial institutions may take longer. We have no control over the processing timelines of your bank or payment provider. If your refund has not appeared after 10 business days, we recommend contacting your financial institution directly for further information.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Immediate subscription cancellation:</strong> Upon successful processing of your refund, your subscription will be <strong>immediately and permanently cancelled</strong>. This means that you will instantly lose access to all premium features, content, elevated rate limits, priority support, and any other benefits associated with your paid subscription plan. Your account will be reverted to the free plan with its corresponding limitations. This action takes effect immediately upon refund approval and cannot be reversed, deferred, or scheduled for a later date.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>One refund per subscription period:</strong> Only one refund may be issued per subscription billing period. If you have already received a refund for the current billing period, you will not be eligible for an additional refund until a new billing period begins with a new payment. Additionally, refunds are only applicable to the most recent payment on your account. Payments from previous billing cycles are not eligible for refund through this self-service process.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Account deletion and refunds:</strong> If you choose to delete your account, all personal data associated with your account will be permanently and irreversibly removed from our systems, including all payment and subscription records. Once your account has been deleted, we will no longer be able to look up your payment information, verify previous transactions, or process any refund requests. <strong>Account deletion permanently forfeits your right to request a refund</strong>, as we will have no means to verify or process such a request. If you are considering both requesting a refund and deleting your account, you must complete the refund process in full <strong>before</strong> initiating account deletion. For more information about account deletion, please visit the <a href="#delete">account deletion section</a>.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Fraud and abuse prevention:</strong> We reserve the right to deny refund requests that we determine, in our sole discretion, to be fraudulent, abusive, or inconsistent with normal usage patterns. This includes, but is not limited to, repeated subscription and refund cycles, chargebacks filed in conjunction with refund requests, and any other activity that violates our <a href="/legal/terms" target="_blank">Terms of Service</a>. Abuse of the refund system may result in suspension or termination of your account.
+            </p>
+            <p class="card-text small text-muted">
+              <strong>Contact and support:</strong> If you have questions about this refund policy, need assistance with your refund request, or believe there has been an error in your refund calculation, please contact our support team through our <a href="/contact" target="_blank">contact page</a> before submitting a refund request. Our support team can help clarify your eligibility, explain the expected refund amount, and address any other concerns you may have. Please note that our support team is unable to override the automated refund calculation system or issue refunds outside the parameters of this policy.
+            </p>
+
+            <hr>
+
+            <h6 class="text-muted">Summary of key points:</h6>
+            <ul class="small text-muted">
+              <li>Your subscription must be cancelled or pending cancellation before requesting a refund</li>
+              <li>Full refund if requested within <strong>7 days</strong> of your last payment</li>
+              <li>Prorated refund based on remaining billing period if requested after 7 days</li>
+              <li><strong>Payments older than 6 months are not eligible</strong> for refunds under any circumstances</li>
+              <li>Refunds are processed to your original payment method within <strong>5&ndash;10 business days</strong></li>
+              <li>Your subscription will be <strong>immediately cancelled</strong> upon refund</li>
+              <li>Account deletion permanently forfeits your right to a refund</li>
+              <li>Only one refund per billing period; only the most recent payment is eligible</li>
+            </ul>
+
+            <!-- Ineligible message (shown when not eligible) -->
+            <div id="refund-ineligible" class="d-none">
+              <hr>
+              <div class="d-flex align-items-start text-warning">
+                <span class="me-2 flex-shrink-0">{% uj_icon "triangle-exclamation", "fa-md" %}</span>
+                <div>
+                  <strong>Not eligible for refund</strong>
+                  <p class="mb-0 small text-muted">To request a refund, you must first cancel your subscription. Refunds are only available for cancelled or pending-cancellation subscriptions. You can cancel your subscription from the <a href="#billing">billing section</a> of your account.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Eligible: show refund form trigger -->
+            <div id="refund-eligible" class="d-none">
+              <p class="card-text small text-muted mb-0">
+                If you have read and understood all of the information above and still wish to proceed with requesting a refund, you may proceed to <button type="button" class="accordion-trigger small text-muted text-decoration-underline" data-bs-toggle="collapse" data-bs-target="#refund-form-accordion" aria-expanded="false" aria-controls="refund-form-accordion">submit your refund request &rarr;</button>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapse" id="refund-form-accordion">
+          <div class="card card-form-border border-primary mt-4">
+            <div class="card-body">
+              <h5 class="card-title text-primary">
+                {% uj_icon "rotate-left", "fa-lg me-2" %}
+                Confirm refund request
+              </h5>
+
+              <form id="refund-form" novalidate onsubmit="return false">
+                <!-- Refund reasons (randomized by JS) -->
+                <div class="mb-3">
+                  <label class="form-label">Why are you requesting a refund? <span class="text-danger">*</span></label>
+                  <div id="refund-reasons-container">
+                    <!-- Radio buttons injected by JS in random order -->
+                  </div>
+                </div>
+
+                <!-- Additional feedback -->
+                <div class="mb-3">
+                  <label for="refund-feedback" class="form-label">Anything else you'd like us to know? <span class="text-danger">*</span></label>
+                  <textarea class="form-control" id="refund-feedback" name="feedback" rows="3" placeholder="Help us understand what we could do better..." required></textarea>
+                  <div class="invalid-feedback">Please provide feedback before requesting a refund.</div>
+                </div>
+
+                <!-- Required confirmation -->
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="refund-confirm-checkbox" name="confirm_refund" required>
+                    <label class="form-check-label" for="refund-confirm-checkbox">
+                      I understand that my subscription will be immediately cancelled and I will lose access to premium features. The refund amount will be determined by my refund eligibility and may be prorated.
+                    </label>
+                    <div class="invalid-feedback">You must confirm before requesting a refund.</div>
+                  </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="row g-2">
+                  <div class="col-12 col-md-6 order-md-2">
+                    <button type="submit" class="btn btn-outline-adaptive w-100" id="refund-submit-btn">
+                      {% uj_icon "rotate-left", "fa-sm me-2" %}
+                      <span class="button-text">Request Refund</span>
+                  </button>
+                </div>
+                <div class="col-12 col-md-6 order-md-1">
+                  <a href="#billing" class="btn btn-primary w-100">
+                    {% uj_icon "arrow-left", "fa-sm me-2" %}
+                    <span>Return to Billing</span>
+                  </a>
+                </div>
+              </div>
               </form>
             </div>
           </div>

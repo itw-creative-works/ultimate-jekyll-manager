@@ -413,6 +413,14 @@ export class FormManager {
           setError(name, 'This field is required');
           return;
         }
+        if (type === 'radio') {
+          // Radio groups: check if any radio in the group is checked
+          const $checked = this.$form.querySelector(`input[name="${name}"]:checked`);
+          if (!$checked) {
+            setError(name, 'This field is required');
+          }
+          return;
+        }
         if (!value || !value.trim()) {
           setError(name, 'This field is required');
           return;
@@ -523,6 +531,24 @@ export class FormManager {
       return;
     }
 
+    // Radio groups: show error text under the last radio without highlighting
+    if ($field.type === 'radio') {
+      const $radios = this.$form.querySelectorAll(`[name="${fieldName}"]`);
+      const $last = $radios[$radios.length - 1];
+
+      const $parent = $last.closest('.form-check') || $last.parentElement;
+      let $feedback = $parent.querySelector('.invalid-feedback');
+      if (!$feedback) {
+        $feedback = document.createElement('div');
+        $feedback.className = 'invalid-feedback';
+        $parent.appendChild($feedback);
+      }
+
+      $feedback.textContent = message;
+      $feedback.style.display = 'block';
+      return;
+    }
+
     // Add invalid class to field
     $field.classList.add('is-invalid');
 
@@ -533,7 +559,7 @@ export class FormManager {
       $feedback.className = 'invalid-feedback';
 
       // Insert after the field (or after the label for checkboxes)
-      if ($field.type === 'checkbox' || $field.type === 'radio') {
+      if ($field.type === 'checkbox') {
         const $parent = $field.closest('.form-check') || $field.parentElement;
         $parent.appendChild($feedback);
       } else {
@@ -553,6 +579,19 @@ export class FormManager {
 
     const $field = this.$form.querySelector(`[name="${fieldName}"]`);
     if (!$field) {
+      return;
+    }
+
+    // Radio groups: clear the error text under the last radio
+    if ($field.type === 'radio') {
+      const $radios = this.$form.querySelectorAll(`[name="${fieldName}"]`);
+      const $last = $radios[$radios.length - 1];
+
+      const $parent = $last.closest('.form-check') || $last.parentElement;
+      const $feedback = $parent.querySelector('.invalid-feedback');
+      if ($feedback) {
+        $feedback.style.display = 'none';
+      }
       return;
     }
 

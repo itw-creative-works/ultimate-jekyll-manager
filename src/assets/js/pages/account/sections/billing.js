@@ -263,14 +263,14 @@ function setupActionButtons() {
   if ($manageBtn) {
     $manageBtn.addEventListener('click', () => {
       trackBilling('manage_billing_click');
-      openStripePortal();
+      openBillingPortal();
     });
   }
 }
 
-// ─── Stripe Portal ───────────────────────────────────────────
+// ─── Billing Portal ─────────────────────────────────────────
 
-async function openStripePortal() {
+async function openBillingPortal() {
   const $manageBtn = document.getElementById('manage-billing-btn');
   const $btnText = $manageBtn?.querySelector('.button-text');
   const originalText = $btnText?.textContent;
@@ -280,7 +280,7 @@ async function openStripePortal() {
     if ($manageBtn) $manageBtn.disabled = true;
     if ($btnText) $btnText.textContent = 'Opening...';
 
-    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/user/subscription/portal`, {
+    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/portal`, {
       method: 'POST',
       timeout: 15000,
       response: 'json',
@@ -295,8 +295,8 @@ async function openStripePortal() {
       throw new Error('No portal URL returned');
     }
   } catch (error) {
-    console.warn('Failed to open Stripe portal, falling back to pricing page:', error);
-    window.location.href = '/pricing';
+    console.error('Failed to open billing portal:', error);
+    webManager.utilities().showNotification(error.message || 'Failed to open billing portal. Please try again later.', 'danger');
   } finally {
     if ($manageBtn) $manageBtn.disabled = false;
     if ($btnText) $btnText.textContent = originalText;
@@ -328,7 +328,7 @@ function setupCancellationForm() {
 
     trackBilling('cancel_submit');
 
-    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/user/subscription/cancel`, {
+    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/cancel`, {
       method: 'POST',
       timeout: 30000,
       response: 'json',
@@ -378,7 +378,9 @@ function populateCancelReasons() {
     return;
   }
 
-  const shuffled = shuffleArray([...CANCEL_REASONS]);
+  const reasons = [...CANCEL_REASONS];
+  const other = reasons.pop(); // Remove 'Other' from the end
+  const shuffled = [...shuffleArray(reasons), other]; // Shuffle rest, append 'Other' last
 
   $container.innerHTML = shuffled.map((reason, i) => `
     <div class="form-check mb-2">
