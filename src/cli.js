@@ -13,6 +13,7 @@ const ALIASES = {
   install: ['-i', 'i', '--install'],
   setup: ['-s', '--setup'],
   version: ['-v', '--version'],
+  deploy: ['-d', '--deploy'],
   // Tasks
   audit: ['-a', '--audit'],
   translation: ['-t', '--translation'],
