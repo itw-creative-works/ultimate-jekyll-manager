@@ -1,5 +1,12 @@
 // Pure pricing calculation -- no side effects, no state mutation
 
+// Resolve price for a frequency (handles both `{ amount: N }` and plain `N` formats)
+function resolvePrice(prices, key) {
+  const entry = prices?.[key];
+  if (entry == null) return 0;
+  return typeof entry === 'object' ? (entry.amount || 0) : Number(entry) || 0;
+}
+
 export function calculatePrices({ product, frequency, discountPercent, trialEligible }) {
   if (!product) {
     return { subtotal: 0, discountAmount: 0, trialDiscountAmount: 0, total: 0, recurring: 0 };
@@ -11,13 +18,11 @@ export function calculatePrices({ product, frequency, discountPercent, trialElig
   // Base price directly from API product
   let basePrice;
   if (isSubscription) {
-    basePrice = frequency === 'monthly'
-      ? (product.prices?.monthly?.amount || 0)
-      : (product.prices?.annually?.amount || 0);
+    basePrice = resolvePrice(product.prices, frequency);
   } else {
     // One-time: use amount if available, else fall back to monthly
-    basePrice = product.prices?.amount
-      || product.prices?.monthly?.amount
+    basePrice = resolvePrice(product.prices, 'amount')
+      || resolvePrice(product.prices, 'monthly')
       || 0;
   }
 

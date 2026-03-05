@@ -3,6 +3,9 @@
 
 import { calculatePrices } from './pricing.js';
 
+// All supported billing frequencies
+export const FREQUENCIES = ['daily', 'weekly', 'monthly', 'annually'];
+
 // Hardcoded discount codes (TODO: move to API)
 export const DISCOUNT_CODES = {
   'FLASH20': 20,
@@ -48,6 +51,19 @@ export function resolveProcessor(paymentMethod) {
   return map[paymentMethod] || paymentMethod;
 }
 
+// Resolve price for a frequency (handles both `{ amount: N }` and plain `N` formats)
+export function resolvePrice(product, frequency) {
+  const entry = product?.prices?.[frequency];
+  if (entry == null) return 0;
+  return typeof entry === 'object' ? (entry.amount || 0) : Number(entry) || 0;
+}
+
+// Determine which frequencies a product supports based on its prices object
+export function getAvailableFrequencies(product) {
+  if (!product?.prices) return [];
+  return FREQUENCIES.filter(f => resolvePrice(product, f) > 0);
+}
+
 // Build the complete bindings state from minimal state
 // Returns a fresh object every time -- no mutation of shared references
 export function buildBindingsState(webManager) {
@@ -59,12 +75,24 @@ export function buildBindingsState(webManager) {
   const hasFreeTrial = isSubscription && state.trialEligible && (product?.trial?.days > 0);
   const cycle = state.frequency;
 
-  // Savings calculation
-  const monthlyTotal = (product?.prices?.monthly?.amount || 0) * 12;
-  const annualPrice = product?.prices?.annually?.amount || 0;
+  // Determine which frequencies are available for this product
+  const availableFrequencies = getAvailableFrequencies(product);
+
+  // Resolve prices using helper (handles both `N` and `{ amount: N }` formats)
+  const monthlyPrice = resolvePrice(product, 'monthly');
+  const annualPrice = resolvePrice(product, 'annually');
+  const weeklyPrice = resolvePrice(product, 'weekly');
+  const dailyPrice = resolvePrice(product, 'daily');
+  const cyclePrice = resolvePrice(product, cycle);
+
+  // Savings calculation (compare monthly annualized vs annual price)
+  const monthlyTotal = monthlyPrice * 12;
   const savingsPercent = monthlyTotal > 0
     ? Math.round(((monthlyTotal - annualPrice) / monthlyTotal) * 100)
     : 0;
+
+  // Frequency display text map
+  const frequencyLabels = { daily: 'daily', weekly: 'weekly', monthly: 'monthly', annually: 'annually' };
 
   return {
     checkout: {
@@ -73,19 +101,26 @@ export function buildBindingsState(webManager) {
         description: product?.description || '',
         isSubscription,
       },
+      // Which frequency options to show (driven by product.prices)
+      frequencies: {
+        daily: availableFrequencies.includes('daily'),
+        weekly: availableFrequencies.includes('weekly'),
+        monthly: availableFrequencies.includes('monthly'),
+        annually: availableFrequencies.includes('annually'),
+      },
       pricing: {
-        monthlyPrice: formatCurrency(product?.prices?.monthly?.amount),
+        dailyPrice: formatCurrency(dailyPrice || null),
+        weeklyPrice: formatCurrency(weeklyPrice || null),
+        monthlyPrice: formatCurrency(monthlyPrice || null),
         annualMonthlyRate: formatCurrency(annualPrice ? annualPrice / 12 : null),
         savingsBadge: savingsPercent > 0 ? `Save ${savingsPercent}%` : '',
         showSavingsBadge: savingsPercent > 0,
-        frequencyPaymentText: cycle === 'monthly'
-          ? `${formatCurrency(product?.prices?.monthly?.amount)} monthly`
-          : `${formatCurrency(annualPrice)} annually`,
+        frequencyPaymentText: `${formatCurrency(cyclePrice)} ${frequencyLabels[cycle] || cycle}`,
         subtotal: formatCurrency(prices.subtotal),
         total: formatCurrency(prices.total),
         totalDueText: `${formatCurrency(prices.total)} due today`,
         recurringAmount: formatCurrency(prices.recurring),
-        recurringPeriod: cycle === 'monthly' ? 'monthly' : 'annually',
+        recurringPeriod: frequencyLabels[cycle] || cycle,
         showTerms: isSubscription,
         termsText: buildTermsText(product, cycle, hasFreeTrial, prices),
       },
@@ -131,15 +166,18 @@ function formatCurrency(amount) {
   return `$${Number(amount).toFixed(2)}`;
 }
 
+// Map frequency to renewal period in days
+const FREQUENCY_DAYS = { daily: 1, weekly: 7, monthly: 30, annually: 365 };
+
 // Build subscription terms text
 function buildTermsText(product, cycle, hasFreeTrial, prices) {
   if (!product || product.type !== 'subscription') return '';
 
-  const periodText = cycle === 'monthly' ? 'monthly' : 'annually';
+  const periodText = cycle;
   const renewalDate = new Date();
   const daysToAdd = hasFreeTrial
     ? (product.trial?.days || 7)
-    : (cycle === 'monthly' ? 30 : 365);
+    : (FREQUENCY_DAYS[cycle] || 30);
   renewalDate.setDate(renewalDate.getDate() + daysToAdd);
 
   const formatted = renewalDate.toLocaleDateString('en-US', {

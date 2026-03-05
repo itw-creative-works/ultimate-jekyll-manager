@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 ## [Unreleased]
 ### Added
+- Checkout page supports daily, weekly, monthly, and annually billing frequencies with selective UI visibility via wm-bindings
+- Default billing frequency auto-selects the longest available term (annually > monthly > weekly > daily), with URL param override
+- Auth state settles before any authorized fetches fire on checkout, preventing race conditions
 - Quick boot mode (`UJ_QUICK=true`) for faster dev server startup (~5s vs ~20s) by skipping clean, slow setup operations, and deferring webpack/sass compilation until after Jekyll's first build
 - Dev-only warning in FormManager for form fields missing `name` attributes (skipped by validation and `getData()`)
 
@@ -30,6 +33,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove development-only guard from click prevention logging in body.html
 
 ### Fixed
+- Fix broken `</>` tag in checkout HTML causing page rendering to break
+- Fix checkout price display for APIs returning plain numbers instead of `{amount: N}` objects
+- Fix quantity badge styling (proper circle instead of pill shape)
 - Fix form checkboxes missing `name` attributes causing FormManager to silently skip validation (cancel, delete forms)
 - Fix admin forms (notifications, users) and blog/status forms missing `novalidate`, `onsubmit`, `name` attributes, and `.button-text` spans
 - Fix profile premium badge using removed `trialing` status and `access` field

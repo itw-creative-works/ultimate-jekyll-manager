@@ -14,15 +14,15 @@ export async function fetchAppConfig(webManager) {
   return response;
 }
 
-// Fetch trial eligibility
-export async function fetchTrialEligibility(productId, webManager) {
+// Check trial eligibility via backend endpoint
+export async function fetchTrialEligibility(webManager) {
   try {
     const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/trial-eligibility`, {
       method: 'GET',
       response: 'json',
-      query: { product: productId },
     });
 
+    console.log('Trial eligibility:', response);
     return response.eligible || false;
   } catch (e) {
     console.warn('Trial eligibility check failed, assuming eligible:', e);

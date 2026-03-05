@@ -1,7 +1,7 @@
 // Payment Checkout Page
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import { fetchAppConfig, fetchTrialEligibility, warmupServer, createPaymentIntent } from './modules/api.js';
-import { state, buildBindingsState, resolveProcessor } from './modules/state.js';
+import { state, buildBindingsState, resolveProcessor, FREQUENCIES, getAvailableFrequencies } from './modules/state.js';
 import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
 import { trackBeginCheckout, trackAddPaymentInfo } from './modules/tracking.js';
@@ -51,17 +51,15 @@ async function initializeCheckout() {
     // Parse URL params
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
-    const frequency = urlParams.get('frequency') || 'annually';
+    const frequencyParam = urlParams.get('frequency');
     const _dev_trialEligible = urlParams.get('_dev_trialEligible');
 
     if (!productId) {
       throw new Error('Product ID is missing from URL.');
     }
 
-    // Set frequency from URL
-    if (frequency === 'monthly' || frequency === 'annually') {
-      state.frequency = frequency;
-    }
+    // Wait for auth state to settle before any authorized calls
+    await new Promise((resolve) => webManager.auth().listen({ once: true }, resolve));
 
     // Fire-and-forget server warmup
     warmupServer(webManager);
@@ -69,7 +67,7 @@ async function initializeCheckout() {
     // Parallel fetch: app config + trial eligibility + reCAPTCHA
     const [appConfigResult, trialResult, recaptchaResult] = await Promise.allSettled([
       fetchAppConfig(webManager),
-      fetchTrialEligibility(productId, webManager),
+      fetchTrialEligibility(webManager),
       initializeRecaptcha(webManager.config?.recaptcha?.['site-key'], webManager),
     ]);
 
@@ -101,6 +99,15 @@ async function initializeCheckout() {
       throw new Error(`Product "${productId}" not found.`);
     }
     state.product = product;
+
+    // Resolve frequency: URL param if valid, otherwise longest available term
+    const available = getAvailableFrequencies(product);
+    if (frequencyParam && FREQUENCIES.includes(frequencyParam) && available.includes(frequencyParam)) {
+      state.frequency = frequencyParam;
+    } else {
+      // Pick longest term (last in FREQUENCIES order: daily < weekly < monthly < annually)
+      state.frequency = available[available.length - 1] || 'annually';
+    }
 
     // Trial eligibility
     let trialEligible = trialResult.status === 'fulfilled' ? trialResult.value : false;
