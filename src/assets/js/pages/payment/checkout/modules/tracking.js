@@ -7,9 +7,8 @@ function getBasePrice(state) {
   if (!product) return 0;
 
   if (product.type === 'subscription') {
-    return state.frequency === 'monthly'
-      ? (product.prices?.monthly?.amount || 0)
-      : (product.prices?.annually?.amount || 0);
+    const entry = product.prices?.[state.frequency];
+    return (typeof entry === 'object' ? entry?.amount : entry) || 0;
   }
 
   return product.prices?.amount

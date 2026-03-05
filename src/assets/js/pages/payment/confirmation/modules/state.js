@@ -21,16 +21,16 @@ export const state = {
 // Returns a fresh object every time -- no mutation of shared references
 export function buildBindingsState() {
   const isSubscription = !!state.frequency;
-  const billingCycleText = state.frequency === 'monthly'
-    ? 'monthly'
-    : state.frequency === 'annually'
-      ? 'annually'
-      : '';
-  const billingPeriodText = state.frequency === 'monthly'
-    ? 'month'
-    : state.frequency === 'annually'
-      ? 'year'
-      : '';
+
+  const FREQUENCY_MAP = {
+    daily: { cycle: 'daily', period: 'day' },
+    weekly: { cycle: 'weekly', period: 'week' },
+    monthly: { cycle: 'monthly', period: 'month' },
+    annually: { cycle: 'annually', period: 'year' },
+  };
+  const freq = FREQUENCY_MAP[state.frequency] || { cycle: '', period: '' };
+  const billingCycleText = freq.cycle;
+  const billingPeriodText = freq.period;
 
   // Build subscription info text
   let subscriptionInfoText = '';

@@ -199,7 +199,8 @@ function updateBillingDetails(account) {
 
   const nextDate = new Date(nextBillingUnix * 1000).toLocaleDateString();
   const formattedAmount = formatCurrency(amount, currency);
-  const frequencyLabel = frequency === 'annually' || frequency === 'yearly' ? 'year' : 'month';
+  const FREQUENCY_LABELS = { daily: 'day', weekly: 'week', monthly: 'month', annually: 'year' };
+  const frequencyLabel = FREQUENCY_LABELS[frequency] || 'month';
 
   $details.innerHTML = `
     <div class="row small text-muted">
