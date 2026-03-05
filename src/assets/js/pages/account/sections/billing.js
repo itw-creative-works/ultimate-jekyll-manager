@@ -226,6 +226,16 @@ function setupCancellationForm() {
     const $selectedReason = document.querySelector('input[name="cancel_reason"]:checked');
     const reason = $selectedReason?.value || '';
 
+    // Capture status BEFORE the API call — the auth listener may update currentAccount
+    // with Firestore data (cancellation.pending=true) before we reach the post-cancel code
+    const sub = currentAccount?.subscription;
+    const productId = getProductId(sub || {});
+    const isPaid = productId !== 'basic';
+    const statusBeforeCancel = getEffectiveStatus(sub || {}, isPaid);
+    const isTrialCancel = statusBeforeCancel === 'trialing';
+
+    console.log('[Billing] Cancelling:', { statusBeforeCancel, isTrialCancel, productId });
+
     trackBilling('cancel_submit');
 
     const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/cancel`, {
@@ -243,10 +253,7 @@ function setupCancellationForm() {
       throw new Error(response.message || 'Failed to cancel subscription. Please try again.');
     }
 
-    // Detect trial cancellation: trial was active and trial period equals subscription period
-    const sub = currentAccount?.subscription;
-    const isTrialCancel = sub?.trial?.claimed === true
-      && sub?.trial?.expires?.timestampUNIX === sub?.expires?.timestampUNIX;
+    console.log('[Billing] Cancel complete:', { isTrialCancel, productId });
 
     if (isTrialCancel) {
       cancelFormManager.showSuccess('Your trial has been cancelled. You\'ve been moved to the free plan. You can subscribe again anytime.');
@@ -263,12 +270,15 @@ function setupCancellationForm() {
       }
     }, 1000);
 
-    // Update the UI to reflect cancellation (using backend structure)
-    if (sub) {
+    // Update the UI to reflect cancellation
+    // Re-read currentAccount.subscription since the auth listener may have replaced it
+    const currentSub = currentAccount?.subscription;
+    if (currentSub) {
       if (isTrialCancel) {
-        // Trial cancellations are immediate — set status to cancelled
-        sub.status = 'cancelled';
-        sub.cancellation = {
+        // Trial cancellations are immediate — downgrade to basic
+        currentSub.status = 'cancelled';
+        currentSub.product = { id: 'basic', name: 'Basic' };
+        currentSub.cancellation = {
           pending: false,
           date: {
             timestamp: new Date().toISOString(),
@@ -277,8 +287,8 @@ function setupCancellationForm() {
         };
       } else {
         // Non-trial cancellations are pending until end of billing period
-        const expiresUnix = sub.expires?.timestampUNIX || 0;
-        sub.cancellation = {
+        const expiresUnix = currentSub.expires?.timestampUNIX || 0;
+        currentSub.cancellation = {
           pending: true,
           date: {
             timestamp: new Date(expiresUnix * 1000).toISOString(),
@@ -286,6 +296,9 @@ function setupCancellationForm() {
           },
         };
       }
+
+      console.log('[Billing] UI update after cancel:', { status: currentSub.status, productId: currentSub.product?.id, cancellationPending: currentSub.cancellation?.pending });
+
       updateUI(currentAccount);
     }
   });
@@ -401,6 +414,9 @@ function getDisplayName(subscription) {
   return product?.name || 'Free';
 }
 
+// Derives a UI-friendly status from the backend subscription object
+// Backend only has 3 statuses: 'active', 'suspended', 'cancelled'
+// This function adds 'free', 'trialing', and 'cancelling' for UI purposes
 function getEffectiveStatus(subscription, isPaid) {
   if (!isPaid) {
     return 'free';
@@ -410,21 +426,24 @@ function getEffectiveStatus(subscription, isPaid) {
     return 'suspended';
   }
 
-  if (subscription.cancellation?.pending && subscription.status === 'active') {
-    return 'cancelling';
-  }
-
-  if (subscription.status === 'active' && subscription.trial?.claimed
-    && subscription.trial?.expires?.timestampUNIX > Math.floor(Date.now() / 1000)) {
-    return 'trialing';
-  }
-
-  if (subscription.status === 'active') {
-    return 'active';
-  }
-
   if (subscription.status === 'cancelled') {
     return 'cancelled';
+  }
+
+  // For active subscriptions, check trial and cancellation state
+  if (subscription.status === 'active') {
+    // Trial check: claimed and not yet expired
+    if (subscription.trial?.claimed
+      && subscription.trial?.expires?.timestampUNIX > Math.floor(Date.now() / 1000)) {
+      return 'trialing';
+    }
+
+    // Pending cancellation check
+    if (subscription.cancellation?.pending) {
+      return 'cancelling';
+    }
+
+    return 'active';
   }
 
   return 'free';

@@ -184,7 +184,7 @@ function showRequestStatus(request) {
 
   const createdDate = new Date(request.metadata.created.timestamp).toLocaleDateString();
 
-  if (request.status === 'complete') {
+  if (request.status === 'completed') {
     $statusTitle.textContent = 'Your data is ready';
     $statusMessage.textContent = `Your data request from ${createdDate} has been processed. Click below to download your data package. This download will expire 30 days after your data became available.`;
     $download.classList.remove('d-none');
