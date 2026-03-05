@@ -344,7 +344,16 @@ function setupCancellationForm() {
       throw new Error(response.message || 'Failed to cancel subscription. Please try again.');
     }
 
-    cancelFormManager.showSuccess('Your subscription has been cancelled. You\'ll continue to have access until the end of your current billing period.');
+    // Detect trial cancellation: trial was active and trial period equals subscription period
+    const sub = currentAccount?.subscription;
+    const isTrialCancel = sub?.trial?.claimed === true
+      && sub?.trial?.expires?.timestampUNIX === sub?.expires?.timestampUNIX;
+
+    if (isTrialCancel) {
+      cancelFormManager.showSuccess('Your trial has been cancelled. You\'ve been moved to the free plan. You can subscribe again anytime.');
+    } else {
+      cancelFormManager.showSuccess('Your subscription has been cancelled. You\'ll continue to have access until the end of your current billing period.');
+    }
 
     // Collapse the cancel form after a short delay
     setTimeout(() => {
@@ -353,18 +362,31 @@ function setupCancellationForm() {
         const bsCollapse = bootstrap.Collapse.getInstance($accordion);
         if (bsCollapse) bsCollapse.hide();
       }
-    }, 3000);
+    }, 1000);
 
     // Update the UI to reflect cancellation (using backend structure)
-    if (currentAccount?.subscription) {
-      const expiresUnix = currentAccount.subscription.expires?.timestampUNIX || 0;
-      currentAccount.subscription.cancellation = {
-        pending: true,
-        date: {
-          timestamp: new Date(expiresUnix * 1000).toISOString(),
-          timestampUNIX: expiresUnix,
-        },
-      };
+    if (sub) {
+      if (isTrialCancel) {
+        // Trial cancellations are immediate — set status to cancelled
+        sub.status = 'cancelled';
+        sub.cancellation = {
+          pending: false,
+          date: {
+            timestamp: new Date().toISOString(),
+            timestampUNIX: Math.floor(Date.now() / 1000),
+          },
+        };
+      } else {
+        // Non-trial cancellations are pending until end of billing period
+        const expiresUnix = sub.expires?.timestampUNIX || 0;
+        sub.cancellation = {
+          pending: true,
+          date: {
+            timestamp: new Date(expiresUnix * 1000).toISOString(),
+            timestampUNIX: expiresUnix,
+          },
+        };
+      }
       updatePlanCard(currentAccount);
       updateAlerts(currentAccount);
       updateBillingDetails(currentAccount);
