@@ -74,6 +74,10 @@
     user-select: none;
   }
 
+  .progress {
+    background-color: var(--bs-tertiary-bg);
+  }
+
   .cancel-trigger-link {
     font-size: 0.8125rem;
     opacity: 0.7;

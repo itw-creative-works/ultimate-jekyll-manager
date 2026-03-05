@@ -5,7 +5,6 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 
 let webManager = null;
 let appData = null;
@@ -23,6 +22,18 @@ const CANCEL_REASONS = [
   'Other',
 ];
 
+// Status display configuration
+const STATUS_CONFIG = {
+  free:       { label: 'Free',      badgeClass: 'badge bg-secondary' },
+  active:     { label: 'Active',    badgeClass: 'badge bg-success' },
+  trialing:   { label: 'Active',    badgeClass: 'badge bg-success' },
+  cancelling: { label: 'Active',    badgeClass: 'badge bg-success' },
+  suspended:  { label: 'Suspended', badgeClass: 'badge bg-danger' },
+  cancelled:  { label: 'Cancelled', badgeClass: 'badge bg-secondary' },
+};
+
+const FREQUENCY_LABELS = { daily: 'day', weekly: 'week', monthly: 'month', annually: 'year' };
+
 // Initialize billing section
 export async function init(wm) {
   webManager = wm;
@@ -39,11 +50,7 @@ export async function loadData(account, sharedAppData) {
   appData = sharedAppData;
   currentAccount = account;
 
-  updatePlanCard(account);
-  updateAlerts(account);
-  updateBillingDetails(account);
-  updateActionButtons(account);
-  updateUsageInfo(account);
+  updateUI(account);
 }
 
 // Called when section is shown
@@ -51,196 +58,88 @@ export function onShow() {
   // Nothing needed
 }
 
-// ─── Plan Card ───────────────────────────────────────────────
+// ─── UI Update ──────────────────────────────────────────────
 
-function updatePlanCard(account) {
-  const subscription = account.subscription || {};
-  const $planStatus = document.getElementById('plan-status');
-  const $planDescription = document.getElementById('plan-description');
+/* @dev-only:start */
+{
+  window._billing = {
+    test: (account) => updateUI(account),
+    state: () => buildBillingState(currentAccount),
+    restore: () => { if (currentAccount) updateUI(currentAccount); },
+  };
+}
+/* @dev-only:end */
 
-  if (!$planStatus || !$planDescription) {
-    return;
-  }
+function updateUI(account) {
+  webManager.bindings().update(buildBillingState(account));
+  updateUsageInfo(account);
+}
 
+function buildBillingState(account) {
+  const subscription = account?.subscription || {};
   const productId = getProductId(subscription);
   const isPaid = productId !== 'basic';
+  const status = getEffectiveStatus(subscription, isPaid);
   const displayName = getDisplayName(subscription);
-  const status = getEffectiveStatus(subscription, isPaid);
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG.free;
 
-  switch (status) {
-    case 'free': {
-      $planStatus.className = 'badge bg-secondary';
-      $planStatus.textContent = 'Free';
-      $planDescription.innerHTML = `You are currently on the <strong>${displayName}</strong> plan. Upgrade to unlock premium features.`;
-      break;
-    }
-    case 'trialing':
-    case 'cancelling':
-    case 'active': {
-      $planStatus.className = 'badge bg-success';
-      $planStatus.textContent = 'Active';
-      $planDescription.innerHTML = `You are currently on the <strong>${displayName}</strong> plan.`;
-      break;
-    }
-    case 'suspended': {
-      $planStatus.className = 'badge bg-danger';
-      $planStatus.textContent = 'Suspended';
-      $planDescription.innerHTML = `Your <strong>${displayName}</strong> subscription has been suspended and access has been revoked due to a payment issue. Please update your payment method to restore access.`;
-      break;
-    }
-    case 'cancelled': {
-      $planStatus.className = 'badge bg-secondary';
-      $planStatus.textContent = 'Cancelled';
-      $planDescription.innerHTML = `Your <strong>${displayName}</strong> subscription has ended. Resubscribe to regain access to premium features.`;
-      break;
-    }
-    default: {
-      $planStatus.className = 'badge bg-secondary';
-      $planStatus.textContent = 'Free';
-      $planDescription.innerHTML = `You are currently on the <strong>Free</strong> plan.`;
-      break;
-    }
-  }
-}
+  // Pre-format alert dates
+  const cancelTimestamp = subscription.cancellation?.date?.timestampUNIX;
+  const cancelDate = (cancelTimestamp && cancelTimestamp > 0)
+    ? new Date(cancelTimestamp * 1000).toLocaleDateString()
+    : 'the end of your billing period';
 
-// ─── Alerts ──────────────────────────────────────────────────
+  const trialEndUnix = subscription.trial?.expires?.timestampUNIX;
+  const trialEndDate = (trialEndUnix && trialEndUnix > 0)
+    ? new Date(trialEndUnix * 1000).toLocaleDateString()
+    : null;
 
-function updateAlerts(account) {
-  const $alerts = document.getElementById('billing-alerts');
-  if (!$alerts) {
-    return;
-  }
-
-  $alerts.innerHTML = '';
-  const subscription = account.subscription || {};
-  const productId = getProductId(subscription);
-  const isPaid = productId !== 'basic';
-  const status = getEffectiveStatus(subscription, isPaid);
-
-  // Suspended (payment issue) alert
-  if (status === 'suspended') {
-    $alerts.innerHTML += `
-      <div class="alert alert-danger d-flex align-items-start">
-        <span class="me-2 flex-shrink-0">${getPrerenderedIcon('triangle-exclamation', 'fa-md')}</span>
-        <div>
-          <strong>Payment failed</strong>
-          <p class="mb-0 small">Your payment method was declined. Please update your payment method to keep your subscription active.</p>
-        </div>
-      </div>
-    `;
-  }
-
-  // Cancellation pending alert
-  if (status === 'cancelling') {
-    const cancelTimestamp = subscription.cancellation?.date?.timestampUNIX;
-    const dateStr = cancelTimestamp && cancelTimestamp > 0
-      ? new Date(cancelTimestamp * 1000).toLocaleDateString()
-      : 'the end of your billing period';
-
-    $alerts.innerHTML += `
-      <div class="alert alert-warning d-flex align-items-start">
-        <span class="me-2 flex-shrink-0">${getPrerenderedIcon('clock', 'fa-md')}</span>
-        <div>
-          <strong>Cancellation scheduled</strong>
-          <p class="mb-0 small">Your subscription will end on <strong>${dateStr}</strong>. You'll continue to have full access until then. If you change your mind, you can reactivate through billing management.</p>
-        </div>
-      </div>
-    `;
-  }
-
-  // Free trial alert
-  if (status === 'trialing') {
-    const trialEndUnix = subscription.trial?.expires?.timestampUNIX;
-    const endDate = trialEndUnix && trialEndUnix > 0
-      ? new Date(trialEndUnix * 1000).toLocaleDateString()
-      : null;
-
-    $alerts.innerHTML += `
-      <div class="alert alert-success d-flex align-items-start">
-        <span class="me-2 flex-shrink-0">${getPrerenderedIcon('circle-check', 'fa-md')}</span>
-        <div>
-          <strong>Free trial</strong>
-          <p class="mb-0 small">You're on a free trial${endDate ? ` that ends on <strong>${endDate}</strong>` : ''}. You won't be charged until your trial ends.</p>
-        </div>
-      </div>
-    `;
-  }
-}
-
-// ─── Billing Details ─────────────────────────────────────────
-
-function updateBillingDetails(account) {
-  const subscription = account.subscription || {};
-  const $details = document.getElementById('billing-details');
-
-  if (!$details) {
-    return;
-  }
-
-  const productId = getProductId(subscription);
-  const isPaid = productId !== 'basic';
-  const status = getEffectiveStatus(subscription, isPaid);
-
-  // Only show billing details for paid, non-suspended, non-cancelled subscriptions
-  if (!isPaid || status === 'suspended' || status === 'cancelled') {
-    $details.classList.add('d-none');
-    return;
-  }
-
+  // Pre-format billing details
   const nextBillingUnix = subscription.expires?.timestampUNIX;
   const amount = subscription.payment?.price;
   const currency = appData?.payment?.currency || 'USD';
   const frequency = subscription.payment?.frequency;
+  const hasValidBilling = nextBillingUnix && nextBillingUnix > 0 && amount;
 
-  if (!nextBillingUnix || nextBillingUnix <= 0 || !amount) {
-    $details.classList.add('d-none');
-    return;
-  }
-
-  const nextDate = new Date(nextBillingUnix * 1000).toLocaleDateString();
-  const formattedAmount = formatCurrency(amount, currency);
-  const FREQUENCY_LABELS = { daily: 'day', weekly: 'week', monthly: 'month', annually: 'year' };
-  const frequencyLabel = FREQUENCY_LABELS[frequency] || 'month';
-
-  $details.innerHTML = `
-    <div class="row small text-muted">
-      <div class="col-sm-6 mb-1">
-        <strong>Next billing:</strong> ${nextDate}
-      </div>
-      <div class="col-sm-6 mb-1">
-        <strong>Amount:</strong> ${formattedAmount} / ${frequencyLabel}
-      </div>
-    </div>
-  `;
-  $details.classList.remove('d-none');
+  return {
+    billing: {
+      plan: {
+        name: displayName,
+      },
+      status: {
+        label: config.label,
+        badgeClass: config.badgeClass,
+      },
+      description: {
+        free: status === 'free',
+        active: status === 'active' || status === 'trialing' || status === 'cancelling',
+        suspended: status === 'suspended',
+        cancelled: status === 'cancelled',
+      },
+      alerts: {
+        suspended: status === 'suspended',
+        cancelling: status === 'cancelling',
+        trialing: status === 'trialing',
+        cancelDate: cancelDate,
+        trialEndDate: trialEndDate || '',
+        trialHasEndDate: !!trialEndDate,
+      },
+      details: {
+        visible: isPaid && status !== 'suspended' && status !== 'cancelled' && !!hasValidBilling,
+        nextDate: hasValidBilling ? new Date(nextBillingUnix * 1000).toLocaleDateString() : '',
+        amount: hasValidBilling ? `${formatCurrency(amount, currency)} / ${FREQUENCY_LABELS[frequency] || 'month'}` : '',
+      },
+      buttons: {
+        upgrade: !isPaid || status === 'cancelled',
+        change: isPaid && status !== 'cancelled' && status !== 'suspended',
+        manage: isPaid && status !== 'cancelled',
+        cancel: isPaid && status !== 'cancelled' && status !== 'suspended',
+      },
+    },
+  };
 }
 
 // ─── Action Buttons ──────────────────────────────────────────
-
-function updateActionButtons(account) {
-  // Bindings handle the primary show/hide based on product.id (basic vs paid).
-  // JS only needs to refine for cancelled/suspended edge cases.
-  const subscription = account.subscription || {};
-  const productId = getProductId(subscription);
-  const isPaid = productId !== 'basic';
-  const status = getEffectiveStatus(subscription, isPaid);
-
-  const $upgradeBtn = document.getElementById('upgrade-plan-btn');
-  const $changeBtn = document.getElementById('change-plan-btn');
-  const $manageBtn = document.getElementById('manage-billing-btn');
-  const $cancelTrigger = document.getElementById('cancel-subscription-trigger');
-
-  if (status === 'cancelled') {
-    // Cancelled: show upgrade, hide change/manage/cancel
-    if ($upgradeBtn) $upgradeBtn.removeAttribute('hidden');
-    if ($changeBtn) $changeBtn.setAttribute('hidden', '');
-    if ($manageBtn) $manageBtn.setAttribute('hidden', '');
-    if ($cancelTrigger) $cancelTrigger.setAttribute('hidden', '');
-  } else if (status === 'suspended') {
-    // Suspended: hide change, keep manage + cancel visible (bindings handle)
-    if ($changeBtn) $changeBtn.setAttribute('hidden', '');
-  }
-}
 
 function setupActionButtons() {
   const $upgradeBtn = document.getElementById('upgrade-plan-btn');
@@ -387,10 +286,7 @@ function setupCancellationForm() {
           },
         };
       }
-      updatePlanCard(currentAccount);
-      updateAlerts(currentAccount);
-      updateBillingDetails(currentAccount);
-      updateActionButtons(currentAccount);
+      updateUI(currentAccount);
     }
   });
 }

@@ -970,30 +970,78 @@ badges:
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <h5 class="card-title mb-1 d-flex align-items-center flex-wrap gap-2">
-                  <span><span data-wm-bind="@text auth.account.subscription.product.name">Current</span> plan</span>
-                  <span id="plan-status" class="badge bg-secondary">Loading...</span>
+                  <span><span data-wm-bind="@text billing.plan.name" class="wm-binding-skeleton">Current</span> plan</span>
+                  <span data-wm-bind="@attr class billing.status.badgeClass, @text billing.status.label" class="badge bg-secondary wm-binding-skeleton">&nbsp;</span>
                 </h5>
-                <p class="card-text mb-0" id="plan-description">Loading plan details...</p>
+                <p class="card-text mb-0" data-wm-bind="@show billing.description.free" hidden>
+                  You are currently on the <strong data-wm-bind="@text billing.plan.name">Free</strong> plan. Upgrade to unlock premium features.
+                </p>
+                <p class="card-text mb-0" data-wm-bind="@show billing.description.active" hidden>
+                  You are currently on the <strong data-wm-bind="@text billing.plan.name">Current</strong> plan.
+                </p>
+                <p class="card-text mb-0" data-wm-bind="@show billing.description.suspended" hidden>
+                  Your <strong data-wm-bind="@text billing.plan.name">Current</strong> subscription has been suspended and access has been revoked due to a payment issue. Please update your payment method to restore access.
+                </p>
+                <p class="card-text mb-0" data-wm-bind="@show billing.description.cancelled" hidden>
+                  Your <strong data-wm-bind="@text billing.plan.name">Current</strong> subscription has ended. Resubscribe to regain access to premium features.
+                </p>
               </div>
             </div>
 
             <!-- Billing details (next billing, amount) -->
-            <div id="billing-details" class="mb-3 d-none"></div>
+            <div id="billing-details" class="mb-3" data-wm-bind="@show billing.details.visible" hidden>
+              <div class="row small text-muted">
+                <div class="col-sm-6 mb-1">
+                  <strong>Next billing:</strong> <span data-wm-bind="@text billing.details.nextDate"></span>
+                </div>
+                <div class="col-sm-6 mb-1">
+                  <strong>Amount:</strong> <span data-wm-bind="@text billing.details.amount"></span>
+                </div>
+              </div>
+            </div>
 
             <!-- State-specific alerts -->
-            <div id="billing-alerts" class="mb-3"></div>
+            <div class="mb-3">
+              <!-- Suspended (payment issue) alert -->
+              <div class="alert alert-danger d-flex align-items-start" data-wm-bind="@show billing.alerts.suspended" hidden>
+                <span class="me-2 flex-shrink-0">{% uj_icon "triangle-exclamation", "fa-md" %}</span>
+                <div>
+                  <strong>Payment failed</strong>
+                  <p class="mb-0 small">Your payment method was declined. Please update your payment method to keep your subscription active.</p>
+                </div>
+              </div>
+
+              <!-- Cancellation pending alert -->
+              <div class="alert alert-warning d-flex align-items-start" data-wm-bind="@show billing.alerts.cancelling" hidden>
+                <span class="me-2 flex-shrink-0">{% uj_icon "clock", "fa-md" %}</span>
+                <div>
+                  <strong>Cancellation scheduled</strong>
+                  <p class="mb-0 small">Your subscription will end on <strong data-wm-bind="@text billing.alerts.cancelDate"></strong>. You'll continue to have full access until then. If you change your mind, you can reactivate through billing management.</p>
+                </div>
+              </div>
+
+              <!-- Free trial alert -->
+              <div class="alert alert-success d-flex align-items-start" data-wm-bind="@show billing.alerts.trialing" hidden>
+                <span class="me-2 flex-shrink-0">{% uj_icon "circle-check", "fa-md" %}</span>
+                <div>
+                  <strong>Free trial</strong>
+                  <p class="mb-0 small" data-wm-bind="@show billing.alerts.trialHasEndDate" hidden>You're on a free trial that ends on <strong data-wm-bind="@text billing.alerts.trialEndDate"></strong>. You won't be charged until your trial ends.</p>
+                  <p class="mb-0 small" data-wm-bind="@hide billing.alerts.trialHasEndDate">You're on a free trial. You won't be charged until your trial ends.</p>
+                </div>
+              </div>
+            </div>
 
             <!-- Action Buttons -->
             <div class="d-grid d-sm-flex gap-2">
-              <button id="upgrade-plan-btn" class="btn btn-success plan-action-btn" data-wm-bind="@show auth.account.subscription.product.id === basic" hidden>
+              <button id="upgrade-plan-btn" class="btn btn-success plan-action-btn" data-wm-bind="@show billing.buttons.upgrade" hidden>
                 {% uj_icon "crown", "me-2" %}
                 <span class="button-text">Upgrade Plan</span>
               </button>
-              <button id="change-plan-btn" class="btn btn-outline-adaptive plan-action-btn" data-wm-bind="@show auth.account.subscription.product.id !== basic" hidden>
+              <button id="change-plan-btn" class="btn btn-outline-adaptive plan-action-btn" data-wm-bind="@show billing.buttons.change" hidden>
                 {% uj_icon "arrow-right-arrow-left", "me-2" %}
                 <span class="button-text">Change Plan</span>
               </button>
-              <button id="manage-billing-btn" class="btn btn-primary plan-action-btn" data-wm-bind="@show auth.account.subscription.product.id !== basic" hidden>
+              <button id="manage-billing-btn" class="btn btn-primary plan-action-btn" data-wm-bind="@show billing.buttons.manage" hidden>
                 {% uj_icon "credit-card", "me-2" %}
                 <span class="button-text">Manage Billing</span>
               </button>
@@ -1012,7 +1060,7 @@ badges:
         </div>
 
         <!-- Cancel Subscription (only visible for paid users) -->
-        <div id="cancel-subscription-trigger" class="text-center" data-wm-bind="@show auth.account.subscription.product.id !== basic" hidden>
+        <div id="cancel-subscription-trigger" class="text-center" data-wm-bind="@show billing.buttons.cancel" hidden>
           <button type="button" class="btn btn-link btn-sm text-muted text-decoration-underline cancel-trigger-link" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion" aria-expanded="false" aria-controls="cancel-subscription-accordion">
             Cancel subscription
           </button>
