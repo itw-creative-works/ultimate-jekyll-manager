@@ -345,7 +345,7 @@ function updateTimeAgo($element, timestamp) {
   const totalSeconds = Math.floor(diffMs / 1000);
 
   if (totalSeconds <= 0) {
-    $element.textContent = 'Just now';
+    $element.textContent = '(Just now)';
     return;
   }
 
@@ -383,7 +383,7 @@ function updateTimeAgo($element, timestamp) {
   }
   parts.push(`${seconds}s`);
 
-  $element.textContent = parts.join(' ') + ' ago';
+  $element.textContent = '(' + parts.join(' ') + ' ago)';
 }
 
 // Fetch status data from API (if configured)
