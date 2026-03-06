@@ -26,6 +26,10 @@ export default function (Manager, options) {
     unauthenticated
   });
 
+  // LEGACY: Handle desktop app auth params (e.g. ?destination=appscheme://page&source=app)
+  // TODO: Remove this call AND the _legacyTranslateAppAuth function when legacy desktop app support is no longer needed
+  _legacyTranslateAppAuth();
+
   // Track if we just signed out to avoid redirect loops
   let justSignedOut = false;
 
@@ -242,4 +246,37 @@ async function sendUserSignupMetadata(user, webManager) {
     console.error('[Auth] Error sending user metadata:', error);
     // Don't throw - we don't want to block the signup flow
   }
+}
+
+// LEGACY: Translate desktop app auth params to UJM format
+// Legacy apps send: ?destination=appscheme://page&source=app&signout=true&cb=timestamp
+// UJM expects: ?authReturnUrl=...&authSignout=true
+// TODO: Remove this function AND its call above when legacy desktop app support is no longer needed
+function _legacyTranslateAppAuth() {
+  const url = new URL(window.location.href);
+  const destination = url.searchParams.get('destination');
+  const source = url.searchParams.get('source');
+
+  if (source !== 'app' || !destination) {
+    return;
+  }
+
+  // Chain through /token page to generate a custom token before redirecting to the app
+  const tokenPageUrl = new URL('/token', window.location.origin);
+  tokenPageUrl.searchParams.set('authReturnUrl', destination);
+  url.searchParams.set('authReturnUrl', tokenPageUrl.toString());
+
+  // Translate signout param
+  if (url.searchParams.get('signout') === 'true') {
+    url.searchParams.set('authSignout', 'true');
+  }
+
+  // Clean up legacy params and update URL
+  url.searchParams.delete('destination');
+  url.searchParams.delete('source');
+  url.searchParams.delete('signout');
+  url.searchParams.delete('cb');
+  window.history.replaceState({}, '', url.toString());
+
+  console.log('[Auth] Translated legacy app params:', url.toString());
 }

@@ -47,11 +47,24 @@ export default function (Manager) {
 
         // Handle redirect or URL update
         if (authReturnUrl) {
-          // Redirect to return URL with token (for electron/deep links)
+          // Redirect to return URL with token
           updateStatus('Redirecting...');
           const returnUrl = new URL(authReturnUrl);
           returnUrl.searchParams.set('authToken', token);
-          window.location.href = returnUrl.toString();
+
+          // LEGACY: Reformat token for desktop app deep links
+          // TODO: Remove this block when legacy desktop app support is no longer needed
+          _legacyTranslateTokenRedirect(returnUrl, token);
+
+          const redirectUrl = returnUrl.toString();
+          console.log('[Token] Redirecting to:', redirectUrl);
+
+          // Show retry button after a delay in case the redirect was cancelled (e.g. custom protocol dialog)
+          setTimeout(() => {
+            updateStatus('If you were not redirected, <a href="' + redirectUrl + '">click here to try again</a>.');
+          }, 3000);
+
+          window.location.href = redirectUrl;
         } else {
           // Add token to current URL (for browser extensions)
           // Extension background will detect this and close the tab
@@ -102,6 +115,16 @@ export default function (Manager) {
     }
     if ($status) {
       $status.classList.add('d-none');
+    }
+  }
+
+  // LEGACY: Reformat token for desktop app deep links
+  // Legacy desktop apps expect ?payload={"token":"X"} instead of ?authToken=X for custom protocol URLs
+  // TODO: Remove this function AND its call above when legacy desktop app support is no longer needed
+  function _legacyTranslateTokenRedirect(returnUrl, token) {
+    if (returnUrl.protocol !== 'http:' && returnUrl.protocol !== 'https:') {
+      returnUrl.searchParams.delete('authToken');
+      returnUrl.searchParams.set('payload', JSON.stringify({ token: token }));
     }
   }
 }
