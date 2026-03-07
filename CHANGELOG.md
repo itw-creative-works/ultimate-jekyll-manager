@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 ## [Unreleased]
 ### Added
+- Email preferences page (`/portal/account/email-preferences`) for unsubscribe/resubscribe from marketing emails
+- Email masking on preferences page to prevent forwarded-email abuse (e.g., `ia***b@gm***.com`)
+- HMAC signature verification for unsubscribe links to prevent forged requests
 - Checkout page supports daily, weekly, monthly, and annually billing frequencies with selective UI visibility via wm-bindings
 - Default billing frequency auto-selects the longest available term (annually > monthly > weekly > daily), with URL param override
 - Auth state settles before any authorized fetches fire on checkout, preventing race conditions
