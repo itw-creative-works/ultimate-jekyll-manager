@@ -21,6 +21,7 @@ export default (Manager) => {
     setupDownloadTracking();
     setupCopyButtons();
     setupMobileEmailForms();
+    setupAutoDownload();
 
     // Expose modal function globally for testing
     window.showDownloadModal = showOnboardingModal;
@@ -291,6 +292,47 @@ function setupCopyButtons() {
       }
     });
   });
+}
+
+// Setup auto-download when ?auto=true is in the URL
+function setupAutoDownload() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get('auto') !== 'true') {
+    return;
+  }
+
+  // Find the first download link in the active platform's tab pane
+  const detectedPlatform = webManager.utilities().getPlatform();
+  const $pane = document.querySelector(`#${detectedPlatform}-pane`);
+
+  if (!$pane) {
+    return;
+  }
+
+  const $downloadLink = $pane.querySelector('a.btn-primary');
+
+  if (!$downloadLink) {
+    return;
+  }
+
+  // Trigger the download and show onboarding modal
+  const downloadUrl = $downloadLink.getAttribute('href');
+  const downloadName = $downloadLink.textContent.trim();
+
+  trackDownloadClick(detectedPlatform, downloadName, downloadUrl);
+  showOnboardingModal(detectedPlatform);
+
+  // Trigger the actual download via a hidden iframe to avoid navigating away
+  const $iframe = document.createElement('iframe');
+  $iframe.style.display = 'none';
+  $iframe.src = downloadUrl;
+  document.body.appendChild($iframe);
+
+  // Clean up URL so refreshing doesn't re-trigger
+  const url = new URL(window.location);
+  url.searchParams.delete('auto');
+  window.history.replaceState({}, '', url);
 }
 
 // Setup mobile email forms
