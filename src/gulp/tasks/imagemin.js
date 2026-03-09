@@ -19,10 +19,16 @@ const CACHE_BRANCH = 'cache-uj-imagemin';
 // Variables
 let githubCache;
 
+// Supported image extensions
+const ALL_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
+const RESPONSIVE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
+const ALL_IMAGE_GLOB = `*.{${ALL_IMAGE_EXTENSIONS.join(',')}}`;
+const RESPONSIVE_GLOB = `*.{${[...RESPONSIVE_EXTENSIONS].join(',')}}`;
+
 // Glob
 const input = [
   // Files to include
-  'src/assets/images/**/*.{jpg,jpeg,png,gif,svg,webp}',
+  `src/assets/images/**/${ALL_IMAGE_GLOB}`,
 
   // Files to exclude
   // '!dist/**',
@@ -132,7 +138,13 @@ async function imagemin(complete) {
     return complete();
   }
 
-  logger.log(`🔄 Processing ${filesToProcess.length} images`);
+  // Calculate expected output count for progress tracking
+  const expectedOutputs = filesToProcess.reduce((count, file) => {
+    const ext = path.extname(file).slice(1).toLowerCase();
+    return count + (RESPONSIVE_EXTENSIONS.has(ext) ? responsiveConfigs.length : 1);
+  }, 0);
+
+  logger.log(`🔄 Processing ${filesToProcess.length} images (${expectedOutputs} output files)`);
   stats.optimized = filesToProcess.length;
 
   // Track sizes for optimization
@@ -144,10 +156,13 @@ async function imagemin(complete) {
     stats.optimizedFiles.push(path.relative(rootPathProject, file));
   }
 
+  // Progress counter
+  let processedOutputs = 0;
+
   // Process images
   return src(filesToProcess, { base: 'src/assets/images' })
     .pipe(responsive({
-      '**/*.{jpg,jpeg,png}': responsiveConfigs
+      [`**/${RESPONSIVE_GLOB}`]: responsiveConfigs
     }, {
       quality: 80,
       progressive: true,
@@ -159,8 +174,12 @@ async function imagemin(complete) {
     }))
     .pipe(dest(output))
     .on('data', (file) => {
-      // Save to cache
+      // Progress tracking
+      processedOutputs++;
       const relativePath = path.relative(path.join(rootPathProject, output), file.path);
+      logger.log(`🖼️  ${processedOutputs}/${expectedOutputs}: ${relativePath}`);
+
+      // Save to cache
       const cachePath = path.join(CACHE_DIR, 'images', relativePath);
       jetpack.copy(file.path, cachePath, { overwrite: true });
 
@@ -308,9 +327,6 @@ async function determineFilesToProcess(files, meta, githubCache, stats) {
   const filesToProcess = [];
   const validCachePaths = new Set();
 
-  // File extensions that get responsive processing (multiple sizes + webp)
-  const RESPONSIVE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
-
   for (const file of files) {
     const relativePath = path.relative(rootPathProject, file);
     const hash = githubCache ? githubCache.calculateHash(file) : null;
@@ -354,7 +370,7 @@ async function determineFilesToProcess(files, meta, githubCache, stats) {
           const dst = path.join(output, dirName, name);
           jetpack.copy(src, dst, { overwrite: true });
         });
-        logger.log(`📦 Using cache: ${relativePath}`);
+        logger.log(`📦 ${stats.fromCache + 1}/${files.length} from cache: ${relativePath}`);
         stats.fromCache++;
         stats.cachedFiles.push(relativePath);
 
