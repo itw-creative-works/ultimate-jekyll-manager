@@ -56,6 +56,20 @@ export async function initializeRecaptcha(siteKey, webManager) {
 
 // Get reCAPTCHA token
 export async function getRecaptchaToken(action = 'checkout') {
+  /* @dev-only:start */
+  {
+    const devRecaptcha = new URLSearchParams(window.location.search).get('_dev_recaptcha');
+    if (devRecaptcha === 'invalid') {
+      console.warn('[Checkout Dev] Sending invalid reCAPTCHA token');
+      return 'invalid-dev-token';
+    }
+    if (devRecaptcha === 'empty') {
+      console.warn('[Checkout Dev] Sending empty reCAPTCHA token');
+      return '';
+    }
+  }
+  /* @dev-only:end */
+
   if (!recaptchaReady || !recaptchaSiteKey) {
     console.warn('reCAPTCHA not initialized');
     return null;

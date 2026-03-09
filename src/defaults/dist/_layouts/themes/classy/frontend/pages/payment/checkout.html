@@ -139,6 +139,14 @@ web_manager:
                 <option value="chargebee">Chargebee</option>
               </select>
             </div>
+            <div class="mb-2">
+              <label class="form-label mb-1 text-body-secondary">reCAPTCHA</label>
+              <select data-dev-param="_dev_recaptcha" class="form-select form-select-sm">
+                <option value="">(normal)</option>
+                <option value="invalid">Send invalid token</option>
+                <option value="empty">Send empty token</option>
+              </select>
+            </div>
             <button id="checkout-dev-apply" class="btn btn-primary btn-sm w-100 fw-bold">Apply &amp; Reload</button>
           </div>
         </div>
