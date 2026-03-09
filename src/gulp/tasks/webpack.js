@@ -94,13 +94,15 @@ function shouldHaveStableName(name) {
   return bundleNaming.stable.some(pattern => pattern.test(name));
 }
 
-// Sanitize chunk/bundle names: strip leading underscores
+// Sanitize chunk data: strip leading underscores from name and id
 // Jekyll ignores files starting with "_" so these won't be copied to _site
-function sanitizeChunkName(name) {
-  if (!name) {
-    return '[name]';
+function sanitizeChunk(data) {
+  if (data.chunk.name?.startsWith('_')) {
+    data.chunk.name = data.chunk.name.replace(/^_+/, '');
   }
-  return name.replace(/^_+/, '');
+  if (data.chunk.id?.startsWith?.('_')) {
+    data.chunk.id = data.chunk.id.replace(/^_+/, '');
+  }
 }
 
 // Helper function to get webpack settings (called at runtime)
@@ -193,18 +195,22 @@ function getSettings() {
 
       // https://github.com/webpack/webpack/issues/959
       chunkFilename: (data) => {
-        const name = sanitizeChunkName(data.chunk.name);
+        sanitizeChunk(data);
+
+        const name = data.chunk.name;
 
         // Check if this chunk should have a stable name
         if (shouldHaveStableName(name)) {
-          return `${name}.chunk.js`;
+          return '[name].chunk.js';
         }
 
         // Otherwise, use hashed filename
-        return `${name}.chunk.[chunkhash].js`;
+        return '[name].chunk.[chunkhash].js';
       },
       filename: (data) => {
-        const name = sanitizeChunkName(data.chunk.name);
+        sanitizeChunk(data);
+
+        const name = data.chunk.name;
 
         // Check for special output paths
         if (bundleNaming.specialPaths[name]) {
@@ -213,11 +219,11 @@ function getSettings() {
 
         // Check if this bundle should have a stable name
         if (shouldHaveStableName(name)) {
-          return `${name}.bundle.js`;
+          return '[name].bundle.js';
         }
 
         // Everything else gets hashed
-        return `${name}.bundle.[contenthash].js`;
+        return '[name].bundle.[contenthash].js';
       },
     },
     resolveLoader: {
