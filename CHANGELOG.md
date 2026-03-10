@@ -29,6 +29,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Dev-only warning in FormManager for form fields missing `name` attributes (skipped by validation and `getData()`)
 
 ### Changed
+- Replace hardcoded discount codes with server-side validation via `payments/discount` API endpoint
+- Simplify payment intent payload: remove `auth`, `cancelUrl`, and `verification.status` fields; send `discountCode` from validated state
+- Form submit falls back to first visible payment button when Enter is pressed instead of throwing
+- Clear FormManager dirty state before redirect to avoid "leave site" prompt
+- Use proper adjective forms in subscription terms text (e.g., "annual" instead of "annually")
+- Add discount disclaimer to subscription terms when a discount code is applied
 - Align billing section to backend SSOT: consume unified subscription structure directly (3 statuses, `product.id` as object, `payment.price` in dollars, `cancellation.pending`, `trial.claimed` + `trial.expires`)
 - Use WM bindings (`data-wm-bind`) for billing plan heading, action button visibility, and cancel trigger instead of manual JS DOM manipulation
 - Standardize cancel, delete, and data-request forms to use FormManager built-in `required` validation instead of manual disabled toggle and checkbox throws
@@ -36,6 +42,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add `onsubmit="return false"` to all JS-managed forms as a safety net against native submission before FormManager loads
 - Checkout payment method buttons start hidden and are revealed via `data-wm-bind` when payment methods load
 - Remove development-only guard from click prevention logging in body.html
+
+### Removed
+- Remove hardcoded `DISCOUNT_CODES` map and `autoApplyWelcomeCoupon` (replaced by server-side validation)
+- Remove `generateCheckoutId` and `state.checkoutId` from checkout session
+- Unexport `resolvePrice` helper (internal-only usage)
 
 ### Fixed
 - Fix broken `</>` tag in checkout HTML causing page rendering to break

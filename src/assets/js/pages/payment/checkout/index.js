@@ -2,7 +2,7 @@
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import { fetchAppConfig, fetchTrialEligibility, warmupServer, createPaymentIntent } from './modules/api.js';
 import { state, buildBindingsState, resolveProcessor, FREQUENCIES, getAvailableFrequencies } from './modules/state.js';
-import { applyDiscountCode, autoApplyWelcomeCoupon } from './modules/discount.js';
+import { applyDiscountCode } from './modules/discount.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
 import { trackBeginCheckout, trackAddPaymentInfo } from './modules/tracking.js';
 
@@ -59,24 +59,9 @@ function trackAbandonedCart(webManager, product, state) {
     .catch((e) => console.warn('Failed to track abandoned cart:', e));
 }
 
-// Generate unique checkout session ID
-function generateCheckoutId() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const existing = urlParams.get('checkoutId');
-  if (existing) return existing;
-
-  const timestamp = Date.now().toString(36);
-  const random1 = Math.random().toString(36).substring(2, 8);
-  const random2 = Math.random().toString(36).substring(2, 8);
-  return `CHK-${timestamp}-${random1}-${random2}`.toUpperCase();
-}
-
 // Initialize checkout
 async function initializeCheckout() {
   try {
-    // Generate session ID
-    state.checkoutId = generateCheckoutId();
-
     // Parse URL params
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
@@ -182,9 +167,6 @@ async function initializeCheckout() {
     // Create/reset abandoned cart tracker (fire-and-forget, authenticated only)
     trackAbandonedCart(webManager, product, state);
 
-    // Auto-apply welcome coupon
-    autoApplyWelcomeCoupon(formManager, updateUI);
-
   } catch (error) {
     console.error('Checkout initialization failed:', error);
     showError(error.message || 'Failed to load checkout. Please refresh the page and try again.');
@@ -211,13 +193,12 @@ function setupForm() {
 
   // Form submission (payment)
   formManager.on('submit', async ({ $submitButton }) => {
-    if (!$submitButton) {
-      throw new Error('Please choose a payment method.');
-    }
-
-    const paymentMethod = $submitButton.getAttribute('data-payment-method');
+    // Fall back to first visible payment button if Enter was pressed without clicking one
+    const $btn = $submitButton
+      || document.querySelector('#checkout-form button[data-payment-method]:not([hidden])');
+    const paymentMethod = $btn?.getAttribute('data-payment-method');
     if (!paymentMethod) {
-      throw new Error('Invalid payment method selected.');
+      throw new Error('Please choose a payment method.');
     }
 
     // Track payment info
@@ -234,6 +215,9 @@ function setupForm() {
       formData: formManager.getData(),
     });
 
+    // Clear dirty state so FormManager doesn't trigger "leave site" prompt
+    formManager.setDirty(false);
+
     // Redirect to processor checkout
     window.location.href = response.url;
 
@@ -246,7 +230,7 @@ function setupForm() {
   if ($applyDiscountBtn) {
     $applyDiscountBtn.addEventListener('click', () => {
       const data = formManager.getData();
-      applyDiscountCode(data.discount, updateUI);
+      applyDiscountCode(data.discount, updateUI, webManager);
     });
   }
 

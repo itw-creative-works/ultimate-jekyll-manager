@@ -1,12 +1,26 @@
 // Discount code logic for checkout
-import { state, DISCOUNT_CODES } from './state.js';
+import { state } from './state.js';
+import { validateDiscountCode } from './api.js';
 
-// Apply a discount code
-// updateUI callback decouples this from the bindings system
-export async function applyDiscountCode(code, updateUI) {
+// Cached webManager reference (set on first call)
+let _webManager = null;
+
+/**
+ * Apply a discount code via server-side validation
+ * @param {string} code - Discount code to validate
+ * @param {Function} updateUI - Callback to refresh bindings
+ * @param {object} webManager - WebManager instance (required on first call)
+ */
+export async function applyDiscountCode(code, updateUI, webManager) {
+  if (webManager) {
+    _webManager = webManager;
+  }
+
   code = (code || '').trim().toUpperCase();
 
   if (!code) {
+    state.discountCode = null;
+    state.discountPercent = 0;
     state.discountUI = { loading: false, success: false, error: true, message: 'Please enter a discount code' };
     updateUI();
     return;
@@ -16,22 +30,24 @@ export async function applyDiscountCode(code, updateUI) {
   state.discountUI = { loading: true, success: false, error: false, message: '' };
   updateUI();
 
-  // Simulate API delay (TODO: replace with real API call)
-  await new Promise(resolve => setTimeout(resolve, 800));
+  try {
+    const result = await validateDiscountCode(_webManager, code);
 
-  if (DISCOUNT_CODES[code]) {
-    state.discountPercent = DISCOUNT_CODES[code];
-    state.discountUI = { loading: false, success: true, error: false, message: `Discount applied: ${state.discountPercent}% off` };
-  } else {
+    if (result.valid) {
+      state.discountCode = result.code;
+      state.discountPercent = result.percent;
+      state.discountUI = { loading: false, success: true, error: false, message: `Discount applied: ${result.percent}% off` };
+    } else {
+      state.discountCode = null;
+      state.discountPercent = 0;
+      state.discountUI = { loading: false, success: false, error: true, message: 'Invalid discount code' };
+    }
+  } catch (e) {
+    console.warn('Discount validation failed:', e);
+    state.discountCode = null;
     state.discountPercent = 0;
-    state.discountUI = { loading: false, success: false, error: true, message: 'Invalid discount code' };
+    state.discountUI = { loading: false, success: false, error: true, message: 'Unable to validate discount code. Please try again.' };
   }
 
   updateUI();
-}
-
-// Auto-apply welcome coupon
-export function autoApplyWelcomeCoupon(formManager, updateUI) {
-  formManager.setData({ discount: 'WELCOME15' });
-  applyDiscountCode('WELCOME15', updateUI);
 }

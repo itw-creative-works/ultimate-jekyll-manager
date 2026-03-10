@@ -6,13 +6,6 @@ import { calculatePrices } from './pricing.js';
 // All supported billing frequencies
 export const FREQUENCIES = ['daily', 'weekly', 'monthly', 'annually'];
 
-// Hardcoded discount codes (TODO: move to API)
-export const DISCOUNT_CODES = {
-  'FLASH20': 20,
-  'SAVE10': 10,
-  'WELCOME15': 15,
-};
-
 // Minimal mutable state
 export const state = {
   // From API (stored once, never transformed)
@@ -22,15 +15,13 @@ export const state = {
 
   // User selections
   frequency: 'annually',
+  discountCode: null,
   discountPercent: 0,
   trialEligible: false,
 
   // UI state
   discountUI: { loading: false, success: false, error: false, message: '' },
   error: { show: false, message: '' },
-
-  // Session
-  checkoutId: null,
 };
 
 // Resolve which processor handles a payment method
@@ -52,7 +43,7 @@ export function resolveProcessor(paymentMethod) {
 }
 
 // Resolve price for a frequency (handles both `{ amount: N }` and plain `N` formats)
-export function resolvePrice(product, frequency) {
+function resolvePrice(product, frequency) {
   const entry = product?.prices?.[frequency];
   if (entry == null) return 0;
   return typeof entry === 'object' ? (entry.amount || 0) : Number(entry) || 0;
@@ -122,7 +113,7 @@ export function buildBindingsState(webManager) {
         recurringAmount: formatCurrency(prices.recurring),
         recurringPeriod: frequencyLabels[cycle] || cycle,
         showTerms: isSubscription,
-        termsText: buildTermsText(product, cycle, hasFreeTrial, prices),
+        termsText: buildTermsText(product, cycle, hasFreeTrial, prices, state.discountPercent > 0),
       },
       trial: {
         show: hasFreeTrial,
@@ -170,10 +161,11 @@ function formatCurrency(amount) {
 const FREQUENCY_DAYS = { daily: 1, weekly: 7, monthly: 30, annually: 365 };
 
 // Build subscription terms text
-function buildTermsText(product, cycle, hasFreeTrial, prices) {
+function buildTermsText(product, cycle, hasFreeTrial, prices, hasDiscount) {
   if (!product || product.type !== 'subscription') return '';
 
-  const periodText = cycle;
+  const periodAdjectiveMap = { daily: 'daily', weekly: 'weekly', monthly: 'monthly', annually: 'annual' };
+  const periodText = periodAdjectiveMap[cycle] || cycle;
   const renewalDate = new Date();
   const daysToAdd = hasFreeTrial
     ? (product.trial?.days || 7)
@@ -186,9 +178,11 @@ function buildTermsText(product, cycle, hasFreeTrial, prices) {
     year: 'numeric',
   });
 
+  const discountNote = hasDiscount ? ' Discount code applies to first payment only and is not available with PayPal.' : '';
+
   if (hasFreeTrial) {
-    return `You won't be charged for your free trial. On ${formatted}, your ${periodText} subscription will start and you'll be charged ${formatCurrency(prices.recurring)} plus applicable tax. Cancel anytime before then.`;
+    return `You won't be charged for your free trial. On ${formatted}, your ${periodText} subscription will start and you'll be charged ${formatCurrency(prices.recurring)} plus applicable tax. Cancel anytime before then.${discountNote}`;
   }
 
-  return `Your ${periodText} subscription will start today and renew on ${formatted} for ${formatCurrency(prices.recurring)} plus applicable tax. Cancel anytime.`;
+  return `Your ${periodText} subscription will start today and renew on ${formatted} for ${formatCurrency(prices.recurring)} plus applicable tax. Cancel anytime.${discountNote}`;
 }

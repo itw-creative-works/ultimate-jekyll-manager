@@ -30,6 +30,16 @@ export async function fetchTrialEligibility(webManager) {
   }
 }
 
+// Validate a discount code via backend
+export async function validateDiscountCode(webManager, code) {
+  const response = await fetch(`${webManager.getApiUrl()}/backend-manager/payments/discount`, {
+    response: 'json',
+    query: { code },
+  });
+
+  return response;
+}
+
 // Fire-and-forget server warmup
 export function warmupServer(webManager) {
   fetch(`${webManager.getApiUrl()}/backend-manager/payments/intent`, {
@@ -43,28 +53,22 @@ export async function createPaymentIntent({ webManager, state, processor, formDa
   // Get reCAPTCHA token
   const recaptchaToken = await getRecaptchaToken('payment_intent');
 
-  // User info
-  const user = webManager.auth().getUser();
+  // Discount code from form data (validated server-side)
+  const discountCode = state.discountCode || '';
 
-  // Discount code from form data
-  const discountCode = state.discountPercent > 0
-    ? (formData.discount || '').trim().toUpperCase()
-    : undefined;
+  // Supplemental form data (everything except fields we handle explicitly)
+  const supplemental = { ...formData };
+  delete supplemental.frequency;
+  delete supplemental.discount;
 
-  // Build payload (flat fields to match backend schema)
+  // Build payload
   const payload = {
     processor,
     productId: state.product.id,
     frequency: state.frequency,
     trial: state.trialEligible,
-    auth: {
-      uid: user?.uid || '',
-      email: user?.email || '',
-    },
     attribution: webManager.storage().get('attribution', {}),
-    cancelUrl: window.location.href,
     verification: {
-      status: 'pending',
       'g-recaptcha-response': recaptchaToken || '',
     },
   };
@@ -74,11 +78,7 @@ export async function createPaymentIntent({ webManager, state, processor, formDa
     payload.discount = discountCode;
   }
 
-  if (formData) {
-    // Clean form data -- remove fields we handle explicitly
-    const supplemental = { ...formData };
-    delete supplemental.frequency;
-    delete supplemental.discount;
+  if (Object.keys(supplemental).length > 0) {
     payload.supplemental = supplemental;
   }
 
