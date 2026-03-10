@@ -78,3 +78,25 @@ button *, a * {
     opacity: $i * 0.1 !important;
   }
 }
+
+// ============================================
+// Sidebar
+// ============================================
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+}
+
+.sidebar-logo {
+  min-height: 57px;
+
+  a {
+    overflow: hidden;
+  }
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
