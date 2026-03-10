@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 ## [Unreleased]
 ### Added
+- Abandoned cart tracking on checkout page: creates a Firestore document in `payments-carts/{uid}` when authenticated users begin checkout, with a 15-minute first reminder delay
+- Backend sidebar auto-expands collapsible dropdown sections containing the currently active page link (desktop and mobile)
 - Email preferences page (`/portal/account/email-preferences`) for unsubscribe/resubscribe from marketing emails
 - Email masking on preferences page to prevent forwarded-email abuse (e.g., `ia***b@gm***.com`)
 - HMAC signature verification for unsubscribe links to prevent forged requests

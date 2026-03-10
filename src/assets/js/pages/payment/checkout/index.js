@@ -30,6 +30,35 @@ function showError(message) {
   updateUI();
 }
 
+// Create/reset abandoned cart tracker in Firestore (fire-and-forget)
+function trackAbandonedCart(webManager, product, state) {
+  const user = webManager.auth().getUser();
+  if (!user) {
+    return;
+  }
+
+  const uid = user.uid;
+  const now = Math.floor(Date.now() / 1000);
+  const nowISO = new Date().toISOString();
+  const FIRST_REMINDER_DELAY = 900; // 15 minutes
+
+  webManager.firestore().doc(`payments-carts/${uid}`).set({
+    id: uid,
+    owner: uid,
+    status: 'pending',
+    productId: product.id,
+    type: product.type || 'subscription',
+    frequency: state.frequency || null,
+    reminderIndex: 0,
+    nextReminderAt: now + FIRST_REMINDER_DELAY,
+    metadata: {
+      created: { timestamp: nowISO, timestampUNIX: now },
+      updated: { timestamp: nowISO, timestampUNIX: now },
+    },
+  })
+    .catch((e) => console.warn('Failed to track abandoned cart:', e));
+}
+
 // Generate unique checkout session ID
 function generateCheckoutId() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -149,6 +178,9 @@ async function initializeCheckout() {
 
     // Track begin_checkout
     trackBeginCheckout(state);
+
+    // Create/reset abandoned cart tracker (fire-and-forget, authenticated only)
+    trackAbandonedCart(webManager, product, state);
 
     // Auto-apply welcome coupon
     autoApplyWelcomeCoupon(formManager, updateUI);

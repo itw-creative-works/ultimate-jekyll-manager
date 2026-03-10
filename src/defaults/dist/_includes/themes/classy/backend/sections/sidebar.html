@@ -37,8 +37,17 @@
         {% elsif link.dropdown %}
           <!-- Collapsible Dropdown -->
           {% capture link_id %}sidebar-collapse-{{ forloop.index }}{% endcapture %}
+          {% assign dropdown_has_active = false %}
+          {% for child in link.dropdown %}
+            {% unless child.divider %}
+              {% capture _check_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+              {% if _check_active == "active" %}
+                {% assign dropdown_has_active = true %}
+              {% endif %}
+            {% endunless %}
+          {% endfor %}
           <li class="mb-1">
-            <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="false">
+            <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 {% unless dropdown_has_active %}collapsed{% endunless %}" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="{{ dropdown_has_active }}">
               <span class="d-inline-flex align-items-center">
                 {% if link.icon %}
                   {% uj_icon link.icon, "fa-xl me-3" %}
@@ -46,7 +55,7 @@
                 {{ link.label }}
               </span>
             </button>
-            <div class="collapse" id="{{ link_id }}">
+            <div class="collapse {% if dropdown_has_active %}show{% endif %}" id="{{ link_id }}">
               <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                 {% for child in link.dropdown %}
                   {% if child.divider %}
@@ -157,8 +166,17 @@
           </li>
         {% elsif link.dropdown %}
           {% capture link_id %}mobile-collapse-{{ forloop.index }}{% endcapture %}
+          {% assign dropdown_has_active = false %}
+          {% for child in link.dropdown %}
+            {% unless child.divider %}
+              {% capture _check_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+              {% if _check_active == "active" %}
+                {% assign dropdown_has_active = true %}
+              {% endif %}
+            {% endunless %}
+          {% endfor %}
           <li class="mb-1">
-            <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="false">
+            <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded py-2 px-3 border-0 {% unless dropdown_has_active %}collapsed{% endunless %}" data-bs-toggle="collapse" data-bs-target="#{{ link_id }}" aria-expanded="{{ dropdown_has_active }}">
               <span class="d-inline-flex align-items-center">
                 {% if link.icon %}
                   {% uj_icon link.icon, "fa-xl me-3" %}
@@ -166,7 +184,7 @@
                 {{ link.label }}
               </span>
             </button>
-            <div class="collapse" id="{{ link_id }}">
+            <div class="collapse {% if dropdown_has_active %}show{% endif %}" id="{{ link_id }}">
               <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                 {% for child in link.dropdown %}
                   {% if child.divider %}
