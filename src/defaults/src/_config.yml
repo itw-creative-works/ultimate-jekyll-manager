@@ -98,7 +98,7 @@ web_manager:
       settings:
         button:
           backgroundColor: "#237afc"
-          textColor: "#FFFFFF"
+          textColor: "#fff"
           position: "bottom-right"
           type: "round"
           icon: "default"
