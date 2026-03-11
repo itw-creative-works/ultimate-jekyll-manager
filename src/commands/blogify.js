@@ -231,7 +231,7 @@ function generateBlogContent(images) {
     // Add local image every other section if we have images left
     if (i % 2 === 1 && imageIndex < contentImages.length) {
       const image = contentImages[imageIndex];
-      content += `![${image.alt}](${image.path})\n\n`;
+      content += `![${image.alt}](@post/${path.basename(image.path)})\n\n`;
       imageIndex++;
     }
   }

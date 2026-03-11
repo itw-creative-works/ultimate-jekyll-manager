@@ -111,7 +111,7 @@ function setupFormScrolling() {
       if (href === '#chat') {
         // Open chat window
         try {
-          chatsy.open();
+          webManager._chatsy?.open();
         } catch (error) {
           webManager.sentry().captureException(new Error('Error opening chat', { cause: error }));
           webManager.utilities().showNotification('Chat is currently unavailable. Please try again later.', 'danger');

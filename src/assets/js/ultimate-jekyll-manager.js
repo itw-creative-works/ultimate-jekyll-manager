@@ -37,7 +37,6 @@ export default async function (Manager, options) {
 
   // Conditionally loaded modules based on config (keep as dynamic imports)
   const conditionalModules = [
-    { path: 'chatsy.js', configKey: 'chatsy' },
     { path: 'cookieconsent.js', configKey: 'cookieConsent' },
     { path: 'exit-popup.js', configKey: 'exitPopup' },
     { path: 'social-sharing.js', configKey: 'socialSharing' }

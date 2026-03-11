@@ -947,6 +947,14 @@ export class FormManager {
   }
 
   /**
+   * Programmatically trigger form submission
+   * Fires the native submit event so FormManager's _handleSubmit() processes it
+   */
+  submit() {
+    this.$form.requestSubmit();
+  }
+
+  /**
    * Check if form has unsaved changes
    */
   isDirty() {

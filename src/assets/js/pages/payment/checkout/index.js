@@ -246,7 +246,7 @@ function setupForm() {
   if ($helpButton) {
     $helpButton.addEventListener('click', (e) => {
       e.preventDefault();
-      chatsy.open();
+      webManager._chatsy?.open();
     });
   }
 
