@@ -259,6 +259,34 @@ That's it! No HTML needed. The UJ pricing layout reads `page.resolved.pricing` a
 
 **Asset Loading:** Page-specific CSS/JS files are automatically included based on the page's canonical path. Override with `asset_path` frontmatter.
 
+### Webpack Import Aliases
+
+UJM defines two webpack aliases (in `src/gulp/tasks/webpack.js`) for importing assets in JavaScript:
+
+| Alias | Resolves To | Purpose |
+|-------|------------|---------|
+| `__main_assets__` | `[UJM package]/dist/assets` | UJM's own built-in assets (core modules, libraries, pages) |
+| `__project_assets__` | `[consuming project]/src/assets` | The consuming project's custom assets |
+
+**`__main_assets__`** — Import UJM libraries and core modules:
+```javascript
+import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+```
+
+**`__project_assets__`** — Import consuming project's own assets:
+```javascript
+// Used in src/index.js to load project-specific page modules
+import(`__project_assets__/js/pages/${pageModulePath}`)
+```
+
+**How they work together:** `src/index.js` loads page modules from both aliases — first from `__main_assets__` (UJM defaults), then from `__project_assets__` (project overrides/extensions). If a project module doesn't exist, it gracefully skips. This enables a layered system where UJM provides defaults and consuming projects can extend or override page behavior.
+
+**When to use which:**
+- **`__main_assets__`** — When importing UJM-provided libraries, core modules, or referencing UJM's built-in page scripts
+- **`__project_assets__`** — When a consuming project needs to import its own custom assets from within UJM-managed code
+
 ### Page Module Structure
 
 All page modules must follow this standardized pattern:
