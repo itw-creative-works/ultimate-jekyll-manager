@@ -96,7 +96,7 @@
     buildTime: {{ site.uj.cache_breaker }},
     brand: {{ page.resolved.brand | jsonify }},
     advertising: {{ page.resolved.advertising | jsonify }},
-    tracking: {{ page.resolved.tracking | jsonify }},
+    analytics: {{ page.resolved.analytics | jsonify }},
     {% for item in page.resolved.web_manager %}
       {{ item[0] | jsonify }}: {{ item[1] | jsonify }},
     {% endfor %}
@@ -144,24 +144,24 @@
 </script>
 
 <!-- Script - Google Analytics Tracking Script -->
-{% iftruthy page.resolved.tracking.google-analytics %}
-  <script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id={{ site.tracking.google-analytics }}" async></script>
+{% iftruthy page.resolved.analytics.google %}
+  <script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id={{ site.analytics.google }}" async></script>
   <script type="text/javascript">
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    gtag('config', '{{ site.tracking.google-analytics }}');
+    gtag('config', '{{ site.analytics.google }}');
   </script>
 {% endiftruthy %}
-{% iffalsy page.resolved.tracking.google-analytics %}
+{% iffalsy page.resolved.analytics.google %}
   <script type="text/javascript">
     function gtag() {};
   </script>
 {% endiffalsy %}
 
 <!-- Script - Meta Pixel Tracking Script -->
-{% iftruthy page.resolved.tracking.meta-pixel %}
+{% iftruthy page.resolved.analytics.meta %}
   <script type="text/javascript">
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -172,35 +172,35 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
 
-    fbq('init', '{{ site.tracking.meta-pixel }}');
+    fbq('init', '{{ site.analytics.meta }}');
     fbq('track', 'PageView');
   </script>
   <noscript>
     <img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id={{ site.tracking.meta-pixel }}&ev=PageView&noscript=1"
+    src="https://www.facebook.com/tr?id={{ site.analytics.meta }}&ev=PageView&noscript=1"
     />
   </noscript>
 {% endiftruthy %}
-{% iffalsy page.resolved.tracking.meta-pixel %}
+{% iffalsy page.resolved.analytics.meta %}
   <script type="text/javascript">
     function fbq() {};
   </script>
 {% endiffalsy %}
 
 <!-- Script - TikTok Pixel Tracking Script -->
-{% iftruthy page.resolved.tracking.tiktok-pixel %}
+{% iftruthy page.resolved.analytics.tiktok %}
   <script type="text/javascript">
     !function (w, d, t) {
       //part1
       w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
 
       //part2
-      ttq.load('{{ site.tracking.tiktok-pixel }}');
+      ttq.load('{{ site.analytics.tiktok }}');
       ttq.page();
     }(window, document, 'ttq');
   </script>
 {% endiftruthy %}
-{% iffalsy page.resolved.tracking.tiktok-pixel %}
+{% iffalsy page.resolved.analytics.tiktok %}
   <script type="text/javascript">
     window.ttq = {
       load: function () {},

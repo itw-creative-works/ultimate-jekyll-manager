@@ -144,7 +144,7 @@ function updateAuthLinks() {
 function setAnalyticsUserId(user, webManager) {
   const userId = user?.uid;
   const email = user?.email;
-  const metaPixelId = webManager.config.tracking['meta-pixel'];
+  const metaPixelId = webManager.config.analytics?.meta;
 
   // Short-circuit if no user
   if (!userId) {

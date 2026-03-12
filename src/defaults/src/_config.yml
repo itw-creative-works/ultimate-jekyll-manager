@@ -168,11 +168,11 @@ socials:
   spotify: null
   mixcloud: null
 
-# Tracking
-tracking:
-  google-analytics: null
-  meta-pixel: null
-  tiktok-pixel: null
+# Analytics
+analytics:
+  google: null
+  meta: null
+  tiktok: null
 
 # reCAPTCHA
 recaptcha:

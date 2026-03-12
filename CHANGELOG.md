@@ -29,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Dev-only warning in FormManager for form fields missing `name` attributes (skipped by validation and `getData()`)
 
 ### Changed
+- Rename `site.tracking` config to `site.analytics` with simplified keys (`google-analytics` → `google`, `meta-pixel` → `meta`, `tiktok-pixel` → `tiktok`)
+- Update `webManager.config.tracking['meta-pixel']` to `webManager.config.analytics?.meta` in auth.js
 - Replace hardcoded discount codes with server-side validation via `payments/discount` API endpoint
 - Simplify payment intent payload: remove `auth`, `cancelUrl`, and `verification.status` fields; send `discountCode` from validated state
 - Form submit falls back to first visible payment button when Enter is pressed instead of throwing
