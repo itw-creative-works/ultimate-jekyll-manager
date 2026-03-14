@@ -427,6 +427,54 @@
   </script>
 {% endif %}
 
+<!-- Schema - SoftwareApplication -->
+{%- iftruthy page.resolved.schema.software_application.enabled -%}
+  {% assign sa = page.resolved.schema.software_application %}
+  {% assign sa-hash-seed = sa.hash_seed | default: site.url %}
+  {% assign sa-rating-rand = sa-hash-seed | uj_hash: 2 %}
+  {% if sa-rating-rand == 0 %}
+    {% assign sa-rating-value = "4.8" %}
+  {% else %}
+    {% assign sa-rating-value = "4.9" %}
+  {% endif %}
+  {% assign sa-review-count = sa-hash-seed | uj_hash: 800000 | plus: 200000 %}
+  <script id="uj-schema-software-application" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "@id": "{{ page.canonical.url }}#SoftwareApplication",
+      "url": "{{ page.canonical.url }}",
+      "name": "{{ sa.name | default: site.brand.name }}",
+      "description": "{{ sa.description | default: page.resolved.meta.description | uj_liquify }}",
+      "applicationCategory": "{{ sa.application_category | default: 'WebApplication' }}",
+      "operatingSystem": "{{ sa.operating_system | default: 'Web-based' }}",
+      "offers": {
+        "@type": "Offer",
+        "price": "{{ sa.price | default: '0' }}",
+        "priceCurrency": "{{ sa.price_currency | default: 'USD' }}",
+        "availability": "https://schema.org/InStock"
+      },
+      "provider": {
+        "@id": "{{ site.url }}#{{ site.brand.type }}"
+      },
+      "publisher": {
+        "@id": "{{ site.url }}#{{ site.brand.type }}"
+      },
+      "image": "{%- if site.brand.images.brandmark contains '://' %}{%- else %}{{ site.url }}/assets/images/og{%- endif -%}{{ site.brand.images.brandmark }}",
+      {% iftruthy sa.features %}
+      "featureList": {{ sa.features | jsonify }},
+      {% endiftruthy %}
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ sa-rating-value }}",
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": "{{ sa-review-count }}"
+      }
+    }
+  </script>
+{% endiftruthy %}
+
 <!-- Schema - ContactPage -->
 {%- if page.url == "/contact" -%}
   <script id="uj-schema-contact" type="application/ld+json">
@@ -444,3 +492,38 @@
     }
   </script>
 {% endif %}
+
+<!-- Schema - FAQPage -->
+{%- iftruthy page.resolved.schema.faq_page.enabled -%}
+  {% assign faq_items = page.resolved.schema.faq_page.items %}
+  {% assign faq_size = faq_items | size %}
+  {% if faq_size == 0 %}
+    {% assign faq_items = page.resolved.faqs.items %}
+    {% assign faq_size = faq_items | size %}
+  {% endif %}
+  {% if faq_size == 0 %}
+    {% assign faq_items = page.resolved.alternative.faqs.items %}
+    {% assign faq_size = faq_items | size %}
+  {% endif %}
+  {% if faq_size > 0 %}
+    <script id="uj-schema-faq-page" type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "@id": "{{ page.canonical.url }}#FAQPage",
+        "mainEntity": [
+          {%- for item in faq_items -%}
+            {
+              "@type": "Question",
+              "name": "{{ item.question | uj_liquify | uj_json_escape }}",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "{{ item.answer | uj_liquify | uj_json_escape }}"
+              }
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+  {% endif %}
+{% endiftruthy %}

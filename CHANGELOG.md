@@ -27,8 +27,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auth state settles before any authorized fetches fire on checkout, preventing race conditions
 - Quick boot mode (`UJ_QUICK=true`) for faster dev server startup (~5s vs ~20s) by skipping clean, slow setup operations, and deferring webpack/sass compilation until after Jekyll's first build
 - Dev-only warning in FormManager for form fields missing `name` attributes (skipped by validation and `getData()`)
+- FAQPage JSON-LD schema with 3-level fallback chain (`schema.faq_page.items` → `faqs.items` → `alternative.faqs.items`)
+- FAQPage schema enabled on blueprint pages with FAQ sections (pricing, contact, download, extension, alternatives)
+- OG image dimension meta tags (`og:image:width`, `og:image:height`) with 1200×630 defaults
+- Article published/modified time meta tags for blog posts
 
 ### Changed
+- Twitter card default from `summary` to configurable `summary_large_image`
 - Rename `site.tracking` config to `site.analytics` with simplified keys (`google-analytics` → `google`, `meta-pixel` → `meta`, `tiktok-pixel` → `tiktok`)
 - Update `webManager.config.tracking['meta-pixel']` to `webManager.config.analytics?.meta` in auth.js
 - Replace hardcoded discount codes with server-side validation via `payments/discount` API endpoint

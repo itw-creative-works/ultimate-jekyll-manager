@@ -212,6 +212,17 @@ favicon:
   msapp-tile-color: "#da532c"
   theme-color: "#ffffff"
 
+# Schema (Structured Data)
+schema:
+  software_application:
+    application_category: "WebApplication"
+    operating_system: "Web-based"
+    price: "0"
+    price_currency: "USD"
+    features: []
+  faq_page:
+    items: []
+
 # Manifest
 manifest:
   name: ""

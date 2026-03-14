@@ -1449,6 +1449,38 @@ schema:
 | Blueprint activation | `src/defaults/dist/_layouts/blueprint/{index,pricing,download}.html`, `blueprint/alternatives/alternative.html` |
 | Hash filter | `jekyll-uj-powertools/lib/filters/main.rb` (`uj_hash`) |
 
+### FAQPage Schema
+
+Renders a `FAQPage` JSON-LD block for pages with FAQ/accordion sections. Enabled by the alternatives blueprint — consuming projects can also enable it on any page with FAQ content.
+
+**How it works:**
+
+1. **`_config.yml`** sets `faq_page.items: []` as fallback
+2. **Blueprint layouts** set `schema.faq_page.enabled: true`
+3. **Items source (fallback chain):** `schema.faq_page.items` → `page.resolved.faqs.items` → `page.resolved.alternative.faqs.items`. Pages with generic `faqs.items` (like pricing) and alternatives pages both get FAQPage schema automatically without duplicating content
+4. Questions/answers are processed through `uj_liquify` (supports Liquid expressions like competitor names) and `uj_json_escape`
+
+**Blueprint activation:** Enabled by default in `blueprint/pricing.html`, `blueprint/contact.html`, `blueprint/download.html`, `blueprint/extension/index.html`, and `blueprint/alternatives/alternative.html`.
+
+**Consuming project usage — provide items directly:**
+```yaml
+schema:
+  faq_page:
+    enabled: true
+    items:
+      - question: "How do I get started?"
+        answer: "Sign up for free and follow the onboarding guide."
+      - question: "Is there a free plan?"
+        answer: "Yes, our basic plan is completely free."
+```
+
+**Available fields:**
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | (set by blueprint) | Enable/disable the schema block |
+| `items` | `[]` | Array of `{question, answer}` objects. Falls back to `alternative.faqs.items` if empty |
+
 ## Audit Workflow
 
 When fixing issues identified by the audit task (`src/gulp/tasks/audit.js`):
