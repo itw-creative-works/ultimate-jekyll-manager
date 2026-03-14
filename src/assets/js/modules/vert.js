@@ -256,7 +256,7 @@ const createAdUnit = (config, $currentScript) => {
 
   // Set attributes and classes
   $vertUnit.className = 'uj-vert-unit';
-  $vertUnit.setAttribute('data-wm-bind', '@hide auth.account.subscription.product.id !== basic');
+  $vertUnit.setAttribute('data-wm-bind', '@hide auth.resolved.active');
 
   // Apply size constraint if specified
   let resolvedSize = '';

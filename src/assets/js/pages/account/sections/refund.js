@@ -46,11 +46,9 @@ export function onShow() {
 
 function updateRefundEligibility(account) {
   const subscription = account?.subscription || {};
-  const productId = subscription.product?.id || 'basic';
-  const isPaid = productId !== 'basic';
-  const isCancelled = subscription.status === 'cancelled';
-  const isPendingCancel = subscription.cancellation?.pending === true;
-  const isEligible = isPaid && (isCancelled || isPendingCancel);
+  const resolved = webManager.auth().resolveSubscription(account);
+  const isPaid = subscription.product?.id !== 'basic' && !!subscription.product?.id;
+  const isEligible = isPaid && (subscription.status === 'cancelled' || resolved.cancelling);
 
   const $eligible = document.getElementById('refund-eligible');
   const $ineligible = document.getElementById('refund-ineligible');

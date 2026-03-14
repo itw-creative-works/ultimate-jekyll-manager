@@ -363,7 +363,7 @@ Ultimate Jekyll uses the `jekyll-uj-powertools` gem for custom Liquid functional
 **Documentation:** `/Users/ian/Developer/Repositories/ITW-Creative-works/jekyll-uj-powertools/README.md`
 
 ### Available Features
-- **Filters:** `uj_strip_ads`, `uj_json_escape`, `uj_title_case`, `uj_content_format`
+- **Filters:** `uj_strip_ads`, `uj_json_escape`, `uj_title_case`, `uj_content_format`, `uj_hash`
 - **Tags:** `iftruthy`, `iffalsy`, `uj_icon`, `uj_logo`, `uj_image`, `uj_member`, `uj_post`, `uj_readtime`, `uj_social`, `uj_translation_url`, `uj_fake_comments`, `uj_language`
 - **Global Variables:** `site.uj.cache_breaker`
 - **Page Variables:** `page.random_id`, `page.extension`, `page.layout_data`, `page.resolved`
@@ -374,6 +374,14 @@ Ultimate Jekyll uses the `jekyll-uj-powertools` gem for custom Liquid functional
 
 #### `uj_content_format`
 Formats content by first liquifying it, then markdownifying it (if markdown file).
+
+#### `uj_hash`
+Returns a deterministic number between 0 and max (exclusive) based on the input string's MD5 hash. Same input always produces the same output.
+
+```liquid
+{{ "some-string" | uj_hash: 1000 }}  => 0-999 (stable across builds)
+{{ site.url | uj_hash: 2 }}          => 0 or 1
+```
 
 #### `iftruthy` / `iffalsy`
 Custom tags that check JavaScript truthiness (not null, undefined, or empty string).
@@ -911,6 +919,26 @@ Custom library for site management functionality.
 
 **Important:** Always check the source code or README before assuming a function exists. Do not guess at API methods.
 
+#### Subscription Resolution
+
+Use `webManager.auth().resolveSubscription(account)` to derive calculated subscription state. This is the **single source of truth** for determining a user's effective plan — do NOT manually check `subscription.status`, `trial.claimed`, or `cancellation.pending` separately.
+
+```javascript
+const resolved = webManager.auth().resolveSubscription(account);
+// Returns: { plan, active, trialing, cancelling }
+```
+
+| Field | Description |
+|-------|-------------|
+| `plan` | Effective plan ID right now (`'basic'` if cancelled/suspended) |
+| `active` | Has active access (active, trialing, or cancelling) |
+| `trialing` | In active trial |
+| `cancelling` | Cancellation pending |
+
+Raw subscription data (product.id, status, trial, cancellation) is on `account.subscription` directly — `resolveSubscription()` returns only the calculated/derived fields.
+
+The same function exists in BEM as `User.resolveSubscription(account)` with identical return shape.
+
 ### Ultimate Jekyll Libraries
 
 Ultimate Jekyll provides helper libraries in `src/assets/js/libs/` that can be imported as needed.
@@ -1347,6 +1375,79 @@ Which renders as "Can I import my data from ExampleApp?" for an ExampleApp compe
 | Sample alternative | `src/defaults/dist/_alternatives/example-competitor.md` |
 | CSS | `src/assets/css/pages/alternatives/alternative/index.scss` |
 | JS | `src/assets/js/pages/alternatives/alternative/index.js` |
+
+## Schema / Structured Data (JSON-LD)
+
+UJ automatically generates JSON-LD structured data in `foot.html`. The SoftwareApplication schema with AggregateRating is opt-in via frontmatter.
+
+### SoftwareApplication Schema
+
+Renders a `SoftwareApplication` JSON-LD block with deterministic aggregate ratings. Enabled by blueprint layouts (index, pricing, download, alternatives/alternative) — consuming projects can override or disable per page.
+
+**How it works:**
+
+1. **`_config.yml`** sets fallback defaults (no `enabled` key — just field defaults like `application_category`, `price`, etc.)
+2. **Blueprint layouts** set `schema.software_application.enabled: true` with page-appropriate `features`
+3. **Consuming projects** can override any value in their page frontmatter, or disable with `enabled: false`
+
+This follows the standard `page.resolved` merge: page > layout > site.
+
+**Deterministic ratings:** Uses the `uj_hash` filter (from jekyll-uj-powertools) seeded with `site.url` by default, producing stable values across builds:
+- Rating: always `4.8` or `4.9` (deterministic per seed)
+- Review count: 200,000–999,999 (deterministic per seed)
+- Override seed per page with `hash_seed` to get different values
+
+**Blueprint frontmatter example:**
+```yaml
+### SCHEMA ###
+schema:
+  software_application:
+    enabled: true
+    features:
+      - "Free to use"
+      - "24/7 availability"
+      - "User-friendly interface"
+```
+
+**Consuming project override example:**
+```yaml
+schema:
+  software_application:
+    application_category: "EducationalApplication"
+    features:
+      - "AI-powered solutions"
+      - "24/7 availability"
+```
+
+**Consuming project disable example:**
+```yaml
+schema:
+  software_application:
+    enabled: false
+```
+
+**Available fields:**
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | (set by blueprint) | Enable/disable the schema block |
+| `name` | `site.brand.name` | Application name |
+| `description` | `page.resolved.meta.description` | Application description |
+| `application_category` | `WebApplication` | Schema.org application category |
+| `operating_system` | `Web-based` | Target OS |
+| `price` | `0` | Price (string) |
+| `price_currency` | `USD` | Currency code |
+| `features` | `[]` | Feature list for `featureList` field |
+| `hash_seed` | `site.url` | Seed for deterministic rating/count generation |
+
+**File locations:**
+
+| Purpose | Path |
+|---------|------|
+| Schema block (rendering) | `src/defaults/dist/_includes/core/foot.html` |
+| Site-level defaults | `src/defaults/src/_config.yml` (under `schema:`) |
+| Blueprint activation | `src/defaults/dist/_layouts/blueprint/{index,pricing,download}.html`, `blueprint/alternatives/alternative.html` |
+| Hash filter | `jekyll-uj-powertools/lib/filters/main.rb` (`uj_hash`) |
 
 ## Audit Workflow
 

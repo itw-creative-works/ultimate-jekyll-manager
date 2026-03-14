@@ -14,6 +14,7 @@ export default (Manager) => {
 
     setupBillingToggle();
     setupPlanButtons();
+    setupCurrentPlanIndicator();
 
     // Setup promo countdown (wait until mouse is not over nav)
     waitForNavUnhover();
@@ -320,6 +321,28 @@ function setupPromoCountdown() {
 
   // Adjust navbar offset to account for banner height
   adjustNavbarOffset();
+}
+
+// Disable button for the user's current active plan
+function setupCurrentPlanIndicator() {
+  webManager.auth().listen({ once: true }, (state) => {
+    const resolved = webManager.auth().resolveSubscription(state.account);
+
+    if (!resolved.active) {
+      return;
+    }
+
+    const $button = document.querySelector(`button[data-plan-id="${resolved.plan}"]`);
+
+    if (!$button) {
+      return;
+    }
+
+    $button.disabled = true;
+    $button.textContent = 'Current Plan';
+    $button.classList.remove('btn-primary', 'btn-gradient-rainbow', 'gradient-animated');
+    $button.classList.add('btn-adaptive');
+  });
 }
 
 function adjustNavbarOffset() {

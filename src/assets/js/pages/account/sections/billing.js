@@ -77,11 +77,19 @@ function updateUI(account) {
 
 function buildBillingState(account) {
   const subscription = account?.subscription || {};
-  const productId = getProductId(subscription);
-  const isPaid = productId !== 'basic';
-  const status = getEffectiveStatus(subscription, isPaid);
+  const resolved = webManager.auth().resolveSubscription(account);
+  const rawStatus = subscription.status;
+  const isPaid = subscription.product?.id !== 'basic' && !!subscription.product?.id;
   const displayName = getDisplayName(subscription);
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.free;
+
+  // Map raw + resolved state to UI config
+  let configKey = 'free';
+  if (isPaid) {
+    if (rawStatus === 'suspended') configKey = 'suspended';
+    else if (rawStatus === 'cancelled') configKey = 'cancelled';
+    else if (resolved.active) configKey = 'active';
+  }
+  const config = STATUS_CONFIG[configKey] || STATUS_CONFIG.free;
 
   // Pre-format alert dates
   const cancelTimestamp = subscription.cancellation?.date?.timestampUNIX;
@@ -111,29 +119,29 @@ function buildBillingState(account) {
         badgeClass: config.badgeClass,
       },
       description: {
-        free: status === 'free',
-        active: status === 'active' || status === 'trialing' || status === 'cancelling',
-        suspended: status === 'suspended',
-        cancelled: status === 'cancelled',
+        free: !isPaid,
+        active: resolved.active,
+        suspended: rawStatus === 'suspended',
+        cancelled: rawStatus === 'cancelled',
       },
       alerts: {
-        suspended: status === 'suspended',
-        cancelling: status === 'cancelling',
-        trialing: status === 'trialing',
+        suspended: rawStatus === 'suspended',
+        cancelling: resolved.cancelling,
+        trialing: resolved.trialing,
         cancelDate: cancelDate,
         trialEndDate: trialEndDate || '',
         trialHasEndDate: !!trialEndDate,
       },
       details: {
-        visible: isPaid && status !== 'suspended' && status !== 'cancelled' && !!hasValidBilling,
+        visible: resolved.active && !!hasValidBilling,
         nextDate: hasValidBilling ? new Date(nextBillingUnix * 1000).toLocaleDateString() : '',
         amount: hasValidBilling ? `${formatCurrency(amount, currency)} / ${FREQUENCY_LABELS[frequency] || 'month'}` : '',
       },
       buttons: {
-        upgrade: !isPaid || status === 'cancelled',
-        change: isPaid && status !== 'cancelled' && status !== 'suspended',
-        manage: isPaid && status !== 'cancelled',
-        cancel: isPaid && status !== 'cancelled' && status !== 'suspended',
+        upgrade: !isPaid || rawStatus === 'cancelled',
+        change: resolved.active,
+        manage: isPaid && rawStatus !== 'cancelled',
+        cancel: resolved.active,
       },
     },
   };
@@ -226,15 +234,12 @@ function setupCancellationForm() {
     const $selectedReason = document.querySelector('input[name="cancel_reason"]:checked');
     const reason = $selectedReason?.value || '';
 
-    // Capture status BEFORE the API call — the auth listener may update currentAccount
+    // Capture state BEFORE the API call — the auth listener may update currentAccount
     // with Firestore data (cancellation.pending=true) before we reach the post-cancel code
-    const sub = currentAccount?.subscription;
-    const productId = getProductId(sub || {});
-    const isPaid = productId !== 'basic';
-    const statusBeforeCancel = getEffectiveStatus(sub || {}, isPaid);
-    const isTrialCancel = statusBeforeCancel === 'trialing';
+    const resolvedBeforeCancel = webManager.auth().resolveSubscription(currentAccount);
+    const isTrialCancel = resolvedBeforeCancel.trialing;
 
-    console.log('[Billing] Cancelling:', { statusBeforeCancel, isTrialCancel, productId });
+    console.log('[Billing] Cancelling:', { plan: resolvedBeforeCancel.plan, isTrialCancel });
 
     trackBilling('cancel_submit');
 
@@ -332,14 +337,9 @@ function updateUsageInfo(account) {
     return;
   }
 
-  // Determine effective product for usage limits
-  // If subscription isn't actively paid, use basic plan limits
-  const productId = getProductId(subscription);
-  const isPaid = productId !== 'basic';
-  const status = getEffectiveStatus(subscription, isPaid);
-  const hasActiveAccess = status === 'active' || status === 'trialing' || status === 'cancelling';
-  const effectiveProductId = (isPaid && hasActiveAccess) ? productId : 'basic';
-  const product = appData?.payment?.products?.find(p => p.id === effectiveProductId);
+  // Use the effective plan for usage limits (basic if cancelled/suspended)
+  const resolved = webManager.auth().resolveSubscription(account);
+  const product = appData?.payment?.products?.find(p => p.id === resolved.plan);
   const limits = product?.limits || {};
 
   // Clear container
@@ -398,10 +398,6 @@ function updateUsageInfo(account) {
 
 // ─── Helpers ─────────────────────────────────────────────────
 
-function getProductId(subscription) {
-  return subscription.product?.id || 'basic';
-}
-
 function getDisplayName(subscription) {
   // Use backend-provided product name first
   if (subscription.product?.name && subscription.product.name !== 'Basic') {
@@ -412,41 +408,6 @@ function getDisplayName(subscription) {
   const productId = subscription.product?.id || 'basic';
   const product = appData?.payment?.products?.find(p => p.id === productId);
   return product?.name || 'Free';
-}
-
-// Derives a UI-friendly status from the backend subscription object
-// Backend only has 3 statuses: 'active', 'suspended', 'cancelled'
-// This function adds 'free', 'trialing', and 'cancelling' for UI purposes
-function getEffectiveStatus(subscription, isPaid) {
-  if (!isPaid) {
-    return 'free';
-  }
-
-  if (subscription.status === 'suspended') {
-    return 'suspended';
-  }
-
-  if (subscription.status === 'cancelled') {
-    return 'cancelled';
-  }
-
-  // For active subscriptions, check trial and cancellation state
-  if (subscription.status === 'active') {
-    // Trial check: claimed and not yet expired
-    if (subscription.trial?.claimed
-      && subscription.trial?.expires?.timestampUNIX > Math.floor(Date.now() / 1000)) {
-      return 'trialing';
-    }
-
-    // Pending cancellation check
-    if (subscription.cancellation?.pending) {
-      return 'cancelling';
-    }
-
-    return 'active';
-  }
-
-  return 'free';
 }
 
 function formatCurrency(amount, currency) {
