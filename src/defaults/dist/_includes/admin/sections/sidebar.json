@@ -65,12 +65,8 @@
     },
     {
       label: 'Stackblitz',
-      // htthttps://developer.stackblitz.com/guides/integration/embedding#embed-url-options
-      href: 'https://stackblitz.com/edit/itw-creative-works-nodejs?embed=1&view=editor&hidedevtools=0&terminalHeight=30&showSidebar=1',
+      href: '/admin/stackblitz',
       icon: 'bolt',
-      attributes: [
-        ['target', '_self'],
-      ]
     },
   ]
 }

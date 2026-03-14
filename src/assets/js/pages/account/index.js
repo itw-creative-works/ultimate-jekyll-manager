@@ -84,8 +84,8 @@ async function initializeAccount() {
     }
   });
 
-  // Setup auth listener with account data
-  webManager.auth().listen({ account: true }, async (state) => {
+  // Setup auth listener
+  webManager.auth().listen({}, async (state) => {
     console.log('Auth state with account data:', state);
 
     // Load user data with the account information

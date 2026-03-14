@@ -49,6 +49,13 @@
   </div>
 {%- endiftruthy -%}
 
+<!-- Script - Iframe detection -->
+<script type="text/javascript">
+  if (window.parent !== window) {
+    document.documentElement.setAttribute('data-iframed', 'true');
+  }
+</script>
+
 <!-- Script - Set preferred appearance -->
 <!-- This runs immediately to prevent flash of wrong theme -->
 <!-- Priority: 1) User saved preference, 2) Site preset, 3) System preference (if preset is 'system') -->

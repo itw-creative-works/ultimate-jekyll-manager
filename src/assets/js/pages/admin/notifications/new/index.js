@@ -56,7 +56,7 @@ async function initializeNotificationCreator() {
   showUserCountLoading();
 
   // Setup auth listener
-  webManager.auth().listen({ account: false }, async (state) => {
+  webManager.auth().listen({}, async (state) => {
     console.log('Auth state for notification creator:', state);
 
     // Show loading spinner while fetching

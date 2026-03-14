@@ -1,7 +1,9 @@
 ---
 ### ALL PAGES ###
-layout: blueprint/admin/index
+layout: modules/utilities/redirect
 permalink: /admin
 
 ### REGULAR PAGES ###
+redirect:
+  url: "/admin/dashboard"
 ---

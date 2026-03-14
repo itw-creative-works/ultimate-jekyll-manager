@@ -11,6 +11,7 @@ export default function (Manager, options) {
   // Get auth policy
   const config = webManager.config.auth.config;
   const policy = config.policy;
+  const requiredRoles = config.roles || null;
 
   // Skip auth module entirely if policy is disabled (e.g., vert iframes)
   if (policy === 'disabled') {
@@ -23,7 +24,8 @@ export default function (Manager, options) {
   // Log policy
   console.log('[Auth] policy:', policy, {
     authenticated,
-    unauthenticated
+    unauthenticated,
+    roles: requiredRoles,
   });
 
   // LEGACY: Handle desktop app auth params (e.g. ?destination=appscheme://page&source=app)
@@ -71,6 +73,14 @@ export default function (Manager, options) {
 
           // Otherwise redirect to default authenticated destination
           redirect(authenticated);
+          return;
+        }
+
+        // Check if page requires specific roles (e.g., admin: true)
+        if (requiredRoles && !hasRequiredRoles(state.account, requiredRoles)) {
+          console.warn('[Auth] User missing required roles:', requiredRoles);
+          redirect(authenticated);
+          return;
         }
       } else {
         // User is not authenticated
@@ -95,6 +105,15 @@ export default function (Manager, options) {
 
     return;
   }
+}
+
+// Check if account has all required roles
+function hasRequiredRoles(account, requiredRoles) {
+  const accountRoles = account?.roles || {};
+
+  return Object.keys(requiredRoles).every((role) => {
+    return accountRoles[role] === requiredRoles[role];
+  });
 }
 
 // Redirect function
