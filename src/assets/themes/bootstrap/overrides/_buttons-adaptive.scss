@@ -49,6 +49,12 @@
 
   color: var(--bs-body-color);
   border-color: var(--bs-dark);
+
+  // btn-check checked state (radio/checkbox toggle buttons)
+  .btn-check:checked + & {
+    color: var(--bs-btn-active-color);
+    border-color: var(--bs-btn-active-border-color);
+  }
 }
 
 [data-bs-theme="dark"] .btn-outline-adaptive {

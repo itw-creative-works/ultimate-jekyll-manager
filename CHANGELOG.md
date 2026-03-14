@@ -31,6 +31,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - FAQPage schema enabled on blueprint pages with FAQ sections (pricing, contact, download, extension, alternatives)
 - OG image dimension meta tags (`og:image:width`, `og:image:height`) with 1200×630 defaults
 - Article published/modified time meta tags for blog posts
+- Admin marketing calendar page (`/admin/calendar`) with custom-built interactive calendar for scheduling newsletters and notifications
+- Calendar supports 4 view modes (month, week, day, year) with event CRUD, drag-and-drop, overlapping event layout, and `window.calendarAPI`
+- Real-time red "now" line indicator in day/week views, updates every 60 seconds
+- Viewport-locked admin layout variant (`themes/classy/admin/core/minimal-viewport-locked`) for full-height admin pages
 
 ### Changed
 - Twitter card default from `summary` to configurable `summary_large_image`
@@ -63,6 +67,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix admin forms (notifications, users) and blog/status forms missing `novalidate`, `onsubmit`, `name` attributes, and `.button-text` spans
 - Fix profile premium badge using removed `trialing` status and `access` field
 - Add dev-only artificial pre-delay support to checkout page for testing form protection timing
+- Fix `btn-check:checked` outline button styling in classy theme — transparent `!important` rule was overriding Bootstrap's checked background due to higher CSS specificity
 
 ---
 ## [1.0.0] - 2024-06-19

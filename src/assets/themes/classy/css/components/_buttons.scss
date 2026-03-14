@@ -116,6 +116,12 @@
   &:not(:hover):not(:active):not(.active) {
     background: transparent !important;
   }
+
+  // btn-check checked state needs active background, not transparent
+  // Extra :checked specificity to beat the :not(:hover):not(:active):not(.active) rule above (0,4,0)
+  .btn-check:checked:checked + & {
+    background: var(--bs-btn-active-bg) !important;
+  }
 }
 
 .btn-outline-primary {

@@ -1,0 +1,311 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/minimal-viewport-locked
+
+### THEME CONFIG ###
+theme:
+  header:
+    title:
+      content: "Calendar"
+      icon: "calendar-days"
+    breadcrumbs:
+      items:
+        - label: "Admin"
+          href: "/admin"
+        - label: "Marketing"
+        - label: "Calendar"
+
+### REGULAR PAGES ###
+meta:
+  title: "Calendar - Admin"
+  description: "Marketing calendar for scheduling newsletters and notifications"
+  breadcrumb: "Calendar"
+
+### ICON PRE-RENDERING ###
+prerender_icons:
+  - name: "chevron-left"
+  - name: "chevron-right"
+  - name: "plus"
+  - name: "pen"
+  - name: "trash"
+  - name: "grip-dots-vertical"
+  - name: "clock"
+  - name: "envelope"
+  - name: "bell"
+  - name: "paper-plane"
+  - name: "calendar-day"
+  - name: "calendar-week"
+  - name: "calendar"
+  - name: "grid-2"
+  - name: "mobile"
+  - name: "comment-sms"
+  - name: "circle"
+---
+
+<!-- Calendar Root -->
+<div id="calendar-root" class="d-flex flex-column flex-grow-1">
+  <!-- Toolbar: navigation, view switcher, period label -->
+  <div id="calendar-toolbar" class="d-flex align-items-center justify-content-between mb-3 flex-shrink-0"></div>
+
+  <!-- Calendar grid: fills remaining height -->
+  <div id="calendar-grid" class="flex-grow-1 overflow-hidden position-relative"></div>
+</div>
+
+<!-- Event Form Modal -->
+<div class="modal fade" id="calendar-event-modal" tabindex="-1" aria-labelledby="event-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="event-modal-title">
+          {% uj_icon "plus", "fa-md me-2" %}
+          <span id="event-modal-title-text">Create Event</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="calendar-event-form" novalidate onsubmit="return false">
+
+          <!-- Event Type -->
+          <h6 class="mb-3">
+            {% uj_icon "paper-plane", "fa-sm me-2 text-info" %}
+            Event Type
+          </h6>
+          <div class="row mb-4">
+            <div class="col-6">
+              <input type="radio" class="btn-check" name="event.type" id="event-type-newsletter" value="newsletter" checked autocomplete="off">
+              <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="event-type-newsletter">
+                {% uj_icon "envelope", "fa-sm me-2" %}
+                Newsletter
+              </label>
+            </div>
+            <div class="col-6">
+              <input type="radio" class="btn-check" name="event.type" id="event-type-notification" value="notification" autocomplete="off">
+              <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="event-type-notification">
+                {% uj_icon "bell", "fa-sm me-2" %}
+                Notification
+              </label>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <h6 class="mb-3">
+            Content
+          </h6>
+
+          <div class="mb-3">
+            <label for="event-title" class="form-label">
+              Title <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control"
+                   id="event-title"
+                   name="event.title"
+                   placeholder="Enter event title"
+                   minlength="3"
+                   maxlength="100"
+                   required>
+            <div class="invalid-feedback">Title is required (3-100 characters)</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="event-body" class="form-label">
+              Body
+            </label>
+            <textarea class="form-control"
+                      id="event-body"
+                      name="event.data.body"
+                      rows="4"
+                      placeholder="Enter event content or description"></textarea>
+          </div>
+
+          <!-- Schedule -->
+          <h6 class="mb-3">
+            {% uj_icon "clock", "fa-sm me-2 text-info" %}
+            Schedule
+          </h6>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="event-date" class="form-label">
+                Date <span class="text-danger">*</span>
+              </label>
+              <input type="date"
+                     class="form-control"
+                     id="event-date"
+                     name="event.date"
+                     required>
+              <div class="invalid-feedback">Date is required</div>
+            </div>
+            <div class="col-md-4">
+              <label for="event-time" class="form-label">
+                Time <span class="text-danger">*</span>
+              </label>
+              <input type="time"
+                     class="form-control"
+                     id="event-time"
+                     name="event.time"
+                     value="09:00"
+                     required>
+              <div class="invalid-feedback">Time is required</div>
+            </div>
+            <div class="col-md-4">
+              <label for="event-duration" class="form-label">
+                Duration (min)
+              </label>
+              <input type="number"
+                     class="form-control"
+                     id="event-duration"
+                     name="event.duration"
+                     value="60"
+                     min="5"
+                     max="1440"
+                     step="5">
+            </div>
+          </div>
+
+          <!-- Targeting -->
+          <h6 class="mb-3 mt-4">
+            {% uj_icon "users", "fa-sm me-2 text-success" %}
+            Target Audience
+          </h6>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input"
+                     type="radio"
+                     name="event.data.audience.type"
+                     id="audience-all"
+                     value="all"
+                     checked>
+              <label class="form-check-label" for="audience-all">
+                All Users
+              </label>
+            </div>
+            <div class="form-check mt-2">
+              <input class="form-check-input"
+                     type="radio"
+                     name="event.data.audience.type"
+                     id="audience-segment"
+                     value="segment">
+              <label class="form-check-label" for="audience-segment">
+                User Segment
+              </label>
+            </div>
+            <div class="form-check mt-2">
+              <input class="form-check-input"
+                     type="radio"
+                     name="event.data.audience.type"
+                     id="audience-test"
+                     value="test">
+              <label class="form-check-label" for="audience-test">
+                Test Users Only
+              </label>
+            </div>
+          </div>
+
+          <!-- Channels -->
+          <h6 class="mb-3 mt-4">
+            Delivery Channels
+          </h6>
+
+          <div class="row mb-4">
+            <div class="col-6 col-md-3">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="channel-push"
+                       name="event.data.channels.push"
+                       checked>
+                <label class="form-check-label" for="channel-push">
+                  {% uj_icon "mobile", "fa-sm me-1 text-primary" %}
+                  Push
+                </label>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="channel-email"
+                       name="event.data.channels.email">
+                <label class="form-check-label" for="channel-email">
+                  {% uj_icon "envelope", "fa-sm me-1 text-info" %}
+                  Email
+                </label>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="channel-sms"
+                       name="event.data.channels.sms">
+                <label class="form-check-label" for="channel-sms">
+                  {% uj_icon "comment-sms", "fa-sm me-1 text-success" %}
+                  SMS
+                </label>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="channel-inapp"
+                       name="event.data.channels.inapp">
+                <label class="form-check-label" for="channel-inapp">
+                  {% uj_icon "bell", "fa-sm me-1 text-warning" %}
+                  In-App
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status & Color -->
+          <h6 class="mb-3">
+            Settings
+          </h6>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="event-status" class="form-label">Status</label>
+              <select class="form-select" id="event-status" name="event.status">
+                <option value="draft">Draft</option>
+                <option value="scheduled">Scheduled</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Color</label>
+              <div class="d-flex gap-2 flex-wrap align-items-center" id="color-swatches">
+                <button type="button" class="color-swatch active" data-color="#4CAF50" style="background-color: #4CAF50;" title="Green"></button>
+                <button type="button" class="color-swatch" data-color="#2196F3" style="background-color: #2196F3;" title="Blue"></button>
+                <button type="button" class="color-swatch" data-color="#FF9800" style="background-color: #FF9800;" title="Orange"></button>
+                <button type="button" class="color-swatch" data-color="#F44336" style="background-color: #F44336;" title="Red"></button>
+                <button type="button" class="color-swatch" data-color="#9C27B0" style="background-color: #9C27B0;" title="Purple"></button>
+                <button type="button" class="color-swatch" data-color="#00BCD4" style="background-color: #00BCD4;" title="Cyan"></button>
+                <button type="button" class="color-swatch" data-color="#795548" style="background-color: #795548;" title="Brown"></button>
+                <button type="button" class="color-swatch" data-color="#607D8B" style="background-color: #607D8B;" title="Gray"></button>
+              </div>
+              <input type="hidden" name="event.color" id="event-color" value="#4CAF50">
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <div>
+          <button type="button" class="btn btn-outline-danger d-none" id="btn-delete-event">
+            {% uj_icon "trash", "fa-sm me-1" %}
+            Delete
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-adaptive" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="calendar-event-form" class="btn btn-adaptive">
+            {% uj_icon "paper-plane", "fa-sm me-1" %}
+            <span class="button-text">Save Event</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

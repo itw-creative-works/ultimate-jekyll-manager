@@ -489,6 +489,12 @@ When posts are created via BEM's `POST /admin/post` endpoint:
 
 Ultimate Jekyll uses Font Awesome icons but does NOT include the Font Awesome JavaScript or CSS library. All icons must be rendered server-side using Jekyll's `{% uj_icon %}` tag.
 
+### Available Icons
+
+UJM ships with the **full Font Awesome Pro solid icon set** (4,600+ icons) at `assets/icons/font-awesome/solid/`, plus brand icons at `assets/icons/font-awesome/brands/`. Any Pro or Free solid/brand icon name can be used with `{% uj_icon %}` and prerendered icons. The icon style defaults to `solid` and can be configured via `site.config.icons.style`.
+
+Browse available icons at: https://fontawesome.com/icons
+
 ### When to Use `{% uj_icon %}` vs Prerendered Icons
 
 **IMPORTANT:** Use the correct method based on WHERE the icon will be used:
