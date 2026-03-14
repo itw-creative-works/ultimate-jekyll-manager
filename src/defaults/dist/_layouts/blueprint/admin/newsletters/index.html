@@ -1,0 +1,59 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/minimal
+
+### THEME CONFIG ###
+theme:
+  header:
+    title:
+      content: "Newsletters"
+      icon: "envelope"
+    breadcrumbs:
+      items:
+        - label: "Admin"
+          href: "/admin"
+        - label: "Marketing"
+        - label: "Newsletters"
+
+### REGULAR PAGES ###
+meta:
+  title: "Newsletters - Admin"
+  description: "Manage email newsletters"
+  breadcrumb: "Newsletters"
+---
+
+<!-- Page Header Actions -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <p class="text-muted mb-0">Manage and send email newsletters to your subscribers</p>
+      </div>
+      <div>
+        <a href="/admin/newsletters/new" class="btn btn-adaptive">
+          {% uj_icon "plus", "fa-md me-2" %}
+          Create Newsletter
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Coming Soon -->
+<div class="card">
+  <div class="card-body text-center py-5">
+    <div class="mb-3">
+      {% uj_icon "envelope", "fa-3xl text-muted" %}
+    </div>
+    <h5 class="mb-2">Newsletters coming soon</h5>
+    <p class="text-muted mb-0">
+      Email newsletter management will be available in a future update.
+      <br>
+      In the meantime, use <strong>Push Notifications</strong> to reach your subscribers.
+    </p>
+    <a href="/admin/notifications/new" class="btn btn-outline-adaptive mt-3">
+      {% uj_icon "bell", "fa-md me-2" %}
+      Send Push Notification
+    </a>
+  </div>
+</div>

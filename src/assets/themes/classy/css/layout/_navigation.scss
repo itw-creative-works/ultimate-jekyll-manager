@@ -524,6 +524,17 @@
   }
 }
 
+// Nested dropdown toggle inside a child nav — match sibling link sizing
+.btn-toggle-nav .btn-toggle {
+  padding: .375rem .75rem;
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
+  font-weight: 500;
+  font-size: inherit;
+  width: calc(100% - 2.5rem);
+  border-radius: .375rem;
+}
+
 // Regular sidebar links (non-dropdown)
 aside.sidebar,
 nav {

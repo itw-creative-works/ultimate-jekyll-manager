@@ -1,0 +1,46 @@
+---
+### ALL PAGES ###
+layout: themes/classy/admin/core/minimal
+
+### THEME CONFIG ###
+theme:
+  header:
+    title:
+      content: "Create Newsletter"
+      icon: "envelope"
+    breadcrumbs:
+      items:
+        - label: "Admin"
+          href: "/admin"
+        - label: "Marketing"
+        - label: "Newsletters"
+          href: "/admin/newsletters"
+        - label: "Create Newsletter"
+
+### REGULAR PAGES ###
+meta:
+  title: "Create Newsletter - Admin"
+  description: "Compose and send an email newsletter"
+  breadcrumb: "Create Newsletter"
+---
+
+<!-- Back Link -->
+<div class="mb-3">
+  <a href="/admin/newsletters" class="text-decoration-none">
+    {% uj_icon "arrow-left", "fa-sm me-2" %}
+    Back to Newsletters
+  </a>
+</div>
+
+<!-- Coming Soon -->
+<div class="card">
+  <div class="card-body text-center py-5">
+    <div class="mb-3">
+      {% uj_icon "envelope", "fa-3xl text-muted" %}
+    </div>
+    <h5 class="mb-2">Newsletter composer coming soon</h5>
+    <p class="text-muted mb-0">
+      The ability to compose and send email newsletters will be available in a future update.
+    </p>
+  </div>
+</div>

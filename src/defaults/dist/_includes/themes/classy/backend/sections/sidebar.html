@@ -40,9 +40,16 @@
           {% assign dropdown_has_active = false %}
           {% for child in link.dropdown %}
             {% unless child.divider %}
-              {% capture _check_active %}{% urlmatches child.href, "active" %}{% endcapture %}
-              {% if _check_active == "active" %}
-                {% assign dropdown_has_active = true %}
+              {% if child.dropdown %}
+                {% for grandchild in child.dropdown %}
+                  {% unless grandchild.divider %}
+                    {% capture _check_nested %}{% urlmatches grandchild.href, "active" %}{% endcapture %}
+                    {% if _check_nested == "active" %}{% assign dropdown_has_active = true %}{% endif %}
+                  {% endunless %}
+                {% endfor %}
+              {% else %}
+                {% capture _check_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                {% if _check_active == "active" %}{% assign dropdown_has_active = true %}{% endif %}
               {% endif %}
             {% endunless %}
           {% endfor %}
@@ -60,6 +67,41 @@
                 {% for child in link.dropdown %}
                   {% if child.divider %}
                     <li><hr class="dropdown-divider my-2"></li>
+                  {% elsif child.dropdown %}
+                    <!-- Nested Dropdown -->
+                    {% capture nested_id %}{{ link_id }}-nested-{{ forloop.index }}{% endcapture %}
+                    {% assign nested_has_active = false %}
+                    {% for grandchild in child.dropdown %}
+                      {% unless grandchild.divider %}
+                        {% capture _check_nested %}{% urlmatches grandchild.href, "active" %}{% endcapture %}
+                        {% if _check_nested == "active" %}{% assign nested_has_active = true %}{% endif %}
+                      {% endunless %}
+                    {% endfor %}
+                    <li>
+                      <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded border-0 {% unless nested_has_active %}collapsed{% endunless %}" data-bs-toggle="collapse" data-bs-target="#{{ nested_id }}" aria-expanded="{{ nested_has_active }}">
+                        <span class="d-inline-flex align-items-center">
+                          {% if child.icon %}{% uj_icon child.icon, "fa-xl me-3" %}{% endif %}
+                          {{ child.label }}
+                        </span>
+                      </button>
+                      <div class="collapse {% if nested_has_active %}show{% endif %}" id="{{ nested_id }}">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 ps-3">
+                          {% for grandchild in child.dropdown %}
+                            {% if grandchild.divider %}
+                              <li><hr class="dropdown-divider my-2"></li>
+                            {% else %}
+                              {% capture grandchild_active %}{% urlmatches grandchild.href, "active" %}{% endcapture %}
+                              <li>
+                                <a href="{{ grandchild.href }}" class="link-body-emphasis d-flex text-decoration-none rounded {{ grandchild_active }}">
+                                  {% if grandchild.icon %}{% uj_icon grandchild.icon, "fa-xl me-3" %}{% endif %}
+                                  {{ grandchild.label }}
+                                </a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </li>
                   {% else %}
                     {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
@@ -169,9 +211,16 @@
           {% assign dropdown_has_active = false %}
           {% for child in link.dropdown %}
             {% unless child.divider %}
-              {% capture _check_active %}{% urlmatches child.href, "active" %}{% endcapture %}
-              {% if _check_active == "active" %}
-                {% assign dropdown_has_active = true %}
+              {% if child.dropdown %}
+                {% for grandchild in child.dropdown %}
+                  {% unless grandchild.divider %}
+                    {% capture _check_nested %}{% urlmatches grandchild.href, "active" %}{% endcapture %}
+                    {% if _check_nested == "active" %}{% assign dropdown_has_active = true %}{% endif %}
+                  {% endunless %}
+                {% endfor %}
+              {% else %}
+                {% capture _check_active %}{% urlmatches child.href, "active" %}{% endcapture %}
+                {% if _check_active == "active" %}{% assign dropdown_has_active = true %}{% endif %}
               {% endif %}
             {% endunless %}
           {% endfor %}
@@ -189,6 +238,41 @@
                 {% for child in link.dropdown %}
                   {% if child.divider %}
                     <li><hr class="dropdown-divider my-2"></li>
+                  {% elsif child.dropdown %}
+                    <!-- Nested Dropdown -->
+                    {% capture nested_id %}{{ link_id }}-nested-{{ forloop.index }}{% endcapture %}
+                    {% assign nested_has_active = false %}
+                    {% for grandchild in child.dropdown %}
+                      {% unless grandchild.divider %}
+                        {% capture _check_nested %}{% urlmatches grandchild.href, "active" %}{% endcapture %}
+                        {% if _check_nested == "active" %}{% assign nested_has_active = true %}{% endif %}
+                      {% endunless %}
+                    {% endfor %}
+                    <li>
+                      <button class="btn btn-toggle d-inline-flex align-items-center justify-content-between rounded border-0 {% unless nested_has_active %}collapsed{% endunless %}" data-bs-toggle="collapse" data-bs-target="#{{ nested_id }}" aria-expanded="{{ nested_has_active }}">
+                        <span class="d-inline-flex align-items-center">
+                          {% if child.icon %}{% uj_icon child.icon, "fa-xl me-3" %}{% endif %}
+                          {{ child.label }}
+                        </span>
+                      </button>
+                      <div class="collapse {% if nested_has_active %}show{% endif %}" id="{{ nested_id }}">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 ps-3">
+                          {% for grandchild in child.dropdown %}
+                            {% if grandchild.divider %}
+                              <li><hr class="dropdown-divider my-2"></li>
+                            {% else %}
+                              {% capture grandchild_active %}{% urlmatches grandchild.href, "active" %}{% endcapture %}
+                              <li>
+                                <a href="{{ grandchild.href }}" class="link-body-emphasis d-flex text-decoration-none rounded {{ grandchild_active }}">
+                                  {% if grandchild.icon %}{% uj_icon grandchild.icon, "fa-xl me-3" %}{% endif %}
+                                  {{ grandchild.label }}
+                                </a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </li>
                   {% else %}
                     {% capture child_active %}{% urlmatches child.href, "active" %}{% endcapture %}
                     {% capture child_attributes %}{% if child.attributes %}{% for attr in child.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}

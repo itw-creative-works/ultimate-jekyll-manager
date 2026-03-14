@@ -32,134 +32,54 @@ meta:
 </div>
 
 <!-- Form Card -->
-<div class="card">
-  <div class="card-header">
-    <h5 class="mb-0">Create New User</h5>
-  </div>
-  <div class="card-body">
-    <form id="create-user-form" novalidate onsubmit="return false">
-      <!-- Basic Information -->
-      <h6 class="mb-3">Basic Information</h6>
-      <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-          <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="firstName" name="user.firstName" required>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="lastName" name="user.lastName" required>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-          <input type="email" class="form-control" id="email" name="user.email" required>
-          <div class="form-text">This will be used for login</div>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="phone" class="form-label">Phone Number</label>
-          <input type="tel" class="form-control" id="phone" name="user.phone">
-        </div>
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Create New User</h5>
       </div>
+      <div class="card-body">
+        <form id="create-user-form" novalidate onsubmit="return false">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="email" name="user.email" required autofocus>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="password" name="user.password" required minlength="6">
+              <div class="form-text">Must be at least 6 characters</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="confirmPassword" name="user.confirmPassword" required minlength="6">
+            </div>
+          </div>
 
-      <hr class="my-4">
-
-      <!-- Account Settings -->
-      <h6 class="mb-3">Account Settings</h6>
-      <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-          <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
-          <select class="form-select" id="role" name="account.role" required>
-            <option value="">Select a role...</option>
-            <option value="admin">Administrator</option>
-            <option value="manager">Manager</option>
-            <option value="user" selected>User</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="status" class="form-label">Status</label>
-          <select class="form-select" id="status" name="account.status">
-            <option value="active" selected>Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="pending">Pending Verification</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <input type="password" class="form-control" id="password" name="account.password" required>
-            <button class="btn btn-outline-secondary" type="button">
-              {% uj_icon "eye", "fa-md" %}
+          <!-- Form Actions -->
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="/admin/users" class="btn btn-outline-adaptive">Cancel</a>
+            <button type="submit" class="btn btn-adaptive">
+              {% uj_icon "check", "fa-md me-2" %}
+              <span class="button-text">Create User</span>
             </button>
           </div>
-          <div class="form-text">Must be at least 8 characters</div>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-          <input type="password" class="form-control" id="confirmPassword" name="account.confirmPassword" required>
-        </div>
+        </form>
       </div>
+    </div>
+  </div>
 
-      <hr class="my-4">
-
-      <!-- Permissions -->
-      <h6 class="mb-3">Permissions</h6>
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canViewDashboard" name="permissions.canViewDashboard" checked>
-            <label class="form-check-label" for="canViewDashboard">
-              Can view dashboard
-            </label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canManageUsers" name="permissions.canManageUsers">
-            <label class="form-check-label" for="canManageUsers">
-              Can manage other users
-            </label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canViewReports" name="permissions.canViewReports" checked>
-            <label class="form-check-label" for="canViewReports">
-              Can view reports
-            </label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="canEditSettings" name="permissions.canEditSettings">
-            <label class="form-check-label" for="canEditSettings">
-              Can edit system settings
-            </label>
-          </div>
-        </div>
+  <!-- Info Sidebar -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-3">{% uj_icon "circle-info", "fa-sm me-2" %} How it works</h6>
+        <ul class="small text-muted mb-0">
+          <li class="mb-2">A Firebase Auth account is created with the provided email and password</li>
+          <li class="mb-2">The backend automatically creates the Firestore user document</li>
+          <li>The user can sign in immediately with their credentials</li>
+        </ul>
       </div>
-
-      <hr class="my-4">
-
-      <!-- Additional Options -->
-      <h6 class="mb-3">Additional Options</h6>
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="sendWelcome" name="options.sendWelcome" checked>
-            <label class="form-check-label" for="sendWelcome">
-              Send welcome email to user
-            </label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="requirePasswordChange" name="options.requirePasswordChange">
-            <label class="form-check-label" for="requirePasswordChange">
-              Require password change on first login
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Actions -->
-      <div class="d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-outline-adaptive" onclick="history.back()">Cancel</button>
-        <button type="submit" class="btn btn-adaptive">
-          {% uj_icon "check", "fa-md me-2" %}
-          <span class="button-text">Create User</span>
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>

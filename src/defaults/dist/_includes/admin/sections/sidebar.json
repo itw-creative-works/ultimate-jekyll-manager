@@ -11,7 +11,7 @@
     },
     {
       header: true,
-      label: 'Main Menu'
+      label: 'Manage'
     },
     {
       label: 'Users',
@@ -31,6 +31,15 @@
       ]
     },
     {
+      label: 'Firebase Explorer',
+      href: '/admin/firebase',
+      icon: 'fire'
+    },
+    {
+      header: true,
+      label: 'Marketing'
+    },
+    {
       label: 'Notifications',
       href: null,
       icon: 'bell',
@@ -41,24 +50,29 @@
           icon: 'list'
         },
         {
-          label: 'Create New',
+          label: 'Send New',
           href: '/admin/notifications/new',
-          icon: 'plus'
+          icon: 'paper-plane'
         }
       ]
     },
     {
-      label: 'Firebase Explorer',
-      href: '/admin/firebase',
-      icon: 'fire'
+      label: 'Newsletters',
+      href: null,
+      icon: 'envelope',
+      dropdown: [
+        {
+          label: 'All Newsletters',
+          href: '/admin/newsletters',
+          icon: 'list'
+        },
+        {
+          label: 'Send New',
+          href: '/admin/newsletters/new',
+          icon: 'plus'
+        }
+      ]
     },
-    // {
-    //   divider: true
-    // },
-    // {
-    //   header: true,
-    //   label: 'Management Tools'
-    // },
     {
       header: true,
       label: 'External Tools'

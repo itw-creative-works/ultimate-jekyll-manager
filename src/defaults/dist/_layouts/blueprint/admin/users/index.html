@@ -19,6 +19,15 @@ meta:
   title: "Users - Admin"
   description: "Manage system users"
   breadcrumb: "All Users"
+
+prerender_icons:
+  - name: "user"
+  - name: "eye"
+  - name: "pen"
+  - name: "fire"
+  - name: "trash"
+  - name: "ellipsis-vertical"
+  - name: "copy"
 ---
 
 <!-- Page Header Actions -->
@@ -26,187 +35,205 @@ meta:
   <div class="col">
     <div class="d-flex justify-content-between align-items-center">
       <div>
-        <p class="text-muted mb-0">Manage and monitor all system users</p>
+        <p class="text-muted mb-0">Search users by email or UID</p>
       </div>
       <div>
-        <button class="btn btn-outline-adaptive me-2" onclick="location.reload()">
+        <button class="btn btn-outline-adaptive" id="btn-refresh-users">
           {% uj_icon "rotate", "fa-md me-2" %}
           Refresh
         </button>
-        <a href="/admin/users/new" class="btn btn-adaptive">
-          {% uj_icon "plus", "fa-md me-2" %}
-          Add User
-        </a>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Filter Tabs -->
-<ul class="nav nav-tabs mb-3" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" data-bs-toggle="tab" type="button">
-      All Users
-      <span class="badge bg-secondary ms-2">1,234</span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" type="button">
-      Active
-      <span class="badge bg-success ms-2">1,180</span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" type="button">
-      Inactive
-      <span class="badge bg-warning ms-2">45</span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" type="button">
-      Suspended
-      <span class="badge bg-danger ms-2">9</span>
-    </button>
-  </li>
-</ul>
-
-<!-- Search Bar -->
-<div class="row mb-3">
-  <div class="col-md-6">
-    <div class="input-group">
-      <span class="input-group-text">
-        {% uj_icon "magnifying-glass", "fa-sm" %}
-      </span>
-      <input type="text" class="form-control" id="user-search" placeholder="Search users by name, email, or ID..." aria-label="Search users">
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+  <!-- Total Users -->
+  <div class="col-lg-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-primary bg-opacity-10 mx-auto mb-2">
+          {% uj_icon "users", "fa-xl text-primary" %}
+        </div>
+        <h6 class="text-muted mb-1">Total users</h6>
+        <h3 class="mb-0" id="stat-total-users">
+          <span class="spinner-border spinner-border-sm"></span>
+        </h3>
+      </div>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="d-flex gap-2 justify-content-end">
-      <select class="form-select" id="user-sort" style="width: auto;" aria-label="Sort users">
-        <option>Sort by: Date Created</option>
-        <option>Sort by: Name</option>
-        <option>Sort by: Last Active</option>
-        <option>Sort by: Role</option>
-      </select>
-      <button class="btn btn-outline-adaptive">
-        {% uj_icon "filter", "fa-md me-2" %}
-        Filters
-      </button>
+
+  <!-- Active Subscriptions -->
+  <div class="col-lg-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-success bg-opacity-10 mx-auto mb-2">
+          {% uj_icon "credit-card", "fa-xl text-success" %}
+        </div>
+        <h6 class="text-muted mb-1">Active subscriptions</h6>
+        <h3 class="mb-0" id="stat-active-subs">
+          <span class="spinner-border spinner-border-sm"></span>
+        </h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Users (30d) -->
+  <div class="col-lg-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-info bg-opacity-10 mx-auto mb-2">
+          {% uj_icon "user-plus", "fa-xl text-info" %}
+        </div>
+        <h6 class="text-muted mb-1">New users (30d)</h6>
+        <h3 class="mb-0" id="stat-new-users">
+          <span class="spinner-border spinner-border-sm"></span>
+        </h3>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Search Form -->
+<form id="user-search-form" onsubmit="return false">
+  <div class="row mb-3">
+    <div class="col">
+      <div class="input-group">
+        <span class="input-group-text">
+          {% uj_icon "magnifying-glass", "fa-sm" %}
+        </span>
+        <input type="text" class="form-control" name="search.query" placeholder="Search by email or UID..." aria-label="Search users" required minlength="1" autofocus>
+        <button type="submit" class="btn btn-adaptive">
+          <span class="button-text">Search</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
 
 <!-- Users Table -->
 <div class="card">
   <div class="card-body p-0">
+    <!-- Search Prompt (default state) -->
+    <div id="users-prompt" class="text-center text-muted py-5">
+      {% uj_icon "magnifying-glass", "fa-2xl mb-3 d-block" %}
+      Enter an email or UID above to search
+    </div>
+
+    <!-- Loading -->
+    <div id="users-loading" class="text-center text-muted py-5 d-none">
+      <span class="spinner-border spinner-border-sm"></span>
+    </div>
+
+    <!-- Empty State -->
+    <div id="users-empty" class="text-center text-muted py-5 d-none">
+      No users found
+    </div>
+
+    <!-- Table -->
     <div class="table-responsive">
-      <table class="table table-hover mb-0">
+      <table class="table table-hover mb-0 d-none" id="users-table">
         <thead>
           <tr>
-            <th>
-              <input class="form-check-input" type="checkbox" id="select-all-users" aria-label="Select all users">
-            </th>
             <th>User</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Last Active</th>
-            <th>Date Joined</th>
-            <th></th>
+            <th>Plan</th>
+            <th>Expires</th>
+            <th>Updated</th>
+            <th style="width: 40px;"></th>
           </tr>
         </thead>
-        <tbody>
-          {% for i in (1..10) %}
-          <tr>
-            <td>
-              <input class="form-check-input" type="checkbox" aria-label="Select user {{ i }}">
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <div class="avatar avatar-sm me-3">
-                  <img src="https://ui-avatars.com/api/?name=User+{{ i }}&background=random" alt="User {{ i }}" class="rounded-circle">
-                </div>
-                <div>
-                  <div class="fw-semibold">User {{ i }}</div>
-                  <small class="text-muted">user{{ i }}@example.com</small>
-                </div>
-              </div>
-            </td>
-            <td>
-              {% if i == 1 %}
-                <span class="badge bg-primary">Admin</span>
-              {% elsif i == 2 or i == 3 %}
-                <span class="badge bg-info">Manager</span>
-              {% else %}
-                <span class="badge bg-secondary">User</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if i == 9 %}
-                <span class="badge bg-danger">Suspended</span>
-              {% elsif i == 8 %}
-                <span class="badge bg-warning">Inactive</span>
-              {% else %}
-                <span class="badge bg-success">Active</span>
-              {% endif %}
-            </td>
-            <td>2 hours ago</td>
-            <td>Jan {{ i }}, 2024</td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-link" type="button" data-bs-toggle="dropdown">
-                  {% uj_icon "ellipsis-vertical", "fa-lg" %}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" href="#">
-                    {% uj_icon "eye", "fa-md me-2" %}
-                    View Profile
-                  </a></li>
-                  <li><a class="dropdown-item" href="#">
-                    {% uj_icon "pen", "fa-md me-2" %}
-                    Edit User
-                  </a></li>
-                  <li><a class="dropdown-item" href="#">
-                    {% uj_icon "envelope", "fa-md me-2" %}
-                    Send Message
-                  </a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#">
-                    {% uj_icon "ban", "fa-md me-2" %}
-                    Suspend User
-                  </a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
+        <tbody id="users-tbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer d-none" id="users-footer">
+    <div class="small text-muted" id="users-count"></div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal fade" id="user-detail-modal" tabindex="-1" aria-labelledby="user-detail-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="user-detail-modal-label">User Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <pre class="mb-0 p-3" style="max-height: 500px; overflow-y: auto; font-size: 0.85em; background: var(--bs-tertiary-bg);"><code id="user-detail-json"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-adaptive" id="btn-copy-uid">
+          {% uj_icon "copy", "fa-sm me-1" %}
+          Copy UID
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-adaptive" id="btn-view-in-firebase">
+          {% uj_icon "fire", "fa-sm me-1" %}
+          View in Explorer
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-adaptive" data-bs-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Pagination -->
-<div class="d-flex justify-content-between align-items-center mt-3">
-  <div>
-    Showing 1-10 of 1,234 users
+<!-- User Edit Modal -->
+<div class="modal fade" id="user-edit-modal" tabindex="-1" aria-labelledby="user-edit-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="user-edit-modal-label">Edit User</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="user-edit-form" onsubmit="return false">
+          <!-- UID (read-only) -->
+          <div class="mb-3">
+            <label class="form-label small text-muted">UID</label>
+            <input type="text" class="form-control form-control-sm font-monospace" id="edit-uid" readonly disabled>
+          </div>
+
+          <!-- Email (read-only) -->
+          <div class="mb-3">
+            <label class="form-label small text-muted">Email</label>
+            <input type="text" class="form-control form-control-sm" id="edit-email" readonly disabled>
+          </div>
+
+          <hr>
+
+          <!-- Roles -->
+          <h6 class="mb-3">Roles</h6>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="edit-role-admin" name="roles.admin">
+            <label class="form-check-label" for="edit-role-admin">Administrator</label>
+          </div>
+
+          <hr>
+
+          <!-- Subscription -->
+          <h6 class="mb-3">Subscription</h6>
+          <div class="mb-3">
+            <label for="edit-plan" class="form-label small">Plan</label>
+            <input type="text" class="form-control form-control-sm" id="edit-plan" name="subscription.product.id" placeholder="e.g. basic, premium, max">
+          </div>
+          <div class="mb-3">
+            <label for="edit-expires" class="form-label small">Expires (date)</label>
+            <input type="date" class="form-control form-control-sm" id="edit-expires" name="subscription.expires.date">
+          </div>
+
+          <!-- Submit -->
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-sm btn-outline-adaptive" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-sm btn-adaptive">
+              {% uj_icon "check", "fa-sm me-1" %}
+              <span class="button-text">Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <nav>
-    <ul class="pagination mb-0">
-      <li class="page-item disabled">
-        <a class="page-link" href="#">Previous</a>
-      </li>
-      <li class="page-item active">
-        <a class="page-link" href="#">1</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">2</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">3</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">Next</a>
-      </li>
-    </ul>
-  </nav>
 </div>
