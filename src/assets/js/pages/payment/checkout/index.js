@@ -227,10 +227,20 @@ function setupForm() {
 
   // Discount button
   const $applyDiscountBtn = document.querySelector('[data-action="apply-discount"]');
+  const $discountInput = document.getElementById('discount-code');
   if ($applyDiscountBtn) {
     $applyDiscountBtn.addEventListener('click', () => {
       const data = formManager.getData();
       applyDiscountCode(data.discount, updateUI, webManager);
+    });
+  }
+  if ($discountInput) {
+    $discountInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') {
+        return;
+      }
+      e.preventDefault();
+      $applyDiscountBtn?.click();
     });
   }
 
