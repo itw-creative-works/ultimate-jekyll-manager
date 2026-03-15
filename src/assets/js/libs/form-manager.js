@@ -124,6 +124,9 @@ export class FormManager {
     }
     /* @dev-only:end */
 
+    // Auto-populate form fields from URL query parameters
+    this._populateFromQueryParams();
+
     // Auto-transition to initialState when DOM is ready
     if (this.config.autoReady) {
       domReady().then(() => this._setInitialState());
@@ -148,6 +151,45 @@ export class FormManager {
     const listeners = this._listeners[event] || [];
     for (const callback of listeners) {
       await callback(data);
+    }
+  }
+
+  /**
+   * Auto-populate form fields from URL query parameters
+   * Matches query param keys to field names (supports dot notation)
+   */
+  _populateFromQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.size === 0) {
+      return;
+    }
+
+    const data = {};
+
+    for (const [key, value] of params) {
+      // Skip tracking/UTM params and common non-form params
+      if (
+        key.startsWith('utm_')
+        || key.startsWith('itm_')
+        || key === 'cb'
+        || key === 'fbclid'
+        || key === 'gclid'
+      ) {
+        continue;
+      }
+
+      // Only populate if a matching field exists in the form
+      const $field = this.$form.querySelector(`[name="${key}"]`);
+      if (!$field) {
+        continue;
+      }
+
+      data[key] = value;
+    }
+
+    if (Object.keys(data).length > 0) {
+      this.setData(data);
     }
   }
 
