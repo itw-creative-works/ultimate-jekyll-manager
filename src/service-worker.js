@@ -27,12 +27,12 @@ class Manager {
     this.config = serviceWorker.UJ_BUILD_JSON?.config || {};
 
     // Defaults
-    this.app = this.config?.brand?.id || 'default';
+    this.brand = this.config?.brand?.id || 'default';
     this.environment = this.config?.uj?.environment || 'production';
     this.cache = {
       breaker: this.config?.uj?.cache_breaker || new Date().getTime(),
     };
-    this.cache.name = `${this.app}-${this.cache.breaker}`;
+    this.cache.name = `${this.brand}-${this.cache.breaker}`;
 
     // Libraries
     this.libraries = {

@@ -7,7 +7,7 @@ import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 let webManager = null;
-let appData = null;
+let brandData = null;
 let cancelFormManager = null;
 let currentAccount = null;
 
@@ -42,12 +42,12 @@ export async function init(wm) {
 }
 
 // Load billing data
-export async function loadData(account, sharedAppData) {
+export async function loadData(account, sharedBrandData) {
   if (!account) {
     return;
   }
 
-  appData = sharedAppData;
+  brandData = sharedBrandData;
   currentAccount = account;
 
   updateUI(account);
@@ -105,7 +105,7 @@ function buildBillingState(account) {
   // Pre-format billing details
   const nextBillingUnix = subscription.expires?.timestampUNIX;
   const amount = subscription.payment?.price;
-  const currency = appData?.payment?.currency || 'USD';
+  const currency = brandData?.payment?.currency || 'USD';
   const frequency = subscription.payment?.frequency;
   const hasValidBilling = nextBillingUnix && nextBillingUnix > 0 && amount;
 
@@ -339,7 +339,7 @@ function updateUsageInfo(account) {
 
   // Use the effective plan for usage limits (basic if cancelled/suspended)
   const resolved = webManager.auth().resolveSubscription(account);
-  const product = appData?.payment?.products?.find(p => p.id === resolved.plan);
+  const product = brandData?.payment?.products?.find(p => p.id === resolved.plan);
   const limits = product?.limits || {};
 
   // Clear container
@@ -404,9 +404,9 @@ function getDisplayName(subscription) {
     return subscription.product.name;
   }
 
-  // Fall back to appData product name
+  // Fall back to brandData product name
   const productId = subscription.product?.id || 'basic';
-  const product = appData?.payment?.products?.find(p => p.id === productId);
+  const product = brandData?.payment?.products?.find(p => p.id === productId);
   return product?.name || 'Free';
 }
 

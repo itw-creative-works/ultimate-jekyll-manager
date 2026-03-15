@@ -9,7 +9,7 @@ export const FREQUENCIES = ['daily', 'weekly', 'monthly', 'annually'];
 // Minimal mutable state
 export const state = {
   // From API (stored once, never transformed)
-  appConfig: null,
+  brandConfig: null,
   product: null,
   processors: null,
 

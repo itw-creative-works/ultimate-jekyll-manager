@@ -36,8 +36,8 @@ export default (Manager) => {
 // Global state
 let $navLinks = null;
 let $sections = null;
-let appData = null;
-let fetchAppDataPromise = null;
+let brandData = null;
+let fetchBrandDataPromise = null;
 
 // Section modules map
 const sectionModules = {
@@ -89,8 +89,8 @@ async function initializeAccount() {
     console.log('Auth state with account data:', state);
 
     // Load user data with the account information
-    // Wait for app data to be fetched before loading section data
-    await fetchAppData();
+    // Wait for brand data to be fetched before loading section data
+    await fetchBrandData();
 
     /* @dev-only:start */
     {
@@ -131,39 +131,37 @@ async function initializeAccount() {
   });
 }
 
-// Fetch app data to get configuration and OAuth settings
-async function fetchAppData() {
-  if (fetchAppDataPromise) return fetchAppDataPromise;
+// Fetch brand data to get configuration and OAuth settings
+async function fetchBrandData() {
+  if (fetchBrandDataPromise) return fetchBrandDataPromise;
 
-  fetchAppDataPromise = (async () => {
+  fetchBrandDataPromise = (async () => {
     try {
-      // Get app ID from site configuration
-      const appId = webManager.config.brand.id;
-      const serverApiURL = `${webManager.getApiUrl()}/backend-manager/app`;
+      const serverApiURL = `${webManager.getApiUrl()}/backend-manager/brand`;
 
-      // Fetch app data
+      // Fetch brand data
       const response = await fetch(serverApiURL, {
         response: 'json',
       });
 
-      console.log('Fetched app data:', response);
-      appData = response;
+      console.log('Fetched brand data:', response);
+      brandData = response;
 
       return response;
     } catch (error) {
-      webManager.sentry().captureException(new Error('Failed to fetch app data', { cause: error }));
+      webManager.sentry().captureException(new Error('Failed to fetch brand data', { cause: error }));
       return null;
     }
   })();
 
-  return fetchAppDataPromise;
+  return fetchBrandDataPromise;
 }
 
 // Load data for all sections
 function loadAllSectionData(authState) {
   const { user, account } = authState;
 
-  // Load data for each section (passing app data where needed)
+  // Load data for each section (passing brand data where needed)
   if (sectionModules.profile.loadData) {
     sectionModules.profile.loadData(account, user);
   }
@@ -177,7 +175,7 @@ function loadAllSectionData(authState) {
   }
 
   if (sectionModules.billing.loadData) {
-    sectionModules.billing.loadData(account, appData);
+    sectionModules.billing.loadData(account, brandData);
   }
 
   if (sectionModules.team && sectionModules.team.loadData) {
@@ -201,7 +199,7 @@ function loadAllSectionData(authState) {
   }
 
   if (sectionModules.connections.loadData) {
-    sectionModules.connections.loadData(account, appData);
+    sectionModules.connections.loadData(account, brandData);
   }
 
   if (sectionModules.refund.loadData) {

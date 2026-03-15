@@ -3,14 +3,14 @@ import fetch from 'wonderful-fetch';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getRecaptchaToken } from './recaptcha.js';
 
-// Fetch app config (products + processors)
-export async function fetchAppConfig(webManager) {
-  const response = await fetch(`${webManager.getApiUrl()}/backend-manager/app`, {
+// Fetch brand config (products + processors)
+export async function fetchBrandConfig(webManager) {
+  const response = await fetch(`${webManager.getApiUrl()}/backend-manager/brand`, {
     response: 'json',
     tries: 2,
   });
 
-  console.log('Fetched app config:', response);
+  console.log('Fetched brand config:', response);
   return response;
 }
 

@@ -7,7 +7,7 @@ import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 
 let webManager = null;
-let appData = null;
+let brandData = null;
 let accountData = null;
 let connectionForms = new Map();
 
@@ -25,13 +25,13 @@ export async function init(wm) {
 }
 
 // Load connections data
-export async function loadData(account, sharedAppData) {
+export async function loadData(account, sharedBrandData) {
   if (!account) {
     return;
   }
 
   accountData = account;
-  appData = sharedAppData;
+  brandData = sharedBrandData;
 
   displayConnections();
 }
@@ -44,14 +44,14 @@ function displayConnections() {
     $loading.classList.add('d-none');
   }
 
-  if (!appData) {
+  if (!brandData) {
     if ($loading) {
       $loading.classList.remove('d-none');
     }
     return;
   }
 
-  const availableProviders = appData?.oauth2 || {};
+  const availableProviders = brandData?.oauth2 || {};
   const userConnections = accountData?.oauth2 || {};
 
   let hasEnabledProviders = false;
@@ -96,7 +96,7 @@ function displayConnections() {
 
     // Provider is enabled in API but has no HTML element — create a warning card
     hasEnabledProviders = true;
-    console.warn(`[Connections] Provider "${providerId}" is enabled in app config but missing from the account page template. Add it to the connections frontmatter list.`);
+    console.warn(`[Connections] Provider "${providerId}" is enabled in brand config but missing from the account page template. Add it to the connections frontmatter list.`);
 
     const warningId = `connection-${providerId}-unconfigured`;
     if (document.getElementById(warningId)) {
@@ -238,7 +238,7 @@ function initializeProviderForm(providerId) {
   formManager.on('statechange', ({ state }) => {
     if (state === 'ready') {
       const userConnection = accountData?.oauth2?.[providerId];
-      const providerSettings = appData?.oauth2?.[providerId];
+      const providerSettings = brandData?.oauth2?.[providerId];
       updateProviderStatus(providerId, userConnection, providerSettings);
     }
   });
@@ -253,7 +253,7 @@ function initializeProviderForm(providerId) {
       const success = await handleDisconnect(provider);
 
       if (success) {
-        const providerSettings = appData?.oauth2?.[provider];
+        const providerSettings = brandData?.oauth2?.[provider];
         updateProviderStatus(provider, null, providerSettings);
       }
     }
@@ -262,7 +262,7 @@ function initializeProviderForm(providerId) {
 
 // Handle connect action
 async function handleConnect(providerId) {
-  const provider = appData?.oauth2?.[providerId];
+  const provider = brandData?.oauth2?.[providerId];
 
   if (!provider || provider.enabled === false) {
     throw new Error('This connection service is not available.');
@@ -323,7 +323,7 @@ async function handleDisconnect(providerId) {
 
 // Called when section is shown
 export function onShow() {
-  if (accountData && appData) {
+  if (accountData && brandData) {
     displayConnections();
   }
 }

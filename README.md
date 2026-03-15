@@ -385,7 +385,7 @@ Raw pixel values also accepted: `vert-size="300"` → 300px max-height. Omit `ve
   - Inserts fake session data in the Security section (active sessions)
 
 ##### Checkout Page (`/payment/checkout`)
-* `_dev_appId`: Override the application ID for testing (e.g., `_dev_appId=test-app`)
+* `_dev_brandId`: Override the brand ID for testing (e.g., `_dev_brandId=test-app`)
 * `_dev_trialEligible`: Force trial eligibility status:
   - `_dev_trialEligible=true`: User is eligible for trial
   - `_dev_trialEligible=false`: User is not eligible for trial
