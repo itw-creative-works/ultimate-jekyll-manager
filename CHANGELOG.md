@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.1] - 2026-03-15
+### Changed
+- Upgrade `node-powertools` from ^2.3.2 to ^3.0.0
+- Upgrade `web-manager` from ^4.1.26 to ^4.1.28
+- Upgrade `wonderful-fetch` from ^1.3.4 to ^2.0.4
+- Upgrade `prepare-package` from ^1.2.6 to ^2.0.7
+- Add `preparePackage.type: "copy"` configuration
+
 ## [Unreleased]
 ### Changed
 - Migrate "app" terminology to "brand" across frontend and service worker: renamed `appData`/`fetchAppData` to `brandData`/`fetchBrandData`, `appConfig`/`fetchAppConfig` to `brandConfig`/`fetchBrandConfig`, API endpoint from `/backend-manager/app` to `/backend-manager/brand`, and `this.app` to `this.brand` in service worker
