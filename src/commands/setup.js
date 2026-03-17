@@ -251,6 +251,7 @@ async function ensurePeerDependencies() {
 
 function setupScripts() {
   project.scripts = project.scripts || {};
+  project.private = true;
 
   Object.keys(package.projectScripts).forEach((key) => {
     project.scripts[key] = package.projectScripts[key];

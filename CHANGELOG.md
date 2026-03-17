@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.3] - 2026-03-16
+### Added
+- Ensure consuming projects have `"private": true` in package.json during setup to prevent accidental npm publishes
+
 ## [1.0.1] - 2026-03-15
 ### Changed
 - Upgrade `node-powertools` from ^2.3.2 to ^3.0.0
