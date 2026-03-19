@@ -8,7 +8,7 @@ import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 import { escapeHtml } from '__main_assets__/js/libs/admin-helpers.js';
-import { DISPLAY_TYPES } from './calendar-core.js';
+import { DISPLAY_TYPES, formatDateUTC, formatTimeUTC, todayUTC } from './calendar-core.js';
 import { renderEmailPreview, renderPushPreview } from './campaign-preview.js';
 
 export default class CalendarEvents {
@@ -117,8 +117,7 @@ export default class CalendarEvents {
       return;
     }
     $btn.addEventListener('click', () => {
-      const today = this.core.formatDate(new Date());
-      this.openCreateModal(today, '09:00');
+      this.openCreateModal(todayUTC(), '09:00');
     });
   }
 
@@ -191,9 +190,8 @@ export default class CalendarEvents {
   _initSendNow() {
     document.getElementById('btn-send-now').addEventListener('click', () => {
       const now = new Date();
-      document.getElementById('campaign-date').value = this.core.formatDate(now);
-      document.getElementById('campaign-time').value =
-        String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('campaign-date').value = formatDateUTC(now);
+      document.getElementById('campaign-time').value = formatTimeUTC(now);
     });
   }
 
@@ -310,9 +308,8 @@ export default class CalendarEvents {
     // Shared fields
     document.getElementById('campaign-name').value = settings.name || '';
     document.getElementById('campaign-subject').value = settings.subject || '';
-    document.getElementById('campaign-date').value = this.core.formatDate(d);
-    document.getElementById('campaign-time').value =
-      String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    document.getElementById('campaign-date').value = formatDateUTC(d);
+    document.getElementById('campaign-time').value = formatTimeUTC(d);
     document.getElementById('campaign-discount-code').value = settings.discountCode || '';
     document.getElementById('campaign-test').checked = !!settings.test;
 
@@ -519,7 +516,7 @@ export default class CalendarEvents {
     if (!date || !time) {
       return 'now';
     }
-    return `${date}T${time}:00`;
+    return `${date}T${time}:00Z`;
   }
 
   _csvToArray(str) {
@@ -549,8 +546,6 @@ export default class CalendarEvents {
 
     this.formManager.showSuccess('Campaign created');
 
-    // Track
-    this._trackCampaignAction('create', payload);
 
     return response;
   }
@@ -569,8 +564,6 @@ export default class CalendarEvents {
 
     this.formManager.showSuccess('Campaign updated');
 
-    // Track
-    this._trackCampaignAction('update', payload);
 
     return response;
   }
@@ -586,14 +579,12 @@ export default class CalendarEvents {
       body: { id },
     });
 
-    // Track
-    this._trackCampaignAction('delete', { id });
 
     return response;
   }
 
   /**
-   * Reschedule a campaign (drag-and-drop)
+   * Reschedule a one-off campaign (drag-and-drop)
    */
   async rescheduleCampaign(id, newSendAt) {
     const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
@@ -604,6 +595,57 @@ export default class CalendarEvents {
       tries: 1,
       log: true,
       body: { id, sendAt: newSendAt },
+    });
+  }
+
+  /**
+   * Reschedule a recurring campaign by updating its sendAt (seed time).
+   * All virtual occurrences recalculate from the new seed.
+   * Also updates recurrence metadata (day/hour) for the backend cron.
+   * @param {string} templateId - The recurring template doc ID
+   * @param {object} virtualEvent - The virtual event that was dragged
+   * @param {number} newSendAtUNIX - New sendAt as unix timestamp
+   */
+  async rescheduleRecurring(templateId, virtualEvent, newSendAtUNIX) {
+    const template = this.core.getCampaign(templateId);
+    if (!template || !template.recurrence) {
+      return;
+    }
+
+    const recurrence = { ...template.recurrence };
+    const d = new Date(newSendAtUNIX * 1000);
+
+    // Update recurrence metadata for the backend cron
+    recurrence.hour = d.getUTCHours();
+    if (recurrence.pattern === 'weekly') {
+      recurrence.day = d.getUTCDay();
+    } else if (recurrence.pattern === 'monthly' || recurrence.pattern === 'quarterly') {
+      recurrence.day = d.getUTCDate();
+    } else if (recurrence.pattern === 'yearly') {
+      recurrence.month = d.getUTCMonth() + 1;
+      recurrence.day = d.getUTCDate();
+    }
+
+    // Optimistic update: move the seed sendAt, re-render immediately
+    const rollback = this.core.optimisticUpdateSendAt(templateId, newSendAtUNIX);
+
+    const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+    return authorizedFetch(url, {
+      method: 'PUT',
+      timeout: 60000,
+      response: 'json',
+      tries: 1,
+      log: true,
+      body: {
+        id: templateId,
+        sendAt: d.toISOString(),
+        recurrence,
+      },
+    }).catch((err) => {
+      console.error('Failed to reschedule recurring campaign:', err);
+      if (rollback) {
+        rollback();
+      }
     });
   }
 
@@ -631,7 +673,7 @@ export default class CalendarEvents {
     html += `<table class="table table-sm table-borderless mb-0">`;
     html += `<tr><td class="text-muted" style="width:120px">Name</td><td>${escapeHtml(settings.name || '')}</td></tr>`;
     html += `<tr><td class="text-muted">Subject</td><td>${escapeHtml(settings.subject || '')}</td></tr>`;
-    html += `<tr><td class="text-muted">Sent At</td><td>${d.toLocaleString()}</td></tr>`;
+    html += `<tr><td class="text-muted">Sent At</td><td>${formatDateUTC(d)} ${formatTimeUTC(d)} UTC</td></tr>`;
 
     if (campaign.type === 'email') {
       if (settings.preheader) {
@@ -697,24 +739,4 @@ export default class CalendarEvents {
     document.getElementById('recurrence-month-row').classList.add('d-none');
   }
 
-  // ============================================
-  // Tracking
-  // ============================================
-  _trackCampaignAction(action, payload) {
-    gtag('event', `campaign_${action}`, {
-      campaign_type: payload.type || 'unknown',
-      campaign_name: payload.name || '',
-    });
-
-    fbq('trackCustom', `AdminCampaign${action.charAt(0).toUpperCase() + action.slice(1)}`, {
-      type: payload.type || 'unknown',
-      name: payload.name || '',
-    });
-
-    ttq.track('SubmitForm', {
-      content_id: `admin-campaign-${action}`,
-      content_type: 'product',
-      content_name: `Admin Campaign ${action}`,
-    });
-  }
 }

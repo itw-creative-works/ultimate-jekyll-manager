@@ -1,8 +1,11 @@
 /**
  * Calendar Core
- * State management, date math, Firestore real-time sync, recurrence
- * computation, and public API.
+ * State management, date math (all UTC), Firestore real-time sync,
+ * recurrence computation, and public API.
  * Reads from Firestore marketing-campaigns collection directly.
+ *
+ * IMPORTANT: All dates/times in this module are UTC.
+ * No local time APIs (getHours, getDate, etc.) are used anywhere.
  */
 
 // View modes
@@ -16,9 +19,6 @@ export const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
-
-// Recurrence pattern options
-export const RECURRENCE_PATTERNS = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
 
 // Campaign type colors
 export const TYPE_COLORS = {
@@ -40,17 +40,56 @@ export const DISPLAY_TYPES = {
   RECURRING_HISTORY: 'recurring-history',
 };
 
+// ============================================
+// Shared UTC date utilities
+// ============================================
+
+/**
+ * Format a Date or unix timestamp to YYYY-MM-DD (UTC).
+ */
+export function formatDateUTC(input) {
+  const d = typeof input === 'number' ? new Date(input * 1000) : input;
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Format a Date or unix timestamp to HH:MM (UTC).
+ */
+export function formatTimeUTC(input) {
+  const d = typeof input === 'number' ? new Date(input * 1000) : input;
+  return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+}
+
+/**
+ * Parse a YYYY-MM-DD string as a UTC midnight Date.
+ */
+export function parseDateUTC(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+/**
+ * Get today's date as YYYY-MM-DD (UTC).
+ */
+export function todayUTC() {
+  return formatDateUTC(new Date());
+}
+
 export default class CalendarCore {
   constructor(webManager) {
     this.webManager = webManager;
     this.currentDate = new Date();
     this.viewMode = 'month';
-    this.campaigns = new Map();       // Real Firestore docs
-    this._virtualEvents = null;       // Cached virtual events (regenerated on data change)
+    this.campaigns = new Map();
+    this._virtualEvents = null;
     this.renderer = null;
     this.eventsManager = null;
     this.$root = document.getElementById('calendar-root');
-    this._unsubscribe = null;
+    this._unsubscribeRange = null;
+    this._unsubscribeRecurring = null;
   }
 
   // ============================================
@@ -81,32 +120,32 @@ export default class CalendarCore {
   }
 
   // ============================================
-  // Navigation
+  // Navigation (all UTC)
   // ============================================
   navigate(direction) {
     const d = this.currentDate;
 
     switch (this.viewMode) {
       case 'day':
-        d.setDate(d.getDate() + direction);
+        d.setUTCDate(d.getUTCDate() + direction);
         break;
       case 'week':
-        d.setDate(d.getDate() + (7 * direction));
+        d.setUTCDate(d.getUTCDate() + (7 * direction));
         break;
       case 'month':
-        d.setMonth(d.getMonth() + direction);
+        d.setUTCMonth(d.getUTCMonth() + direction);
         break;
       case 'year':
-        d.setFullYear(d.getFullYear() + direction);
+        d.setUTCFullYear(d.getUTCFullYear() + direction);
         break;
       case 'list':
-        d.setDate(d.getDate() + (30 * direction));
+        d.setUTCDate(d.getUTCDate() + (30 * direction));
         break;
     }
 
     this._virtualEvents = null;
-    this.renderer.render(); // Instant render from cache
-    this._subscribeToRange(); // Background fetch for accurate data
+    this.renderer.render();
+    this._subscribeToRange();
     this._dispatch('calendar:navigate');
   }
 
@@ -131,6 +170,32 @@ export default class CalendarCore {
   }
 
   // ============================================
+  // Optimistic Updates
+  // ============================================
+
+  /**
+   * Optimistically update a campaign's sendAt locally and re-render.
+   * Returns a rollback function.
+   */
+  optimisticUpdateSendAt(id, newSendAtUNIX) {
+    const campaign = this.campaigns.get(id);
+    if (!campaign) {
+      return null;
+    }
+
+    const originalSendAt = campaign.sendAt;
+    campaign.sendAt = newSendAtUNIX;
+    this._virtualEvents = null;
+    this.renderer.render();
+
+    return () => {
+      campaign.sendAt = originalSendAt;
+      this._virtualEvents = null;
+      this.renderer.render();
+    };
+  }
+
+  // ============================================
   // Campaign Display Type Detection
   // ============================================
   getCampaignDisplayType(doc) {
@@ -144,60 +209,32 @@ export default class CalendarCore {
   }
 
   isEditable(doc) {
-    // Virtual occurrences are not editable (they don't exist as docs)
     if (doc._virtual) {
       return false;
     }
-    // History records are read-only
     if (doc.recurringId) {
       return false;
     }
-    // Sent/failed are read-only
     if (doc.status === 'sent' || doc.status === 'failed') {
       return false;
     }
-    // Pending one-offs and recurring templates are editable
     return true;
   }
 
-  // ============================================
-  // Optimistic Updates
-  // ============================================
-
-  /**
-   * Optimistically update a campaign's sendAt locally and re-render.
-   * Returns a rollback function that restores the original value.
-   */
-  optimisticUpdateSendAt(id, newSendAtUNIX) {
-    const campaign = this.campaigns.get(id);
-    if (!campaign) {
-      return null;
-    }
-
-    const originalSendAt = campaign.sendAt;
-    campaign.sendAt = newSendAtUNIX;
-    this._virtualEvents = null; // Clear virtual cache
-    this.renderer.render();
-
-    // Return rollback function
-    return () => {
-      campaign.sendAt = originalSendAt;
-      this._virtualEvents = null;
-      this.renderer.render();
-    };
+  isRecurring(campaign) {
+    return !!(campaign.recurrence || campaign.recurringId || campaign._virtual);
   }
 
   // ============================================
   // Campaign Accessors
   // ============================================
   getCampaign(id) {
-    // Check real Firestore docs first
     const real = this.campaigns.get(id);
     if (real) {
       return real;
     }
 
-    // Check virtual events (synthetic IDs like "templateId__virtual__timestamp")
+    // Check virtual events
     const virtuals = this._getVirtualEvents();
     for (const v of virtuals) {
       if (v.id === id) {
@@ -209,31 +246,31 @@ export default class CalendarCore {
   }
 
   /**
-   * Get all display items for a given date, including virtual recurring occurrences.
-   * Merges: one-off docs + recurring history docs + virtual occurrences (not overlapping with history).
+   * Get all display items for a date (YYYY-MM-DD UTC string).
+   * Merges real docs + virtual recurring occurrences.
    */
   getCampaignsForDate(dateStr) {
     const items = [];
     const historyDatesById = this._getHistoryDateMap();
 
-    // Real Firestore docs that land on this date (skip recurring templates — they render via virtuals)
+    // Real non-recurring docs
     this.campaigns.forEach((c) => {
       if (c.recurrence) {
         return;
       }
-      if (this._campaignDate(c) === dateStr) {
+      if (formatDateUTC(c.sendAt) === dateStr) {
         items.push(c);
       }
     });
 
-    // Virtual recurring occurrences for this date
+    // Virtual recurring occurrences
     const virtuals = this._getVirtualEvents();
     virtuals.forEach((v) => {
-      if (this._campaignDate(v) !== dateStr) {
+      const vDate = formatDateUTC(v.sendAt);
+      if (vDate !== dateStr) {
         return;
       }
-      // Don't add a virtual if a history record already covers this date for this recurring template
-      const key = `${v._recurringSourceId}:${dateStr}`;
+      const key = `${v._recurringSourceId}:${vDate}`;
       if (historyDatesById.has(key)) {
         return;
       }
@@ -245,13 +282,11 @@ export default class CalendarCore {
 
   /**
    * Get all display items sorted chronologically (for list view).
-   * Merges non-recurring docs + virtual recurring occurrences.
    */
   getAllCampaignsSorted() {
     const items = [];
     const historyDatesById = this._getHistoryDateMap();
 
-    // Real non-recurring docs
     this.campaigns.forEach((c) => {
       if (c.recurrence) {
         return;
@@ -259,10 +294,9 @@ export default class CalendarCore {
       items.push(c);
     });
 
-    // Virtual recurring occurrences (suppress where history exists)
     const virtuals = this._getVirtualEvents();
     virtuals.forEach((v) => {
-      const dateStr = this._campaignDate(v);
+      const dateStr = formatDateUTC(v.sendAt);
       const key = `${v._recurringSourceId}:${dateStr}`;
       if (historyDatesById.has(key)) {
         return;
@@ -276,68 +310,32 @@ export default class CalendarCore {
   // ============================================
   // Campaign Helpers
   // ============================================
-
-  /**
-   * Get YYYY-MM-DD string from a campaign's sendAt timestamp
-   */
-  _campaignDate(campaign) {
-    const d = new Date(campaign.sendAt * 1000);
-    return this._formatDate(d);
-  }
-
-  /**
-   * Get HH:MM string from a campaign's sendAt timestamp
-   */
-  campaignTime(campaign) {
-    const d = new Date(campaign.sendAt * 1000);
-    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-  }
-
-  /**
-   * Get duration in minutes (default 60 for display purposes)
-   */
-  campaignDuration() {
-    return 60;
-  }
-
-  /**
-   * Get color based on campaign type
-   */
   campaignColor(campaign) {
     return TYPE_COLORS[campaign.type] || TYPE_COLORS.email;
   }
 
-  /**
-   * Get status style info
-   */
   campaignStatusStyle(campaign) {
     return STATUS_STYLES[campaign.status] || STATUS_STYLES.pending;
+  }
+
+  campaignDuration() {
+    return 60;
   }
 
   // ============================================
   // Recurrence: Virtual Event Generation
   // ============================================
-
-  /**
-   * Build a map of recurringId:dateStr → true for all history records.
-   * Used to suppress virtual occurrences on dates that have real history docs.
-   */
   _getHistoryDateMap() {
     const map = new Map();
     this.campaigns.forEach((c) => {
       if (!c.recurringId) {
         return;
       }
-      const dateStr = this._campaignDate(c);
-      map.set(`${c.recurringId}:${dateStr}`, true);
+      map.set(`${c.recurringId}:${formatDateUTC(c.sendAt)}`, true);
     });
     return map;
   }
 
-  /**
-   * Get virtual events for recurring templates within the visible range.
-   * Cached per render cycle; cleared when Firestore data changes.
-   */
   _getVirtualEvents() {
     if (this._virtualEvents) {
       return this._virtualEvents;
@@ -359,172 +357,81 @@ export default class CalendarCore {
   }
 
   /**
-   * Generate virtual occurrence items for a recurring template within a date range.
+   * Generate virtual occurrences using the template's sendAt as seed.
+   * Pure unix math — no Date objects, no timezone issues.
    */
   _generateOccurrences(template, startUNIX, endUNIX) {
-    const recurrence = template.recurrence;
-    const hour = recurrence.hour || 0;
+    const interval = this._getIntervalSeconds(template.recurrence.pattern);
     const occurrences = [];
+    const seedUNIX = template.sendAt;
 
-    // Start from the beginning of the visible range and iterate forward
-    const startDate = new Date(startUNIX * 1000);
-    const endDate = new Date(endUNIX * 1000);
+    // Walk backward from seed to find first occurrence >= startUNIX
+    let cursorUNIX = seedUNIX;
+    while (cursorUNIX > startUNIX + interval) {
+      cursorUNIX -= interval;
+    }
+    while (cursorUNIX < startUNIX) {
+      cursorUNIX += interval;
+    }
 
-    // Find the first occurrence at or after startDate based on pattern
-    let cursor = this._findFirstOccurrence(recurrence, startDate);
-
-    // Safety: limit iterations
     let maxIterations = 400;
+    while (cursorUNIX <= endUNIX && maxIterations-- > 0) {
+      occurrences.push({
+        id: `${template.id}__virtual__${cursorUNIX}`,
+        sendAt: cursorUNIX,
+        status: 'pending',
+        type: template.type,
+        settings: template.settings,
+        recurrence: template.recurrence,
+        _virtual: true,
+        _recurringSourceId: template.id,
+      });
 
-    while (cursor <= endDate && maxIterations-- > 0) {
-      const cursorUNIX = Math.floor(cursor.getTime() / 1000);
-
-      if (cursorUNIX >= startUNIX && cursorUNIX <= endUNIX) {
-        occurrences.push({
-          id: `${template.id}__virtual__${cursorUNIX}`,
-          sendAt: cursorUNIX,
-          status: 'pending',
-          type: template.type,
-          settings: template.settings,
-          recurrence: template.recurrence,
-          _virtual: true,
-          _recurringSourceId: template.id,
-        });
-      }
-
-      cursor = this._advanceCursor(recurrence, cursor);
+      cursorUNIX += interval;
     }
 
     return occurrences;
   }
 
-  /**
-   * Find the first occurrence at or after the given date.
-   */
-  _findFirstOccurrence(recurrence, startDate) {
-    const hour = recurrence.hour || 0;
-    const day = recurrence.day || 1;
-    const month = recurrence.month || 1;
-
-    switch (recurrence.pattern) {
-      case 'daily': {
-        const d = new Date(startDate);
-        d.setHours(hour, 0, 0, 0);
-        if (d < startDate) {
-          d.setDate(d.getDate() + 1);
-        }
-        return d;
-      }
-      case 'weekly': {
-        // day = day of week (0=Sun, 1=Mon, ..., 6=Sat)
-        const d = new Date(startDate);
-        d.setHours(hour, 0, 0, 0);
-        const currentDay = d.getDay();
-        let daysUntil = day - currentDay;
-        if (daysUntil < 0 || (daysUntil === 0 && d < startDate)) {
-          daysUntil += 7;
-        }
-        d.setDate(d.getDate() + daysUntil);
-        return d;
-      }
-      case 'monthly': {
-        // day = day of month
-        const d = new Date(startDate.getFullYear(), startDate.getMonth(), day, hour, 0, 0, 0);
-        if (d < startDate) {
-          d.setMonth(d.getMonth() + 1);
-        }
-        return d;
-      }
-      case 'quarterly': {
-        // Fires on day of month every 3 months, starting from month 0, 3, 6, 9
-        const quarterMonths = [0, 3, 6, 9];
-        for (const qm of quarterMonths) {
-          const d = new Date(startDate.getFullYear(), qm, day, hour, 0, 0, 0);
-          if (d >= startDate) {
-            return d;
-          }
-        }
-        // Next year's first quarter
-        return new Date(startDate.getFullYear() + 1, 0, day, hour, 0, 0, 0);
-      }
-      case 'yearly': {
-        // month = month (1-12), day = day of month
-        const m = month - 1; // Convert 1-based to 0-based
-        const d = new Date(startDate.getFullYear(), m, day, hour, 0, 0, 0);
-        if (d < startDate) {
-          d.setFullYear(d.getFullYear() + 1);
-        }
-        return d;
-      }
-      default:
-        return new Date(startDate);
+  _getIntervalSeconds(pattern) {
+    const DAY = 86400;
+    switch (pattern) {
+      case 'daily': return DAY;
+      case 'weekly': return DAY * 7;
+      case 'monthly': return DAY * 30;
+      case 'quarterly': return DAY * 91;
+      case 'yearly': return DAY * 365;
+      default: return DAY;
     }
-  }
-
-  /**
-   * Advance the cursor to the next occurrence.
-   */
-  _advanceCursor(recurrence, cursor) {
-    const d = new Date(cursor);
-
-    switch (recurrence.pattern) {
-      case 'daily':
-        d.setDate(d.getDate() + 1);
-        break;
-      case 'weekly':
-        d.setDate(d.getDate() + 7);
-        break;
-      case 'monthly':
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case 'quarterly':
-        d.setMonth(d.getMonth() + 3);
-        break;
-      case 'yearly':
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-      default:
-        // Prevent infinite loop
-        d.setDate(d.getDate() + 1);
-        break;
-    }
-
-    return d;
   }
 
   // ============================================
-  // Date Utilities
+  // Date Utilities (all UTC)
   // ============================================
   getDaysInMonth(year, month) {
-    return new Date(year, month + 1, 0).getDate();
+    return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   }
 
   getMonthGrid() {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
+    const year = this.currentDate.getUTCFullYear();
+    const month = this.currentDate.getUTCMonth();
+    const firstDay = new Date(Date.UTC(year, month, 1)).getUTCDay();
     const daysInMonth = this.getDaysInMonth(year, month);
     const daysInPrevMonth = this.getDaysInMonth(year, month - 1);
 
     const cells = [];
 
-    // Previous month trailing days
     for (let i = firstDay - 1; i >= 0; i--) {
-      const d = new Date(year, month - 1, daysInPrevMonth - i);
-      cells.push({ date: d, outside: true });
+      cells.push({ date: new Date(Date.UTC(year, month - 1, daysInPrevMonth - i)), outside: true });
     }
 
-    // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(year, month, i);
-      cells.push({ date: d, outside: false });
+      cells.push({ date: new Date(Date.UTC(year, month, i)), outside: false });
     }
 
-    // Next month leading days (fill to complete 6 rows = 42 cells)
     const remaining = 42 - cells.length;
     for (let i = 1; i <= remaining; i++) {
-      const d = new Date(year, month + 1, i);
-      cells.push({ date: d, outside: true });
+      cells.push({ date: new Date(Date.UTC(year, month + 1, i)), outside: true });
     }
 
     return cells;
@@ -532,13 +439,13 @@ export default class CalendarCore {
 
   getWeekDates() {
     const d = new Date(this.currentDate);
-    const day = d.getDay();
-    d.setDate(d.getDate() - day);
+    const day = d.getUTCDay();
+    d.setUTCDate(d.getUTCDate() - day);
 
     const dates = [];
     for (let i = 0; i < 7; i++) {
       dates.push(new Date(d));
-      d.setDate(d.getDate() + 1);
+      d.setUTCDate(d.getUTCDate() + 1);
     }
 
     return dates;
@@ -546,22 +453,22 @@ export default class CalendarCore {
 
   formatPeriodLabel() {
     const d = this.currentDate;
-    const month = MONTH_NAMES[d.getMonth()];
-    const year = d.getFullYear();
+    const month = MONTH_NAMES[d.getUTCMonth()];
+    const year = d.getUTCFullYear();
 
     switch (this.viewMode) {
       case 'day':
-        return `${DAY_ABBREVS[d.getDay()]}, ${month} ${d.getDate()}, ${year}`;
+        return `${DAY_ABBREVS[d.getUTCDay()]}, ${month} ${d.getUTCDate()}, ${year}`;
       case 'week': {
         const weekDates = this.getWeekDates();
         const start = weekDates[0];
         const end = weekDates[6];
-        const startMonth = MONTH_NAMES[start.getMonth()].slice(0, 3);
-        const endMonth = MONTH_NAMES[end.getMonth()].slice(0, 3);
-        if (start.getMonth() === end.getMonth()) {
-          return `${startMonth} ${start.getDate()} – ${end.getDate()}, ${year}`;
+        const startMonth = MONTH_NAMES[start.getUTCMonth()].slice(0, 3);
+        const endMonth = MONTH_NAMES[end.getUTCMonth()].slice(0, 3);
+        if (start.getUTCMonth() === end.getUTCMonth()) {
+          return `${startMonth} ${start.getUTCDate()} – ${end.getUTCDate()}, ${year}`;
         }
-        return `${startMonth} ${start.getDate()} – ${endMonth} ${end.getDate()}, ${year}`;
+        return `${startMonth} ${start.getUTCDate()} – ${endMonth} ${end.getUTCDate()}, ${year}`;
       }
       case 'month':
         return `${month} ${year}`;
@@ -569,11 +476,9 @@ export default class CalendarCore {
         return `${year}`;
       case 'list': {
         const { startUNIX, endUNIX } = this._getVisibleRange();
-        const startDate = new Date(startUNIX * 1000);
-        const endDate = new Date(endUNIX * 1000);
-        const startLabel = `${MONTH_NAMES[startDate.getMonth()].slice(0, 3)} ${startDate.getDate()}`;
-        const endLabel = `${MONTH_NAMES[endDate.getMonth()].slice(0, 3)} ${endDate.getDate()}, ${endDate.getFullYear()}`;
-        return `${startLabel} – ${endLabel}`;
+        const s = new Date(startUNIX * 1000);
+        const e = new Date(endUNIX * 1000);
+        return `${MONTH_NAMES[s.getUTCMonth()].slice(0, 3)} ${s.getUTCDate()} – ${MONTH_NAMES[e.getUTCMonth()].slice(0, 3)} ${e.getUTCDate()}, ${e.getUTCFullYear()}`;
       }
       default:
         return '';
@@ -582,20 +487,9 @@ export default class CalendarCore {
 
   isToday(date) {
     const today = new Date();
-    return date.getFullYear() === today.getFullYear()
-      && date.getMonth() === today.getMonth()
-      && date.getDate() === today.getDate();
-  }
-
-  _formatDate(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
-
-  formatDate(date) {
-    return this._formatDate(date);
+    return date.getUTCFullYear() === today.getUTCFullYear()
+      && date.getUTCMonth() === today.getUTCMonth()
+      && date.getUTCDate() === today.getUTCDate();
   }
 
   // ============================================
@@ -607,8 +501,6 @@ export default class CalendarCore {
       const db = this.webManager.firebaseFirestore;
       const colRef = collection(db, 'marketing-campaigns');
 
-      // Fetch all recurring templates (IDs prefixed with _recurring-)
-      // These are loaded once and kept in memory since virtuals are computed client-side
       const recurringDocs = await getDocs(query(
         colRef,
         where('__name__', '>=', '_recurring-'),
@@ -618,17 +510,14 @@ export default class CalendarCore {
       recurringDocs.forEach((doc) => {
         const data = doc.data();
         data.id = doc.id;
-        console.log('[Calendar] Recurring template:', doc.id, data);
         this.campaigns.set(doc.id, data);
       });
 
-      // Also listen for changes to recurring templates in real-time
       this._unsubscribeRecurring = onSnapshot(query(
         colRef,
         where('__name__', '>=', '_recurring-'),
         where('__name__', '<=', '_recurring-\uf8ff'),
       ), (snapshot) => {
-        // Remove old recurring templates, add fresh ones
         for (const id of this.campaigns.keys()) {
           if (id.startsWith('_recurring-')) {
             this.campaigns.delete(id);
@@ -650,10 +539,9 @@ export default class CalendarCore {
   }
 
   // ============================================
-  // Firestore: Range-based subscription (view-dependent)
+  // Firestore: Range-based subscription
   // ============================================
   async _subscribeToRange() {
-    // Unsubscribe from previous range listener
     if (this._unsubscribeRange) {
       this._unsubscribeRange();
       this._unsubscribeRange = null;
@@ -673,22 +561,18 @@ export default class CalendarCore {
       );
 
       this._unsubscribeRange = onSnapshot(rangeQuery, (snapshot) => {
-        // Remove old non-recurring docs (keep recurring templates)
         for (const id of this.campaigns.keys()) {
           if (!id.startsWith('_recurring-')) {
             this.campaigns.delete(id);
           }
         }
 
-        // Add range-matched docs
         snapshot.forEach((doc) => {
           const data = doc.data();
           data.id = doc.id;
-          console.log('[Calendar] Firestore doc:', doc.id, data);
           this.campaigns.set(doc.id, data);
         });
 
-        console.log('[Calendar] Total docs:', this.campaigns.size);
         this._virtualEvents = null;
         this._dispatch('calendar:datachange');
         this.renderer.render();
@@ -701,8 +585,7 @@ export default class CalendarCore {
   }
 
   /**
-   * Calculate the visible date range as unix timestamps.
-   * Adds buffer to capture events on boundary days.
+   * Calculate visible date range as unix timestamps (UTC).
    */
   _getVisibleRange() {
     const d = this.currentDate;
@@ -710,31 +593,30 @@ export default class CalendarCore {
 
     switch (this.viewMode) {
       case 'day':
-        start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+        end = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1));
         break;
       case 'week': {
         const weekDates = this.getWeekDates();
         start = weekDates[0];
         end = new Date(weekDates[6]);
-        end.setDate(end.getDate() + 1);
+        end.setUTCDate(end.getUTCDate() + 1);
         break;
       }
       case 'month': {
-        // Include overflow days from prev/next month (6 rows of 7 = 42 days)
-        const firstDay = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
-        start = new Date(d.getFullYear(), d.getMonth(), 1 - firstDay);
+        const firstDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).getUTCDay();
+        start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1 - firstDay));
         end = new Date(start);
-        end.setDate(end.getDate() + 42);
+        end.setUTCDate(end.getUTCDate() + 42);
         break;
       }
       case 'year':
-        start = new Date(d.getFullYear(), 0, 1);
-        end = new Date(d.getFullYear() + 1, 0, 1);
+        start = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        end = new Date(Date.UTC(d.getUTCFullYear() + 1, 0, 1));
         break;
       case 'list':
-        start = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 30);
-        end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 60);
+        start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - 30));
+        end = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 60));
         break;
     }
 
