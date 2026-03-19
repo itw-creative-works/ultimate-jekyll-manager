@@ -66,15 +66,19 @@ function setupForm() {
 
     try {
       // Send request using wonderful-fetch
-      await fetch(apiEndpoint, {
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         body: requestData,
         response: 'json',
         timeout: 30000,
       });
 
+      console.log('Contact form submitted successfully:', response);
+
       formManager.showSuccess('Thank you for your message! We\'ll get back to you within 24 hours.');
     } catch (error) {
+      console.error('Contact form submission failed:', error);
+
       // Only capture technical errors to Sentry (network, timeout, API errors)
       if (error.message?.includes('network') || error.message?.includes('timeout') || !error.message?.includes('Failed')) {
         webManager.sentry().captureException(new Error('Contact form submission error', { cause: error }));
