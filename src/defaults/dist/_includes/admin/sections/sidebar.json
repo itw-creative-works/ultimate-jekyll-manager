@@ -40,40 +40,6 @@
       label: 'Marketing'
     },
     {
-      label: 'Notifications',
-      href: null,
-      icon: 'bell',
-      dropdown: [
-        {
-          label: 'All Notifications',
-          href: '/admin/notifications',
-          icon: 'list'
-        },
-        {
-          label: 'Send New',
-          href: '/admin/notifications/new',
-          icon: 'paper-plane'
-        }
-      ]
-    },
-    {
-      label: 'Newsletters',
-      href: null,
-      icon: 'envelope',
-      dropdown: [
-        {
-          label: 'All Newsletters',
-          href: '/admin/newsletters',
-          icon: 'list'
-        },
-        {
-          label: 'Send New',
-          href: '/admin/newsletters/new',
-          icon: 'plus'
-        }
-      ]
-    },
-    {
       label: 'Calendar',
       href: '/admin/calendar',
       icon: 'calendar-days'

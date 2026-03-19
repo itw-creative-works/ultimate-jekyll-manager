@@ -131,10 +131,11 @@ UJ provides JSON configuration files for common sections like navigation and foo
 **Configuration Files:**
 - `src/defaults/src/_includes/frontend/sections/nav.json` - Navigation configuration
 - `src/defaults/src/_includes/frontend/sections/footer.json` - Footer configuration
+- `src/defaults/src/_includes/global/sections/account.json` - Account dropdown configuration (shared across frontend nav, backend topbar, admin topbar)
 
 **How It Works:**
 1. JSON files contain structured data (links, labels, settings)
-2. HTML templates in `src/defaults/dist/_includes/themes/[theme-id]/frontend/sections/` read and render this data
+2. HTML templates in `src/defaults/dist/_includes/themes/[theme-id]/` read and render this data
 3. The build process converts `.json` → data loaded by `.html` templates
 
 **Customizing Navigation/Footer:**
@@ -142,6 +143,68 @@ UJ provides JSON configuration files for common sections like navigation and foo
 Consuming projects should create their own JSON files in `src/_includes/frontend/sections/`:
 - `src/_includes/frontend/sections/nav.json`
 - `src/_includes/frontend/sections/footer.json`
+
+### Account Dropdown (Shared Component)
+
+The account dropdown (avatar + user info + menu items) is a shared component used across the frontend nav, backend topbar, and admin topbar. It is defined once and included everywhere.
+
+**Data Source:** `src/defaults/src/_includes/global/sections/account.json`
+
+This is the single source of truth for account dropdown menu items. Consuming projects can override it by creating `src/_includes/global/sections/account.json`.
+
+**Example: account.json**
+```json5
+{
+  dropdown: [
+    { label: 'Account', href: '/account#profile', icon: 'user-gear' },
+    { label: 'Dashboard', href: '/dashboard', icon: 'gauge-high' },
+    { divider: true, attributes: [['data-wm-bind', '@show auth.account.roles.admin']] },
+    { label: 'Admin Panel', href: '/admin/dashboard', icon: 'shield-halved', attributes: [['data-wm-bind', '@show auth.account.roles.admin']] },
+    { divider: true },
+    { label: 'Sign Out', icon: 'arrow-right-from-bracket', class: 'auth-signout-btn text-danger' }
+  ]
+}
+```
+
+**Include:** `src/defaults/dist/_includes/themes/classy/global/sections/account.html`
+
+This renders the full account dropdown: avatar button with profile photo, user info header (displayName + email), and the menu items from `account.json`.
+
+**Parameters:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `size` | `md` | Avatar size class (`sm`, `md`, `lg`) |
+| `attributes` | none | Array of `[name, value]` attribute pairs for the dropdown wrapper |
+
+**Usage in templates:**
+```liquid
+{% include themes/classy/global/sections/account.html size="md" attributes=action.attributes %}
+```
+
+**How it's wired into nav/topbar:**
+
+In `nav.json` or `topbar.json`, set `type: 'account'` on an action — the rendering templates detect this type and include the shared account dropdown automatically. No `dropdown` array is needed on the action:
+
+```json5
+{
+  type: 'account',
+  attributes: [
+    ['data-wm-bind', '@show auth.user'],
+    ['hidden', '']
+  ],
+}
+```
+
+**File Locations:**
+
+| Purpose | Path |
+|---------|------|
+| Account data (SSOT) | `src/defaults/src/_includes/global/sections/account.json` |
+| Account include | `src/defaults/dist/_includes/themes/classy/global/sections/account.html` |
+| Frontend nav (uses include) | `src/defaults/dist/_includes/themes/classy/frontend/sections/nav.html` |
+| Backend topbar (uses include) | `src/defaults/dist/_includes/themes/classy/backend/sections/topbar.html` |
+| Admin topbar (wraps backend) | `src/defaults/dist/_includes/themes/classy/admin/sections/topbar.html` |
 
 **Example: Footer Configuration**
 

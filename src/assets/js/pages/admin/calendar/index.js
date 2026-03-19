@@ -1,5 +1,5 @@
 /**
- * Admin Calendar Page JavaScript
+ * Admin Marketing Calendar Page JavaScript
  */
 
 // Libraries
@@ -35,25 +35,13 @@ export default (Manager) => {
 
 // Initialize the calendar
 function initialize() {
-  const core = new CalendarCore();
+  const core = new CalendarCore(webManager);
   const renderer = new CalendarRenderer(core);
   const events = new CalendarEvents(core, webManager);
 
   core.setRenderer(renderer);
   core.setEventsManager(events);
   core.initialize();
-
-  // Expose public API
-  window.calendarAPI = {
-    addEvent: (data) => core.addEvent(data),
-    updateEvent: (id, changes) => core.updateEvent(id, changes),
-    removeEvent: (id) => core.removeEvent(id),
-    getEvent: (id) => core.getEvent(id),
-    getEvents: (filter) => core.getEvents(filter),
-    navigate: (direction) => core.navigate(direction),
-    setView: (mode) => core.setView(mode),
-    goToToday: () => core.goToToday(),
-  };
 }
 
 // Show unauthenticated state
@@ -62,8 +50,7 @@ function showUnauthenticated() {
   $grid.innerHTML = `
     <div class="d-flex align-items-center justify-content-center h-100 text-muted">
       <div class="text-center">
-        <div class="mb-3" style="font-size: 3rem; opacity: 0.3;">📅</div>
-        <p>Sign in to view the calendar</p>
+        <p>Sign in to view the marketing calendar</p>
       </div>
     </div>
   `;

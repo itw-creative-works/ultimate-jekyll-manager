@@ -6,7 +6,7 @@ layout: themes/classy/admin/core/minimal-viewport-locked
 theme:
   header:
     title:
-      content: "Calendar"
+      content: "Marketing Calendar"
       icon: "calendar-days"
     breadcrumbs:
       items:
@@ -14,11 +14,18 @@ theme:
           href: "/admin"
         - label: "Marketing"
         - label: "Calendar"
+    actions:
+      items:
+        - label: "Create Campaign"
+          icon: "plus"
+          color: "primary"
+          attributes:
+            - ["id", "btn-create-campaign"]
 
 ### REGULAR PAGES ###
 meta:
-  title: "Calendar - Admin"
-  description: "Marketing calendar for scheduling newsletters and notifications"
+  title: "Marketing Calendar - Admin"
+  description: "Schedule and manage marketing campaigns — emails and push notifications"
   breadcrumb: "Calendar"
 
 ### ICON PRE-RENDERING ###
@@ -28,7 +35,6 @@ prerender_icons:
   - name: "plus"
   - name: "pen"
   - name: "trash"
-  - name: "grip-dots-vertical"
   - name: "clock"
   - name: "envelope"
   - name: "bell"
@@ -38,8 +44,22 @@ prerender_icons:
   - name: "calendar"
   - name: "grid-2"
   - name: "mobile"
-  - name: "comment-sms"
-  - name: "circle"
+  - name: "circle-check"
+  - name: "triangle-exclamation"
+  - name: "xmark"
+  - name: "rotate-right"
+  - name: "eye"
+  - name: "link"
+  - name: "tags"
+  - name: "users"
+  - name: "bullhorn"
+  - name: "code"
+  - name: "sliders"
+  - name: "arrow-up-right-from-square"
+  - name: "repeat"
+  - name: "wifi"
+  - name: "battery-full"
+  - name: "table-list"
 ---
 
 <!-- Calendar Root -->
@@ -51,241 +71,479 @@ prerender_icons:
   <div id="calendar-grid" class="flex-grow-1 overflow-hidden position-relative"></div>
 </div>
 
-<!-- Event Form Modal -->
-<div class="modal fade" id="calendar-event-modal" tabindex="-1" aria-labelledby="event-modal-title" aria-hidden="true">
+<!-- Campaign Editor Modal -->
+<div class="modal fade" id="campaign-editor-modal" tabindex="-1" aria-labelledby="campaign-modal-title" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="event-modal-title">
+        <h5 class="modal-title" id="campaign-modal-title">
           {% uj_icon "plus", "fa-md me-2" %}
-          <span id="event-modal-title-text">Create Event</span>
+          <span id="campaign-modal-title-text">Create Campaign</span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="calendar-event-form" novalidate onsubmit="return false">
+        <form id="campaign-editor-form" novalidate onsubmit="return false">
 
-          <!-- Event Type -->
+          <!-- Campaign Type -->
           <h6 class="mb-3">
-            {% uj_icon "paper-plane", "fa-sm me-2 text-info" %}
-            Event Type
+            {% uj_icon "bullhorn", "fa-sm me-2 text-info" %}
+            Campaign Type
           </h6>
           <div class="row mb-4">
             <div class="col-6">
-              <input type="radio" class="btn-check" name="event.type" id="event-type-newsletter" value="newsletter" checked autocomplete="off">
-              <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="event-type-newsletter">
+              <input type="radio" class="btn-check" name="campaign.type" id="campaign-type-email" value="email" checked autocomplete="off">
+              <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="campaign-type-email">
                 {% uj_icon "envelope", "fa-sm me-2" %}
-                Newsletter
+                Email
               </label>
             </div>
             <div class="col-6">
-              <input type="radio" class="btn-check" name="event.type" id="event-type-notification" value="notification" autocomplete="off">
-              <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="event-type-notification">
+              <input type="radio" class="btn-check" name="campaign.type" id="campaign-type-push" value="push" autocomplete="off">
+              <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="campaign-type-push">
                 {% uj_icon "bell", "fa-sm me-2" %}
-                Notification
+                Push Notification
               </label>
             </div>
           </div>
 
-          <!-- Content -->
-          <h6 class="mb-3">
-            Content
-          </h6>
+          <!-- Content: Edit / Preview tabs -->
+          <ul class="nav nav-tabs mb-3" id="campaign-content-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-edit" data-bs-toggle="tab" data-bs-target="#panel-edit" type="button" role="tab">
+                {% uj_icon "pen", "fa-sm me-1" %} Edit
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-preview" data-bs-toggle="tab" data-bs-target="#panel-preview" type="button" role="tab">
+                {% uj_icon "eye", "fa-sm me-1" %} Preview
+              </button>
+            </li>
+          </ul>
 
+          <div class="tab-content">
+            <!-- Edit Tab -->
+            <div class="tab-pane fade show active" id="panel-edit" role="tabpanel">
+              <div class="mb-3">
+                <label for="campaign-name" class="form-label">
+                  Campaign Name <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="campaign-name"
+                       name="campaign.name"
+                       placeholder="e.g. Spring Sale"
+                       minlength="3"
+                       maxlength="100"
+                       required>
+                <div class="invalid-feedback">Campaign name is required (3-100 characters)</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="campaign-subject" class="form-label">
+                  Subject <span class="text-danger">*</span>
+                  <small class="text-muted fw-normal ms-1" id="campaign-subject-hint">(email subject line)</small>
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="campaign-subject"
+                       name="campaign.subject"
+                       placeholder="e.g. 50% Off Premium!"
+                       minlength="3"
+                       maxlength="200"
+                       required>
+                <div class="invalid-feedback">Subject is required</div>
+              </div>
+
+              <!-- Email-only fields -->
+              <div id="email-fields">
+                <div class="mb-3">
+                  <label for="campaign-preheader" class="form-label">
+                    Preheader
+                    <small class="text-muted fw-normal ms-1">(preview text)</small>
+                  </label>
+                  <input type="text"
+                         class="form-control"
+                         id="campaign-preheader"
+                         name="campaign.preheader"
+                         placeholder="Brief preview text shown in inbox"
+                         maxlength="200">
+                </div>
+
+                <div class="mb-3">
+                  <label for="campaign-content" class="form-label">
+                    Content
+                    <small class="text-muted fw-normal ms-1">(markdown)</small>
+                  </label>
+                  <textarea class="form-control font-monospace"
+                            id="campaign-content"
+                            name="campaign.content"
+                            rows="6"
+                            placeholder="# Hello&#10;&#10;Check out our **sale**!"></textarea>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="campaign-template" class="form-label">Template</label>
+                    <select class="form-select" id="campaign-template" name="campaign.template">
+                      <option value="default" selected>Default</option>
+                      <option value="main/basic/card">Card</option>
+                      <option value="main/basic/plain">Plain</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="campaign-sender" class="form-label">Sender</label>
+                    <select class="form-select" id="campaign-sender" name="campaign.sender">
+                      <option value="marketing" selected>Marketing</option>
+                      <option value="newsletter">Newsletter</option>
+                      <option value="hello">Hello</option>
+                      <option value="orders">Orders</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Push-only fields -->
+              <div id="push-fields" class="d-none">
+            <div class="mb-3">
+              <label for="campaign-icon" class="form-label">
+                Icon URL
+              </label>
+              <input type="url"
+                     class="form-control"
+                     id="campaign-icon"
+                     name="campaign.icon"
+                     placeholder="https://example.com/icon.png"
+                     pattern="https?://.+"
+                     title="URL must start with http:// or https://">
+              <div class="invalid-feedback">Please provide a valid icon URL</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="campaign-click-action" class="form-label">
+                Click Action URL
+              </label>
+              <input type="url"
+                     class="form-control"
+                     id="campaign-click-action"
+                     name="campaign.clickAction"
+                     placeholder="https://example.com/landing"
+                     pattern="https?://.+"
+                     title="URL must start with http:// or https://">
+              <div class="invalid-feedback">Please provide a valid URL</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="campaign-push-tags" class="form-label">
+                {% uj_icon "tags", "fa-sm me-1 text-info" %}
+                Filter by Tags
+                <small class="text-muted fw-normal ms-1">(comma-separated)</small>
+              </label>
+              <input type="text"
+                     class="form-control"
+                     id="campaign-push-tags"
+                     name="campaign.filters.tags"
+                     placeholder="e.g. premium, active">
+            </div>
+
+            <div class="mb-3">
+              <label for="campaign-push-owner" class="form-label">
+                Owner UID
+                <small class="text-muted fw-normal ms-1">(optional, for testing)</small>
+              </label>
+              <input type="text"
+                     class="form-control"
+                     id="campaign-push-owner"
+                     name="campaign.filters.owner"
+                     placeholder="User UID for targeted test send">
+            </div>
+          </div>
+            </div>
+
+            <!-- Preview Tab -->
+            <div class="tab-pane fade" id="panel-preview" role="tabpanel">
+              <div id="campaign-preview-container">
+                <div class="text-center text-muted py-4">
+                  <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                  Loading preview...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Discount Code -->
           <div class="mb-3">
-            <label for="event-title" class="form-label">
-              Title <span class="text-danger">*</span>
+            <label for="campaign-discount-code" class="form-label">
+              Discount Code
+              <small class="text-muted fw-normal ms-1">(optional)</small>
             </label>
             <input type="text"
                    class="form-control"
-                   id="event-title"
-                   name="event.title"
-                   placeholder="Enter event title"
-                   minlength="3"
-                   maxlength="100"
-                   required>
-            <div class="invalid-feedback">Title is required (3-100 characters)</div>
+                   id="campaign-discount-code"
+                   name="campaign.discountCode"
+                   placeholder="e.g. UPGRADE15">
           </div>
 
-          <div class="mb-4">
-            <label for="event-body" class="form-label">
-              Body
+          <!-- Test Mode -->
+          <div class="form-check mb-4">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="campaign-test"
+                   name="campaign.test">
+            <label class="form-check-label" for="campaign-test">
+              Test mode
             </label>
-            <textarea class="form-control"
-                      id="event-body"
-                      name="event.data.body"
-                      rows="4"
-                      placeholder="Enter event content or description"></textarea>
+            <small class="d-block text-muted mt-1">
+              Send only to admin/test recipients instead of the full audience. Use this to preview the campaign before going live.
+            </small>
           </div>
 
           <!-- Schedule -->
-          <h6 class="mb-3">
+          <h6 class="mb-3 mt-4">
             {% uj_icon "clock", "fa-sm me-2 text-info" %}
             Schedule
           </h6>
 
           <div class="row mb-3">
-            <div class="col-md-4">
-              <label for="event-date" class="form-label">
+            <div class="col-md-5">
+              <label for="campaign-date" class="form-label">
                 Date <span class="text-danger">*</span>
               </label>
               <input type="date"
                      class="form-control"
-                     id="event-date"
-                     name="event.date"
+                     id="campaign-date"
+                     name="campaign.date"
                      required>
               <div class="invalid-feedback">Date is required</div>
             </div>
             <div class="col-md-4">
-              <label for="event-time" class="form-label">
+              <label for="campaign-time" class="form-label">
                 Time <span class="text-danger">*</span>
               </label>
               <input type="time"
                      class="form-control"
-                     id="event-time"
-                     name="event.time"
+                     id="campaign-time"
+                     name="campaign.time"
                      value="09:00"
                      required>
               <div class="invalid-feedback">Time is required</div>
             </div>
-            <div class="col-md-4">
-              <label for="event-duration" class="form-label">
-                Duration (min)
-              </label>
-              <input type="number"
-                     class="form-control"
-                     id="event-duration"
-                     name="event.duration"
-                     value="60"
-                     min="5"
-                     max="1440"
-                     step="5">
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="button" class="btn btn-sm btn-outline-primary w-100" id="btn-send-now">
+                {% uj_icon "paper-plane", "fa-sm me-1" %}
+                Send Now
+              </button>
+            </div>
+          </div>
+
+          <!-- Recurrence -->
+          <h6 class="mb-3 mt-4">
+            {% uj_icon "repeat", "fa-sm me-2 text-info" %}
+            Recurrence
+            <small class="text-muted fw-normal ms-1">(optional)</small>
+          </h6>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="campaign-recurring"
+                   name="campaign.recurring">
+            <label class="form-check-label" for="campaign-recurring">
+              Make this a recurring campaign
+            </label>
+          </div>
+
+          <div id="recurrence-fields" class="d-none">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="campaign-recurrence-pattern" class="form-label">Pattern</label>
+                <select class="form-select" id="campaign-recurrence-pattern" name="campaign.recurrence.pattern">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly" selected>Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="campaign-recurrence-hour" class="form-label">Hour (UTC)</label>
+                <input type="number"
+                       class="form-control"
+                       id="campaign-recurrence-hour"
+                       name="campaign.recurrence.hour"
+                       value="14"
+                       min="0"
+                       max="23">
+              </div>
+              <div class="col-md-4">
+                <label for="campaign-recurrence-day" class="form-label">
+                  Day
+                  <small class="text-muted fw-normal ms-1" id="recurrence-day-hint">(of month)</small>
+                </label>
+                <input type="number"
+                       class="form-control"
+                       id="campaign-recurrence-day"
+                       name="campaign.recurrence.day"
+                       value="1"
+                       min="0"
+                       max="31">
+              </div>
+            </div>
+
+            <div class="row mb-3 d-none" id="recurrence-month-row">
+              <div class="col-md-4">
+                <label for="campaign-recurrence-month" class="form-label">Month</label>
+                <select class="form-select" id="campaign-recurrence-month" name="campaign.recurrence.month">
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="alert alert-info small mb-3" id="recurrence-info">
+              This campaign will repeat automatically. Editing changes all future sends.
             </div>
           </div>
 
           <!-- Targeting -->
           <h6 class="mb-3 mt-4">
             {% uj_icon "users", "fa-sm me-2 text-success" %}
-            Target Audience
+            Targeting
           </h6>
+
+          <div class="mb-3" id="email-targeting">
+            <label class="form-label">Providers</label>
+            <small class="d-block text-muted mb-2">Which services to send through. Leave unchecked to use all enabled providers.</small>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="campaign-provider-sendgrid"
+                       name="campaign.providers.sendgrid">
+                <label class="form-check-label" for="campaign-provider-sendgrid">
+                  SendGrid
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="campaign-provider-beehiiv"
+                       name="campaign.providers.beehiiv">
+                <label class="form-check-label" for="campaign-provider-beehiiv">
+                  Beehiiv
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="campaign-all"
+                   name="campaign.all">
+            <label class="form-check-label" for="campaign-all">
+              Target all contacts
+              <small class="text-muted fw-normal ms-1">(SendGrid only — overrides lists/segments)</small>
+            </label>
+          </div>
 
           <div class="mb-3">
-            <div class="form-check">
-              <input class="form-check-input"
-                     type="radio"
-                     name="event.data.audience.type"
-                     id="audience-all"
-                     value="all"
-                     checked>
-              <label class="form-check-label" for="audience-all">
-                All Users
-              </label>
-            </div>
-            <div class="form-check mt-2">
-              <input class="form-check-input"
-                     type="radio"
-                     name="event.data.audience.type"
-                     id="audience-segment"
-                     value="segment">
-              <label class="form-check-label" for="audience-segment">
-                User Segment
-              </label>
-            </div>
-            <div class="form-check mt-2">
-              <input class="form-check-input"
-                     type="radio"
-                     name="event.data.audience.type"
-                     id="audience-test"
-                     value="test">
-              <label class="form-check-label" for="audience-test">
-                Test Users Only
-              </label>
-            </div>
+            <label for="campaign-lists" class="form-label">
+              Lists
+              <small class="text-muted fw-normal ms-1">(SendGrid list IDs, comma-separated — empty = brand default list)</small>
+            </label>
+            <input type="text"
+                   class="form-control"
+                   id="campaign-lists"
+                   name="campaign.lists"
+                   placeholder="Leave empty for default brand list">
           </div>
 
-          <!-- Channels -->
+          <div class="mb-3">
+            <label for="campaign-segments" class="form-label">
+              Segments
+              <small class="text-muted fw-normal ms-1">(comma-separated IDs)</small>
+            </label>
+            <input type="text"
+                   class="form-control"
+                   id="campaign-segments"
+                   name="campaign.segments"
+                   placeholder="e.g. seg_abc123, seg_def456">
+          </div>
+
+          <div class="mb-3">
+            <label for="campaign-exclude-segments" class="form-label">
+              Exclude Segments
+              <small class="text-muted fw-normal ms-1">(comma-separated IDs)</small>
+            </label>
+            <input type="text"
+                   class="form-control"
+                   id="campaign-exclude-segments"
+                   name="campaign.excludeSegments"
+                   placeholder="e.g. seg_unsubscribed">
+          </div>
+
+          <!-- Advanced Settings (collapsible) -->
           <h6 class="mb-3 mt-4">
-            Delivery Channels
+            <a class="text-decoration-none" data-bs-toggle="collapse" href="#advanced-settings" role="button" aria-expanded="false">
+              {% uj_icon "sliders", "fa-sm me-2 text-info" %}
+              Advanced Settings
+              <small class="text-muted fw-normal ms-1">(optional)</small>
+            </a>
           </h6>
 
-          <div class="row mb-4">
-            <div class="col-6 col-md-3">
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       id="channel-push"
-                       name="event.data.channels.push"
-                       checked>
-                <label class="form-check-label" for="channel-push">
-                  {% uj_icon "mobile", "fa-sm me-1 text-primary" %}
-                  Push
+          <div class="collapse" id="advanced-settings">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="campaign-group" class="form-label">ASM Group</label>
+                <input type="text"
+                       class="form-control"
+                       id="campaign-group"
+                       name="campaign.group"
+                       placeholder="e.g. marketing">
+              </div>
+              <div class="col-md-6">
+                <label for="campaign-categories" class="form-label">
+                  Categories
+                  <small class="text-muted fw-normal ms-1">(comma-separated)</small>
                 </label>
+                <input type="text"
+                       class="form-control"
+                       id="campaign-categories"
+                       name="campaign.categories"
+                       placeholder="e.g. marketing, q1-launch">
               </div>
             </div>
-            <div class="col-6 col-md-3">
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       id="channel-email"
-                       name="event.data.channels.email">
-                <label class="form-check-label" for="channel-email">
-                  {% uj_icon "envelope", "fa-sm me-1 text-info" %}
-                  Email
-                </label>
-              </div>
-            </div>
-            <div class="col-6 col-md-3">
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       id="channel-sms"
-                       name="event.data.channels.sms">
-                <label class="form-check-label" for="channel-sms">
-                  {% uj_icon "comment-sms", "fa-sm me-1 text-success" %}
-                  SMS
-                </label>
-              </div>
-            </div>
-            <div class="col-6 col-md-3">
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       id="channel-inapp"
-                       name="event.data.channels.inapp">
-                <label class="form-check-label" for="channel-inapp">
-                  {% uj_icon "bell", "fa-sm me-1 text-warning" %}
-                  In-App
-                </label>
-              </div>
-            </div>
-          </div>
 
-          <!-- Status & Color -->
-          <h6 class="mb-3">
-            Settings
-          </h6>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="event-status" class="form-label">Status</label>
-              <select class="form-select" id="event-status" name="event.status">
-                <option value="draft">Draft</option>
-                <option value="scheduled">Scheduled</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Color</label>
-              <div class="d-flex gap-2 flex-wrap align-items-center" id="color-swatches">
-                <button type="button" class="color-swatch active" data-color="#4CAF50" style="background-color: #4CAF50;" title="Green"></button>
-                <button type="button" class="color-swatch" data-color="#2196F3" style="background-color: #2196F3;" title="Blue"></button>
-                <button type="button" class="color-swatch" data-color="#FF9800" style="background-color: #FF9800;" title="Orange"></button>
-                <button type="button" class="color-swatch" data-color="#F44336" style="background-color: #F44336;" title="Red"></button>
-                <button type="button" class="color-swatch" data-color="#9C27B0" style="background-color: #9C27B0;" title="Purple"></button>
-                <button type="button" class="color-swatch" data-color="#00BCD4" style="background-color: #00BCD4;" title="Cyan"></button>
-                <button type="button" class="color-swatch" data-color="#795548" style="background-color: #795548;" title="Brown"></button>
-                <button type="button" class="color-swatch" data-color="#607D8B" style="background-color: #607D8B;" title="Gray"></button>
+            <div class="mb-3">
+              <label class="form-label">UTM Overrides</label>
+              <div class="row g-2" id="utm-fields">
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" name="campaign.utm.utm_source" placeholder="utm_source">
+                </div>
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" name="campaign.utm.utm_medium" placeholder="utm_medium">
+                </div>
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" name="campaign.utm.utm_campaign" placeholder="utm_campaign">
+                </div>
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" name="campaign.utm.utm_term" placeholder="utm_term">
+                </div>
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" name="campaign.utm.utm_content" placeholder="utm_content">
+                </div>
               </div>
-              <input type="hidden" name="event.color" id="event-color" value="#4CAF50">
             </div>
           </div>
 
@@ -293,18 +551,43 @@ prerender_icons:
       </div>
       <div class="modal-footer d-flex justify-content-between">
         <div>
-          <button type="button" class="btn btn-outline-danger d-none" id="btn-delete-event">
+          <button type="button" class="btn btn-outline-danger d-none" id="btn-delete-campaign">
             {% uj_icon "trash", "fa-sm me-1" %}
             Delete
           </button>
         </div>
         <div class="d-flex gap-2">
           <button type="button" class="btn btn-outline-adaptive" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" form="calendar-event-form" class="btn btn-adaptive">
+          <button type="submit" form="campaign-editor-form" class="btn btn-adaptive" id="btn-save-campaign">
             {% uj_icon "paper-plane", "fa-sm me-1" %}
-            <span class="button-text">Save Event</span>
+            <span class="button-text">Save Campaign</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Campaign Results Modal (read-only for sent/failed) -->
+<div class="modal fade" id="campaign-results-modal" tabindex="-1" aria-labelledby="campaign-results-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="campaign-results-title">
+          {% uj_icon "eye", "fa-md me-2" %}
+          <span id="campaign-results-title-text">Campaign Details</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="campaign-results-body">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger d-none" id="btn-retry-campaign">
+          {% uj_icon "rotate-right", "fa-sm me-1" %}
+          Retry (Create New)
+        </button>
+        <button type="button" class="btn btn-outline-adaptive" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

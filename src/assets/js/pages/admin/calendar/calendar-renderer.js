@@ -1,10 +1,13 @@
 /**
  * Calendar Renderer
  * Renders the toolbar and calendar grid for all 4 view modes.
+ * Campaigns are color-coded by type (email=blue, push=green) and
+ * styled by status (pending=normal, sent=faded+checkmark, failed=red).
  */
 
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
-import { VIEW_MODES, DAY_ABBREVS, MONTH_NAMES } from './calendar-core.js';
+import { escapeHtml } from '__main_assets__/js/libs/admin-helpers.js';
+import { VIEW_MODES, DAY_ABBREVS, MONTH_NAMES, TYPE_COLORS, STATUS_STYLES, DISPLAY_TYPES } from './calendar-core.js';
 
 export default class CalendarRenderer {
   constructor(core) {
@@ -80,6 +83,7 @@ export default class CalendarRenderer {
       week: 'calendar-week',
       month: 'calendar',
       year: 'grid-2',
+      list: 'table-list',
     };
     return getPrerenderedIcon(icons[mode], 'fa-sm');
   }
@@ -100,6 +104,9 @@ export default class CalendarRenderer {
         break;
       case 'year':
         this._renderYearView();
+        break;
+      case 'list':
+        this._renderListView();
         break;
     }
   }
@@ -125,7 +132,7 @@ export default class CalendarRenderer {
     cells.forEach((cell) => {
       const dateStr = core.formatDate(cell.date);
       const isToday = core.isToday(cell.date);
-      const events = core.getEventsForDate(dateStr);
+      const campaigns = core.getCampaignsForDate(dateStr);
 
       let classes = 'calendar-cell';
       if (isToday) {
@@ -140,12 +147,12 @@ export default class CalendarRenderer {
       html += '<div class="calendar-cell-events">';
 
       const maxVisible = 3;
-      events.slice(0, maxVisible).forEach((evt) => {
-        html += this._renderEventPill(evt);
+      campaigns.slice(0, maxVisible).forEach((campaign) => {
+        html += this._renderEventPill(campaign);
       });
 
-      if (events.length > maxVisible) {
-        html += `<div class="calendar-cell-more" data-date="${dateStr}">+${events.length - maxVisible} more</div>`;
+      if (campaigns.length > maxVisible) {
+        html += `<div class="calendar-cell-more" data-date="${dateStr}">+${campaigns.length - maxVisible} more</div>`;
       }
 
       html += '</div></div>';
@@ -204,7 +211,7 @@ export default class CalendarRenderer {
     // Day columns
     weekDates.forEach((date) => {
       const dateStr = core.formatDate(date);
-      const events = core.getEventsForDate(dateStr);
+      const campaigns = core.getCampaignsForDate(dateStr);
 
       html += `<div class="calendar-week-day-col" data-date="${dateStr}">`;
       hours.forEach((hour) => {
@@ -212,9 +219,9 @@ export default class CalendarRenderer {
       });
 
       // Positioned events with overlap layout
-      const layout = this._calculateOverlapLayout(events);
-      events.forEach((evt) => {
-        html += this._renderTimeEvent(evt, layout.get(evt.id));
+      const layout = this._calculateOverlapLayout(campaigns);
+      campaigns.forEach((campaign) => {
+        html += this._renderTimeEvent(campaign, layout.get(campaign.id));
       });
 
       html += '</div>';
@@ -235,7 +242,7 @@ export default class CalendarRenderer {
     const core = this.core;
     const date = core.currentDate;
     const dateStr = core.formatDate(date);
-    const events = core.getEventsForDate(dateStr);
+    const campaigns = core.getCampaignsForDate(dateStr);
     const hours = this._getHours();
 
     let html = '';
@@ -257,9 +264,9 @@ export default class CalendarRenderer {
     });
 
     // Positioned events with overlap layout
-    const layout = this._calculateOverlapLayout(events);
-    events.forEach((evt) => {
-      html += this._renderTimeEvent(evt, layout.get(evt.id));
+    const layout = this._calculateOverlapLayout(campaigns);
+    campaigns.forEach((campaign) => {
+      html += this._renderTimeEvent(campaign, layout.get(campaign.id));
     });
 
     html += '</div></div>';
@@ -303,13 +310,13 @@ export default class CalendarRenderer {
         const date = new Date(year, month, d);
         const dateStr = core.formatDate(date);
         const isToday = core.isToday(date);
-        const hasEvents = core.getEventsForDate(dateStr).length > 0;
+        const hasCampaigns = core.getCampaignsForDate(dateStr).length > 0;
 
         let classes = 'calendar-mini-day';
         if (isToday) {
           classes += ' calendar-cell--today';
         }
-        if (hasEvents) {
+        if (hasCampaigns) {
           classes += ' has-events';
         }
 
@@ -334,28 +341,156 @@ export default class CalendarRenderer {
   }
 
   // ============================================
-  // Event Rendering Helpers
+  // List View
   // ============================================
-  _renderEventPill(evt) {
-    const timeStr = this._formatTime(evt.time);
+  _renderListView() {
+    const core = this.core;
+    const campaigns = core.getAllCampaignsSorted();
+
+    if (campaigns.length === 0) {
+      this.$grid.innerHTML = `
+        <div class="calendar-list-empty">
+          <div class="text-center">
+            <p>No campaigns in this date range</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '<div class="calendar-list"><table>';
+
+    let currentDateStr = null;
+
+    campaigns.forEach((campaign) => {
+      const dateStr = core._campaignDate(campaign);
+
+      // Date group header
+      if (dateStr !== currentDateStr) {
+        currentDateStr = dateStr;
+        const d = new Date(campaign.sendAt * 1000);
+        const dayName = DAY_ABBREVS[d.getDay()];
+        const monthName = MONTH_NAMES[d.getMonth()].slice(0, 3);
+        const isToday = core.isToday(d);
+        const todayBadge = isToday ? ' <span class="badge bg-danger ms-2">Today</span>' : '';
+
+        html += `<tr class="calendar-list-date-header"><td colspan="4">${dayName}, ${monthName} ${d.getDate()}, ${d.getFullYear()}${todayBadge}</td></tr>`;
+      }
+
+      // Campaign row
+      const time = this._formatTime(core.campaignTime(campaign));
+      const name = (campaign.settings && campaign.settings.name) || 'Untitled';
+      const color = core.campaignColor(campaign);
+      const statusStyle = core.campaignStatusStyle(campaign);
+      const isRecurring = campaign.recurrence || campaign.recurringId || campaign._virtual;
+
+      const typeBadge = campaign.type === 'email'
+        ? `<span class="badge" style="background-color: ${TYPE_COLORS.email}">${getPrerenderedIcon('envelope', 'fa-xs me-1')} Email</span>`
+        : `<span class="badge" style="background-color: ${TYPE_COLORS.push}">${getPrerenderedIcon('bell', 'fa-xs me-1')} Push</span>`;
+
+      let statusBadge = '';
+      if (campaign.status === 'sent') {
+        statusBadge = `<span class="badge bg-success">${getPrerenderedIcon('circle-check', 'fa-xs me-1')} Sent</span>`;
+      } else if (campaign.status === 'failed') {
+        statusBadge = `<span class="badge bg-danger">${getPrerenderedIcon('triangle-exclamation', 'fa-xs me-1')} Failed</span>`;
+      } else {
+        statusBadge = '<span class="badge bg-secondary">Pending</span>';
+      }
+
+      const recurringIcon = isRecurring ? getPrerenderedIcon('repeat', 'fa-xs me-1 text-muted') : '';
+
+      html += `
+        <tr class="calendar-list-row" data-campaign-id="${campaign.id}" style="opacity: ${statusStyle.opacity}">
+          <td style="width: 60px">${time}</td>
+          <td>${recurringIcon}${escapeHtml(name)}</td>
+          <td style="width: 80px">${typeBadge}</td>
+          <td style="width: 80px">${statusBadge}</td>
+        </tr>
+      `;
+    });
+
+    html += '</table></div>';
+
+    this.$grid.innerHTML = html;
+
+    // Bind row clicks
+    this.$grid.querySelectorAll('.calendar-list-row').forEach(($row) => {
+      $row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = $row.dataset.campaignId;
+        core.eventsManager.openEditModal(id);
+      });
+    });
+  }
+
+  // ============================================
+  // Campaign Rendering Helpers
+  // ============================================
+  _renderEventPill(campaign) {
+    const core = this.core;
+    const timeStr = this._formatTime(core.campaignTime(campaign));
+    const color = core.campaignColor(campaign);
+    const statusStyle = core.campaignStatusStyle(campaign);
+    const name = (campaign.settings && campaign.settings.name) || 'Untitled';
+    const isEditable = core.isEditable(campaign);
+    const isRecurring = campaign.recurrence || campaign.recurringId || campaign._virtual;
+    const statusIcon = statusStyle.icon
+      ? getPrerenderedIcon(statusStyle.icon, 'fa-xs')
+      : '';
+    const typeIcon = campaign.type === 'email'
+      ? getPrerenderedIcon('envelope', 'fa-xs')
+      : getPrerenderedIcon('bell', 'fa-xs');
+    const recurringIcon = isRecurring
+      ? getPrerenderedIcon('repeat', 'fa-xs')
+      : '';
+
+    let pillClass = 'calendar-event';
+    if (campaign.status === 'failed') {
+      pillClass += ' calendar-event--failed';
+    }
+    if (campaign.status === 'sent') {
+      pillClass += ' calendar-event--sent';
+    }
+    if (campaign._virtual) {
+      pillClass += ' calendar-event--virtual';
+    }
+    if (isRecurring && !campaign._virtual) {
+      pillClass += ' calendar-event--recurring';
+    }
 
     return `
-      <div class="calendar-event"
-           data-event-id="${evt.id}"
-           draggable="true"
-           style="background-color: ${evt.color};"
-           title="${evt.title}">
+      <div class="${pillClass}"
+           data-campaign-id="${campaign.id}"
+           ${isEditable && !campaign._virtual ? 'draggable="true"' : ''}
+           style="background-color: ${color}; opacity: ${statusStyle.opacity};"
+           title="${escapeHtml(name)}${isRecurring ? ' (recurring)' : ''}">
+        ${statusIcon}
+        ${recurringIcon}
         <span class="calendar-event-time">${timeStr}</span>
-        <span class="calendar-event-title">${this._escapeHtml(evt.title)}</span>
+        <span class="calendar-event-type-icon">${typeIcon}</span>
+        <span class="calendar-event-title">${escapeHtml(name)}</span>
       </div>
     `;
   }
 
-  _renderTimeEvent(evt, layout) {
-    const [hours, minutes] = evt.time.split(':').map(Number);
+  _renderTimeEvent(campaign, layout) {
+    const core = this.core;
+    const time = core.campaignTime(campaign);
+    const [hours, minutes] = time.split(':').map(Number);
     const topPx = (hours * 60 + minutes);
-    const heightPx = Math.max(evt.duration || 60, 15);
-    const timeStr = this._formatTime(evt.time);
+    const heightPx = Math.max(core.campaignDuration(), 15);
+    const timeStr = this._formatTime(time);
+    const color = core.campaignColor(campaign);
+    const statusStyle = core.campaignStatusStyle(campaign);
+    const name = (campaign.settings && campaign.settings.name) || 'Untitled';
+    const isEditable = core.isEditable(campaign);
+    const isRecurring = campaign.recurrence || campaign.recurringId || campaign._virtual;
+    const statusIcon = statusStyle.icon
+      ? getPrerenderedIcon(statusStyle.icon, 'fa-xs me-1')
+      : '';
+    const recurringIcon = isRecurring
+      ? getPrerenderedIcon('repeat', 'fa-xs me-1')
+      : '';
 
     // Layout: column position and total columns for side-by-side overlap
     const col = layout ? layout.col : 0;
@@ -367,34 +502,52 @@ export default class CalendarRenderer {
       ? `left: ${leftPct}%; width: calc(${widthPct}% - 2px);`
       : '';
 
+    let eventClass = 'calendar-week-event';
+    if (campaign.status === 'failed') {
+      eventClass += ' calendar-event--failed';
+    }
+    if (campaign.status === 'sent') {
+      eventClass += ' calendar-event--sent';
+    }
+    if (campaign._virtual) {
+      eventClass += ' calendar-event--virtual';
+    }
+    if (isRecurring && !campaign._virtual) {
+      eventClass += ' calendar-event--recurring';
+    }
+
     return `
-      <div class="calendar-week-event"
-           data-event-id="${evt.id}"
-           draggable="true"
-           style="background-color: ${evt.color}; top: ${topPx}px; height: ${heightPx}px; ${sizeStyle}"
-           title="${evt.title}">
-        <strong>${timeStr}</strong> ${this._escapeHtml(evt.title)}
+      <div class="${eventClass}"
+           data-campaign-id="${campaign.id}"
+           ${isEditable && !campaign._virtual ? 'draggable="true"' : ''}
+           style="background-color: ${color}; opacity: ${statusStyle.opacity}; top: ${topPx}px; height: ${heightPx}px; ${sizeStyle}"
+           title="${escapeHtml(name)}${isRecurring ? ' (recurring)' : ''}">
+        ${statusIcon}${recurringIcon}<strong>${timeStr}</strong> ${escapeHtml(name)}
       </div>
     `;
   }
 
   /**
-   * Calculate side-by-side layout for overlapping events.
-   * Returns a Map of eventId → { col, totalCols }
+   * Calculate side-by-side layout for overlapping campaigns.
+   * Returns a Map of campaignId → { col, totalCols }
    */
-  _calculateOverlapLayout(events) {
+  _calculateOverlapLayout(campaigns) {
     const layout = new Map();
 
-    if (events.length === 0) {
+    if (campaigns.length === 0) {
       return layout;
     }
 
+    const core = this.core;
+    const duration = core.campaignDuration();
+
     // Convert to intervals
-    const intervals = events.map((evt) => {
-      const [h, m] = evt.time.split(':').map(Number);
+    const intervals = campaigns.map((c) => {
+      const time = core.campaignTime(c);
+      const [h, m] = time.split(':').map(Number);
       const start = h * 60 + m;
-      const end = start + (evt.duration || 60);
-      return { id: evt.id, start, end };
+      const end = start + duration;
+      return { id: c.id, start, end };
     }).sort((a, b) => a.start - b.start || a.end - b.end);
 
     // Group overlapping events into clusters
@@ -417,7 +570,6 @@ export default class CalendarRenderer {
       const columns = [];
 
       cluster.forEach((interval) => {
-        // Find the first column where this event fits (no overlap)
         let placed = false;
         for (let c = 0; c < columns.length; c++) {
           const lastInCol = columns[c];
@@ -487,13 +639,12 @@ export default class CalendarRenderer {
   _bindCellClicks() {
     const core = this.core;
 
-    // Month view: single click → day view, double click → create event
-    // Debounce single click to avoid firing when double clicking
+    // Month view: single click → day view, double click → create campaign
     let clickTimer = null;
 
     this.$grid.querySelectorAll('.calendar-cell').forEach(($cell) => {
       $cell.addEventListener('click', (e) => {
-        if (e.target.closest('.calendar-event, .calendar-week-event')) {
+        if (e.target.closest('[data-campaign-id]')) {
           return;
         }
 
@@ -511,7 +662,7 @@ export default class CalendarRenderer {
       });
 
       $cell.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.calendar-event, .calendar-week-event')) {
+        if (e.target.closest('[data-campaign-id]')) {
           return;
         }
 
@@ -526,10 +677,10 @@ export default class CalendarRenderer {
       });
     });
 
-    // Time slots (week/day views): double click only to create event
+    // Time slots (week/day views): double click only to create campaign
     this.$grid.querySelectorAll('.calendar-week-time-slot').forEach(($slot) => {
       $slot.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.calendar-event, .calendar-week-event')) {
+        if (e.target.closest('[data-campaign-id]')) {
           return;
         }
 
@@ -559,24 +710,24 @@ export default class CalendarRenderer {
   }
 
   _bindEventPillClicks() {
-    this.$grid.querySelectorAll('[data-event-id]').forEach(($pill) => {
+    this.$grid.querySelectorAll('[data-campaign-id]').forEach(($pill) => {
       $pill.addEventListener('click', (e) => {
         e.stopPropagation();
-        const id = $pill.dataset.eventId;
+        const id = $pill.dataset.campaignId;
         this.core.eventsManager.openEditModal(id);
       });
     });
   }
 
   _bindDragAndDrop() {
-    // Drag start on event pills
-    this.$grid.querySelectorAll('[data-event-id][draggable]').forEach(($pill) => {
+    const core = this.core;
+
+    // Drag start on pending campaign pills only
+    this.$grid.querySelectorAll('[data-campaign-id][draggable]').forEach(($pill) => {
       $pill.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', $pill.dataset.eventId);
+        e.dataTransfer.setData('text/plain', $pill.dataset.campaignId);
         e.dataTransfer.effectAllowed = 'move';
         $pill.classList.add('calendar-event--dragging');
-        // Disable pointer-events on all events so drops pass through to time slots
-        // Use requestAnimationFrame so the drag has started before we disable pointer-events
         requestAnimationFrame(() => {
           this.$grid.classList.add('calendar-grid--dragging');
         });
@@ -585,7 +736,6 @@ export default class CalendarRenderer {
       $pill.addEventListener('dragend', () => {
         $pill.classList.remove('calendar-event--dragging');
         this.$grid.classList.remove('calendar-grid--dragging');
-        // Clear all drag-over states
         this.$grid.querySelectorAll('.calendar-cell--drag-over').forEach(($el) => {
           $el.classList.remove('calendar-cell--drag-over');
         });
@@ -609,20 +759,44 @@ export default class CalendarRenderer {
         e.preventDefault();
         $cell.classList.remove('calendar-cell--drag-over');
 
-        const eventId = e.dataTransfer.getData('text/plain');
+        const campaignId = e.dataTransfer.getData('text/plain');
         const newDate = $cell.dataset.date;
-        if (!eventId || !newDate) {
+        if (!campaignId || !newDate) {
           return;
         }
 
-        const changes = { date: newDate };
-
-        // If dropping on a time slot, update time too
-        if ($cell.dataset.hour) {
-          changes.time = String($cell.dataset.hour).padStart(2, '0') + ':00';
+        // Only allow rescheduling editable campaigns (pending one-offs and recurring templates)
+        const campaign = core.getCampaign(campaignId);
+        if (!campaign || !core.isEditable(campaign)) {
+          return;
         }
 
-        this.core.updateEvent(eventId, changes);
+        // Build new sendAt from drop target
+        const parts = newDate.split('-');
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+        // If dropping on a time slot, use that hour
+        if ($cell.dataset.hour) {
+          d.setHours(parseInt($cell.dataset.hour), 0, 0, 0);
+        } else {
+          // Keep original time
+          const originalDate = new Date(campaign.sendAt * 1000);
+          d.setHours(originalDate.getHours(), originalDate.getMinutes(), 0, 0);
+        }
+
+        const newSendAtUNIX = Math.floor(d.getTime() / 1000);
+        const newSendAtISO = d.toISOString();
+
+        // Optimistic update: render immediately, rollback on failure
+        const rollback = core.optimisticUpdateSendAt(campaignId, newSendAtUNIX);
+
+        core.eventsManager.rescheduleCampaign(campaignId, newSendAtISO)
+          .catch((err) => {
+            console.error('Failed to reschedule campaign:', err);
+            if (rollback) {
+              rollback();
+            }
+          });
       });
     });
   }
@@ -653,9 +827,4 @@ export default class CalendarRenderer {
     return `${display}${m > 0 ? ':' + String(m).padStart(2, '0') : ''}${period}`;
   }
 
-  _escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
 }
