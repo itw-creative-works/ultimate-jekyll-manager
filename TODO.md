@@ -1,3 +1,16 @@
+Next, we need to enable a way in the front-end and backend to enable CHANGING PLANS
+* it obviously depends on the processor, but I WOULD LIKE TO FULLY SUPPORT CHANING BETWEEN ALL TYPES OF PLANS AND BILLING CYCLES
+* so for example, a user on the plus plan monthly can change to plus annually, or pro annually
+* im not sure what would be the easiest place to put the interface.... it would eithe rbe
+  * a button to a new page
+  * a button to the same checout page with a query param
+  * all happens inside the billing account page with a simple modal and a confirm button
+* what happens if the user is on a trial? can they change plans?
+
+
+
+
+
 
 NEW TODO
 - service working failing to load scripts??
