@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.7] - 2026-03-20
+### Changed
+- Upgrade `web-manager` from ^4.1.29 to ^4.1.30
+
 ## [1.0.3] - 2026-03-16
 ### Added
 - Ensure consuming projects have `"private": true` in package.json during setup to prevent accidental npm publishes
