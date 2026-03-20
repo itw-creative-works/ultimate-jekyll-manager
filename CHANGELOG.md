@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.9] - 2026-03-20
+### Changed
+- `authorizedFetch` no longer throws when no user is logged in; logs a warning and proceeds without the Authorization header
+
 ## [1.0.7] - 2026-03-20
 ### Changed
 - Upgrade `web-manager` from ^4.1.29 to ^4.1.30
