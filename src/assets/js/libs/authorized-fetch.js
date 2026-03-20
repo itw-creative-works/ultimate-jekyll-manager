@@ -20,20 +20,19 @@ export async function authorizedFetch(url, options = {}) {
   const user = auth.currentUser;
 
   if (!user) {
-    console.warn('Did we fully wait for auth state to be determined?');
-    throw new Error('No authenticated user found');
+    console.warn('authorizedFetch: No authenticated user found. Did we fully wait for auth state to be determined?');
   }
-
-  // Get the ID token - let it throw if it fails
-  const idToken = await user.getIdToken(true);
 
   // Ensure headers object exists
   if (!requestOptions.headers) {
     requestOptions.headers = {};
   }
 
-  // Set the Authorization header with Bearer token
-  requestOptions.headers['Authorization'] = `Bearer ${idToken}`;
+  // Set the Authorization header with Bearer token if user is logged in
+  if (user) {
+    const idToken = await user.getIdToken(true);
+    requestOptions.headers['Authorization'] = `Bearer ${idToken}`;
+  }
 
   // Make the request using wonderful-fetch
   return fetch(url, requestOptions);
