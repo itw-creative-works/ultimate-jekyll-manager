@@ -77,7 +77,7 @@ async function loadStatCards() {
   const [totalUsers, newUsers, activeSubscriptions, pushSubscribers] = await Promise.allSettled([
     getCountFromServer(collection(db, 'users')),
     getCountFromServer(query(collection(db, 'users'), where('metadata.created.timestampUNIX', '>=', thirtyDaysAgo))),
-    getCountFromServer(query(collection(db, 'users'), where('subscription.expires.timestampUNIX', '>=', now))),
+    getCountFromServer(query(collection(db, 'users'), where('subscription.status', '==', 'active'), where('subscription.product.id', '!=', 'basic'))),
     getCountFromServer(collection(db, 'notifications')),
   ]);
 
@@ -92,10 +92,9 @@ async function loadStatCards() {
 // ============================================
 async function loadSubscriberData() {
   const firestore = webManager.firestore();
-  const now = Math.floor(Date.now() / 1000);
 
   const snapshot = await firestore.collection('users')
-    .where('subscription.expires.timestampUNIX', '>=', now)
+    .where('subscription.status', '==', 'active')
     .get();
 
   // Group by plan

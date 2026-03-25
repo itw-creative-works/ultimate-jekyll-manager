@@ -142,7 +142,18 @@ Manager.prototype.getPackage = Manager.getPackage;
 // getUJMConfig: requires and parses ultimate-jekyll-manager.json
 Manager.getUJMConfig = function () {
   const configPath = path.join(process.cwd(), 'config', 'ultimate-jekyll-manager.json');
-  return JSON5.parse(jetpack.read(configPath));
+  if (!jetpack.exists(configPath)) {
+    throw new Error(`Config file not found: ${configPath}`);
+  }
+  const content = jetpack.read(configPath);
+  if (!content) {
+    throw new Error(`Config file is empty: ${configPath}`);
+  }
+  try {
+    return JSON5.parse(content);
+  } catch (e) {
+    throw new Error(`Failed to parse ${configPath}: ${e.message}`);
+  }
 }
 Manager.prototype.getUJMConfig = Manager.getUJMConfig;
 

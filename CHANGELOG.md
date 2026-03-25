@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.10] - 2026-03-24
+### Fixed
+- `getUJMConfig()` now throws descriptive errors when config file is missing, empty, or malformed instead of crashing silently
+- Admin dashboard subscription queries now filter by `subscription.status == 'active'` instead of expiry timestamp
+
+### Changed
+- Webpack watch path for web-manager changed from `src/` to `dist/`
+
 ## [1.0.9] - 2026-03-20
 ### Changed
 - `authorizedFetch` no longer throws when no user is logged in; logs a warning and proceeds without the Authorization header

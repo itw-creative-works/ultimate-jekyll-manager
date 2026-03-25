@@ -62,7 +62,7 @@ const watchInput = [
   `${rootPathPackage}/dist/service-worker.js`,
 
   // So we can watch for changes while we're developing web-manager
-  `${rootPathPackage}/../web-manager/src`,
+  `${rootPathPackage}/../web-manager/dist`,
 ];
 
 // Files to copy directly without webpack processing
