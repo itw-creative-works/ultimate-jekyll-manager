@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.11] - 2026-03-24
+### Added
+- Firestore version + transport test page at `/test/libraries/firestore` for diagnosing SDK connectivity across browsers
+
 ## [1.0.10] - 2026-03-24
 ### Fixed
 - `getUJMConfig()` now throws descriptive errors when config file is missing, empty, or malformed instead of crashing silently
