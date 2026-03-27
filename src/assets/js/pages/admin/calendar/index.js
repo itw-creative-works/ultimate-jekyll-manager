@@ -21,7 +21,6 @@ export default (Manager) => {
 
     webManager.auth().listen({ once: true }, async (state) => {
       if (!state.user) {
-        showUnauthenticated();
         return;
       }
 
@@ -44,14 +43,3 @@ function initialize() {
   core.initialize();
 }
 
-// Show unauthenticated state
-function showUnauthenticated() {
-  const $grid = document.getElementById('calendar-grid');
-  $grid.innerHTML = `
-    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
-      <div class="text-center">
-        <p>Sign in to view the marketing calendar</p>
-      </div>
-    </div>
-  `;
-}

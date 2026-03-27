@@ -29,7 +29,6 @@ export default (Manager) => {
 
     webManager.auth().listen({ once: true }, async (state) => {
       if (!state.user) {
-        showUnauthenticated();
         return;
       }
 
@@ -39,14 +38,6 @@ export default (Manager) => {
     return resolve();
   });
 };
-
-// Show unauthenticated state
-function showUnauthenticated() {
-  const $empty = document.getElementById('docs-empty');
-  if ($empty) {
-    $empty.textContent = 'Sign in to view';
-  }
-}
 
 // ============================================
 // Initialize

@@ -32,7 +32,7 @@ prerender_icons:
 <!-- Stats Cards -->
 <div class="row g-3 mb-4">
   <!-- Total Users -->
-  <div class="col-lg-3 col-md-6">
+  <div class="col-lg-4 col-md-6">
     <div class="card h-100">
       <div class="card-body text-center">
         <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-primary bg-opacity-10 mx-auto mb-2">
@@ -40,44 +40,31 @@ prerender_icons:
         </div>
         <h6 class="text-muted mb-1">Total users</h6>
         <h3 class="mb-0" id="stat-total-users">
-          <span class="spinner-border spinner-border-sm"></span>
+          <span class="spinner-border spinner-border-sm fs-6"></span>
         </h3>
+        <small class="text-muted" id="stat-new-users"></small>
       </div>
     </div>
   </div>
 
-  <!-- New Users (30d) -->
-  <div class="col-lg-3 col-md-6">
-    <div class="card h-100">
-      <div class="card-body text-center">
-        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-success bg-opacity-10 mx-auto mb-2">
-          {% uj_icon "user-plus", "fa-xl text-success" %}
-        </div>
-        <h6 class="text-muted mb-1">New users (30d)</h6>
-        <h3 class="mb-0" id="stat-new-users">
-          <span class="spinner-border spinner-border-sm"></span>
-        </h3>
-      </div>
-    </div>
-  </div>
-
-  <!-- Active Subscriptions -->
-  <div class="col-lg-3 col-md-6">
+  <!-- MRR -->
+  <div class="col-lg-4 col-md-6">
     <div class="card h-100">
       <div class="card-body text-center">
         <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-info bg-opacity-10 mx-auto mb-2">
           {% uj_icon "credit-card", "fa-xl text-info" %}
         </div>
-        <h6 class="text-muted mb-1">Active subscriptions</h6>
-        <h3 class="mb-0" id="stat-subscriptions">
-          <span class="spinner-border spinner-border-sm"></span>
+        <h6 class="text-muted mb-1">MRR</h6>
+        <h3 class="mb-0" id="stat-mrr">
+          <span class="spinner-border spinner-border-sm fs-6"></span>
         </h3>
+        <small class="text-muted" id="stat-mrr-count"></small>
       </div>
     </div>
   </div>
 
   <!-- Push Subscribers -->
-  <div class="col-lg-3 col-md-6">
+  <div class="col-lg-4 col-md-6">
     <div class="card h-100">
       <div class="card-body text-center">
         <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-warning bg-opacity-10 mx-auto mb-2">
@@ -85,8 +72,9 @@ prerender_icons:
         </div>
         <h6 class="text-muted mb-1">Push subscribers</h6>
         <h3 class="mb-0" id="stat-notifications">
-          <span class="spinner-border spinner-border-sm"></span>
+          <span class="spinner-border spinner-border-sm fs-6"></span>
         </h3>
+        <small class="text-muted" id="stat-new-notifications"></small>
       </div>
     </div>
   </div>

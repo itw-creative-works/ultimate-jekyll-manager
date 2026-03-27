@@ -15,6 +15,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.13] - 2026-03-27
+### Added
+- MRR stat card on admin dashboard calculated from brand config prices × subscriber counts
+- `setStatSubValue` helper in admin-helpers.js for displaying sub-metrics on stat cards
+- Green "+N in 30d" sub-values under Total Users and Push Subscribers stat cards
+- New "Active users (30d)" stat card on admin users page
+
+### Changed
+- Dashboard charts now use `getCountFromServer` queries per product × frequency instead of fetching all user docs
+- Product list and billing frequencies derived dynamically from `/backend-manager/brand` API
+- Consolidated "New users (30d)" from standalone card into sub-value under Total Users
+
+### Fixed
+- Pacman-shaped spinners in stat cards caused by `spinner-border-sm` inheriting `<h3>` font size (added `fs-6`)
+
+### Removed
+- `showUnauthenticated()` flows from all admin pages — pages now return early if no user
+
 ## [1.0.11] - 2026-03-24
 ### Added
 - Firestore version + transport test page at `/test/libraries/firestore` for diagnosing SDK connectivity across browsers

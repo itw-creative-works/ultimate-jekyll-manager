@@ -52,3 +52,17 @@ export function setStatValue(id, result) {
     console.error(`Failed to load ${id}:`, result.reason);
   }
 }
+
+export function setStatSubValue(id, result, label) {
+  const $el = document.getElementById(id);
+  if (!$el) {
+    return;
+  }
+
+  if (result.status === 'fulfilled') {
+    const count = result.value.data().count;
+    $el.textContent = `+${count.toLocaleString()} ${label}`;
+    $el.classList.add('text-success');
+    $el.classList.remove('text-muted');
+  }
+}

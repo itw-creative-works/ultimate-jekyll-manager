@@ -5,7 +5,7 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-import { formatTimeAgo, capitalize, escapeHtml, setStatValue } from '__main_assets__/js/libs/admin-helpers.js';
+import { formatTimeAgo, capitalize, escapeHtml, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 
 // State
@@ -26,7 +26,6 @@ export default (Manager) => {
 
     webManager.auth().listen({ once: true }, async (state) => {
       if (!state.user) {
-        showUnauthenticated();
         return;
       }
 
@@ -37,16 +36,6 @@ export default (Manager) => {
     return resolve();
   });
 };
-
-// Show unauthenticated state
-function showUnauthenticated() {
-  document.querySelectorAll('.spinner-border').forEach((spinner) => {
-    spinner.replaceWith(Object.assign(document.createElement('span'), {
-      className: 'text-muted small',
-      textContent: 'Sign in to view',
-    }));
-  });
-}
 
 // Initialize FormManager for search
 function initForm() {
@@ -73,15 +62,17 @@ async function loadStatCards() {
   const now = Math.floor(Date.now() / 1000);
   const thirtyDaysAgo = now - (30 * 24 * 60 * 60);
 
-  const [totalUsers, activeSubs, newUsers] = await Promise.allSettled([
+  const [totalUsers, newUsers, activeSubs, activeUsers] = await Promise.allSettled([
     getCountFromServer(collection(db, 'users')),
-    getCountFromServer(query(collection(db, 'users'), where('subscription.expires.timestampUNIX', '>=', now))),
+    getCountFromServer(query(collection(db, 'users'), where('metadata.created.timestampUNIX', '>=', thirtyDaysAgo))),
+    getCountFromServer(query(collection(db, 'users'), where('subscription.status', '==', 'active'), where('subscription.product.id', '!=', 'basic'))),
     getCountFromServer(query(collection(db, 'users'), where('metadata.updated.timestampUNIX', '>=', thirtyDaysAgo))),
   ]);
 
   setStatValue('stat-total-users', totalUsers);
+  setStatSubValue('stat-new-users', newUsers, 'in 30d');
   setStatValue('stat-active-subs', activeSubs);
-  setStatValue('stat-new-users', newUsers);
+  setStatValue('stat-active-users', activeUsers);
 }
 
 // Search users by email prefix or UID prefix

@@ -58,8 +58,9 @@ prerender_icons:
         </div>
         <h6 class="text-muted mb-1">Total users</h6>
         <h3 class="mb-0" id="stat-total-users">
-          <span class="spinner-border spinner-border-sm"></span>
+          <span class="spinner-border spinner-border-sm fs-6"></span>
         </h3>
+        <small class="text-muted" id="stat-new-users"></small>
       </div>
     </div>
   </div>
@@ -73,22 +74,22 @@ prerender_icons:
         </div>
         <h6 class="text-muted mb-1">Active subscriptions</h6>
         <h3 class="mb-0" id="stat-active-subs">
-          <span class="spinner-border spinner-border-sm"></span>
+          <span class="spinner-border spinner-border-sm fs-6"></span>
         </h3>
       </div>
     </div>
   </div>
 
-  <!-- New Users (30d) -->
+  <!-- Active Users (30d) -->
   <div class="col-lg-4 col-md-6">
     <div class="card h-100">
       <div class="card-body text-center">
         <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-info bg-opacity-10 mx-auto mb-2">
           {% uj_icon "user-plus", "fa-xl text-info" %}
         </div>
-        <h6 class="text-muted mb-1">New users (30d)</h6>
-        <h3 class="mb-0" id="stat-new-users">
-          <span class="spinner-border spinner-border-sm"></span>
+        <h6 class="text-muted mb-1">Active users (30d)</h6>
+        <h3 class="mb-0" id="stat-active-users">
+          <span class="spinner-border spinner-border-sm fs-6"></span>
         </h3>
       </div>
     </div>

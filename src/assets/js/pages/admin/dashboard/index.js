@@ -4,8 +4,9 @@
 
 // Libraries
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+import fetch from 'wonderful-fetch';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-import { formatTimeAgo, capitalize, escapeHtml, setStatValue } from '__main_assets__/js/libs/admin-helpers.js';
+import { formatTimeAgo, capitalize, escapeHtml, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
 import { Chart, DoughnutController, BarController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 
 // Register Chart.js components
@@ -25,7 +26,6 @@ export default (Manager) => {
 
     webManager.auth().listen({ once: true }, async (state) => {
       if (!state.user) {
-        showUnauthenticated();
         return;
       }
 
@@ -36,18 +36,6 @@ export default (Manager) => {
     return resolve();
   });
 };
-
-// Show unauthenticated state
-function showUnauthenticated() {
-  // Replace all spinners with sign-in message
-  document.querySelectorAll('.spinner-border').forEach((spinner) => {
-    const container = spinner.closest('.card-body') || spinner.parentElement;
-    spinner.replaceWith(Object.assign(document.createElement('span'), {
-      className: 'text-muted small',
-      textContent: 'Sign in to view',
-    }));
-  });
-}
 
 // Load all dashboard data in parallel
 async function loadDashboard() {
@@ -74,54 +62,97 @@ async function loadStatCards() {
   const now = Math.floor(Date.now() / 1000);
   const thirtyDaysAgo = now - (30 * 24 * 60 * 60);
 
-  const [totalUsers, newUsers, activeSubscriptions, pushSubscribers] = await Promise.allSettled([
+  const [totalUsers, newUsers, totalNotifications, newNotifications] = await Promise.allSettled([
     getCountFromServer(collection(db, 'users')),
     getCountFromServer(query(collection(db, 'users'), where('metadata.created.timestampUNIX', '>=', thirtyDaysAgo))),
-    getCountFromServer(query(collection(db, 'users'), where('subscription.status', '==', 'active'), where('subscription.product.id', '!=', 'basic'))),
     getCountFromServer(collection(db, 'notifications')),
+    getCountFromServer(query(collection(db, 'notifications'), where('metadata.created.timestampUNIX', '>=', thirtyDaysAgo))),
   ]);
 
   setStatValue('stat-total-users', totalUsers);
-  setStatValue('stat-new-users', newUsers);
-  setStatValue('stat-subscriptions', activeSubscriptions);
-  setStatValue('stat-notifications', pushSubscribers);
+  setStatSubValue('stat-new-users', newUsers, 'in 30d');
+  setStatValue('stat-notifications', totalNotifications);
+  setStatSubValue('stat-new-notifications', newNotifications, 'in 30d');
 }
 
 // ============================================
 // Subscriber Data (for charts)
 // ============================================
 async function loadSubscriberData() {
-  const firestore = webManager.firestore();
+  const { collection, query, where, getCountFromServer } = await import('firebase/firestore');
+  const db = webManager.firebaseFirestore;
 
-  const snapshot = await firestore.collection('users')
-    .where('subscription.status', '==', 'active')
-    .get();
+  // Fetch brand config to get product list and available frequencies
+  const brandConfig = await fetch(`${webManager.getApiUrl()}/backend-manager/brand`, {
+    response: 'json',
+    tries: 2,
+  });
 
-  // Group by plan
+  const products = (brandConfig?.payment?.products || []).filter((p) => p.id !== 'basic');
+  const frequencyIds = [...new Set(products.flatMap((p) => Object.keys(p.prices || {})))];
+
+  // Run count queries for each product × frequency in parallel
+  const countQueries = products.flatMap((product) =>
+    frequencyIds.map((freq) =>
+      getCountFromServer(query(
+        collection(db, 'users'),
+        where('subscription.status', '==', 'active'),
+        where('subscription.product.id', '==', product.id),
+        where('subscription.payment.frequency', '==', freq),
+      )).then((snap) => ({ planId: product.id, frequency: freq, count: snap.data().count }))
+    )
+  );
+
+  const results = await Promise.all(countQueries);
+
+  // Build chart data from counts
   const plans = {};
   const frequencies = {};
 
-  snapshot.docs.forEach((doc) => {
-    const data = doc.data();
-    const planId = data?.subscription?.product?.id || 'basic';
-    const frequency = data?.subscription?.payment?.frequency || 'unknown';
+  results.forEach(({ planId, frequency, count }) => {
+    if (count === 0) {
+      return;
+    }
 
-    // Plan counts
-    plans[planId] = (plans[planId] || 0) + 1;
+    plans[planId] = (plans[planId] || 0) + count;
 
-    // Frequency per plan
     if (!frequencies[planId]) {
-      frequencies[planId] = { monthly: 0, annually: 0, other: 0 };
+      frequencies[planId] = Object.fromEntries(frequencyIds.map((f) => [f, 0]));
     }
-    if (frequency === 'monthly' || frequency === 'annually') {
-      frequencies[planId][frequency]++;
-    } else {
-      frequencies[planId].other++;
-    }
+    frequencies[planId][frequency] = count;
   });
 
+  // Calculate MRR from counts × product prices
+  const MONTHS_PER_FREQUENCY = { daily: 1 / 30, weekly: 1 / 4, monthly: 1, annually: 12 };
+  let mrr = 0;
+  let totalSubscribers = 0;
+
+  results.forEach(({ planId, frequency, count }) => {
+    if (count === 0) {
+      return;
+    }
+
+    const product = products.find((p) => p.id === planId);
+    const priceEntry = product?.prices?.[frequency];
+    const price = typeof priceEntry === 'object' ? (priceEntry?.amount || 0) : Number(priceEntry) || 0;
+    const months = MONTHS_PER_FREQUENCY[frequency] || 1;
+
+    mrr += (price / months) * count;
+    totalSubscribers += count;
+  });
+
+  // Set MRR stat card
+  const $mrr = document.getElementById('stat-mrr');
+  if ($mrr) {
+    $mrr.textContent = `$${Math.round(mrr).toLocaleString()}`;
+  }
+  const $mrrCount = document.getElementById('stat-mrr-count');
+  if ($mrrCount) {
+    $mrrCount.textContent = `${totalSubscribers.toLocaleString()} subscriber${totalSubscribers === 1 ? '' : 's'}`;
+  }
+
   renderPlanChart(plans);
-  renderFrequencyChart(frequencies);
+  renderFrequencyChart(frequencies, frequencyIds);
 }
 
 // ============================================
@@ -202,7 +233,7 @@ function renderPlanChart(plans) {
   });
 }
 
-function renderFrequencyChart(frequencies) {
+function renderFrequencyChart(frequencies, frequencyIds) {
   const $loading = document.getElementById('chart-frequency-loading');
   const $canvas = document.getElementById('chart-frequency');
   if (!$canvas) {
@@ -229,23 +260,11 @@ function renderFrequencyChart(frequencies) {
     type: 'bar',
     data: {
       labels: planIds.map(capitalize),
-      datasets: [
-        {
-          label: 'Monthly',
-          data: planIds.map((id) => frequencies[id].monthly),
-          backgroundColor: colors.palette[0],
-        },
-        {
-          label: 'Annually',
-          data: planIds.map((id) => frequencies[id].annually),
-          backgroundColor: colors.palette[1],
-        },
-        {
-          label: 'Other',
-          data: planIds.map((id) => frequencies[id].other),
-          backgroundColor: colors.palette[3],
-        },
-      ],
+      datasets: frequencyIds.map((freq, i) => ({
+        label: capitalize(freq),
+        data: planIds.map((id) => frequencies[id]?.[freq] || 0),
+        backgroundColor: colors.palette[i % colors.palette.length],
+      })),
     },
     options: {
       responsive: true,
