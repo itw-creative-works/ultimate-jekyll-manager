@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.18] - 2026-03-30
+### Changed
+- Removed redundant "Additional gems" comment from Gemfile template output in defaults.js
+
+---
 ## [1.0.17] - 2026-03-30
 ### Added
 - Configurable gems support via `gems` array in `config/ultimate-jekyll-manager.json`

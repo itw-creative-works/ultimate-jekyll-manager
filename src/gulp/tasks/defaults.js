@@ -122,7 +122,7 @@ const FILE_MAP = {
         ujPowertoolsVersion: argv.ujPluginDevMode === 'true'
           ? `path: File.expand_path('~/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools')`
           : '"~> 1.0"',
-        additionalGems: gems ? `\n# Additional gems (from ultimate-jekyll-manager.json)\n${gems}` : '',
+        additionalGems: gems ? `\n${gems}` : '',
       };
     },
   },
