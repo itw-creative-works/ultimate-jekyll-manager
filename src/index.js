@@ -68,12 +68,8 @@ class Manager {
           .catch(e => console.error('Failed to load ultimate-jekyll-manager.js:', e))
       );
 
-      /* @dev-only:start */
-      {
-        console.log(`Page-specific module loading: #main/${pageModulePathFull}`);
-        console.log(`Page-specific module loading: #project/${pageModulePathFull}`);
-      }
-      /* @dev-only:end */
+      console.log(`Page-specific module loading: #main/${pageModulePathFull}`);
+      console.log(`Page-specific module loading: #project/${pageModulePathFull}`);
 
       // Load page-specific scripts
       modulePromises.push(
@@ -118,9 +114,7 @@ class Manager {
 
         // Execute the module function
         try {
-          /* @dev-only:start */
           console.log(`Page-specific module loaded: #${mod.tag}/${pageModulePathFull}`);
-          /* @dev-only:end */
 
           await mod.default(this, options);
         } catch (e) {

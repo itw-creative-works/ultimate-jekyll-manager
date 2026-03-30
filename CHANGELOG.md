@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.16] - 2026-03-30
+### Changed
+- Removed @dev-only wrappers from page module loading console.log statements in src/index.js
+
+---
 ## [1.0.15] - 2026-03-30
 ### Changed
 - Bump web-manager from 4.1.32 to 4.1.33 (includes @sentry/* 10.46.0, chatsy 2.0.13)
