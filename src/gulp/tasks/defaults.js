@@ -112,10 +112,18 @@ const FILE_MAP = {
     template: cleanVersions,
   },
   'Gemfile': {
-    template: {
-      ujPowertoolsVersion: argv.ujPluginDevMode === 'true'
-        ? `path: File.expand_path('~/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools')`
-        : '"~> 1.0"'
+    template: () => {
+      // Read project config for additional gems
+      const projectConfigPath = path.join(rootPathProject, 'config', 'ultimate-jekyll-manager.json');
+      const projectConfig = jetpack.exists(projectConfigPath) ? JSON5.parse(jetpack.read(projectConfigPath)) : {};
+      const gems = (projectConfig.gems || []).map(g => `gem "${g}"`).join('\n');
+
+      return {
+        ujPowertoolsVersion: argv.ujPluginDevMode === 'true'
+          ? `path: File.expand_path('~/Developer/Repositories/ITW-Creative-Works/jekyll-uj-powertools')`
+          : '"~> 1.0"',
+        additionalGems: gems ? `\n# Additional gems (from ultimate-jekyll-manager.json)\n${gems}` : '',
+      };
     },
   },
 
@@ -515,8 +523,9 @@ function customTransform() {
 
     // Run template if required (skip for binary files)
     if (options.template && !isBinaryFile) {
+      const templateData = typeof options.template === 'function' ? options.template() : options.template;
       const contents = file.contents.toString();
-      const templated = template(contents, options.template);
+      const templated = template(contents, templateData);
 
       // Update file contents
       file.contents = Buffer.from(templated);
