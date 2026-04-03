@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.21] - 2026-04-03
+### Fixed
+- Disable cache breaker on Slapform contact form fetch to prevent appending cache-busting query params to POST request
+
 ## [1.0.20] - 2026-04-03
 ### Fixed
 - Fix contact form sending `user: map[]` to Slapform by replacing nested `user` object with flat `uid` string field

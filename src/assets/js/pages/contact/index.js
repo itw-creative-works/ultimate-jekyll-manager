@@ -66,6 +66,7 @@ function setupForm() {
         method: 'POST',
         body: requestData,
         response: 'json',
+        cacheBreaker: false,
         timeout: 30000,
       });
 
