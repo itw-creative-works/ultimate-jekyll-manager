@@ -1,9 +1,11 @@
 // reCAPTCHA management for checkout
+import webManager from 'web-manager';
+
 let recaptchaReady = false;
 let recaptchaSiteKey = null;
 
 // Initialize reCAPTCHA
-export async function initializeRecaptcha(siteKey, webManager) {
+export async function initializeRecaptcha(siteKey) {
   if (!siteKey) {
     console.warn('No reCAPTCHA site key provided');
     return false;

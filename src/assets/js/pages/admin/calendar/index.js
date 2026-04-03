@@ -6,16 +6,11 @@
 import CalendarCore from './calendar-core.js';
 import CalendarRenderer from './calendar-renderer.js';
 import CalendarEvents from './calendar-events.js';
-
-// State
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
@@ -34,9 +29,9 @@ export default (Manager) => {
 
 // Initialize the calendar
 function initialize() {
-  const core = new CalendarCore(webManager);
+  const core = new CalendarCore();
   const renderer = new CalendarRenderer(core);
-  const events = new CalendarEvents(core, webManager);
+  const events = new CalendarEvents(core);
 
   core.setRenderer(renderer);
   core.setEventsManager(events);

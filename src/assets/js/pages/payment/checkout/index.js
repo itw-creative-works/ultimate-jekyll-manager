@@ -5,14 +5,13 @@ import { state, buildBindingsState, resolveProcessor, FREQUENCIES, getAvailableF
 import { applyDiscountCode } from './modules/discount.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
 import { trackBeginCheckout, trackAddPaymentInfo } from './modules/tracking.js';
+import webManager from 'web-manager';
 
-let webManager = null;
 let formManager = null;
 
-// Module export
-export default (Manager) => {
+// Module
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
     await webManager.dom().ready();
     await initializeCheckout();
     return resolve();
@@ -21,7 +20,7 @@ export default (Manager) => {
 
 // Update UI via bindings (single source of truth)
 function updateUI() {
-  webManager.bindings().update(buildBindingsState(webManager));
+  webManager.bindings().update(buildBindingsState());
 }
 
 // Show fatal error and hide checkout content
@@ -31,7 +30,7 @@ function showError(message) {
 }
 
 // Create/reset abandoned cart tracker in Firestore (fire-and-forget)
-function trackAbandonedCart(webManager, product, state) {
+function trackAbandonedCart(product, state) {
   const user = webManager.auth().getUser();
   if (!user) {
     return;
@@ -76,13 +75,13 @@ async function initializeCheckout() {
     await new Promise((resolve) => webManager.auth().listen({ once: true }, resolve));
 
     // Fire-and-forget server warmup
-    warmupServer(webManager);
+    warmupServer();
 
     // Parallel fetch: brand config + trial eligibility + reCAPTCHA
     const [brandConfigResult, trialResult, recaptchaResult] = await Promise.allSettled([
-      fetchBrandConfig(webManager),
-      fetchTrialEligibility(webManager),
-      initializeRecaptcha(webManager.config?.recaptcha?.['site-key'], webManager),
+      fetchBrandConfig(),
+      fetchTrialEligibility(),
+      initializeRecaptcha(webManager.config?.recaptcha?.['site-key']),
     ]);
 
     /* @dev-only:start */
@@ -165,7 +164,7 @@ async function initializeCheckout() {
     trackBeginCheckout(state);
 
     // Create/reset abandoned cart tracker (fire-and-forget, authenticated only)
-    trackAbandonedCart(webManager, product, state);
+    trackAbandonedCart(product, state);
 
   } catch (error) {
     console.error('Checkout initialization failed:', error);
@@ -209,7 +208,6 @@ function setupForm() {
 
     // Create payment intent and redirect
     const response = await createPaymentIntent({
-      webManager,
       state,
       processor,
       formData: formManager.getData(),
@@ -231,7 +229,7 @@ function setupForm() {
   if ($applyDiscountBtn) {
     $applyDiscountBtn.addEventListener('click', () => {
       const data = formManager.getData();
-      applyDiscountCode(data.discount, updateUI, webManager);
+      applyDiscountCode(data.discount, updateUI);
     });
   }
   if ($discountInput) {
@@ -269,7 +267,7 @@ function setupForm() {
     window._checkout = {
       get state() { return JSON.parse(JSON.stringify(state)); },
       get formData() { return formManager.getData(); },
-      get bindings() { return buildBindingsState(webManager); },
+      get bindings() { return buildBindingsState(); },
       resolveProcessor: (method) => resolveProcessor(method || 'card'),
     };
     console.log('%c[Checkout Dev] window._checkout available', 'color: #8B5CF6');

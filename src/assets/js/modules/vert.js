@@ -3,8 +3,7 @@
  * Handles lazy loading of ad units (verts) when scrolled into view.
  * Configuration is passed via data attributes on the script tag itself.
  */
-const Manager = window.Manager
-const webManager = Manager?.webManager;
+import webManager from 'web-manager';
 
 // Get search params to check for debug mode
 const searchParams = new URLSearchParams(window.location.search);
@@ -116,8 +115,10 @@ const setupMessageHandler = () => {
         $iframe.style.height = payload.height + 'px';
       }
     } else if (command === 'uj-vert-unit:click') {
-      // Navigate to the URL when ad is clicked
-      window.location.href = payload.url;
+      // Navigate to the URL when ad is clicked — only allow http/https schemes
+      if (payload.url && /^https?:\/\//i.test(payload.url)) {
+        window.location.href = payload.url;
+      }
     }
   }, false);
 };

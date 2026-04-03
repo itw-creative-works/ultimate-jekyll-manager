@@ -1,7 +1,7 @@
+import webManager from 'web-manager';
+
 // Cookie Consent Module
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
+export default function () {
 
   // Check if user has already consented
   const hasConsented = webManager.storage().get('cookies.consent.accepted') === true;

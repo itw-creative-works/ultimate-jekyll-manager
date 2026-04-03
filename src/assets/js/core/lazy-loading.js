@@ -1,8 +1,7 @@
-// Lazy Loading Module
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
+import webManager from 'web-manager';
 
+// Lazy Loading Module
+export default function () {
   // Constants
   const TRANSPARENT_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 

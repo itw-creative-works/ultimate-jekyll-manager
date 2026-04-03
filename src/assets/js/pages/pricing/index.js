@@ -1,14 +1,10 @@
 // Libraries
 import { getSaleName } from '__main_assets__/js/libs/sale-name.js';
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 

@@ -8,9 +8,6 @@ import fetch from 'wonderful-fetch';
  * @returns {Promise} - The response from the API
  */
 export async function authorizedFetch(url, options = {}) {
-  // Get webManager reference from global window.Manager
-  const webManager = window.Manager?.webManager;
-
   // Deep clone options to avoid mutating the original
   const requestOptions = JSON.parse(JSON.stringify(options));
 

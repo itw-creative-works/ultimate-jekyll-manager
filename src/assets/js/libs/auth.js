@@ -1,12 +1,9 @@
 // This file is required by /signin, /signup, and /reset pages since the logic is mostly the same
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import webManager from 'web-manager';
 
 // Module
-export default function (Manager) {
-  // Shortcuts
-  const { webManager } = Manager;
-
-  // Form manager instance
+export default function () {
   let formManager = null;
 
   // Check query string for popup parameter
@@ -14,7 +11,7 @@ export default function (Manager) {
   const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== window.top;
 
   // Fire wakeup call immediately to prevent cold start on signup API call (fire-and-forget)
-  // wakeupServer(webManager);
+  // wakeupServer();
 
   // Handle DOM ready
   webManager.dom().ready()
@@ -23,7 +20,7 @@ export default function (Manager) {
     console.log('[Auth] Initialized. useAuthPopup:', useAuthPopup);
 
     // Check for authSignout parameter first
-    await handleAuthSignout(webManager);
+    await handleAuthSignout();
 
     // Initialize the appropriate form based on the page (with autoReady: false)
     initializePageForm();
@@ -212,7 +209,7 @@ export default function (Manager) {
     }
   }
 
-  async function handleAuthSignout(webManager) {
+  async function handleAuthSignout() {
     const url = new URL(window.location.href);
     const authSignout = url.searchParams.get('authSignout');
 
@@ -408,7 +405,6 @@ export default function (Manager) {
       throw error;
     }
   }
-
 
   async function signInWithProvider(providerName, action = 'signin') {
     try {
@@ -661,7 +657,7 @@ export default function (Manager) {
   }
 
   // Wakeup server to prevent cold start on signup API call
-  function wakeupServer(webManager) {
+  function wakeupServer() {
     const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/signup?wakeup=true`;
 
     fetch(serverApiURL, { method: 'POST' })

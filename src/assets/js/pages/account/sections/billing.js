@@ -5,8 +5,8 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
-let webManager = null;
 let brandData = null;
 let cancelFormManager = null;
 let currentAccount = null;
@@ -35,8 +35,7 @@ const STATUS_CONFIG = {
 const FREQUENCY_LABELS = { daily: 'day', weekly: 'week', monthly: 'month', annually: 'year' };
 
 // Initialize billing section
-export async function init(wm) {
-  webManager = wm;
+export async function init() {
   setupActionButtons();
   setupCancellationForm();
 }
@@ -359,24 +358,25 @@ function updateUsageInfo(account) {
     const metricUsage = usage[metricId] || {};
     const used = metricUsage.period || 0;
 
-    const usagePercent = Math.min(100, Math.round((used / limit) * 100));
+    const isUnlimited = limit === -1;
+    const usagePercent = isUnlimited ? 0 : Math.min(100, Math.round((used / limit) * 100));
 
     let progressClass = 'bg-success';
-    if (usagePercent >= 80) {
+    if (!isUnlimited && usagePercent >= 80) {
       progressClass = 'bg-danger';
-    } else if (usagePercent >= 50) {
+    } else if (!isUnlimited && usagePercent >= 50) {
       progressClass = 'bg-warning';
     }
 
     const metricName = formatMetricName(metricId);
     const formattedUsed = formatMetricValue(metricId, used);
-    const formattedLimit = formatMetricValue(metricId, limit);
+    const formattedLimit = isUnlimited ? '∞' : formatMetricValue(metricId, limit);
 
     $container.innerHTML += `
       <div class="mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <small class="text-muted fw-semibold">${metricName}</small>
-          <small class="text-muted">${formattedUsed} / ${formattedLimit}</small>
+          <small class="text-muted fw-semibold">${webManager.utilities().escapeHTML(metricName)}</small>
+          <small class="text-muted">${webManager.utilities().escapeHTML(formattedUsed)} / ${webManager.utilities().escapeHTML(formattedLimit)}</small>
         </div>
         <div class="progress" style="height: 20px;">
           <div class="progress-bar ${progressClass}" role="progressbar"

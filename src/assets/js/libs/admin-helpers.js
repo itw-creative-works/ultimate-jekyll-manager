@@ -33,12 +33,6 @@ export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 export function setStatValue(id, result) {
   const $el = document.getElementById(id);
   if (!$el) {

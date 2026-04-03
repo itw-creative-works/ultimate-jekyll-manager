@@ -7,14 +7,13 @@
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
-import { escapeHtml } from '__main_assets__/js/libs/admin-helpers.js';
+import webManager from 'web-manager';
 import { DISPLAY_TYPES, formatDateUTC, formatTimeUTC, todayUTC } from './calendar-core.js';
 import { renderEmailPreview, renderPushPreview } from './campaign-preview.js';
 
 export default class CalendarEvents {
-  constructor(core, webManager) {
+  constructor(core) {
     this.core = core;
-    this.webManager = webManager;
     this.editingCampaignId = null;
     this.formManager = null;
     this.$editorModal = null;
@@ -159,7 +158,7 @@ export default class CalendarEvents {
         $container.innerHTML = renderPushPreview(data);
       }
     } catch (error) {
-      $container.innerHTML = `<div class="text-danger small">Preview failed: ${error.message}</div>`;
+      $container.innerHTML = `<div class="text-danger small">Preview failed: ${webManager.utilities().escapeHTML(error.message)}</div>`;
     }
   }
 
@@ -534,7 +533,7 @@ export default class CalendarEvents {
   // BEM API Calls
   // ============================================
   async _createCampaign(payload) {
-    const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+    const url = `${webManager.getApiUrl()}/backend-manager/marketing/campaign`;
     const response = await authorizedFetch(url, {
       method: 'POST',
       timeout: 60000,
@@ -552,7 +551,7 @@ export default class CalendarEvents {
 
   async _updateCampaign(id, payload) {
     payload.id = id;
-    const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+    const url = `${webManager.getApiUrl()}/backend-manager/marketing/campaign`;
     const response = await authorizedFetch(url, {
       method: 'PUT',
       timeout: 60000,
@@ -569,7 +568,7 @@ export default class CalendarEvents {
   }
 
   async _deleteCampaign(id) {
-    const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+    const url = `${webManager.getApiUrl()}/backend-manager/marketing/campaign`;
     const response = await authorizedFetch(url, {
       method: 'DELETE',
       timeout: 60000,
@@ -587,7 +586,7 @@ export default class CalendarEvents {
    * Reschedule a one-off campaign (drag-and-drop)
    */
   async rescheduleCampaign(id, newSendAt) {
-    const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+    const url = `${webManager.getApiUrl()}/backend-manager/marketing/campaign`;
     return authorizedFetch(url, {
       method: 'PUT',
       timeout: 60000,
@@ -629,7 +628,7 @@ export default class CalendarEvents {
     // Optimistic update: move the seed sendAt, re-render immediately
     const rollback = this.core.optimisticUpdateSendAt(templateId, newSendAtUNIX);
 
-    const url = `${this.webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+    const url = `${webManager.getApiUrl()}/backend-manager/marketing/campaign`;
     return authorizedFetch(url, {
       method: 'PUT',
       timeout: 60000,
@@ -671,33 +670,33 @@ export default class CalendarEvents {
     html += `<span class="badge bg-${campaign.type === 'email' ? 'primary' : 'success'}">${campaign.type === 'email' ? 'Email' : 'Push'}</span>`;
     html += `</div>`;
     html += `<table class="table table-sm table-borderless mb-0">`;
-    html += `<tr><td class="text-muted" style="width:120px">Name</td><td>${escapeHtml(settings.name || '')}</td></tr>`;
-    html += `<tr><td class="text-muted">Subject</td><td>${escapeHtml(settings.subject || '')}</td></tr>`;
+    html += `<tr><td class="text-muted" style="width:120px">Name</td><td>${webManager.utilities().escapeHTML(settings.name || '')}</td></tr>`;
+    html += `<tr><td class="text-muted">Subject</td><td>${webManager.utilities().escapeHTML(settings.subject || '')}</td></tr>`;
     html += `<tr><td class="text-muted">Sent At</td><td>${formatDateUTC(d)} ${formatTimeUTC(d)} UTC</td></tr>`;
 
     if (campaign.type === 'email') {
       if (settings.preheader) {
-        html += `<tr><td class="text-muted">Preheader</td><td>${escapeHtml(settings.preheader)}</td></tr>`;
+        html += `<tr><td class="text-muted">Preheader</td><td>${webManager.utilities().escapeHTML(settings.preheader)}</td></tr>`;
       }
       if (settings.sender) {
-        html += `<tr><td class="text-muted">Sender</td><td>${escapeHtml(settings.sender)}</td></tr>`;
+        html += `<tr><td class="text-muted">Sender</td><td>${webManager.utilities().escapeHTML(settings.sender)}</td></tr>`;
       }
       if (settings.template) {
-        html += `<tr><td class="text-muted">Template</td><td>${escapeHtml(settings.template)}</td></tr>`;
+        html += `<tr><td class="text-muted">Template</td><td>${webManager.utilities().escapeHTML(settings.template)}</td></tr>`;
       }
     }
 
     if (campaign.type === 'push') {
       if (settings.icon) {
-        html += `<tr><td class="text-muted">Icon</td><td><a href="${escapeHtml(settings.icon)}" target="_blank" rel="noopener">${escapeHtml(settings.icon)}</a></td></tr>`;
+        html += `<tr><td class="text-muted">Icon</td><td><a href="${webManager.utilities().escapeHTML(settings.icon)}" target="_blank" rel="noopener">${webManager.utilities().escapeHTML(settings.icon)}</a></td></tr>`;
       }
       if (settings.clickAction) {
-        html += `<tr><td class="text-muted">Click URL</td><td><a href="${escapeHtml(settings.clickAction)}" target="_blank" rel="noopener">${escapeHtml(settings.clickAction)}</a></td></tr>`;
+        html += `<tr><td class="text-muted">Click URL</td><td><a href="${webManager.utilities().escapeHTML(settings.clickAction)}" target="_blank" rel="noopener">${webManager.utilities().escapeHTML(settings.clickAction)}</a></td></tr>`;
       }
     }
 
     if (campaign.recurringId) {
-      html += `<tr><td class="text-muted">Recurring</td><td>${escapeHtml(campaign.recurringId)}</td></tr>`;
+      html += `<tr><td class="text-muted">Recurring</td><td>${webManager.utilities().escapeHTML(campaign.recurringId)}</td></tr>`;
     }
 
     html += `</table>`;
@@ -707,7 +706,7 @@ export default class CalendarEvents {
     if (campaign.type === 'email' && settings.content) {
       html += '<div class="mb-4">';
       html += '<h6>Content</h6>';
-      html += `<pre class="bg-body-tertiary p-3 rounded small" style="white-space:pre-wrap;max-height:200px;overflow-y:auto">${escapeHtml(settings.content)}</pre>`;
+      html += `<pre class="bg-body-tertiary p-3 rounded small" style="white-space:pre-wrap;max-height:200px;overflow-y:auto">${webManager.utilities().escapeHTML(settings.content)}</pre>`;
       html += '</div>';
     }
 
@@ -715,7 +714,7 @@ export default class CalendarEvents {
     if (Object.keys(results).length > 0) {
       html += '<div class="mb-3">';
       html += '<h6>Results</h6>';
-      html += `<pre class="bg-body-tertiary p-3 rounded small" style="white-space:pre-wrap;max-height:300px;overflow-y:auto">${escapeHtml(JSON.stringify(results, null, 2))}</pre>`;
+      html += `<pre class="bg-body-tertiary p-3 rounded small" style="white-space:pre-wrap;max-height:300px;overflow-y:auto">${webManager.utilities().escapeHTML(JSON.stringify(results, null, 2))}</pre>`;
       html += '</div>';
     }
 

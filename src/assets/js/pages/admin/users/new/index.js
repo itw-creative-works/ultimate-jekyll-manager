@@ -4,16 +4,14 @@
 
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import webManager from 'web-manager';
 
 // State
-let webManager = null;
 let formManager = null;
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
-
     await webManager.dom().ready();
 
     webManager.auth().listen({ once: true }, async (state) => {

@@ -360,14 +360,11 @@ All page modules must follow this standardized pattern:
  */
 
 // Libraries
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
@@ -386,9 +383,63 @@ function helper1() {
 ```
 
 **Key Points:**
+- `web-manager` is a singleton — `import webManager from 'web-manager'` returns the same initialized instance everywhere. No need to receive it via params or store in module-level variables.
 - Helpers are defined outside the main export function
-- Use `webManager` shortcuts for common operations
 - Always wait for DOM ready before manipulating elements
+- Use `webManager.utilities().escapeHTML()` for XSS prevention — do NOT write your own escape function
+
+## XSS Prevention (ZERO TRUST — MANDATORY)
+
+**TREAT ALL DYNAMIC DATA AS UNTRUSTED.** This is a zero-trust policy: any value that did not come directly from a hardcoded literal in the source file MUST be escaped before being inserted into the DOM via `innerHTML` or attribute interpolation.
+
+This includes — but is not limited to:
+- Firestore document fields (user names, emails, IDs, descriptions, etc.)
+- API response data
+- URL parameters (`location.search`, `URLSearchParams`)
+- User input from form fields
+- OAuth-provided values (displayName, email from Google/GitHub)
+- Any variable whose origin is not a hardcoded source-code constant
+
+### The Rule
+```javascript
+// ✅ ALWAYS escape dynamic data before innerHTML
+$el.innerHTML = `<p>${webManager.utilities().escapeHTML(data.title)}</p>`;
+$el.innerHTML = `<a href="${webManager.utilities().escapeHTML(url)}">${webManager.utilities().escapeHTML(label)}</a>`;
+
+// ✅ textContent is always safe — no escaping needed
+$el.textContent = data.title;
+
+// ❌ NEVER inject dynamic data raw into innerHTML
+$el.innerHTML = `<p>${data.title}</p>`;
+$el.innerHTML = `<a href="${url}">${label}</a>`;
+```
+
+### NEVER Write Your Own Escape Function
+Do NOT create a local `escapeHtml` function or any variant. The ONLY allowed escape method is:
+```javascript
+webManager.utilities().escapeHTML(str)
+```
+
+### When Building DOM Programmatically
+Prefer `document.createElement` + `textContent` for plain text nodes — it is inherently safe:
+```javascript
+const $el = document.createElement('div');
+$el.textContent = data.message; // Safe — no escaping needed
+```
+
+Only use `innerHTML` when you need actual HTML structure (tags, classes, etc.), and escape every dynamic value in it.
+
+### Do NOT Escape Values Passed to textContent-Based APIs
+`showNotification()`, `formManager.showSuccess()`, `formManager.showError()`, and `textContent` assignments use safe text insertion internally. Pre-escaping these causes double-encoding (e.g., `We'll` displays as `We&#039;ll`).
+
+```javascript
+// ✅ CORRECT — these APIs use textContent internally, so they're already safe
+webManager.utilities().showNotification('Thank you! We\'ll be in touch.', 'success');
+formManager.showSuccess('Message sent successfully!');
+
+// ❌ WRONG — double-escapes
+webManager.utilities().showNotification(webManager.utilities().escapeHTML(message), 'success');
+```
 
 ## Layouts and Pages
 
@@ -976,15 +1027,22 @@ webManager.uj().appearance.clear();      // Clear saved preference
 
 ### WebManager
 
-Custom library for site management functionality.
+Custom library for site management functionality. **It's a singleton** — import it directly from any file:
+
+```javascript
+import webManager from 'web-manager';
+```
+
+This returns the same initialized instance everywhere. Do NOT pass it via params, store in module-level variables, or create new instances.
 
 **Documentation:** `/Users/ian/Developer/Repositories/ITW-Creative-Works/web-manager/README.md`
 
 **Available Utilities:**
 - `webManager.auth()` - Authentication management
-- `webManager.utilities()` - Utility functions
+- `webManager.utilities()` - Utility functions (escapeHTML, clipboardCopy, etc.)
 - `webManager.sentry()` - Error tracking
 - `webManager.dom()` - DOM manipulation
+- `webManager.utilities().escapeHTML(text)` - **XSS prevention** — use this instead of writing your own escape function
 
 **Important:** Always check the source code or README before assuming a function exists. Do not guess at API methods.
 

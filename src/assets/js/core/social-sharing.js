@@ -1,7 +1,7 @@
+import webManager from 'web-manager';
+
 // Social Sharing Module
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
+export default function () {
 
   // Configuration with defaults merged with supplied config
   const config = webManager.config.socialSharing.config;

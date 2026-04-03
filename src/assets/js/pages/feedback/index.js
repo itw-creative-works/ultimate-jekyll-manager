@@ -6,15 +6,11 @@
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
@@ -124,7 +120,7 @@ function showReviewModal(reviewURL, data) {
   // Extract site name for display
   try {
     const siteName = new URL(fullURL).hostname.replace('www.', '');
-    $link.innerHTML = `${getPrerenderedIcon('arrow-up-right-from-square', 'me-2')} Write a Review on ${siteName}`;
+    $link.innerHTML = `${getPrerenderedIcon('arrow-up-right-from-square', 'me-2')} Write a Review on ${webManager.utilities().escapeHTML(siteName)}`;
   } catch (e) {
     // Use default text
   }

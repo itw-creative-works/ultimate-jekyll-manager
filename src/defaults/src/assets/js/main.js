@@ -7,9 +7,6 @@ const manager = new Manager();
 // Initialize
 manager.initialize()
 .then(() => {
-  // Shortcuts
-  const { webManager } = manager;
-
   // Log
   console.log('Ultimate Jekyll Manager initialized successfully');
 

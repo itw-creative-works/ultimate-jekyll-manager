@@ -2,19 +2,17 @@
  * Appearance Module
  * Handles theme appearance switching (dark, light, system)
  */
+import webManager from 'web-manager';
 
 // Constants
 const STORAGE_KEY = 'appearance.preference';
 const VALID_VALUES = ['dark', 'light', 'system'];
 
 // Module state
-let webManager = null;
 let mediaQuery = null;
 
 // Module
-export default (Manager) => {
-  // Shortcuts
-  webManager = Manager.webManager;
+export default () => {
 
   // Create appearance API
   const appearanceAPI = {

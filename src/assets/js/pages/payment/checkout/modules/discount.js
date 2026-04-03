@@ -2,20 +2,12 @@
 import { state } from './state.js';
 import { validateDiscountCode } from './api.js';
 
-// Cached webManager reference (set on first call)
-let _webManager = null;
-
 /**
  * Apply a discount code via server-side validation
  * @param {string} code - Discount code to validate
  * @param {Function} updateUI - Callback to refresh bindings
- * @param {object} webManager - WebManager instance (required on first call)
  */
-export async function applyDiscountCode(code, updateUI, webManager) {
-  if (webManager) {
-    _webManager = webManager;
-  }
-
+export async function applyDiscountCode(code, updateUI) {
   code = (code || '').trim().toUpperCase();
 
   if (!code) {
@@ -31,7 +23,7 @@ export async function applyDiscountCode(code, updateUI, webManager) {
   updateUI();
 
   try {
-    const result = await validateDiscountCode(_webManager, code);
+    const result = await validateDiscountCode(code);
 
     if (result.valid) {
       state.discountCode = result.code;

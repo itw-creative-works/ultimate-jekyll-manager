@@ -1,11 +1,11 @@
 // Libraries
-import { Manager as WebManager } from 'web-manager';
+import webManager from 'web-manager';
 
 // Manager Class
 class Manager {
   constructor() {
     // Set properties
-    this.webManager = null;
+    this.webManager = webManager;
   }
 
   // Initialize
@@ -17,9 +17,6 @@ class Manager {
         console.log(`Initializing page:`, window.location.href);
       }
       /* @dev-only:end */
-
-      // Initiate the web manager
-      this.webManager = new WebManager();
 
       // Initialize
       await this.webManager.initialize(window.Configuration);
@@ -56,7 +53,7 @@ class Manager {
       // Initialize development features
       modulePromises.push(
         import('__main_assets__/js/libs/dev.js')
-          .then(mod => mod.default(this, options))
+          .then(mod => mod.default({ manager: this, options }))
           .catch(e => console.error('Failed to load dev.js:', e))
       );
       /* @dev-only:end */
@@ -64,7 +61,7 @@ class Manager {
       // Load global script
       modulePromises.push(
         import('__main_assets__/js/ultimate-jekyll-manager.js')
-          .then(mod => mod.default(this, options))
+          .then(mod => mod.default({ manager: this, options }))
           .catch(e => console.error('Failed to load ultimate-jekyll-manager.js:', e))
       );
 
@@ -116,7 +113,7 @@ class Manager {
         try {
           console.log(`Page-specific module loaded: #${mod.tag}/${pageModulePathFull}`);
 
-          await mod.default(this, options);
+          await mod.default({ manager: this, options });
         } catch (e) {
           console.error(`Page-specific module error: #${mod.tag}/${pageModulePathFull}`, e);
           break; // Stop execution if any module fails

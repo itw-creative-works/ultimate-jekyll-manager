@@ -1,20 +1,18 @@
 // Notifications section module
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Initialize notifications section
-export function init(wm) {
-  webManager = wm;
+export function init() {
   setupNotificationToggles();
 }
 
 // Load notifications data
 export function loadData(account) {
   if (!account) return;
-  
+
   // Load notification preferences from account
   const preferences = account.preferences?.notifications || {};
-  
+
   // Set toggle states
   setToggleState('marketing-emails', preferences.marketing !== false);
   setToggleState('security-emails', preferences.security !== false);
@@ -28,7 +26,7 @@ function setupNotificationToggles() {
     'security-emails',
     'product-emails'
   ];
-  
+
   toggles.forEach(toggleId => {
     const $toggle = document.getElementById(toggleId);
     if ($toggle) {
@@ -41,24 +39,24 @@ function setupNotificationToggles() {
 async function handleToggleChange(event) {
   const toggleId = event.target.id;
   const isEnabled = event.target.checked;
-  
+
   try {
     // Map toggle ID to preference key
     const preferenceKey = toggleId.replace('-emails', '');
-    
+
     // Update preferences
     await updateNotificationPreference(preferenceKey, isEnabled);
-    
+
     // Show feedback
     const actionText = isEnabled ? 'enabled' : 'disabled';
     showToast(`${getToggleLabel(toggleId)} ${actionText}`, 'success');
-    
+
   } catch (error) {
     console.error('Failed to update notification preference:', error);
-    
+
     // Revert toggle state
     event.target.checked = !isEnabled;
-    
+
     showToast('Failed to update notification preferences. Please try again.', 'danger');
   }
 }
@@ -72,7 +70,7 @@ async function updateNotificationPreference(key, value) {
       [key]: value
     }
   };
-  
+
   // await webManager.auth().updatePreferences(preferences);
   console.log('Updating notification preference:', key, value);
 }
@@ -108,24 +106,32 @@ function showToast(message, type = 'info') {
   $toast.setAttribute('aria-live', 'assertive');
   $toast.setAttribute('aria-atomic', 'true');
   $toast.style.zIndex = '9999';
-  
-  $toast.innerHTML = `
-    <div class="d-flex">
-      <div class="toast-body">
-        ${message}
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  `;
-  
+
+  const $inner = document.createElement('div');
+  $inner.className = 'd-flex';
+
+  const $body = document.createElement('div');
+  $body.className = 'toast-body';
+  $body.textContent = message;
+
+  const $closeBtn = document.createElement('button');
+  $closeBtn.type = 'button';
+  $closeBtn.className = 'btn-close btn-close-white me-2 m-auto';
+  $closeBtn.setAttribute('data-bs-dismiss', 'toast');
+  $closeBtn.setAttribute('aria-label', 'Close');
+
+  $inner.appendChild($body);
+  $inner.appendChild($closeBtn);
+  $toast.appendChild($inner);
+
   // Add to page
   document.body.appendChild($toast);
-  
+
   // Initialize and show toast
   if (window.bootstrap && window.bootstrap.Toast) {
     const toast = new window.bootstrap.Toast($toast);
     toast.show();
-    
+
     // Remove after hidden
     $toast.addEventListener('hidden.bs.toast', () => {
       $toast.remove();

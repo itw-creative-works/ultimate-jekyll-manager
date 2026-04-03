@@ -5,12 +5,10 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Initialize API Keys section
-export function init(wm) {
-  webManager = wm;
+export function init() {
   setupButtons();
   setupResetApiKeyForm();
 }

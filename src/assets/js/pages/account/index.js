@@ -11,14 +11,11 @@ import * as deleteSection from './sections/delete.js';
 import * as dataRequestSection from './sections/data-request.js';
 import * as connectionsSection from './sections/connections.js';
 import * as refundSection from './sections/refund.js';
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
@@ -80,7 +77,7 @@ async function initializeAccount() {
   // Initialize all section modules
   Object.values(sectionModules).forEach(module => {
     if (module.init) {
-      module.init(webManager);
+      module.init();
     }
   });
 

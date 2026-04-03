@@ -4,13 +4,12 @@
 
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
+import webManager from 'web-manager';
 
 let formManager = null;
-let webManager = null;
 
 // Initialize profile section
-export function init(wm) {
-  webManager = wm;
+export function init() {
   setupProfileForm();
   setupButtons();
 }

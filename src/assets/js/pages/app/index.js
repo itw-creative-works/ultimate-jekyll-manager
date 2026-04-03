@@ -1,5 +1,5 @@
 // Libraries
-let webManager = null;
+import webManager from 'web-manager';
 
 // Global variables
 let launchTimeout;
@@ -12,11 +12,9 @@ let $errorAlert;
 let $spinner;
 
 // Module
-export default (Manager, options) => {
+export default () => {
   return new Promise(async function (resolve) {
     // Set webManager
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 

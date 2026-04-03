@@ -37,10 +37,12 @@
   overflow: visible;
 }
 
-.btn-check:checked + .btn {
+// Extra :checked specificity to beat classy theme's
+// .btn-check:checked:checked + [class*="btn-outline-"] { background: var(--bs-btn-active-bg) !important }
+.btn-check:checked:checked + .btn {
   border-color: var(--bs-primary) !important;
   color: var(--bs-primary) !important;
-  background-color: transparent !important;
+  background: transparent !important;
 
   // Checkmark circle turns primary when selected
   .rounded-circle {

@@ -1,10 +1,8 @@
 // Referrals section module
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Initialize referrals section
-export function init(wm) {
-  webManager = wm;
+export function init() {
   setupButtons();
 }
 
@@ -111,7 +109,7 @@ function updateReferralsList(referrals) {
                 <div class="d-flex align-items-center">
                   <span class="badge bg-secondary me-2">#${sortedReferrals.length - index}</span>
                   <div>
-                    <strong class="font-monospace small">${referral.uid || 'Unknown User'}</strong>
+                    <strong class="font-monospace small">${webManager.utilities().escapeHTML(referral.uid || 'Unknown User')}</strong>
                     <div class="text-muted small">${dateStr}${timeStr ? ` at ${timeStr}` : ''}</div>
                   </div>
                 </div>

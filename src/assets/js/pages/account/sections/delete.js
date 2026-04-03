@@ -5,13 +5,12 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
-let webManager = null;
 let formManager = null;
 
 // Initialize delete section
-export async function init(wm) {
-  webManager = wm;
+export async function init() {
   setupDeleteAccountForm();
 }
 

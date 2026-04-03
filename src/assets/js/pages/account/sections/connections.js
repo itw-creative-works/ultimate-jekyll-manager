@@ -5,8 +5,8 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
-let webManager = null;
 let brandData = null;
 let accountData = null;
 let connectionForms = new Map();
@@ -20,8 +20,7 @@ function getApiUrl() {
 }
 
 // Initialize connections section
-export async function init(wm) {
-  webManager = wm;
+export async function init() {
 }
 
 // Load connections data
@@ -114,8 +113,8 @@ function displayConnections() {
             &#9888;
           </div>
           <div>
-            <h6 class="mb-0">${providerName}</h6>
-            <small class="text-warning d-block">Unsupported connection: "${providerId}". Update Ultimate Jekyll Manager to enable this provider.</small>
+            <h6 class="mb-0">${webManager.utilities().escapeHTML(providerName)}</h6>
+            <small class="text-warning d-block">Unsupported connection: "${webManager.utilities().escapeHTML(providerId)}". Update Ultimate Jekyll Manager to enable this provider.</small>
           </div>
         </div>
         <div class="text-start text-sm-end flex-shrink-0">

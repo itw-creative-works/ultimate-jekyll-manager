@@ -1,5 +1,6 @@
 // Purchase analytics tracking for confirmation page
 // All three platforms tracked together, no conditional checks
+import webManager from 'web-manager';
 
 // Build common item array for tracking
 function buildItems(state) {
@@ -50,7 +51,7 @@ function trackPurchase(state) {
 // Track purchase only if the track=true URL param is present
 // Removes the param after tracking to prevent duplicates on refresh
 // Also stores orderId in webManager storage as a backup guard
-export function trackPurchaseIfNeeded(state, webManager) {
+export function trackPurchaseIfNeeded(state) {
   const urlParams = new URLSearchParams(window.location.search);
   const shouldTrack = urlParams.get('track') === 'true';
 

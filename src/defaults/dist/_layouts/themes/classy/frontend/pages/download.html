@@ -622,23 +622,30 @@ cta:
         <!-- Windows Instructions -->
         <div class="platform-instructions" data-platform="windows" hidden>
           <div class="steps-slideshow">
+            <div class="steps-slideshow-slides">
             <div class="step-slide" data-step="1">
               <div class="step-number-badge">1</div>
-              <h5 class="step-title">Open your Downloads folder</h5>
+                <h5 class="step-title">Open your Downloads folder</h5>
               <!-- <p class="text-muted mb-3">Find the <strong>Downloads</strong> folder on your computer</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
-                <div class="d-flex flex-column align-items-center gap-2">
+                <div class="d-flex flex-column align-items-center gap-2 position-relative">
                   <div class="folder-icon animation-flex position-relative d-flex align-items-center justify-content-center">
                     {% uj_icon "download", "display-4" %}
                   </div>
                   <span class="fw-bold">Downloads</span>
+                  <div class="click-indicator folder-click-target position-absolute top-50 start-50">
+                    <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                    <div class="pointer-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/><path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/></svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="step-slide" data-step="2">
               <div class="step-number-badge">2</div>
-              <h5 class="step-title">Double-click {{ site.brand.name }}-Setup.exe</h5>
+                <h5 class="step-title">Double-click {{ site.brand.name }}-Setup.exe</h5>
               <!-- <p class="text-muted mb-3">Click <strong>"Yes"</strong> if Windows asks for permission</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex flex-column align-items-center gap-2 position-relative">
@@ -658,7 +665,7 @@ cta:
 
             <div class="step-slide" data-step="3">
               <div class="step-number-badge">3</div>
-              <h5 class="step-title">Follow the installation setup</h5>
+                <h5 class="step-title">Follow the installation setup</h5>
               <!-- <p class="text-muted mb-3">Click <strong>"Next"</strong> through the steps and accept the terms</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="wizard-window card border-2 rounded-3 shadow overflow-hidden">
@@ -677,7 +684,7 @@ cta:
 
             <div class="step-slide" data-step="4">
               <div class="step-number-badge">4</div>
-              <h5 class="step-title">Launch the app</h5>
+                <h5 class="step-title">Launch the app</h5>
               <!-- <p class="text-muted mb-3">Find {{ site.brand.name }} in your <strong>Start Menu</strong> or <strong>Desktop</strong> shortcut</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex flex-column align-items-center gap-2">
@@ -689,6 +696,7 @@ cta:
               </div>
             </div>
 
+            </div>
             <div class="steps-slideshow-nav">
               <button type="button" class="btn btn-outline-adaptive btn-sm step-prev" disabled>
                 {% uj_icon "chevron-left", "me-1" %} Back
@@ -704,23 +712,30 @@ cta:
         <!-- macOS Instructions -->
         <div class="platform-instructions" data-platform="mac" hidden>
           <div class="steps-slideshow">
+            <div class="steps-slideshow-slides">
             <div class="step-slide" data-step="1">
               <div class="step-number-badge">1</div>
-              <h5 class="step-title">Open your Downloads folder</h5>
+                <h5 class="step-title">Open your Downloads folder</h5>
               <!-- <p class="text-muted mb-3">Find the <strong>Downloads</strong> folder on your Mac</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
-                <div class="d-flex flex-column align-items-center gap-2">
+                <div class="d-flex flex-column align-items-center gap-2 position-relative">
                   <div class="folder-icon animation-flex position-relative d-flex align-items-center justify-content-center">
                     {% uj_icon "download", "display-4" %}
                   </div>
                   <span class="fw-bold">Downloads</span>
+                  <div class="click-indicator folder-click-target position-absolute top-50 start-50">
+                    <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                    <div class="pointer-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/><path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/></svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="step-slide" data-step="2">
               <div class="step-number-badge">2</div>
-              <h5 class="step-title">Double-click {{ site.brand.name }}.dmg</h5>
+                <h5 class="step-title">Double-click {{ site.brand.name }}.dmg</h5>
               <!-- <p class="text-muted mb-3">This will mount the disk image</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex flex-column align-items-center gap-2 position-relative">
@@ -740,7 +755,7 @@ cta:
 
             <div class="step-slide" data-step="3">
               <div class="step-number-badge">3</div>
-              <h5 class="step-title">Drag {{ site.brand.name }} to Applications folder</h5>
+                <h5 class="step-title">Drag {{ site.brand.name }} to Applications folder</h5>
               <!-- <p class="text-muted mb-3">This installs the app for all users</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex gap-5 align-items-center position-relative">
@@ -776,7 +791,7 @@ cta:
 
             <div class="step-slide" data-step="4">
               <div class="step-number-badge">4</div>
-              <h5 class="step-title">Launch the app</h5>
+                <h5 class="step-title">Launch the app</h5>
               <!-- <p class="text-muted mb-3">Find {{ site.brand.name }} in your <strong>Applications</strong> folder or use <strong>Spotlight</strong></p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex flex-column align-items-center gap-2">
@@ -788,6 +803,7 @@ cta:
               </div>
             </div>
 
+            </div>
             <div class="steps-slideshow-nav">
               <button type="button" class="btn btn-outline-adaptive btn-sm step-prev" disabled>
                 {% uj_icon "chevron-left", "me-1" %} Back
@@ -803,23 +819,30 @@ cta:
         <!-- Linux Instructions -->
         <div class="platform-instructions" data-platform="linux" hidden>
           <div class="steps-slideshow">
+            <div class="steps-slideshow-slides">
             <div class="step-slide" data-step="1">
               <div class="step-number-badge">1</div>
-              <h5 class="step-title">Open Terminal</h5>
+                <h5 class="step-title">Open Terminal</h5>
               <!-- <p class="text-muted mb-3">Press <strong>Ctrl+Alt+T</strong></p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
-                <div class="d-flex flex-column align-items-center gap-2">
+                <div class="d-flex flex-column align-items-center gap-2 position-relative">
                   <div class="app-icon animation-flex bg-dark text-light rounded-3 d-flex align-items-center justify-content-center">
                     {% uj_icon "terminal", "display-4" %}
                   </div>
                   <span class="fw-bold">Terminal</span>
+                  <div class="click-indicator folder-click-target position-absolute top-50 start-50">
+                    <div class="click-pulse position-absolute border border-3 border-primary rounded-circle"></div>
+                    <div class="pointer-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#E0E0E0" d="M27.8,39.7c-0.1,0-0.2,0-0.4-0.1c-0.2-0.1-0.4-0.3-0.6-0.5l-3.7-8.6l-4.5,4.2C18.5,34.9,18.3,35,18,35c-0.1,0-0.3,0-0.4-0.1C17.3,34.8,17,34.4,17,34l0-22c0-0.4,0.2-0.8,0.6-0.9C17.7,11,17.9,11,18,11c0.2,0,0.5,0.1,0.7,0.3l16,15c0.3,0.3,0.4,0.7,0.3,1.1c-0.1,0.4-0.5,0.6-0.9,0.7l-6.3,0.6l3.9,8.5c0.1,0.2,0.1,0.5,0,0.8c-0.1,0.2-0.3,0.5-0.5,0.6l-2.9,1.3C28.1,39.7,27.9,39.7,27.8,39.7z"/><path fill="#212121" d="M18,12l16,15l-7.7,0.7l4.5,9.8l-2.9,1.3l-4.3-9.9L18,34L18,12 M18,10c-0.3,0-0.5,0.1-0.8,0.2c-0.7,0.3-1.2,1-1.2,1.8l0,22c0,0.8,0.5,1.5,1.2,1.8C17.5,36,17.8,36,18,36c0.5,0,1-0.2,1.4-0.5l3.4-3.2l3.1,7.3c0.2,0.5,0.6,0.9,1.1,1.1c0.2,0.1,0.5,0.1,0.7,0.1c0.3,0,0.5-0.1,0.8-0.2l2.9-1.3c0.5-0.2,0.9-0.6,1.1-1.1c0.2-0.5,0.2-1.1,0-1.5l-3.3-7.2l4.9-0.4c0.8-0.1,1.5-0.6,1.7-1.3c0.3-0.7,0.1-1.6-0.5-2.1l-16-15C19,10.2,18.5,10,18,10L18,10z"/></svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="step-slide" data-step="2">
               <div class="step-number-badge">2</div>
-              <h5 class="step-title" id="linux-step-2-label">Navigate to Downloads</h5>
+                <h5 class="step-title" id="linux-step-2-label">Navigate to Downloads</h5>
               <!-- <p class="text-muted mb-3">Run the command below</p> -->
               <div class="bg-body-tertiary rounded-4 p-4 overflow-hidden position-relative">
                 <div class="input-group">
@@ -834,7 +857,7 @@ cta:
 
             <div class="step-slide" data-step="3">
               <div class="step-number-badge">3</div>
-              <h5 class="step-title" id="linux-step-3-label">Install the package</h5>
+                <h5 class="step-title" id="linux-step-3-label">Install the package</h5>
               <!-- <p class="text-muted mb-3">Run the appropriate command for your distribution</p> -->
               <div class="bg-body-tertiary rounded-4 p-4 overflow-hidden position-relative">
                 <div class="mb-3">
@@ -862,7 +885,7 @@ cta:
 
             <div class="step-slide" data-step="4">
               <div class="step-number-badge">4</div>
-              <h5 class="step-title">Launch the app</h5>
+                <h5 class="step-title">Launch the app</h5>
               <!-- <p class="text-muted mb-3">Find {{ site.brand.name }} in your <strong>Applications</strong> menu</p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex flex-column align-items-center gap-2">
@@ -874,6 +897,7 @@ cta:
               </div>
             </div>
 
+            </div>
             <div class="steps-slideshow-nav">
               <button type="button" class="btn btn-outline-adaptive btn-sm step-prev" disabled>
                 {% uj_icon "chevron-left", "me-1" %} Back
@@ -889,24 +913,26 @@ cta:
         <!-- Android Instructions -->
         <div class="platform-instructions" data-platform="android" hidden>
           <div class="steps-slideshow">
+            <div class="steps-slideshow-slides">
             <div class="step-slide" data-step="1">
               <div class="step-number-badge">1</div>
-              <h5 class="step-title">Open the Play Store app</h5>
+                <h5 class="step-title">Open the Play Store app</h5>
               <!-- <p class="text-muted mb-3">Or follow the download link that opened</p> -->
             </div>
 
             <div class="step-slide" data-step="2">
               <div class="step-number-badge">2</div>
-              <h5 class="step-title">Tap "Install"</h5>
+                <h5 class="step-title">Tap "Install"</h5>
               <!-- <p class="text-muted mb-3">Grant any required permissions</p> -->
             </div>
 
             <div class="step-slide" data-step="3">
               <div class="step-number-badge">3</div>
-              <h5 class="step-title">Tap "Open"</h5>
+                <h5 class="step-title">Tap "Open"</h5>
               <!-- <p class="text-muted mb-3">Or find the app icon on your home screen</p> -->
             </div>
 
+            </div>
             <div class="steps-slideshow-nav">
               <button type="button" class="btn btn-outline-adaptive btn-sm step-prev" disabled>
                 {% uj_icon "chevron-left", "me-1" %} Back
@@ -922,24 +948,26 @@ cta:
         <!-- iOS Instructions -->
         <div class="platform-instructions" data-platform="ios" hidden>
           <div class="steps-slideshow">
+            <div class="steps-slideshow-slides">
             <div class="step-slide" data-step="1">
               <div class="step-number-badge">1</div>
-              <h5 class="step-title">Open the App Store</h5>
+                <h5 class="step-title">Open the App Store</h5>
               <!-- <p class="text-muted mb-3">Or follow the link that opened</p> -->
             </div>
 
             <div class="step-slide" data-step="2">
               <div class="step-number-badge">2</div>
-              <h5 class="step-title">Tap "Get" or the download button</h5>
+                <h5 class="step-title">Tap "Get" or the download button</h5>
               <!-- <p class="text-muted mb-3">You may need to verify with Face ID or Touch ID</p> -->
             </div>
 
             <div class="step-slide" data-step="3">
               <div class="step-number-badge">3</div>
-              <h5 class="step-title">Tap "Open"</h5>
+                <h5 class="step-title">Tap "Open"</h5>
               <!-- <p class="text-muted mb-3">Or find the app icon on your home screen</p> -->
             </div>
 
+            </div>
             <div class="steps-slideshow-nav">
               <button type="button" class="btn btn-outline-adaptive btn-sm step-prev" disabled>
                 {% uj_icon "chevron-left", "me-1" %} Back

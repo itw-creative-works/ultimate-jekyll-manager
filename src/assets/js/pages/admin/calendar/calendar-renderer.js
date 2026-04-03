@@ -5,7 +5,7 @@
  */
 
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
-import { escapeHtml } from '__main_assets__/js/libs/admin-helpers.js';
+import webManager from 'web-manager';
 import { VIEW_MODES, DAY_ABBREVS, MONTH_NAMES, TYPE_COLORS, formatDateUTC, formatTimeUTC, parseDateUTC } from './calendar-core.js';
 
 export default class CalendarRenderer {
@@ -297,7 +297,7 @@ export default class CalendarRenderer {
 
       html += `<tr class="calendar-list-row" data-campaign-id="${campaign.id}" style="opacity: ${statusStyle.opacity}">
         <td style="width: 60px">${timeStr}</td>
-        <td>${recurringIcon}${escapeHtml(name)}</td>
+        <td>${recurringIcon}${webManager.utilities().escapeHTML(name)}</td>
         <td style="width: 80px">${typeBadge}</td>
         <td style="width: 80px">${statusBadge}</td>
       </tr>`;
@@ -344,12 +344,12 @@ export default class CalendarRenderer {
            data-send-at="${campaign.sendAt}"
            ${isDraggable ? 'draggable="true"' : ''}
            style="background-color: ${color}; opacity: ${statusStyle.opacity};"
-           title="${escapeHtml(name)}${isRecurring ? ' (recurring)' : ''}">
+           title="${webManager.utilities().escapeHTML(name)}${isRecurring ? ' (recurring)' : ''}">
         ${statusIcon}
         ${recurringIcon}
         <span class="calendar-event-time">${timeStr}</span>
         <span class="calendar-event-type-icon">${typeIcon}</span>
-        <span class="calendar-event-title">${escapeHtml(name)}</span>
+        <span class="calendar-event-title">${webManager.utilities().escapeHTML(name)}</span>
       </div>
     `;
   }
@@ -387,8 +387,8 @@ export default class CalendarRenderer {
            data-send-at="${campaign.sendAt}"
            ${isDraggable ? 'draggable="true"' : ''}
            style="background-color: ${color}; opacity: ${statusStyle.opacity}; top: ${topPx}px; height: ${heightPx}px; ${sizeStyle}"
-           title="${escapeHtml(name)}${isRecurring ? ' (recurring)' : ''}">
-        ${statusIcon}${recurringIcon}<strong>${timeStr}</strong> ${escapeHtml(name)}
+           title="${webManager.utilities().escapeHTML(name)}${isRecurring ? ' (recurring)' : ''}">
+        ${statusIcon}${recurringIcon}<strong>${timeStr}</strong> ${webManager.utilities().escapeHTML(name)}
       </div>
     `;
   }

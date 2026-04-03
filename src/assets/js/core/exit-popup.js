@@ -1,10 +1,9 @@
 // Libraries
 import merge from 'lodash/merge.js';
+import webManager from 'web-manager';
 
 // Exit Popup Module
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
+export default function () {
 
   // Get config
   const config = webManager.config.exitPopup.config;

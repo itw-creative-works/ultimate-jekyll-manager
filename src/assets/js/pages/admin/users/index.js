@@ -5,11 +5,11 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-import { formatTimeAgo, capitalize, escapeHtml, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
+import { formatTimeAgo, capitalize, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+import webManager from 'web-manager';
 
 // State
-let webManager = null;
 let formManager = null;
 let editFormManager = null;
 let editingUid = null;
@@ -18,10 +18,8 @@ let searchResults = [];
 const SEARCH_LIMIT = 50;
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
-
     await webManager.dom().ready();
 
     webManager.auth().listen({ once: true }, async (state) => {
@@ -164,12 +162,12 @@ function renderUsers() {
         <div class="d-flex align-items-center">
           ${getPrerenderedIcon('user', 'fa-sm me-2 text-muted')}
           <div>
-            <div class="text-truncate" style="max-width: 220px;">${escapeHtml(email)}</div>
-            <div class="font-monospace text-muted text-truncate" style="max-width: 220px; font-size: 0.7rem;">${escapeHtml(uid)}</div>
+            <div class="text-truncate" style="max-width: 220px;">${webManager.utilities().escapeHTML(email)}</div>
+            <div class="font-monospace text-muted text-truncate" style="max-width: 220px; font-size: 0.7rem;">${webManager.utilities().escapeHTML(uid)}</div>
           </div>
         </div>
       </td>
-      <td><span class="badge ${badgeClass}">${escapeHtml(capitalize(plan))}</span></td>
+      <td><span class="badge ${badgeClass}">${webManager.utilities().escapeHTML(capitalize(plan))}</span></td>
       <td class="small ${expiresText === 'Expired' ? 'text-danger' : 'text-muted'}">${expiresText}</td>
       <td class="text-muted small">${updatedText}</td>
       <td>

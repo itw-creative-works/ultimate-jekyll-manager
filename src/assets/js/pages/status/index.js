@@ -5,15 +5,11 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import fetch from 'wonderful-fetch';
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    // Shortcuts
-    webManager = Manager.webManager;
-
     // Initialize when DOM is ready
     await webManager.dom().ready();
 
@@ -144,7 +140,7 @@ function showUptimeTooltip(e, $bar, index, totalDays) {
       <span class="status-dot rounded-circle ${config.statusClasses[status]}"></span>
       <span>${config.statusLabels[status]}</span>
     </div>
-    <div class="text-muted small">Uptime: ${uptime}</div>
+    <div class="text-muted small">Uptime: ${webManager.utilities().escapeHTML(uptime)}</div>
   `;
 
   $tooltip.style.display = 'block';
@@ -317,14 +313,14 @@ function displayBuildInfo(data) {
   if ($environment && data.environment) {
     const envText = data.environment.charAt(0).toUpperCase() + data.environment.slice(1);
     const envClass = data.environment === 'production' ? 'text-success' : 'text-warning';
-    $environment.innerHTML = `<span class="${envClass}">${escapeHtml(envText)}</span>`;
+    $environment.innerHTML = `<span class="${envClass}">${webManager.utilities().escapeHTML(envText)}</span>`;
   }
 
   // Packages
   if ($packages && data.packages) {
     const packageBadges = Object.entries(data.packages)
       .map(([name, version]) => {
-        return `<span class="badge bg-body-secondary text-body fw-normal">${escapeHtml(name)}: <span class="fw-semibold">${escapeHtml(version)}</span></span>`;
+        return `<span class="badge bg-body-secondary text-body fw-normal">${webManager.utilities().escapeHTML(name)}: <span class="fw-semibold">${webManager.utilities().escapeHTML(version)}</span></span>`;
       })
       .join('');
     $packages.innerHTML = packageBadges;
@@ -332,8 +328,8 @@ function displayBuildInfo(data) {
 
   // Repository
   if ($repo && data.repo) {
-    const repoUrl = `https://github.com/${data.repo.user}/${data.repo.name}`;
-    $repo.innerHTML = `<a href="${repoUrl}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">${escapeHtml(data.repo.user)}/${escapeHtml(data.repo.name)}</a>`;
+    const repoUrl = `https://github.com/${encodeURIComponent(data.repo.user)}/${encodeURIComponent(data.repo.name)}`;
+    $repo.innerHTML = `<a href="${webManager.utilities().escapeHTML(repoUrl)}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">${webManager.utilities().escapeHTML(data.repo.user)}/${webManager.utilities().escapeHTML(data.repo.name)}</a>`;
   }
 }
 
@@ -534,14 +530,14 @@ function updateMaintenance(maintenanceItems) {
     <div class="card maintenance-card border-0 bg-body-tertiary mb-3 border-info">
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-start mb-2">
-          <h4 class="h5 fw-semibold mb-0">${escapeHtml(item.title)}</h4>
+          <h4 class="h5 fw-semibold mb-0">${webManager.utilities().escapeHTML(item.title)}</h4>
           <span class="text-muted small">${formatDate(item.scheduled_for)}</span>
         </div>
-        <p class="text-muted mb-0">${escapeHtml(item.description)}</p>
+        <p class="text-muted mb-0">${webManager.utilities().escapeHTML(item.description)}</p>
         ${item.affected_services ? `
           <div class="mt-2">
             <small class="text-muted">
-              <strong>Affected:</strong> ${item.affected_services.map(s => escapeHtml(s)).join(', ')}
+              <strong>Affected:</strong> ${item.affected_services.map(s => webManager.utilities().escapeHTML(s)).join(', ')}
             </small>
           </div>
         ` : ''}
@@ -583,7 +579,7 @@ function updateIncidents(incidents) {
     <div class="card incident-card border-0 bg-body-tertiary mb-3 ${config.borderClasses[incident.status] || ''}">
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
-          <h4 class="h5 fw-semibold mb-0">${escapeHtml(incident.title)}</h4>
+          <h4 class="h5 fw-semibold mb-0">${webManager.utilities().escapeHTML(incident.title)}</h4>
           <div class="d-flex align-items-center gap-2">
             <span class="badge ${getIncidentBadgeClasses(incident.status)}">${formatIncidentStatus(incident.status)}</span>
             <span class="text-muted small">${formatDate(incident.created_at)}</span>
@@ -594,7 +590,7 @@ function updateIncidents(incidents) {
             ${incident.updates.map(update => `
               <div class="timeline-item pb-3" data-status="${config.dataStatusMap[update.status] || ''}">
                 <div class="small text-muted mb-1">${formatDateTime(update.created_at)}</div>
-                <div class="small">${escapeHtml(update.message)}</div>
+                <div class="small">${webManager.utilities().escapeHTML(update.message)}</div>
               </div>
             `).join('')}
           </div>
@@ -625,13 +621,6 @@ function trackStatusSubscribe() {
     content_type: 'product',
     content_name: 'Status Subscription'
   });
-}
-
-// Helper functions
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }
 
 function formatDate(dateStr) {

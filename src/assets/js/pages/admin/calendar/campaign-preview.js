@@ -5,7 +5,7 @@
  */
 
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
-import { escapeHtml } from '__main_assets__/js/libs/admin-helpers.js';
+import webManager from 'web-manager';
 
 // Lazy-loaded markdown-it instance
 let md = null;
@@ -31,8 +31,8 @@ async function renderEmailPreview(formData) {
   return `
     <div class="email-preview">
       <div class="email-preview-header">
-        <div class="email-preview-subject">${escapeHtml(subject) || '<span class="text-muted">No subject</span>'}</div>
-        ${preheader ? `<div class="email-preview-preheader">${escapeHtml(preheader)}</div>` : ''}
+        <div class="email-preview-subject">${webManager.utilities().escapeHTML(subject) || '<span class="text-muted">No subject</span>'}</div>
+        ${preheader ? `<div class="email-preview-preheader">${webManager.utilities().escapeHTML(preheader)}</div>` : ''}
       </div>
       <div class="email-preview-body">${renderedContent}</div>
       <div class="email-preview-disclaimer text-muted small mt-3">
@@ -53,7 +53,7 @@ function renderPushPreview(formData) {
   const icon = campaign.icon || '';
 
   const iconSrc = icon && icon.match(/^https?:\/\/.+/)
-    ? escapeHtml(icon)
+    ? webManager.utilities().escapeHTML(icon)
     : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50"%3E%3Crect width="50" height="50" fill="%236c757d" rx="8"/%3E%3C/svg%3E';
 
   const clickAction = campaign.clickAction || '';
@@ -69,8 +69,8 @@ function renderPushPreview(formData) {
           </span>
         </div>
         <div class="push-preview-notification"
-             ${clickAction ? `role="button" title="Click to test: ${escapeHtml(clickAction)}"` : ''}
-             data-click-action="${escapeHtml(clickAction)}">
+             ${clickAction ? `role="button" title="Click to test: ${webManager.utilities().escapeHTML(clickAction)}"` : ''}
+             data-click-action="${webManager.utilities().escapeHTML(clickAction)}">
           <div class="d-flex align-items-start">
             <img src="${iconSrc}"
                  class="rounded me-2"
@@ -78,8 +78,8 @@ function renderPushPreview(formData) {
                  height="50"
                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22%3E%3Crect width=%2250%22 height=%2250%22 fill=%22%236c757d%22 rx=%228%22/%3E%3C/svg%3E'">
             <div class="flex-fill">
-              <div class="fw-semibold small">${escapeHtml(name)}</div>
-              <div class="small text-muted mt-1">${escapeHtml(subject)}</div>
+              <div class="fw-semibold small">${webManager.utilities().escapeHTML(name)}</div>
+              <div class="small text-muted mt-1">${webManager.utilities().escapeHTML(subject)}</div>
               <div class="small text-muted mt-1">
                 ${getPrerenderedIcon('clock', 'fa-xs me-1')}
                 Now

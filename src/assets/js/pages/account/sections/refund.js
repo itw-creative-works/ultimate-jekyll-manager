@@ -5,6 +5,7 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
 // Refund reasons (will be shuffled on each render)
 const REFUND_REASONS = [
@@ -17,14 +18,11 @@ const REFUND_REASONS = [
   'Billing or payment issue',
   'Other',
 ];
-
-let webManager = null;
 let formManager = null;
 let currentAccount = null;
 
 // Initialize refund section
-export async function init(wm) {
-  webManager = wm;
+export async function init() {
   populateRefundReasons();
   setupRefundForm();
 }

@@ -2,9 +2,10 @@
 import fetch from 'wonderful-fetch';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getRecaptchaToken } from './recaptcha.js';
+import webManager from 'web-manager';
 
 // Fetch brand config (products + processors)
-export async function fetchBrandConfig(webManager) {
+export async function fetchBrandConfig() {
   const response = await fetch(`${webManager.getApiUrl()}/backend-manager/brand`, {
     response: 'json',
     tries: 2,
@@ -15,7 +16,7 @@ export async function fetchBrandConfig(webManager) {
 }
 
 // Check trial eligibility via backend endpoint
-export async function fetchTrialEligibility(webManager) {
+export async function fetchTrialEligibility() {
   try {
     const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/payments/trial-eligibility`, {
       method: 'GET',
@@ -31,7 +32,7 @@ export async function fetchTrialEligibility(webManager) {
 }
 
 // Validate a discount code via backend
-export async function validateDiscountCode(webManager, code) {
+export async function validateDiscountCode(code) {
   const response = await fetch(`${webManager.getApiUrl()}/backend-manager/payments/discount`, {
     response: 'json',
     query: { code },
@@ -41,7 +42,7 @@ export async function validateDiscountCode(webManager, code) {
 }
 
 // Fire-and-forget server warmup
-export function warmupServer(webManager) {
+export function warmupServer() {
   fetch(`${webManager.getApiUrl()}/backend-manager/payments/intent`, {
     method: 'GET',
     query: { wakeup: 'true' },
@@ -49,7 +50,7 @@ export function warmupServer(webManager) {
 }
 
 // Create payment intent and return { url }
-export async function createPaymentIntent({ webManager, state, processor, formData }) {
+export async function createPaymentIntent({ state, processor, formData }) {
   // Get reCAPTCHA token
   const recaptchaToken = await getRecaptchaToken('payment_intent');
 

@@ -1,13 +1,11 @@
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
 // Constants
 const SIGNUP_MAX_AGE = 5 * 60 * 1000;
 
 // Auth Module
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
-
+export default function () {
   // Get auth policy
   const config = webManager.config.auth.config;
   const policy = config.policy;
@@ -47,7 +45,7 @@ export default function (Manager, options) {
       console.log('[Auth] state changed:', state);
 
       // Set user ID for analytics tracking
-      setAnalyticsUserId(user, webManager);
+      setAnalyticsUserId(user);
 
       // Check if we're in the process of signing out
       if (authSignout === 'true' && user) {
@@ -61,7 +59,7 @@ export default function (Manager, options) {
         // User is authenticated
 
         // Send user signup metadata if account is new
-        await sendUserSignupMetadata(user, webManager);
+        await sendUserSignupMetadata(user);
 
         // Check if page requires user to be unauthenticated (e.g., signin page)
         if (policy === 'unauthenticated') {
@@ -160,7 +158,7 @@ function updateAuthLinks() {
   });
 }
 
-function setAnalyticsUserId(user, webManager) {
+function setAnalyticsUserId(user) {
   const userId = user?.uid;
   const email = user?.email;
   const metaPixelId = webManager.config.analytics?.meta;
@@ -206,7 +204,7 @@ function setAnalyticsUserId(user, webManager) {
 }
 
 // Send user metadata to server (affiliate, UTM params, etc.)
-async function sendUserSignupMetadata(user, webManager) {
+async function sendUserSignupMetadata(user) {
   try {
     // Skip on auth pages to avoid blocking redirect (metadata will be sent on destination page)
     const pagePath = document.documentElement.getAttribute('data-page-path');

@@ -13,6 +13,7 @@
 
 // Libraries
 import { ready as domReady } from 'web-manager/modules/dom.js';
+import webManager from 'web-manager';
 
 // Constants
 const HONEYPOT_SELECTOR = '[data-honey], [name="honey"]';
@@ -227,7 +228,7 @@ export class FormManager {
 
     // Focus the field with autofocus attribute if it exists (desktop only)
     const $autofocusField = this.$form.querySelector('[autofocus]');
-    if ($autofocusField && !$autofocusField.disabled && window.Manager?.webManager?.utilities()?.getDevice() === 'desktop') {
+    if ($autofocusField && !$autofocusField.disabled && webManager.utilities().getDevice() === 'desktop') {
       this._focusField($autofocusField);
     }
   }
@@ -957,7 +958,7 @@ export class FormManager {
     }
     /* @dev-only:end */
 
-    window.Manager?.webManager?.utilities()?.showNotification(message, { type: 'success' });
+    webManager.utilities().showNotification(message, { type: 'success' });
   }
 
   /**
@@ -970,7 +971,7 @@ export class FormManager {
     }
     /* @dev-only:end */
 
-    window.Manager?.webManager?.utilities()?.showNotification(message, { type: 'danger' });
+    webManager.utilities().showNotification(message, { type: 'danger' });
   }
 
   /**

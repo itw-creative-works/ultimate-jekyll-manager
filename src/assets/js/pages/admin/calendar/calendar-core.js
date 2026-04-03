@@ -7,6 +7,7 @@
  * IMPORTANT: All dates/times in this module are UTC.
  * No local time APIs (getHours, getDate, etc.) are used anywhere.
  */
+import webManager from 'web-manager';
 
 // View modes
 export const VIEW_MODES = ['day', 'week', 'month', 'year', 'list'];
@@ -79,8 +80,7 @@ export function todayUTC() {
 }
 
 export default class CalendarCore {
-  constructor(webManager) {
-    this.webManager = webManager;
+  constructor() {
     this.currentDate = new Date();
     this.viewMode = 'month';
     this.campaigns = new Map();
@@ -498,7 +498,7 @@ export default class CalendarCore {
   async _loadRecurringTemplates() {
     try {
       const { collection, query, where, getDocs, onSnapshot } = await import('firebase/firestore');
-      const db = this.webManager.firebaseFirestore;
+      const db = webManager.firebaseFirestore;
       const colRef = collection(db, 'marketing-campaigns');
 
       const recurringDocs = await getDocs(query(
@@ -551,7 +551,7 @@ export default class CalendarCore {
 
     try {
       const { collection, query, where, orderBy, onSnapshot } = await import('firebase/firestore');
-      const db = this.webManager.firebaseFirestore;
+      const db = webManager.firebaseFirestore;
 
       const rangeQuery = query(
         collection(db, 'marketing-campaigns'),

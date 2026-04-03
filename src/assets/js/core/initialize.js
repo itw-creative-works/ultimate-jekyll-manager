@@ -1,8 +1,5 @@
 // Page Loader Module - Initialization
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
-
+export default function () {
   // Log
   console.log('Running initialize()');
 

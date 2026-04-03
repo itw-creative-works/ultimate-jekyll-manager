@@ -5,15 +5,14 @@
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
-let webManager = null;
 let formManager = null;
 let downloadFormManager = null;
 let cancelFormManager = null;
 
 // Initialize data-request section
-export async function init(wm) {
-  webManager = wm;
+export async function init() {
   setupDataRequestForm();
   setupDownloadButton();
   setupCancelButton();

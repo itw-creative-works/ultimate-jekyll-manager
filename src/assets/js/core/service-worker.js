@@ -1,8 +1,5 @@
 // Service Worker Core Library
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
-
+export default function ({ options } = {}) {
   // Cache visited pages
   if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
     console.warn('Service Worker not available or not controlled by a Service Worker.');

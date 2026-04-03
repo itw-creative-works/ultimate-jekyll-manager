@@ -405,18 +405,6 @@ alternative:
 {% assign testimonials_size = alt.testimonials.items | size %}
 {% if testimonials_size > 0 %}
   {% include themes/classy/frontend/components/testimonial-scroll.html testimonials=alt.testimonials %}
-  {% iftruthy alt.section_cta.text %}
-    <div class="container">
-      <div class="text-center" data-lazy="@class animation-slide-up">
-        <a href="{{ alt.section_cta.href }}" class="btn btn-primary btn-lg px-5">
-          {% iftruthy alt.section_cta.icon %}
-            {% uj_icon alt.section_cta.icon, "me-2" %}
-          {% endiftruthy %}
-          {{ alt.section_cta.text }}
-        </a>
-      </div>
-    </div>
-  {% endiftruthy %}
 {% endif %}
 
 <!-- Stats Section -->
@@ -504,16 +492,6 @@ alternative:
             {% endfor %}
           </div>
 
-          {% iftruthy alt.section_cta.text %}
-            <div class="text-center mt-5" data-lazy="@class animation-slide-up">
-              <a href="{{ alt.section_cta.href }}" class="btn btn-primary btn-lg px-5">
-                {% iftruthy alt.section_cta.icon %}
-                  {% uj_icon alt.section_cta.icon, "me-2" %}
-                {% endiftruthy %}
-                {{ alt.section_cta.text }}
-              </a>
-            </div>
-          {% endiftruthy %}
         </div>
       </div>
     </div>

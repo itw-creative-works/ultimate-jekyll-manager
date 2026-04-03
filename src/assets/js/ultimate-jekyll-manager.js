@@ -7,13 +7,13 @@ import serviceWorkerModule from '__main_assets__/js/core/service-worker.js';
 import appearanceModule from '__main_assets__/js/core/appearance.js';
 import completeModule from '__main_assets__/js/core/complete.js';
 
-// Ultimate Jekyll Manager Module
-export default async function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
+import webManager from 'web-manager';
 
+// Ultimate Jekyll Manager Module
+export default async function ({ manager, options } = {}) {
   // Add Manager to global scope for easy access in modules
-  window.Manager = Manager;
+  // Removed because web-manager is singleton and can be imported directly in modules, so no need to attach it to window
+  // window.Manager = manager;
 
   // Initialize the UJ library on webManager for programmatic access to UJ features
   // This allows other modules to call webManager.uj().showExitPopup(), etc.
@@ -28,12 +28,12 @@ export default async function (Manager, options) {
   console.log('Global module loaded successfully (assets/js/ultimate-jekyll-manager.js)');
 
   // Initialize fixed modules synchronously (already loaded via static imports)
-  // initializeModule(Manager, options);
-  authModule(Manager, options);
-  lazyLoadingModule(Manager, options);
-  queryStringsModule(Manager, options);
-  serviceWorkerModule(Manager, options);
-  appearanceModule(Manager, options);
+  // initializeModule({ manager, options });
+  authModule({ manager, options });
+  lazyLoadingModule({ manager, options });
+  queryStringsModule({ manager, options });
+  serviceWorkerModule({ manager, options });
+  appearanceModule({ manager, options });
 
   // Conditionally loaded modules based on config (keep as dynamic imports)
   const conditionalModules = [
@@ -51,7 +51,7 @@ export default async function (Manager, options) {
     if (moduleConfig?.enabled) {
       modulePromises.push(
         import(`__main_assets__/js/core/${module.path}`)
-          .then(({ default: moduleFunc }) => moduleFunc(Manager, options))
+          .then(({ default: moduleFunc }) => moduleFunc({ manager, options }))
           .catch(error => console.error(`Failed to load ${module.path}:`, error))
       );
     } else {
@@ -69,5 +69,5 @@ export default async function (Manager, options) {
   await Promise.all(modulePromises);
 
   // Run the complete module to finalize page load state
-  completeModule(Manager, options);
+  completeModule({ manager, options });
 }

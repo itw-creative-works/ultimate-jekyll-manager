@@ -6,8 +6,8 @@
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+import webManager from 'web-manager';
 
-let webManager = null;
 let firebaseAuth = null;
 let signinMethodForms = new Map(); // Store FormManager instances for signin methods
 let signoutAllFormManager = null; // FormManager instance for sign out all sessions
@@ -17,8 +17,7 @@ const url = new URL(window.location.href);
 const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== window.top;
 
 // Initialize security section
-export function init(wm) {
-  webManager = wm;
+export function init() {
   initializeSigninMethods();
   initializeSignoutAllForm();
 }
@@ -91,7 +90,7 @@ async function updateSigninMethods() {
   // Get the formatted user from webManager for consistency, but we'll use firebaseUser for provider data
   const user = webManager.auth().getUser();
   if (!user) {
-    console.log('[DEBUG] security.js - No user from webManager, returning');
+    console.log('[DEBUG] security.js - No user, returning');
     return;
   }
 
@@ -295,10 +294,10 @@ async function updateActiveSessions(account) {
             ${getDeviceIcon(session.platform || deviceName)}
           </div>
           <div>
-            <strong>${deviceName}</strong>
-            <div class="text-muted small">${browserName}${session.mobile !== undefined ? ` • ${session.mobile ? 'Mobile' : 'Desktop'}` : ''}</div>
-            ${location ? `<div class="text-muted small">${location}</div>` : ''}
-            ${session.ip ? `<div class="text-muted small">IP: ${session.ip}</div>` : ''}
+            <strong>${webManager.utilities().escapeHTML(deviceName)}</strong>
+            <div class="text-muted small">${webManager.utilities().escapeHTML(browserName)}${session.mobile !== undefined ? ` • ${session.mobile ? 'Mobile' : 'Desktop'}` : ''}</div>
+            ${location ? `<div class="text-muted small">${webManager.utilities().escapeHTML(location)}</div>` : ''}
+            ${session.ip ? `<div class="text-muted small">IP: ${webManager.utilities().escapeHTML(session.ip)}</div>` : ''}
           </div>
         </div>
         <div class="text-end">

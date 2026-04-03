@@ -7,33 +7,17 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
 hero:
   headline: "Extension installed,"
   headline_accent: "now let's pin it!"
-  description: "One more step to get the most out of {{ site.brand.name }}"
+  description: ""
 
 # Steps
 steps:
-  - number: 1
-    title: "Click the puzzle piece"
+  - title: "Click the puzzle piece"
     description: "Find the Extensions icon in your browser toolbar"
-  - number: 2
-    title: "Pin {{ site.brand.name }}"
-    description: "Click the pin icon to keep it visible"
+  - title: "Pin the extension"
+    description: "Click the pin icon to keep it visible in your toolbar"
+  - title: "You're all set!"
+    description: "{{ site.brand.name }} is now pinned and ready to use"
 ---
-
-<!-- Arrow pointing to top-right -->
-<div class="extension-arrow-container position-fixed d-flex flex-column align-items-end z-3">
-  <span class="extension-arrow-label badge bg-primary fs-6 px-3 py-2 shadow text-nowrap">
-    {% uj_icon "hand-pointer", "me-2" %}
-    Click here first!
-  </span>
-  <div class="extension-arrow text-primary mt-2 me-2">
-    <svg width="60" height="80" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Curved arrow pointing up-right -->
-      <path d="M30 75 Q35 40 50 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
-      <!-- Arrowhead -->
-      <path d="M42 5 L50 15 L38 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-  </div>
-</div>
 
 <!-- Main content -->
 <section class="col-12 col-md-10 col-lg-8 col-xl-7">
@@ -52,21 +36,18 @@ steps:
           {{ page.resolved.hero.headline }}
           <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
-        <p class="fs-5 text-muted mb-0">{{ page.resolved.hero.description }}</p>
       </div>
 
-      <!-- Step 1: Click puzzle piece -->
-      <div class="extension-step mb-3" data-step="1">
-        <div class="d-flex align-items-start gap-4">
-          <div class="flex-shrink-0">
-            <span class="avatar avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fs-5">1</span>
-          </div>
-          <div class="flex-grow-1 text-start">
-            <h4 class="mb-2">{{ page.resolved.steps[0].title }}</h4>
-            <p class="text-muted mb-3">{{ page.resolved.steps[0].description }}</p>
-
-            <!-- Visual: Browser toolbar with puzzle piece -->
-            <div class="extension-visual bg-body-tertiary rounded-4 p-4">
+      <!-- Steps Slideshow -->
+      <div class="steps-slideshow">
+        <div class="steps-slideshow-slides">
+        <!-- Step 1: Click puzzle piece -->
+        <div class="step-slide" data-step="1">
+          <div class="step-number-badge">1</div>
+            <h5 class="step-title">{{ page.resolved.steps[0].title }}</h5>
+          <p class="text-muted mb-3">{{ page.resolved.steps[0].description }}</p>
+          <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center position-relative">
+            <div class="extension-visual">
               <div class="extension-toolbar d-flex align-items-center justify-content-end gap-2 bg-body rounded-3 p-2 border">
                 <!-- Mock URL bar -->
                 <div class="extension-url-bar flex-grow-1 bg-body-secondary rounded px-3 py-1 small text-muted me-2 text-truncate">
@@ -98,26 +79,15 @@ steps:
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Divider -->
-      <div class="extension-step-divider d-flex justify-content-center mb-3">
-        {% uj_icon "arrow-down", "fs-3 text-muted" %}
-      </div>
-
-      <!-- Step 2: Pin the extension -->
-      <div class="extension-step" data-step="2">
-        <div class="d-flex align-items-start gap-4">
-          <div class="flex-shrink-0">
-            <span class="avatar avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fs-5">2</span>
-          </div>
-          <div class="flex-grow-1 text-start">
-            <h4 class="mb-2">{{ page.resolved.steps[1].title }}</h4>
-            <p class="text-muted mb-3">{{ page.resolved.steps[1].description }}</p>
-
-            <!-- Visual: Extension dropdown with pin -->
-            <div class="extension-visual bg-body-tertiary rounded-4 p-4">
-              <div class="extension-dropdown bg-body rounded-3 border shadow-sm overflow-hidden mx-auto">
+        <!-- Step 2: Pin the extension -->
+        <div class="step-slide" data-step="2">
+          <div class="step-number-badge">2</div>
+            <h5 class="step-title">{{ page.resolved.steps[1].title }}</h5>
+          <p class="text-muted mb-3">{{ page.resolved.steps[1].description }}</p>
+          <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center position-relative">
+            <div class="extension-visual">
+              <div class="extension-dropdown bg-body rounded-3 border shadow-sm mx-auto">
                 <!-- Dropdown header -->
                 <div class="extension-dropdown-header d-flex align-items-center justify-content-between p-2 border-bottom bg-body-secondary">
                   <span class="small fw-bold">Extensions</span>
@@ -137,7 +107,7 @@ steps:
                       {% uj_icon "thumbtack", "fa-xs text-muted" %}
                     </button>
                   </div>
-                  <!-- Our extension (highlighted) -->
+                  <!-- Our extension (highlighted with pin click) -->
                   <div class="extension-dropdown-item d-flex align-items-center gap-3 p-2 rounded bg-primary bg-opacity-10 border border-primary">
                     <div class="extension-item-icon rounded p-1 d-flex align-items-center justify-content-center">
                       <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="extension-brandmark" alt="{{ site.brand.name }}"/>
@@ -164,13 +134,51 @@ steps:
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Success message -->
-      <div class="extension-success-message mt-5 pt-4 border-top">
-        <div class="d-flex align-items-center justify-content-center gap-3 text-success">
-          {% uj_icon "circle-check", "fs-4" %}
-          <span class="fs-5 fw-semibold">That's it! You're all set.</span>
+        <!-- Step 3: All set -->
+        <div class="step-slide" data-step="3">
+          <div class="step-number-badge">3</div>
+            <h5 class="step-title">{{ page.resolved.steps[2].title }}</h5>
+          <p class="text-muted mb-3">{{ page.resolved.steps[2].description }}</p>
+          <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center position-relative">
+            <div class="extension-visual">
+              <div class="extension-toolbar d-flex align-items-center justify-content-end gap-2 bg-body rounded-3 p-2 border">
+                <!-- Mock URL bar -->
+                <div class="extension-url-bar flex-grow-1 bg-body-secondary rounded px-3 py-1 small text-muted me-2 text-truncate">
+                  {{ site.url }}
+                </div>
+                <!-- Extension icons -->
+                <button type="button" class="btn btn-sm btn-secondary opacity-50" disabled>
+                  {% uj_icon "shield", "fa-sm" %}
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary opacity-50" disabled>
+                  {% uj_icon "bookmark", "fa-sm" %}
+                </button>
+                <!-- Our extension - now pinned! -->
+                <div class="extension-pinned-target position-relative">
+                  <button type="button" class="btn btn-sm btn-primary animation-flex">
+                    <img src="{{ site.uj.placeholder.src }}" data-lazy="@src {{ site.brand.images.brandmark }}" class="extension-toolbar-brandmark" alt="{{ site.brand.name }}"/>
+                  </button>
+                </div>
+                <button type="button" class="btn btn-sm btn-secondary opacity-50" disabled>
+                  {% uj_icon "puzzle-piece", "fa-sm" %}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div>
+
+        <!-- Slideshow Navigation -->
+        <div class="steps-slideshow-nav">
+          <button type="button" class="btn btn-outline-adaptive btn-sm step-prev" disabled>
+            {% uj_icon "chevron-left", "me-1" %} Back
+          </button>
+          <div class="steps-dots"></div>
+          <button type="button" class="btn btn-primary btn-sm step-next">
+            <span class="button-text">Next</span> {% uj_icon "chevron-right", "ms-1" %}
+          </button>
         </div>
       </div>
 

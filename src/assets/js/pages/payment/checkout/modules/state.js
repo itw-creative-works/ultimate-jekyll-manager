@@ -2,6 +2,7 @@
 // Minimal mutable state -- everything else is derived by buildBindingsState()
 
 import { calculatePrices } from './pricing.js';
+import webManager from 'web-manager';
 
 // All supported billing frequencies
 export const FREQUENCIES = ['daily', 'weekly', 'monthly', 'annually'];
@@ -57,7 +58,7 @@ export function getAvailableFrequencies(product) {
 
 // Build the complete bindings state from minimal state
 // Returns a fresh object every time -- no mutation of shared references
-export function buildBindingsState(webManager) {
+export function buildBindingsState() {
   const product = state.product;
   const user = webManager.auth().getUser();
   const prices = calculatePrices(state);

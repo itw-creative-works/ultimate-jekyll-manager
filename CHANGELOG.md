@@ -15,6 +15,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.19] - 2026-04-02
+### Security
+- Comprehensive XSS hardening: escape all dynamic data in innerHTML with `webManager.utilities().escapeHTML()`
+- Remove all local `escapeHtml` implementations — single source of truth via web-manager
+- Rebuild `showToast()` and `showNotification()` to use `textContent` instead of `innerHTML`
+- Add `javascript:` protocol blocking in web-manager `@attr` binding directive
+- Add URL scheme validation for vert.js postMessage handler
+- Fix double-escaping in `showSuccess()`/`showError()`/`showNotification()` callers
+- Document zero-trust XSS policy in CLAUDE.md and skills
+
+### Changed
+- Refactor webManager from passed parameter to direct singleton import across all modules
+- Remove `init(wm)` pattern and Manager parameter passing throughout page modules
+- Calendar core/events/renderer use direct imports instead of constructor injection
+- Fix file structure and spacing across all JS files (consistent Libraries/Module pattern)
+- Fix alternatives layout markdown code block rendering issue
+
+---
 ## [1.0.18] - 2026-03-30
 ### Changed
 - Removed redundant "Additional gems" comment from Gemfile template output in defaults.js

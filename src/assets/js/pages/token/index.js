@@ -1,12 +1,9 @@
 // This file is required by /token page to generate custom auth tokens for extensions/apps
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import webManager from 'web-manager';
 
 // Module
-export default function (Manager) {
-  // Shortcuts
-  const { webManager } = Manager;
-
-  // DOM elements
+export default function () {
   const $status = document.getElementById('token-status');
   const $error = document.getElementById('token-error');
   const $errorMessage = document.getElementById('token-error-message');
@@ -40,7 +37,7 @@ export default function (Manager) {
       try {
         // Generate custom token
         updateStatus('Generating secure token...');
-        const token = await generateCustomToken(webManager);
+        const token = await generateCustomToken();
 
         // Update status
         updateStatus('Token generated successfully!');
@@ -61,7 +58,7 @@ export default function (Manager) {
 
           // Show retry button after a delay in case the redirect was cancelled (e.g. custom protocol dialog)
           setTimeout(() => {
-            updateStatus('If you were not redirected, <a href="' + redirectUrl + '">click here to try again</a>.');
+            updateStatus('If you were not redirected, <a href="' + webManager.utilities().escapeHTML(redirectUrl) + '">click here to try again</a>.', true);
           }, 3000);
 
           window.location.href = redirectUrl;
@@ -80,7 +77,7 @@ export default function (Manager) {
   });
 
   // Generate custom token via backend-manager API
-  async function generateCustomToken(webManager) {
+  async function generateCustomToken() {
     const serverApiURL = `${webManager.getApiUrl()}/backend-manager/user/token`;
 
     const response = await authorizedFetch(serverApiURL, {
@@ -100,11 +97,23 @@ export default function (Manager) {
     return token;
   }
 
-  // Update status message
-  function updateStatus(message) {
-    if ($status) {
-      $status.innerHTML = `<p class="text-muted small">${message}</p>`;
+  // Update status message (rawHtml=true only when caller has pre-escaped the content)
+  function updateStatus(message, rawHtml) {
+    if (!$status) {
+      return;
     }
+
+    const $p = document.createElement('p');
+    $p.className = 'text-muted small';
+
+    if (rawHtml) {
+      $p.innerHTML = message;
+    } else {
+      $p.textContent = message;
+    }
+
+    $status.innerHTML = '';
+    $status.appendChild($p);
   }
 
   // Show error message

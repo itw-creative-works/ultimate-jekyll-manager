@@ -2,17 +2,14 @@
 import { state, buildBindingsState } from './modules/state.js';
 import { trackPurchaseIfNeeded } from './modules/tracking.js';
 import { triggerCelebration } from './modules/celebration.js';
-
-let webManager = null;
-
+import webManager from 'web-manager';
 /* Test URL
   https://localhost:3000/payment/confirmation?orderId=ORD-TRIAL-123&productId=pro&productName=Pro%20Plan&amount=0&currency=USD&frequency=annually&paymentMethod=stripe&trial=true&track=true
 */
 
 // Module export
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
     await webManager.dom().ready();
     await initializeConfirmation();
     return resolve();
@@ -33,10 +30,10 @@ async function initializeConfirmation() {
   updateUI();
 
   // Track purchase (if track=true param present)
-  // trackPurchaseIfNeeded(state, webManager);
+  // trackPurchaseIfNeeded(state);
 
   // Trigger celebration animation
-  await triggerCelebration(webManager);
+  await triggerCelebration();
 }
 
 // Parse URL parameters into minimal state

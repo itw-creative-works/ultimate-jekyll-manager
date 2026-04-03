@@ -2,13 +2,9 @@
 import authPages from '__main_assets__/js/libs/auth.js';
 
 // Module
-export default (Manager, options) => {
+export default () => {
   return new Promise(async function (resolve, reject) {
-    // Shortcuts
-    const { webManager } = Manager;
-
-    // Run authPages
-    await authPages(Manager);
+    await authPages();
 
     // Resolve
     return resolve();

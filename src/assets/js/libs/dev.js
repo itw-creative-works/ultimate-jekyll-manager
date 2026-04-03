@@ -2,17 +2,15 @@
  * Development-only utilities and features
  * This file contains code that should only run in development mode
  */
-export default function (Manager, options) {
-  const { webManager } = Manager;
-
+export default function () {
   // Main log
   console.log('⚠️ Enabling development mode features!');
 
   // Setup handlers
-  setupHandlers(webManager);
+  setupHandlers();
 
   // Setup helpers
-  setupHelpers(webManager);
+  setupHelpers();
 
   // Setup breakpoint logger
   setupBreakpointLogger();
@@ -21,18 +19,15 @@ export default function (Manager, options) {
   setupTrackingInterceptors();
 }
 
-function setupHandlers(webManager) {
+function setupHandlers() {
   // Add development click handler
   document.addEventListener('click', function (event) {
     console.log('Click', event.target);
   });
 }
 
-function setupHelpers(webManager) {
+function setupHelpers() {
   // Add development helper functions
-
-  // Globalize the webManager
-  // window.webManager = webManager;
 
   // Log opening tags of common HTML elements
   window.logOpeningTags = function (detail) {

@@ -4,11 +4,10 @@
 
 // Libraries
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
-import { escapeHtml } from '__main_assets__/js/libs/admin-helpers.js';
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
+import webManager from 'web-manager';
 
 // State
-let webManager = null;
 let currentCollection = '';
 let currentDocPath = null;
 let documents = [];
@@ -21,10 +20,8 @@ const PAGE_SIZE = 20;
 const MAX_DISPLAY_COLUMNS = 4;
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
-
     await webManager.dom().ready();
 
     webManager.auth().listen({ once: true }, async (state) => {
@@ -290,7 +287,7 @@ function renderDocuments() {
   if ($thead) {
     $thead.innerHTML = '<th>Document ID</th>';
     columns.forEach((col) => {
-      $thead.innerHTML += `<th>${escapeHtml(col)}</th>`;
+      $thead.innerHTML += `<th>${webManager.utilities().escapeHTML(col)}</th>`;
     });
     $thead.innerHTML += '<th style="width: 40px;"></th>';
   }
@@ -302,15 +299,15 @@ function renderDocuments() {
       const $row = document.createElement('tr');
       $row.style.cursor = 'pointer';
 
-      let cells = `<td class="font-monospace small text-truncate" style="max-width: 200px;" title="${escapeHtml(doc.id)}">${escapeHtml(doc.id)}</td>`;
+      let cells = `<td class="font-monospace small text-truncate" style="max-width: 200px;" title="${webManager.utilities().escapeHTML(doc.id)}">${webManager.utilities().escapeHTML(doc.id)}</td>`;
 
       columns.forEach((col) => {
         const value = getNestedValue(doc.data, col);
-        cells += `<td class="small text-truncate" style="max-width: 180px;" title="${escapeHtml(String(value ?? ''))}">${renderCellValue(value)}</td>`;
+        cells += `<td class="small text-truncate" style="max-width: 180px;" title="${webManager.utilities().escapeHTML(String(value ?? ''))}">${renderCellValue(value)}</td>`;
       });
 
       cells += `<td>
-        <button class="btn btn-sm btn-link p-0 btn-view-doc" data-doc-id="${escapeHtml(doc.id)}">
+        <button class="btn btn-sm btn-link p-0 btn-view-doc" data-doc-id="${webManager.utilities().escapeHTML(doc.id)}">
           ${getPrerenderedIcon('file', 'fa-sm')}
         </button>
       </td>`;
@@ -413,22 +410,22 @@ function renderCellValue(value) {
     if (value > 1000000000 && value < 10000000000) {
       return `<span title="${value}">${new Date(value * 1000).toLocaleDateString()}</span>`;
     }
-    return escapeHtml(value.toLocaleString());
+    return webManager.utilities().escapeHTML(value.toLocaleString());
   }
 
   if (typeof value === 'object') {
     if (value.toDate && typeof value.toDate === 'function') {
-      return escapeHtml(value.toDate().toLocaleDateString());
+      return webManager.utilities().escapeHTML(value.toDate().toLocaleDateString());
     }
     return `<span class="text-muted">{...}</span>`;
   }
 
   const str = String(value);
   if (str.length > 40) {
-    return escapeHtml(str.substring(0, 40) + '...');
+    return webManager.utilities().escapeHTML(str.substring(0, 40) + '...');
   }
 
-  return escapeHtml(str);
+  return webManager.utilities().escapeHTML(str);
 }
 
 // ============================================

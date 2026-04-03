@@ -1,10 +1,8 @@
-// @TODO: DELETE THIS FILE when the project is ready
+// Libraries
+import webManager from 'web-manager';
 
 // Module
-export default async (Manager, options) => {
-  // Shortcuts
-  const { webManager } = Manager;
-
+export default async () => {
   // Log
   console.log('Loaded #project index.js');
 

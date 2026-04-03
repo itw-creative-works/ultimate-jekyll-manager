@@ -1,13 +1,10 @@
 // Libraries
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-
-let webManager = null;
+import webManager from 'web-manager';
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
-
     await webManager.dom().ready();
 
     // Wait for auth state before handling callback

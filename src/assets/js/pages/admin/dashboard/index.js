@@ -6,22 +6,20 @@
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
 import fetch from 'wonderful-fetch';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
-import { formatTimeAgo, capitalize, escapeHtml, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
+import { formatTimeAgo, capitalize, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
 import { Chart, DoughnutController, BarController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import webManager from 'web-manager';
 
 // Register Chart.js components
 Chart.register(DoughnutController, BarController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 // State
-let webManager = null;
 let planChart = null;
 let frequencyChart = null;
 
 // Module
-export default (Manager) => {
+export default () => {
   return new Promise(async function (resolve) {
-    webManager = Manager.webManager;
-
     await webManager.dom().ready();
 
     webManager.auth().listen({ once: true }, async (state) => {
@@ -332,8 +330,8 @@ async function loadRecentUsers() {
 
     const $row = document.createElement('tr');
     $row.innerHTML = `
-      <td class="text-truncate" style="max-width: 200px;">${escapeHtml(email)}</td>
-      <td><span class="badge bg-body-secondary text-body">${escapeHtml(capitalize(plan))}</span></td>
+      <td class="text-truncate" style="max-width: 200px;">${webManager.utilities().escapeHTML(email)}</td>
+      <td><span class="badge bg-body-secondary text-body">${webManager.utilities().escapeHTML(capitalize(plan))}</span></td>
       <td class="text-muted small">${timeAgo}</td>
     `;
     $tbody.appendChild($row);
@@ -380,9 +378,9 @@ async function loadRecentOrders() {
 
     const $row = document.createElement('tr');
     $row.innerHTML = `
-      <td class="font-monospace small text-truncate" style="max-width: 120px;" title="${escapeHtml(orderId)}">${escapeHtml(orderId)}</td>
-      <td><span class="badge bg-body-secondary text-body">${escapeHtml(capitalize(product))}</span></td>
-      <td class="small">${escapeHtml(capitalize(processor))}</td>
+      <td class="font-monospace small text-truncate" style="max-width: 120px;" title="${webManager.utilities().escapeHTML(orderId)}">${webManager.utilities().escapeHTML(orderId)}</td>
+      <td><span class="badge bg-body-secondary text-body">${webManager.utilities().escapeHTML(capitalize(product))}</span></td>
+      <td class="small">${webManager.utilities().escapeHTML(capitalize(processor))}</td>
       <td class="text-muted small">${timeAgo}</td>
     `;
     $tbody.appendChild($row);
@@ -424,13 +422,13 @@ async function runCron($btn) {
 
     if ($result) {
       $result.classList.remove('d-none');
-      $result.innerHTML = `<div class="alert alert-success small mb-0 py-2">Cron <strong>${escapeHtml(cronId)}</strong> completed successfully</div>`;
+      $result.innerHTML = `<div class="alert alert-success small mb-0 py-2">Cron <strong>${webManager.utilities().escapeHTML(cronId)}</strong> completed successfully</div>`;
     }
   } catch (error) {
     console.error(`Cron ${cronId} failed:`, error);
     if ($result) {
       $result.classList.remove('d-none');
-      $result.innerHTML = `<div class="alert alert-danger small mb-0 py-2">Cron <strong>${escapeHtml(cronId)}</strong> failed: ${escapeHtml(error.message || 'Unknown error')}</div>`;
+      $result.innerHTML = `<div class="alert alert-danger small mb-0 py-2">Cron <strong>${webManager.utilities().escapeHTML(cronId)}</strong> failed: ${webManager.utilities().escapeHTML(error.message || 'Unknown error')}</div>`;
     }
   }
 
@@ -468,7 +466,7 @@ async function runBackup() {
     console.error('Backup failed:', error);
     if ($result) {
       $result.classList.remove('d-none');
-      $result.innerHTML = `<div class="alert alert-danger small mb-0 py-2">Backup failed: ${escapeHtml(error.message || 'Unknown error')}</div>`;
+      $result.innerHTML = `<div class="alert alert-danger small mb-0 py-2">Backup failed: ${webManager.utilities().escapeHTML(error.message || 'Unknown error')}</div>`;
     }
   }
 

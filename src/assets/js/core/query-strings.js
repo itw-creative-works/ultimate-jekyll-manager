@@ -1,8 +1,7 @@
-// Query Strings Module
-export default function (Manager, options) {
-  // Shortcuts
-  const { webManager } = Manager;
+import webManager from 'web-manager';
 
+// Query Strings Module
+export default function () {
   // Process query strings when DOM is ready
   webManager.dom().ready().then(() => {
     processQueryStrings();

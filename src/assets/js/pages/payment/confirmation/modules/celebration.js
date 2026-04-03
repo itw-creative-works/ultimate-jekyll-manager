@@ -1,7 +1,8 @@
 // Celebration animation for confirmation page
+import webManager from 'web-manager';
 
 // Trigger confetti celebration
-export async function triggerCelebration(webManager) {
+export async function triggerCelebration() {
   try {
     await webManager.dom().loadScript({
       src: 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js'
