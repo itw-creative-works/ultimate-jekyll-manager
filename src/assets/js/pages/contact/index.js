@@ -54,7 +54,7 @@ function setupForm() {
       company: data.company || '',
       subject: data.subject,
       message: data.message,
-      user: data.user || {},
+      uid: data.uid || '',
     };
 
     // Get API endpoint from site config or use default

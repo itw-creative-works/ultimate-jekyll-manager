@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.20] - 2026-04-03
+### Fixed
+- Fix contact form sending `user: map[]` to Slapform by replacing nested `user` object with flat `uid` string field
+- Autofill visible email input from auth state via `data-wm-bind="@value auth.user.email"` for logged-in users
+- Remove redundant hidden `auth.user.email` field
+
 ## [1.0.19] - 2026-04-02
 ### Security
 - Comprehensive XSS hardening: escape all dynamic data in innerHTML with `webManager.utilities().escapeHTML()`
