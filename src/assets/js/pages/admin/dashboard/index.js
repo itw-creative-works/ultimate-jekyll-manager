@@ -4,8 +4,8 @@
 
 // Libraries
 import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js';
-import fetch from 'wonderful-fetch';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
+import { getProducts } from '__main_assets__/js/libs/payment-config.js';
 import { formatTimeAgo, capitalize, setStatValue, setStatSubValue } from '__main_assets__/js/libs/admin-helpers.js';
 import { Chart, DoughnutController, BarController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import webManager from 'web-manager';
@@ -80,13 +80,8 @@ async function loadSubscriberData() {
   const { collection, query, where, getCountFromServer } = await import('firebase/firestore');
   const db = webManager.firebaseFirestore;
 
-  // Fetch brand config to get product list and available frequencies
-  const brandConfig = await fetch(`${webManager.getApiUrl()}/backend-manager/brand`, {
-    response: 'json',
-    tries: 2,
-  });
-
-  const products = (brandConfig?.payment?.products || []).filter((p) => p.id !== 'basic');
+  // Get product list from _config.yml (available instantly via webManager.config)
+  const products = getProducts().filter((p) => p.id !== 'basic');
   const frequencyIds = [...new Set(products.flatMap((p) => Object.keys(p.prices || {})))];
 
   // Run count queries for each product × frequency in parallel

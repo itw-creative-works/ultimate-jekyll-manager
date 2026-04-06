@@ -328,6 +328,32 @@ faqs:
 
         <div class="row g-4 mb-5 justify-content-center">
           {% for plan in page.resolved.pricing.plans %}
+            {% comment %} Look up matching product in _config.yml payment products {% endcomment %}
+            {% assign _config_product = nil %}
+            {% for p in site.web_manager.payment.products %}
+              {% if p.id == plan.id %}
+                {% assign _config_product = p %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
+            {% comment %} Resolve prices: frontmatter pricing takes precedence, then config prices {% endcomment %}
+            {% if plan.pricing.monthly or plan.pricing.monthly == 0 %}
+              {% assign _plan_monthly = plan.pricing.monthly %}
+            {% elsif _config_product.prices.monthly or _config_product.prices.monthly == 0 %}
+              {% assign _plan_monthly = _config_product.prices.monthly %}
+            {% else %}
+              {% assign _plan_monthly = 0 %}
+            {% endif %}
+
+            {% if plan.pricing.annually or plan.pricing.annually == 0 %}
+              {% assign _plan_annually = plan.pricing.annually %}
+            {% elsif _config_product.prices.annually or _config_product.prices.annually == 0 %}
+              {% assign _plan_annually = _config_product.prices.annually %}
+            {% else %}
+              {% assign _plan_annually = 0 %}
+            {% endif %}
+
             {% if plan.popular %}
               {% assign border_classes = "border-gradient-rainbow border-3" %}
             {% else %}
@@ -349,12 +375,12 @@ faqs:
                     <p class="text-muted small mb-3">{{ plan.tagline }}</p>
 
                     <!-- Price -->
-                    {% if plan.pricing.monthly == 0 %}
+                    {% if _plan_monthly == 0 %}
                       <p class="display-6 fw-bold mb-0">Free</p>
                     {% else %}
                       <p class="mb-0">
                         <span class="display-6 fw-bold">
-                          <span class="fs-3">$</span><span class="amount" data-monthly="{{ plan.pricing.monthly }}" data-annually="{{ plan.pricing.annually | divided_by: 12 | round }}">{{ plan.pricing.annually | divided_by: 12 | round }}</span>
+                          <span class="fs-3">$</span><span class="amount" data-monthly="{{ _plan_monthly }}" data-annually="{{ _plan_annually | divided_by: 12 | round }}">{{ _plan_annually | divided_by: 12 | round }}</span>
                         </span>
                         <small class="text-muted">/month</small>
                       </p>
@@ -363,12 +389,17 @@ faqs:
                     <!-- Price per unit (only shown when enabled) -->
                     {% if page.resolved.pricing.price_per_unit.enabled %}
                       <p class="text-muted small mb-4">
-                        {% if plan.pricing.monthly > 0 %}
+                        {% if _plan_monthly > 0 %}
                           {% for feature in plan.features %}
                             {% if feature.id == page.resolved.pricing.price_per_unit.feature_id %}
-                              {% assign monthly_price_per_unit = plan.pricing.monthly | times: 1.0 | divided_by: feature.value | round: 2 %}
-                              {% assign annual_monthly_price = plan.pricing.annually | divided_by: 12.0 %}
-                              {% assign annual_price_per_unit = annual_monthly_price | divided_by: feature.value | round: 2 %}
+                              {% comment %} Resolve feature value from config limits if not set in frontmatter {% endcomment %}
+                              {% assign _ppu_value = feature.value %}
+                              {% if _config_product and _ppu_value == nil %}
+                                {% for _lim in _config_product.limits %}{% if _lim[0] == feature.id %}{% assign _ppu_value = _lim[1] %}{% break %}{% endif %}{% endfor %}
+                              {% endif %}
+                              {% assign monthly_price_per_unit = _plan_monthly | times: 1.0 | divided_by: _ppu_value | round: 2 %}
+                              {% assign annual_monthly_price = _plan_annually | divided_by: 12.0 %}
+                              {% assign annual_price_per_unit = annual_monthly_price | divided_by: _ppu_value | round: 2 %}
                               <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.pricing.price_per_unit.label }}
                             {% endif %}
                           {% endfor %}
@@ -389,8 +420,8 @@ faqs:
                       {% assign btn_style = "btn-primary" %}
 
                       {% iftruthy plan.url %}
-                        <a href="{{ plan.url }}" class="btn {% if plan.pricing.monthly == 0 %}btn-adaptive{% else %}{{ btn_style }}{% endif %} btn-md fw-semibold px-2 fs-5">
-                          {% if plan.pricing.monthly == 0 %}
+                        <a href="{{ plan.url }}" class="btn {% if _plan_monthly == 0 %}btn-adaptive{% else %}{{ btn_style }}{% endif %} btn-md fw-semibold px-2 fs-5">
+                          {% if _plan_monthly == 0 %}
                             Get Started
                           {% else %}
                             Get Free Trial
@@ -406,11 +437,11 @@ faqs:
 
                     <!-- Billing info -->
                     <p class="text-center text-muted small mb-3">
-                      {% if plan.pricing.monthly == 0 %}
+                      {% if _plan_monthly == 0 %}
                         <span>No credit card required</span>
                       {% else %}
-                        <span class="billing-info" data-monthly="Billed ${{ plan.pricing.monthly | uj_commaify }} monthly" data-annually="Billed ${{ plan.pricing.annually | uj_commaify }} annually">
-                          Billed ${{ plan.pricing.annually | uj_commaify }} annually
+                        <span class="billing-info" data-monthly="Billed ${{ _plan_monthly | uj_commaify }} monthly" data-annually="Billed ${{ _plan_annually | uj_commaify }} annually">
+                          Billed ${{ _plan_annually | uj_commaify }} annually
                         </span>
                       {% endif %}
                     </p>
@@ -423,6 +454,16 @@ faqs:
                       <ul class="list-unstyled mb-3">
                         {% for feature in plan.features %}
                           {% if common_feature_ids contains feature.id %}
+                            {% comment %} Resolve feature value: frontmatter > config limits {% endcomment %}
+                            {% assign _feature_value = feature.value %}
+                            {% if _config_product and _feature_value == nil %}
+                              {% assign _config_limit = nil %}{% for _lim in _config_product.limits %}{% if _lim[0] == feature.id %}{% assign _config_limit = _lim[1] %}{% break %}{% endif %}{% endfor %}
+                              {% if _config_limit == -1 %}
+                                {% assign _feature_value = "Unlimited" %}
+                              {% elsif _config_limit %}
+                                {% assign _feature_value = _config_limit %}
+                              {% endif %}
+                            {% endif %}
                             {% assign feature_definition = nil %}
                             {% for def in page.resolved.pricing.definitions %}
                               {% if def.id == feature.id %}
@@ -433,10 +474,10 @@ faqs:
                             <li class="d-flex align-items-start mb-2">
                               <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                               <span>
-                                {% if feature.value == "Unlimited" %}
+                                {% if _feature_value == "Unlimited" %}
                                   Unlimited
                                 {% else %}
-                                  {{ feature.value | uj_commaify }}
+                                  {{ _feature_value | uj_commaify }}
                                 {% endif %}
                                 {% iftruthy feature_definition %}
                                   <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ feature_definition }}">{{ feature.name }}</span>
@@ -467,6 +508,16 @@ faqs:
                           <ul class="list-unstyled mb-0">
                             {% for feature in plan.features %}
                               {% unless common_feature_ids contains feature.id %}
+                                {% comment %} Resolve feature value: frontmatter > config limits {% endcomment %}
+                                {% assign _feature_value = feature.value %}
+                                {% if _config_product and _feature_value == nil %}
+                                  {% assign _config_limit = nil %}{% for _lim in _config_product.limits %}{% if _lim[0] == feature.id %}{% assign _config_limit = _lim[1] %}{% break %}{% endif %}{% endfor %}
+                                  {% if _config_limit == -1 %}
+                                    {% assign _feature_value = "Unlimited" %}
+                                  {% elsif _config_limit %}
+                                    {% assign _feature_value = _config_limit %}
+                                  {% endif %}
+                                {% endif %}
                                 {% assign feature_definition = nil %}
                                 {% for def in page.resolved.pricing.definitions %}
                                   {% if def.id == feature.id %}
@@ -477,12 +528,12 @@ faqs:
                                 <li class="d-flex align-items-start mb-2 {% if forloop.last %}mb-0{% endif %}">
                                   <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                                   <span>
-                                    {% if feature.value == "24/7" %}
-                                      {{ feature.value }}
-                                    {% elsif feature.value == "Included" or feature.value == "Available" or feature.value == "Full" %}
+                                    {% if _feature_value == "24/7" %}
+                                      {{ _feature_value }}
+                                    {% elsif _feature_value == "Included" or _feature_value == "Available" or _feature_value == "Full" %}
                                       <!-- No prefix for these values -->
                                     {% else %}
-                                      {{ feature.value | uj_commaify }}
+                                      {{ _feature_value | uj_commaify }}
                                     {% endif %}
                                     {% iftruthy feature_definition %}
                                       <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ feature_definition }}">{{ feature.name }}</span>
@@ -509,16 +560,12 @@ faqs:
                           {% endunless %}
                         {% endfor %}
 
+                        {% assign _prev_index = forloop.index0 | minus: 1 %}
+                        {% assign _prev_plan = page.resolved.pricing.plans[_prev_index] %}
                         <div class="text-muted small mb-2">
                           <em>Everything in</em>
                           <em>
-                            <strong>
-                              {%- if forloop.index == 1 -%}Free{%- endif -%}
-                              {%- if forloop.index == 2 -%}Basic{%- endif -%}
-                              {%- if forloop.index == 3 -%}Starter{%- endif -%}
-                              {%- if forloop.index == 4 -%}Pro{%- endif -%}
-                              {%- if forloop.index == 5 -%}Max{% endif -%}
-                            </strong>
+                            <strong>{{ _prev_plan.name }}</strong>
                             {%- if has_additional -%}, plus:{%- endif -%}
                           </em>
                         </div>
@@ -528,6 +575,16 @@ faqs:
                           <ul class="list-unstyled mb-0">
                             {% for feature in plan.features %}
                               {% unless common_feature_ids contains feature.id %}
+                                {% comment %} Resolve feature value: frontmatter > config limits {% endcomment %}
+                                {% assign _feature_value = feature.value %}
+                                {% if _config_product and _feature_value == nil %}
+                                  {% assign _config_limit = nil %}{% for _lim in _config_product.limits %}{% if _lim[0] == feature.id %}{% assign _config_limit = _lim[1] %}{% break %}{% endif %}{% endfor %}
+                                  {% if _config_limit == -1 %}
+                                    {% assign _feature_value = "Unlimited" %}
+                                  {% elsif _config_limit %}
+                                    {% assign _feature_value = _config_limit %}
+                                  {% endif %}
+                                {% endif %}
                                 {% assign feature_definition = nil %}
                                 {% for def in page.resolved.pricing.definitions %}
                                   {% if def.id == feature.id %}
@@ -538,12 +595,12 @@ faqs:
                                 <li class="d-flex align-items-start mb-2 {% if forloop.last %}mb-0{% endif %}">
                                   <span class="me-3">{% uj_icon feature.icon, "fa-md" %}</span>
                                   <span>
-                                    {% if feature.value == "24/7" %}
-                                      {{ feature.value }}
-                                    {% elsif feature.value == "Included" or feature.value == "Available" or feature.value == "Full" %}
+                                    {% if _feature_value == "24/7" %}
+                                      {{ _feature_value }}
+                                    {% elsif _feature_value == "Included" or _feature_value == "Available" or _feature_value == "Full" %}
                                       <!-- No prefix for these values -->
                                     {% else %}
-                                      {{ feature.value | uj_commaify }}
+                                      {{ _feature_value | uj_commaify }}
                                     {% endif %}
                                     {% iftruthy feature_definition %}
                                       <span class="text-decoration-underline text-decoration-dotted cursor-help" data-bs-toggle="tooltip" data-bs-title="{{ feature_definition }}">{{ feature.name }}</span>
@@ -664,6 +721,14 @@ faqs:
                 {% endiffalsy %}
               </th>
               {% for plan in page.resolved.pricing.plans %}
+                {% comment %} Look up config product for this plan {% endcomment %}
+                {% assign _tbl_config_product = nil %}
+                {% for p in site.web_manager.payment.products %}
+                  {% if p.id == plan.id %}
+                    {% assign _tbl_config_product = p %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
                 <td>
                   {% assign has_feature = false %}
                   {% assign feature_value = nil %}
@@ -678,6 +743,16 @@ faqs:
                     {% endif %}
                   {% endfor %}
 
+                  {% comment %} Resolve feature value from config limits if not set {% endcomment %}
+                  {% if has_feature and feature_value == nil and _tbl_config_product %}
+                    {% assign _tbl_limit = nil %}{% for _lim in _tbl_config_product.limits %}{% if _lim[0] == feature_def.id %}{% assign _tbl_limit = _lim[1] %}{% break %}{% endif %}{% endfor %}
+                    {% if _tbl_limit == -1 %}
+                      {% assign feature_value = "Unlimited" %}
+                    {% elsif _tbl_limit %}
+                      {% assign feature_value = _tbl_limit %}
+                    {% endif %}
+                  {% endif %}
+
                   {% unless has_feature %}
                     {% for check_plan in page.resolved.pricing.plans %}
                       {% if check_plan.id == plan.id %}
@@ -690,6 +765,26 @@ faqs:
                           {% break %}
                         {% endif %}
                       {% endfor %}
+
+                      {% comment %} Resolve inherited value from config limits if not set {% endcomment %}
+                      {% if inherited_feature and inherited_value == nil %}
+                        {% assign _inh_config_product = nil %}
+                        {% for p in site.web_manager.payment.products %}
+                          {% if p.id == check_plan.id %}
+                            {% assign _inh_config_product = p %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
+                        {% if _inh_config_product %}
+                          {% assign _inh_limit = nil %}{% for _lim in _inh_config_product.limits %}{% if _lim[0] == feature_def.id %}{% assign _inh_limit = _lim[1] %}{% break %}{% endif %}{% endfor %}
+                          {% if _inh_limit == -1 %}
+                            {% assign inherited_value = "Unlimited" %}
+                          {% elsif _inh_limit %}
+                            {% assign inherited_value = _inh_limit %}
+                          {% endif %}
+                        {% endif %}
+                      {% endif %}
+
                       {% if inherited_feature %}
                         {% break %}
                       {% endif %}

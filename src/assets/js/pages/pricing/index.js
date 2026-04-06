@@ -319,7 +319,7 @@ function setupPromoCountdown() {
   adjustNavbarOffset();
 }
 
-// Disable button for the user's current active plan
+// Update buttons based on the user's current active plan
 function setupCurrentPlanIndicator() {
   webManager.auth().listen({ once: true }, (state) => {
     const resolved = webManager.auth().resolveSubscription(state.account);
@@ -328,16 +328,22 @@ function setupCurrentPlanIndicator() {
       return;
     }
 
-    const $button = document.querySelector(`button[data-plan-id="${resolved.plan}"]`);
-
-    if (!$button) {
-      return;
+    // Mark current plan button
+    const $currentButton = document.querySelector(`button[data-plan-id="${resolved.plan}"]`);
+    if ($currentButton) {
+      $currentButton.disabled = true;
+      $currentButton.textContent = 'Current Plan';
+      $currentButton.classList.remove('btn-primary', 'btn-gradient-rainbow', 'gradient-animated');
+      $currentButton.classList.add('btn-adaptive');
     }
 
-    $button.disabled = true;
-    $button.textContent = 'Current Plan';
-    $button.classList.remove('btn-primary', 'btn-gradient-rainbow', 'gradient-animated');
-    $button.classList.add('btn-adaptive');
+    // Update other paid plan buttons to "Switch to this plan"
+    document.querySelectorAll('button[data-plan-id]').forEach(($button) => {
+      if ($button.dataset.planId === resolved.plan || $button.dataset.planId === 'basic' || $button.dataset.planId === 'enterprise') {
+        return;
+      }
+      $button.textContent = 'Switch to This Plan';
+    });
   });
 }
 

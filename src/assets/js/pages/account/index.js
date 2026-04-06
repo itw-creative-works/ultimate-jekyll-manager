@@ -1,5 +1,4 @@
 // Libraries
-import fetch from 'wonderful-fetch';
 import * as profileSection from './sections/profile.js';
 import * as notificationsSection from './sections/notifications.js';
 import * as securitySection from './sections/security.js';
@@ -12,6 +11,7 @@ import * as dataRequestSection from './sections/data-request.js';
 import * as connectionsSection from './sections/connections.js';
 import * as refundSection from './sections/refund.js';
 import webManager from 'web-manager';
+import { getPaymentConfig } from '__main_assets__/js/libs/payment-config.js';
 
 // Module
 export default () => {
@@ -33,8 +33,9 @@ export default () => {
 // Global state
 let $navLinks = null;
 let $sections = null;
-let brandData = null;
-let fetchBrandDataPromise = null;
+
+// Config from _config.yml (available instantly, no fetch needed)
+const paymentConfig = getPaymentConfig();
 
 // Section modules map
 const sectionModules = {
@@ -85,10 +86,6 @@ async function initializeAccount() {
   webManager.auth().listen({}, async (state) => {
     console.log('Auth state with account data:', state);
 
-    // Load user data with the account information
-    // Wait for brand data to be fetched before loading section data
-    await fetchBrandData();
-
     /* @dev-only:start */
     {
       // Check for test subscription parameter
@@ -128,32 +125,6 @@ async function initializeAccount() {
   });
 }
 
-// Fetch brand data to get configuration and OAuth settings
-async function fetchBrandData() {
-  if (fetchBrandDataPromise) return fetchBrandDataPromise;
-
-  fetchBrandDataPromise = (async () => {
-    try {
-      const serverApiURL = `${webManager.getApiUrl()}/backend-manager/brand`;
-
-      // Fetch brand data
-      const response = await fetch(serverApiURL, {
-        response: 'json',
-      });
-
-      console.log('Fetched brand data:', response);
-      brandData = response;
-
-      return response;
-    } catch (error) {
-      webManager.sentry().captureException(new Error('Failed to fetch brand data', { cause: error }));
-      return null;
-    }
-  })();
-
-  return fetchBrandDataPromise;
-}
-
 // Load data for all sections
 function loadAllSectionData(authState) {
   const { user, account } = authState;
@@ -172,7 +143,7 @@ function loadAllSectionData(authState) {
   }
 
   if (sectionModules.billing.loadData) {
-    sectionModules.billing.loadData(account, brandData);
+    sectionModules.billing.loadData(account, paymentConfig);
   }
 
   if (sectionModules.team && sectionModules.team.loadData) {
@@ -196,7 +167,7 @@ function loadAllSectionData(authState) {
   }
 
   if (sectionModules.connections.loadData) {
-    sectionModules.connections.loadData(account, brandData);
+    sectionModules.connections.loadData(account, webManager.config?.oauth2 || {});
   }
 
   if (sectionModules.refund.loadData) {

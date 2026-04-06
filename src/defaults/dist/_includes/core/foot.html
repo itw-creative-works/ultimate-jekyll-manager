@@ -102,6 +102,7 @@
     {% endfor %}
     env: {{ page.resolved.web_manager.env | jsonify }},
     recaptcha: {{ page.resolved.recaptcha | jsonify }},
+    oauth2: {{ page.resolved.oauth2 | jsonify }},
   };
 </script>
 

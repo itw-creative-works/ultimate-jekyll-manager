@@ -1136,6 +1136,108 @@ webManager.auth().listen({ once: true }, async () => {
 
 **Reference:** `src/assets/js/libs/authorized-fetch.js`
 
+#### Payment Config Library
+
+Reads payment configuration (products, processors, prices, limits) from `webManager.config.payment` — populated from `_config.yml` at build time. **Do NOT fetch `/backend-manager/brand` to get payment data.** It's already available instantly via this library.
+
+**Import:**
+```javascript
+import { getPaymentConfig, getProcessors, getProducts, getProductById, getProductLimits, getCurrency } from '__main_assets__/js/libs/payment-config.js';
+```
+
+**Usage:**
+```javascript
+// Get all products
+const products = getProducts();
+
+// Find a specific product
+const product = getProductById('plus');
+
+// Get product limits
+const limits = getProductLimits('plus'); // { credits: 500, agents: 3, ... }
+
+// Get processors (stripe, paypal, etc.)
+const processors = getProcessors();
+```
+
+**Config location in `_config.yml`:**
+```yaml
+web_manager:
+  payment:
+    processors:
+      stripe:
+        publishableKey: pk_live_...
+      paypal:
+        clientId: ...
+    products:
+      - id: basic
+        name: Basic
+        limits:
+          credits: 100
+      - id: plus
+        name: Plus
+        limits:
+          credits: 500
+        prices:
+          monthly: 19
+          annually: 190
+```
+
+**How it works:** The `foot.html` Configuration injection serializes all `web_manager` properties into `window.Configuration`, which `webManager.initialize()` stores in `webManager.config`. The payment config is available immediately — no API call needed.
+
+**When to still use the brand API:**
+- `oauth2` provider configuration (used by the connections section on the account page)
+- Any data that is NOT in `_config.yml` and only exists server-side
+
+**Reference:** `src/assets/js/libs/payment-config.js`
+
+#### Pricing Page: Config-Resolved Values
+
+The pricing layout automatically resolves prices and feature limits from `_config.yml` when not explicitly set in frontmatter. This means consuming projects can define ONLY display metadata (name, tagline, icon, features list) and let prices/limits come from the single source of truth.
+
+**Resolution order (frontmatter wins):**
+1. `plan.pricing.monthly` / `plan.pricing.annually` from page frontmatter
+2. `site.web_manager.payment.products[matching_id].prices.monthly` / `.annually` from config
+3. `0` (default)
+
+**Feature value resolution:**
+1. `feature.value` from page frontmatter
+2. `site.web_manager.payment.products[matching_id].limits[feature.id]` from config (with `-1` → `"Unlimited"`)
+
+**Example: Minimal pricing.md (prices/limits come from config):**
+```yaml
+---
+layout: blueprint/pricing
+permalink: /pricing
+
+pricing:
+  plans:
+    - id: "basic"
+      name: "Basic"
+      tagline: "best for getting started"
+      url: "/dashboard"
+      features:
+        - id: "credits"
+          name: "Credits"
+          icon: "sparkles"
+        - id: "agents"
+          name: "Agents"
+          icon: "robot"
+    - id: "plus"
+      name: "Plus"
+      tagline: "best for small websites"
+      features:
+        - id: "credits"
+          name: "Credits"
+          icon: "sparkles"
+        - id: "agents"
+          name: "Agents"
+          icon: "robot"
+---
+```
+
+In this example, `credits` value of 100 and price of $19/mo come from `_config.yml`'s `web_manager.payment.products` — no hardcoding needed.
+
 #### FormManager Library
 
 Lightweight form state management library with built-in validation, state machine, and event system.

@@ -134,18 +134,17 @@ web_manager:
     config:
       autoRequest: 1000 * 60
   validRedirectHosts: []
-
-# Payment
-payment:
-  processors:
-    stripe:
-      publishableKey: null
-    paypal:
-      clientId: null
-    chargebee:
-      site: null
-    coinbase:
-      enabled: false
+  payment:
+    processors:
+      stripe:
+        publishableKey: null
+      paypal:
+        clientId: null
+      chargebee:
+        site: null
+      coinbase:
+        enabled: false
+    products: []
 
 # OAuth2
 oauth2:

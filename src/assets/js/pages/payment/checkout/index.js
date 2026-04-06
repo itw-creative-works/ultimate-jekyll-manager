@@ -1,6 +1,7 @@
 // Payment Checkout Page
 import { FormManager } from '__main_assets__/js/libs/form-manager.js';
-import { fetchBrandConfig, fetchTrialEligibility, warmupServer, createPaymentIntent } from './modules/api.js';
+import { getPaymentConfig, getProcessors, getProductById } from '__main_assets__/js/libs/payment-config.js';
+import { fetchTrialEligibility, warmupServer, createPaymentIntent } from './modules/api.js';
 import { state, buildBindingsState, resolveProcessor, FREQUENCIES, getAvailableFrequencies } from './modules/state.js';
 import { applyDiscountCode } from './modules/discount.js';
 import { initializeRecaptcha } from './modules/recaptcha.js';
@@ -71,15 +72,24 @@ async function initializeCheckout() {
       throw new Error('Product ID is missing from URL.');
     }
 
+    // Read payment config from _config.yml (available instantly via webManager.config)
+    state.processors = getProcessors();
+
+    // Find product
+    const product = getProductById(productId);
+    if (!product) {
+      throw new Error(`Product "${productId}" not found.`);
+    }
+    state.product = product;
+
     // Wait for auth state to settle before any authorized calls
     await new Promise((resolve) => webManager.auth().listen({ once: true }, resolve));
 
     // Fire-and-forget server warmup
     warmupServer();
 
-    // Parallel fetch: brand config + trial eligibility + reCAPTCHA
-    const [brandConfigResult, trialResult, recaptchaResult] = await Promise.allSettled([
-      fetchBrandConfig(),
+    // Parallel fetch: trial eligibility + reCAPTCHA
+    const [trialResult, recaptchaResult] = await Promise.allSettled([
       fetchTrialEligibility(),
       initializeRecaptcha(webManager.config?.recaptcha?.['site-key']),
     ]);
@@ -95,23 +105,6 @@ async function initializeCheckout() {
       }
     }
     /* @dev-only:end */
-
-    // Brand config is required
-    if (brandConfigResult.status === 'rejected') {
-      const reason = brandConfigResult.reason?.message || brandConfigResult.reason || 'Unknown error';
-      throw new Error(`Failed to load checkout brand config: ${reason}`);
-    }
-
-    const brandConfig = brandConfigResult.value;
-    state.brandConfig = brandConfig;
-    state.processors = brandConfig.payment?.processors || {};
-
-    // Find product
-    const product = brandConfig.payment?.products?.find(p => p.id === productId);
-    if (!product) {
-      throw new Error(`Product "${productId}" not found.`);
-    }
-    state.product = product;
 
     // Resolve frequency: URL param if valid, otherwise longest available term
     const available = getAvailableFrequencies(product);
@@ -286,7 +279,7 @@ function initDevPanel() {
   // Show the panel
   $panel.hidden = false;
 
-  const products = state.brandConfig?.payment?.products || [];
+  const products = getPaymentConfig().products || [];
   const params = new URLSearchParams(window.location.search);
 
   // Populate product dropdown

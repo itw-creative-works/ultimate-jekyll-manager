@@ -4,17 +4,6 @@ import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import { getRecaptchaToken } from './recaptcha.js';
 import webManager from 'web-manager';
 
-// Fetch brand config (products + processors)
-export async function fetchBrandConfig() {
-  const response = await fetch(`${webManager.getApiUrl()}/backend-manager/brand`, {
-    response: 'json',
-    tries: 2,
-  });
-
-  console.log('Fetched brand config:', response);
-  return response;
-}
-
 // Check trial eligibility via backend endpoint
 export async function fetchTrialEligibility() {
   try {

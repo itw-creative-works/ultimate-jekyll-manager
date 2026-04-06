@@ -7,7 +7,7 @@ import { FormManager } from '__main_assets__/js/libs/form-manager.js';
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import webManager from 'web-manager';
 
-let brandData = null;
+let oauth2Config = null;
 let accountData = null;
 let connectionForms = new Map();
 
@@ -24,13 +24,13 @@ export async function init() {
 }
 
 // Load connections data
-export async function loadData(account, sharedBrandData) {
+export async function loadData(account, sharedOAuth2Config) {
   if (!account) {
     return;
   }
 
   accountData = account;
-  brandData = sharedBrandData;
+  oauth2Config = sharedOAuth2Config;
 
   displayConnections();
 }
@@ -43,14 +43,14 @@ function displayConnections() {
     $loading.classList.add('d-none');
   }
 
-  if (!brandData) {
+  if (!oauth2Config) {
     if ($loading) {
       $loading.classList.remove('d-none');
     }
     return;
   }
 
-  const availableProviders = brandData?.oauth2 || {};
+  const availableProviders = oauth2Config;
   const userConnections = accountData?.oauth2 || {};
 
   let hasEnabledProviders = false;
@@ -237,7 +237,7 @@ function initializeProviderForm(providerId) {
   formManager.on('statechange', ({ state }) => {
     if (state === 'ready') {
       const userConnection = accountData?.oauth2?.[providerId];
-      const providerSettings = brandData?.oauth2?.[providerId];
+      const providerSettings = oauth2Config?.[providerId];
       updateProviderStatus(providerId, userConnection, providerSettings);
     }
   });
@@ -252,7 +252,7 @@ function initializeProviderForm(providerId) {
       const success = await handleDisconnect(provider);
 
       if (success) {
-        const providerSettings = brandData?.oauth2?.[provider];
+        const providerSettings = oauth2Config?.[provider];
         updateProviderStatus(provider, null, providerSettings);
       }
     }
@@ -261,7 +261,7 @@ function initializeProviderForm(providerId) {
 
 // Handle connect action
 async function handleConnect(providerId) {
-  const provider = brandData?.oauth2?.[providerId];
+  const provider = oauth2Config?.[providerId];
 
   if (!provider || provider.enabled === false) {
     throw new Error('This connection service is not available.');
@@ -322,7 +322,7 @@ async function handleDisconnect(providerId) {
 
 // Called when section is shown
 export function onShow() {
-  if (accountData && brandData) {
+  if (accountData && oauth2Config) {
     displayConnections();
   }
 }

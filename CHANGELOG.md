@@ -15,6 +15,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.0] - 2026-04-06
+### Added
+- `payment-config.js` shared library for reading payment data from build-time config
+- Pricing layout resolves prices and feature limits from `_config.yml` when not set in frontmatter
+- `oauth2` config injected into client-side Configuration object via `foot.html`
+- Pricing page shows "Switch to This Plan" on other paid plans when user has active subscription
+
+### Changed
+- Move `payment` under `web_manager` in default `_config.yml` so it serializes into client-side config
+- Checkout page uses `payment-config.js` instead of fetching `/backend-manager/brand`
+- Account billing section uses config for products/limits/currency instead of brand API
+- Account connections section reads `oauth2` from config instead of brand API
+- Admin dashboard uses config for product list in MRR calculations
+- Remove `/backend-manager/brand` fetch from account page entirely
+- "Everything in [plan]" now uses dynamic previous plan name instead of hardcoded index
+
+### Fixed
+- Liquid 4.x compatibility: use loop-based hash lookup instead of bracket notation for config limits
+
 ## [1.0.22] - 2026-04-05
 ### Changed
 - Bump web-manager from ^4.1.36 to ^4.1.37
