@@ -3,6 +3,7 @@ import { state, buildBindingsState } from './modules/state.js';
 import { trackPurchaseIfNeeded } from './modules/tracking.js';
 import { triggerCelebration } from './modules/celebration.js';
 import webManager from 'web-manager';
+
 /* Test URL
   https://localhost:3000/payment/confirmation?orderId=ORD-TRIAL-123&productId=pro&productName=Pro%20Plan&amount=0&currency=USD&frequency=annually&paymentMethod=stripe&trial=true&track=true
 */
