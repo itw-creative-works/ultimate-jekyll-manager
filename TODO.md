@@ -8,8 +8,11 @@ Next, we need to enable a way in the front-end and backend to enable CHANGING PL
 * what happens if the user is on a trial? can they change plans?
 
 
+-------
 
 
+
+-------
 
 
 NEW TODO

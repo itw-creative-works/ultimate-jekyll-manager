@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.0.22] - 2026-04-05
+### Changed
+- Bump web-manager from ^4.1.36 to ^4.1.37
+- Bump dotenv from ^17.4.0 to ^17.4.1
+- Bump html-validate from ^10.11.2 to ^10.11.3
+
 ## [1.0.21] - 2026-04-03
 ### Fixed
 - Disable cache breaker on Slapform contact form fetch to prevent appending cache-busting query params to POST request
