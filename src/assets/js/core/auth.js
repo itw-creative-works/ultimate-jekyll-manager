@@ -38,7 +38,8 @@ export default function () {
     webManager.auth().listen({}, async (state) => {
       const user = state.user;
       const url = new URL(window.location.href);
-      const authReturnUrl = url.searchParams.get('authReturnUrl');
+      const authReturnUrlRaw = url.searchParams.get('authReturnUrl');
+      const authReturnUrl = authReturnUrlRaw && webManager.isValidRedirectUrl(authReturnUrlRaw) ? authReturnUrlRaw : null;
       const authSignout = url.searchParams.get('authSignout');
 
       // Log

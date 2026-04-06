@@ -15,6 +15,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.1] - 2026-04-06
+### Security
+- Fix open redirect via `authReturnUrl` URL parameter in core/auth.js — now validated with `isValidRedirectUrl()`
+- Fix cross-origin redirect via unvalidated postMessage in vert.js — added origin allowlist
+- Replace `new Function()` code execution in redirect.js with safe named modifier lookup
+- Sanitize markdown-it output with DOMPurify in campaign-preview.js (newsletter-safe tag allowlist)
+- Validate OAuth redirect URL scheme in connections.js
+- Escape `classes` parameter in prerendered-icons.js to prevent attribute breakout
+- Defense-in-depth: escape `formatDate()` outputs in security.js, team.js, referrals.js
+- Defense-in-depth: escape cancel/refund reason strings in billing.js, refund.js
+- Defense-in-depth: escape `submittingText` in form-manager.js spinner
+- Document redirect validation, postMessage origin checks, eval prohibition, and DOMPurify rules in CLAUDE.md
+
+### Added
+- `dompurify` dependency for HTML sanitization
+
 ## [1.1.0] - 2026-04-06
 ### Added
 - `payment-config.js` shared library for reading payment data from build-time config

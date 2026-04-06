@@ -301,7 +301,7 @@ async function updateActiveSessions(account) {
           </div>
         </div>
         <div class="text-end">
-          <small class="text-muted">${formatDate(session.timestamp || (session.timestampUNIX * 1000))}</small>
+          <small class="text-muted">${webManager.utilities().escapeHTML(formatDate(session.timestamp || (session.timestampUNIX * 1000)))}</small>
           ${session.isCurrent ? '<span class="badge bg-primary ms-2">Current</span>' : ''}
         </div>
       </div>

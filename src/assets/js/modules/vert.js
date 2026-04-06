@@ -90,8 +90,12 @@ const setupMessageHandler = () => {
   // Flag as set up
   window.__ujVertMessageHandlerSetup = true;
 
-  // Listen for messages from iframes
+  // Listen for messages from vert iframes (validate origin)
   window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin && event.origin !== 'https://promo-server.itwcreativeworks.com') {
+      return;
+    }
+
     const message = event.data || {};
     const command = message.command || '';
     const payload = message.payload || {};

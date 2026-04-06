@@ -128,8 +128,8 @@ function populateRefundReasons() {
 
   $container.innerHTML = shuffled.map((reason, i) => `
     <div class="form-check mb-2">
-      <input class="form-check-input" type="radio" name="refund_reason" id="refund-reason-${i}" value="${reason}" required>
-      <label class="form-check-label" for="refund-reason-${i}">${reason}</label>
+      <input class="form-check-input" type="radio" name="refund_reason" id="refund-reason-${i}" value="${webManager.utilities().escapeHTML(reason)}" required>
+      <label class="form-check-label" for="refund-reason-${i}">${webManager.utilities().escapeHTML(reason)}</label>
     </div>
   `).join('');
 }

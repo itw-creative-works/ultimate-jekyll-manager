@@ -2,6 +2,7 @@
  * Prerendered Icons Library
  * Retrieves pre-rendered icon HTML from the frontmatter icon system
  */
+import webManager from 'web-manager';
 
 /**
  * Get pre-rendered icon by name from frontmatter icon system.
@@ -31,5 +32,5 @@ export function getPrerenderedIcon(iconName, classes) {
     return $iconTemplate.innerHTML;
   }
 
-  return $iconTemplate.innerHTML.replace('class="fa"', `class="fa ${classes}"`);
+  return $iconTemplate.innerHTML.replace('class="fa"', `class="fa ${webManager.utilities().escapeHTML(classes)}"`);
 }

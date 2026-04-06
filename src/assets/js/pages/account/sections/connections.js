@@ -281,7 +281,7 @@ async function handleConnect(providerId) {
     tries: 2,
   });
 
-  if (response.url) {
+  if (response.url && /^https?:\/\//i.test(response.url)) {
     window.location.href = response.url;
   } else {
     throw new Error(response.message || 'Failed to get authorization URL');

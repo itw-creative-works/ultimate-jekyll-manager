@@ -26,7 +26,13 @@ async function renderEmailPreview(formData) {
     md = new MarkdownIt({ html: true, breaks: true, linkify: true });
   }
 
-  const renderedContent = content ? md.render(content) : '<p class="text-muted">No content yet</p>';
+  const DOMPurify = (await import('dompurify')).default;
+  const renderedContent = content
+    ? DOMPurify.sanitize(md.render(content), {
+        ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'ul', 'ol', 'li', 'a', 'b', 'strong', 'i', 'em', 'u', 's', 'del', 'blockquote', 'pre', 'code', 'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span', 'sup', 'sub'],
+        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'width', 'height', 'class', 'style', 'target', 'rel'],
+      })
+    : '<p class="text-muted">No content yet</p>';
 
   return `
     <div class="email-preview">

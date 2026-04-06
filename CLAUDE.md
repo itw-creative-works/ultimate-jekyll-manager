@@ -429,6 +429,69 @@ $el.textContent = data.message; // Safe — no escaping needed
 
 Only use `innerHTML` when you need actual HTML structure (tags, classes, etc.), and escape every dynamic value in it.
 
+### Even "Safe" Values Must Be Escaped
+Even values that *seem* safe (like `Date.toLocaleDateString()` output, numeric calculations, or hardcoded config strings) MUST be escaped when inserted via `innerHTML`. This is defense-in-depth — if the data source ever changes, the escaping is already in place.
+
+```javascript
+// ✅ CORRECT — escape even "safe" values in innerHTML
+$el.innerHTML = `<small>${webManager.utilities().escapeHTML(formatDate(timestamp))}</small>`;
+$el.innerHTML = `<span>${webManager.utilities().escapeHTML(reason)}</span>`;
+
+// ❌ WRONG — assuming the value is safe because it's from a date formatter
+$el.innerHTML = `<small>${formatDate(timestamp)}</small>`;
+```
+
+### Redirects Must Be Validated
+Never redirect to a URL from untrusted sources without validation:
+
+```javascript
+// ✅ CORRECT — validate before redirect
+const url = urlParams.get('returnUrl');
+if (url && webManager.isValidRedirectUrl(url)) {
+  window.location.href = url;
+}
+
+// ✅ CORRECT — validate API response URLs have safe scheme
+if (response.url && /^https?:\/\//i.test(response.url)) {
+  window.location.href = response.url;
+}
+
+// ❌ WRONG — redirect to unvalidated input
+window.location.href = urlParams.get('returnUrl');
+```
+
+### postMessage Handlers Must Check Origin
+Always validate `event.origin` when handling `window.addEventListener('message', ...)`:
+
+```javascript
+// ✅ CORRECT
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin && event.origin !== 'https://trusted-domain.com') {
+    return;
+  }
+  // handle message
+});
+
+// ❌ WRONG — any origin can send messages
+window.addEventListener('message', (event) => {
+  window.location.href = event.data.url; // attacker-controlled redirect
+});
+```
+
+### Never Use eval() or new Function()
+Do not use `eval()`, `new Function()`, `setTimeout(string)`, or `setInterval(string)`. These execute arbitrary code and violate CSP policies.
+
+### Sanitize Markdown/Rich Text Output
+When rendering user-authored markdown or rich text, use DOMPurify to sanitize the output:
+
+```javascript
+import DOMPurify from 'dompurify';
+const safeHTML = DOMPurify.sanitize(md.render(userContent), {
+  ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'br', 'a', 'b', 'strong', 'i', 'em', 'ul', 'ol', 'li', 'img', 'code', 'pre'],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'target', 'rel'],
+});
+```
+
 ### Do NOT Escape Values Passed to textContent-Based APIs
 `showNotification()`, `formManager.showSuccess()`, `formManager.showError()`, and `textContent` assignments use safe text insertion internally. Pre-escaping these causes double-encoding (e.g., `We'll` displays as `We&#039;ll`).
 
@@ -1108,12 +1171,24 @@ const response = await authorizedFetch(url, options);
 - No need to manually call `webManager.auth().getIdToken()`
 - Automatic token injection as Authorization Bearer header
 - Centralized authentication handling
+- Automatic usage sync: extracts `bm-properties` header from every response and updates `webManager.bindings()` with fresh usage data under the `usage` key
+
+**Options pass-through:** All `wonderful-fetch` options (`response`, `output`, `body`, `timeout`, etc.) are passed through untouched. Internally, `authorizedFetch` uses `output: 'complete'` to read response headers, then returns only the body by default. If the caller passes `output: 'complete'`, they get the full `{ status, headers, body }` response.
+
+**Automatic Usage Binding Sync:**
+
+After every successful response, `authorizedFetch` reads the `bm-properties` header and updates the `usage` bindings key:
+```javascript
+// After an API call, bindings are automatically updated:
+// usage.credits = { monthly: 5, daily: 2, limit: 100 }
+```
+This means any `data-wm-bind` elements bound to `usage.*` paths are automatically kept in sync without any manual work. See "Usage Bindings" below.
 
 **⚠️ IMPORTANT: Auth State Requirement**
 
 `authorizedFetch` requires Firebase Auth to have determined the current user's authentication state before being called. On fresh page loads (e.g., OAuth callback pages, deep links), Firebase Auth needs time to restore the session from IndexedDB/localStorage.
 
-**If called before auth state is determined, it will throw: `"No authenticated user found"`**
+**If called before auth state is determined, it will warn: `"No authenticated user found"`**
 
 **Solution:** Wait for auth state before calling `authorizedFetch`:
 
@@ -1135,6 +1210,40 @@ webManager.auth().listen({ once: true }, async () => {
 - Pages that wait for user interaction before making API calls
 
 **Reference:** `src/assets/js/libs/authorized-fetch.js`
+
+#### Usage Bindings
+
+Usage data is available in the `usage` bindings key. It is populated from two sources:
+
+1. **On page load (auth settle):** `web-manager` reads `account.usage` from Firestore and resolves plan limits from `config.payment.plans`, then sets `usage` bindings with the merged data.
+2. **After API calls:** `authorizedFetch` reads the `bm-properties` response header and merges fresh usage counters + limits into the existing `usage` bindings.
+
+**Bindings structure:**
+```javascript
+// usage.credits = { monthly: 5, daily: 2, limit: 100 }
+// usage.requests = { monthly: 20, limit: 500 }
+```
+
+**HTML usage:**
+```html
+<!-- Show usage counter: "5/100" -->
+<span data-wm-bind="@show usage.credits">
+  <span data-wm-bind="usage.credits.monthly">–</span>/<span data-wm-bind="usage.credits.limit">–</span>
+</span>
+```
+
+**Config requirement:** Plan limits must be defined in `_config.yml` under `web_manager.payment.plans`:
+```yaml
+web_manager:
+  payment:
+    plans:
+      - id: basic
+        limits:
+          credits: 100
+      - id: premium
+        limits:
+          credits: 500
+```
 
 #### Payment Config Library
 

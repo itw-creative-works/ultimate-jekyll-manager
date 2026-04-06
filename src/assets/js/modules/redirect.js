@@ -34,15 +34,23 @@ const performRedirect = () => {
   const currentUrl = new URL(window.location.href);
   const siteUrl = new URL(config.siteUrl);
 
-  // Parse modifier function
+  // Named modifier lookup (safe alternative to eval/new Function)
+  const MODIFIERS = {
+    'search-cse': (url) => {
+      const q = url.searchParams.get('q');
+      url.searchParams.set('q', 'site:' + window.location.origin + ' ' + q);
+      return url;
+    },
+  };
+
+  // Resolve modifier by name
   let modifierFunction = (url) => url;
   if (config.modifier && config.modifier !== '""' && config.modifier !== '') {
-    try {
-      // Safely evaluate modifier function
-      modifierFunction = new Function('url', `return (${config.modifier})(url)`);
-    } catch (error) {
-      console.warn('[Redirect] Failed to parse modifier function:', error);
-      console.warn('[Redirect] Modifier string:', config.modifier);
+    const modifierName = config.modifier.trim();
+    if (MODIFIERS[modifierName]) {
+      modifierFunction = MODIFIERS[modifierName];
+    } else {
+      console.warn('[Redirect] Unknown modifier:', modifierName);
     }
   }
 

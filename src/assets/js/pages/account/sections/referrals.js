@@ -110,12 +110,12 @@ function updateReferralsList(referrals) {
                   <span class="badge bg-secondary me-2">#${sortedReferrals.length - index}</span>
                   <div>
                     <strong class="font-monospace small">${webManager.utilities().escapeHTML(referral.uid || 'Unknown User')}</strong>
-                    <div class="text-muted small">${dateStr}${timeStr ? ` at ${timeStr}` : ''}</div>
+                    <div class="text-muted small">${webManager.utilities().escapeHTML(dateStr)}${timeStr ? ` at ${webManager.utilities().escapeHTML(timeStr)}` : ''}</div>
                   </div>
                 </div>
               </div>
               <div class="text-end">
-                ${getTimeSince(timestamp)}
+                <small class="text-muted">${webManager.utilities().escapeHTML(getTimeSince(timestamp))}</small>
               </div>
             </div>
           </div>
@@ -146,48 +146,40 @@ function formatTime(date) {
 
 // Get time since string
 function getTimeSince(timestamp) {
-  if (!timestamp) return '<small class="text-muted">Unknown</small>';
+  if (!timestamp) return 'Unknown';
 
   const now = Date.now();
   const diff = now - timestamp;
 
-  // Less than 1 minute
-  if (diff < 60000) {
-    return '<small class="text-success">Just now</small>';
-  }
+  if (diff < 60000) return 'Just now';
 
-  // Less than 1 hour
   if (diff < 3600000) {
     const minutes = Math.floor(diff / 60000);
-    return `<small class="text-muted">${minutes} min${minutes > 1 ? 's' : ''} ago</small>`;
+    return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
   }
 
-  // Less than 24 hours
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
-    return `<small class="text-muted">${hours} hour${hours > 1 ? 's' : ''} ago</small>`;
+    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
   }
 
-  // Less than 7 days
   if (diff < 604800000) {
     const days = Math.floor(diff / 86400000);
-    return `<small class="text-muted">${days} day${days > 1 ? 's' : ''} ago</small>`;
+    return `${days} day${days > 1 ? 's' : ''} ago`;
   }
 
-  // Less than 30 days
   if (diff < 2592000000) {
     const weeks = Math.floor(diff / 604800000);
-    return `<small class="text-muted">${weeks} week${weeks > 1 ? 's' : ''} ago</small>`;
+    return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
   }
 
-  // More than 30 days
   const months = Math.floor(diff / 2592000000);
   if (months < 12) {
-    return `<small class="text-muted">${months} month${months > 1 ? 's' : ''} ago</small>`;
+    return `${months} month${months > 1 ? 's' : ''} ago`;
   }
 
   const years = Math.floor(months / 12);
-  return `<small class="text-muted">${years} year${years > 1 ? 's' : ''} ago</small>`;
+  return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
 // Setup button handlers

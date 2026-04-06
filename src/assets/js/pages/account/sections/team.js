@@ -66,7 +66,7 @@ function updateInviteStatus(invites) {
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <strong>${webManager.utilities().escapeHTML(invite.email)}</strong>
-          <small class="text-muted d-block">Invited ${formatDate(invite.invitedAt)}</small>
+          <small class="text-muted d-block">Invited ${webManager.utilities().escapeHTML(formatDate(invite.invitedAt))}</small>
         </div>
         <div>
           <button class="btn btn-sm btn-outline-danger" data-action="cancel-invite" data-invite-id="${webManager.utilities().escapeHTML(invite.id)}">

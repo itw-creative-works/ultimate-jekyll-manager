@@ -320,8 +320,8 @@ function populateCancelReasons() {
 
   $container.innerHTML = shuffled.map((reason, i) => `
     <div class="form-check mb-2">
-      <input class="form-check-input" type="radio" name="cancel_reason" id="cancel-reason-${i}" value="${reason}">
-      <label class="form-check-label" for="cancel-reason-${i}">${reason}</label>
+      <input class="form-check-input" type="radio" name="cancel_reason" id="cancel-reason-${i}" value="${webManager.utilities().escapeHTML(reason)}">
+      <label class="form-check-label" for="cancel-reason-${i}">${webManager.utilities().escapeHTML(reason)}</label>
     </div>
   `).join('');
 }
