@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.2] - 2026-04-08
+### Fixed
+- Fix AdSense minimum width error in dashboard sidebar by increasing sidebar width from 280px to 282px (content area now meets 250px minimum)
+
+### Changed
+- Update dependencies: fast-xml-parser, postcss, webpack, wonderful-fetch, prepare-package
+
+---
 ## [1.1.1] - 2026-04-06
 ### Security
 - Fix open redirect via `authReturnUrl` URL parameter in core/auth.js — now validated with `isValidRedirectUrl()`
