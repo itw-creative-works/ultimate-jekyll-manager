@@ -135,10 +135,10 @@ function showUptimeTooltip(e, $bar, index, totalDays) {
   });
 
   $tooltip.innerHTML = `
-    <div class="fw-semibold mb-1">${dateStr}</div>
+    <div class="fw-semibold mb-1">${webManager.utilities().escapeHTML(dateStr)}</div>
     <div class="d-flex align-items-center gap-2">
       <span class="status-dot rounded-circle ${config.statusClasses[status]}"></span>
-      <span>${config.statusLabels[status]}</span>
+      <span>${webManager.utilities().escapeHTML(config.statusLabels[status])}</span>
     </div>
     <div class="text-muted small">Uptime: ${webManager.utilities().escapeHTML(uptime)}</div>
   `;
@@ -531,7 +531,7 @@ function updateMaintenance(maintenanceItems) {
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <h4 class="h5 fw-semibold mb-0">${webManager.utilities().escapeHTML(item.title)}</h4>
-          <span class="text-muted small">${formatDate(item.scheduled_for)}</span>
+          <span class="text-muted small">${webManager.utilities().escapeHTML(formatDate(item.scheduled_for))}</span>
         </div>
         <p class="text-muted mb-0">${webManager.utilities().escapeHTML(item.description)}</p>
         ${item.affected_services ? `
@@ -581,15 +581,15 @@ function updateIncidents(incidents) {
         <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
           <h4 class="h5 fw-semibold mb-0">${webManager.utilities().escapeHTML(incident.title)}</h4>
           <div class="d-flex align-items-center gap-2">
-            <span class="badge ${getIncidentBadgeClasses(incident.status)}">${formatIncidentStatus(incident.status)}</span>
-            <span class="text-muted small">${formatDate(incident.created_at)}</span>
+            <span class="badge ${getIncidentBadgeClasses(incident.status)}">${webManager.utilities().escapeHTML(formatIncidentStatus(incident.status))}</span>
+            <span class="text-muted small">${webManager.utilities().escapeHTML(formatDate(incident.created_at))}</span>
           </div>
         </div>
         ${incident.updates && incident.updates.length > 0 ? `
           <div class="incident-timeline mt-3">
             ${incident.updates.map(update => `
-              <div class="timeline-item pb-3" data-status="${config.dataStatusMap[update.status] || ''}">
-                <div class="small text-muted mb-1">${formatDateTime(update.created_at)}</div>
+              <div class="timeline-item pb-3" data-status="${webManager.utilities().escapeHTML(config.dataStatusMap[update.status] || '')}">
+                <div class="small text-muted mb-1">${webManager.utilities().escapeHTML(formatDateTime(update.created_at))}</div>
                 <div class="small">${webManager.utilities().escapeHTML(update.message)}</div>
               </div>
             `).join('')}

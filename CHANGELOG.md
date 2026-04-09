@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.3] - 2026-04-08
+### Security
+- Escape all remaining unescaped innerHTML values (formatDate, formatDateTime, formatIncidentStatus, formatTimeAgo, statusLabels, dataStatusMap, numeric values) for defense-in-depth
+- Add `https://` scheme validation to `window.open()` and `href` attributes for push notification URLs in calendar-events
+- Remove `style` from DOMPurify `ALLOWED_ATTR` in campaign email preview to prevent CSS-based data exfiltration
+
+---
 ## [1.1.2] - 2026-04-08
 ### Fixed
 - Fix AdSense minimum width error in dashboard sidebar by increasing sidebar width from 280px to 282px (content area now meets 250px minimum)

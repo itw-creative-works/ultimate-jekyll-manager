@@ -141,7 +141,7 @@ export default class CalendarEvents {
         return;
       }
       const url = $notification.dataset.clickAction;
-      if (url) {
+      if (url && /^https?:\/\//i.test(url)) {
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     });
@@ -688,10 +688,12 @@ export default class CalendarEvents {
 
     if (campaign.type === 'push') {
       if (settings.icon) {
-        html += `<tr><td class="text-muted">Icon</td><td><a href="${webManager.utilities().escapeHTML(settings.icon)}" target="_blank" rel="noopener">${webManager.utilities().escapeHTML(settings.icon)}</a></td></tr>`;
+        const iconUrl = /^https?:\/\//i.test(settings.icon) ? webManager.utilities().escapeHTML(settings.icon) : '#';
+        html += `<tr><td class="text-muted">Icon</td><td><a href="${iconUrl}" target="_blank" rel="noopener">${webManager.utilities().escapeHTML(settings.icon)}</a></td></tr>`;
       }
       if (settings.clickAction) {
-        html += `<tr><td class="text-muted">Click URL</td><td><a href="${webManager.utilities().escapeHTML(settings.clickAction)}" target="_blank" rel="noopener">${webManager.utilities().escapeHTML(settings.clickAction)}</a></td></tr>`;
+        const clickUrl = /^https?:\/\//i.test(settings.clickAction) ? webManager.utilities().escapeHTML(settings.clickAction) : '#';
+        html += `<tr><td class="text-muted">Click URL</td><td><a href="${clickUrl}" target="_blank" rel="noopener">${webManager.utilities().escapeHTML(settings.clickAction)}</a></td></tr>`;
       }
     }
 

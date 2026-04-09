@@ -408,7 +408,7 @@ function renderCellValue(value) {
   if (typeof value === 'number') {
     // Check if it looks like a UNIX timestamp (reasonable range)
     if (value > 1000000000 && value < 10000000000) {
-      return `<span title="${value}">${new Date(value * 1000).toLocaleDateString()}</span>`;
+      return `<span title="${webManager.utilities().escapeHTML(String(value))}">${webManager.utilities().escapeHTML(new Date(value * 1000).toLocaleDateString())}</span>`;
     }
     return webManager.utilities().escapeHTML(value.toLocaleString());
   }

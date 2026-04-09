@@ -327,7 +327,7 @@ async function loadRecentUsers() {
     $row.innerHTML = `
       <td class="text-truncate" style="max-width: 200px;">${webManager.utilities().escapeHTML(email)}</td>
       <td><span class="badge bg-body-secondary text-body">${webManager.utilities().escapeHTML(capitalize(plan))}</span></td>
-      <td class="text-muted small">${timeAgo}</td>
+      <td class="text-muted small">${webManager.utilities().escapeHTML(timeAgo)}</td>
     `;
     $tbody.appendChild($row);
   });
@@ -376,7 +376,7 @@ async function loadRecentOrders() {
       <td class="font-monospace small text-truncate" style="max-width: 120px;" title="${webManager.utilities().escapeHTML(orderId)}">${webManager.utilities().escapeHTML(orderId)}</td>
       <td><span class="badge bg-body-secondary text-body">${webManager.utilities().escapeHTML(capitalize(product))}</span></td>
       <td class="small">${webManager.utilities().escapeHTML(capitalize(processor))}</td>
-      <td class="text-muted small">${timeAgo}</td>
+      <td class="text-muted small">${webManager.utilities().escapeHTML(timeAgo)}</td>
     `;
     $tbody.appendChild($row);
   });
