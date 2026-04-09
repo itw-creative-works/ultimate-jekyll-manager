@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.4] - 2026-04-09
+### Changed
+- Update web-manager from v4.1.37 to v4.1.38
+
+---
 ## [1.1.3] - 2026-04-08
 ### Security
 - Escape all remaining unescaped innerHTML values (formatDate, formatDateTime, formatIncidentStatus, formatTimeAgo, statusLabels, dataStatusMap, numeric values) for defense-in-depth
