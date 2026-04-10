@@ -33,50 +33,37 @@ pricing:
       name: "Basic"
       tagline: "best for getting started"
       url: "/dashboard"  # URL to get started
-      pricing:
-        monthly: 0
-        annually: 0
       features:
-        # Common features
+        # Common features (values resolve from _config.yml payment.products.limits)
         - id: "credits"
           name: "Credits"
-          value: 10
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
-          value: "Watermarked"
           icon: "download"
         # Additional features
         - id: "storage"
           name: "Logo Storage"
-          value: "7 days"
           icon: "clock"
 
     - id: "plus"
       name: "Plus"
       tagline: "best for individuals"
       url: null
-      pricing:
-        monthly: 28
-        annually: 276  # Total annual price (~20% off monthly)
       features:
         # Common features
         - id: "credits"
           name: "Credits"
-          value: 100
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
-          value: "Unlimited"
           icon: "download"
         # Additional features
         - id: "api_access"
           name: "API Access"
-          value: "Full"
           icon: "code"
         - id: "priority_support"
           name: "Priority Support"
-          value: "24/7"
           icon: "headset"
 
     - id: "pro"
@@ -84,18 +71,13 @@ pricing:
       tagline: "best for small businesses"
       url: null
       popular: true
-      pricing:
-        monthly: 50
-        annually: 504  # Total annual price (~16% off monthly)
       features:
         # Common features
         - id: "credits"
           name: "Credits"
-          value: 200
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
-          value: "Unlimited"
           icon: "download"
         # Additional features
 
@@ -103,27 +85,20 @@ pricing:
       name: "Max"
       tagline: "best for growing businesses"
       url: null
-      pricing:
-        monthly: 100
-        annually: 960  # Total annual price (20% off monthly)
       features:
         # Common features
         - id: "credits"
           name: "Credits"
-          value: 500
           icon: "sparkles"
         - id: "exports"
           name: "Exports"
-          value: "Unlimited"
           icon: "download"
         # Additional features
         - id: "team_collaboration"
           name: "Team Collaboration"
-          value: "Included"
           icon: "users"
         - id: "custom_branding"
           name: "Custom Branding"
-          value: "Available"
           icon: "palette"
 
 # Feature Comparison Section
@@ -530,7 +505,7 @@ faqs:
                                   <span>
                                     {% if _feature_value == "24/7" %}
                                       {{ _feature_value }}
-                                    {% elsif _feature_value == "Included" or _feature_value == "Available" or _feature_value == "Full" %}
+                                    {% elsif _feature_value == true or _feature_value == "Included" or _feature_value == "Available" or _feature_value == "Full" %}
                                       <!-- No prefix for these values -->
                                     {% else %}
                                       {{ _feature_value | uj_commaify }}
@@ -597,7 +572,7 @@ faqs:
                                   <span>
                                     {% if _feature_value == "24/7" %}
                                       {{ _feature_value }}
-                                    {% elsif _feature_value == "Included" or _feature_value == "Available" or _feature_value == "Full" %}
+                                    {% elsif _feature_value == true or _feature_value == "Included" or _feature_value == "Available" or _feature_value == "Full" %}
                                       <!-- No prefix for these values -->
                                     {% else %}
                                       {{ _feature_value | uj_commaify }}

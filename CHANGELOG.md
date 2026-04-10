@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.5] - 2026-04-09
+### Changed
+- Move pricing and feature limit values from layout frontmatter to default `_config.yml` under `web_manager.payment.products`, making the pricing page fully config-driven
+- Add default `payment.products` array with 4 example plans (basic, plus, pro, max) including limits, prices, and trial config
+- Handle boolean `true` config limits in feature value display (renders feature name only, check icon in comparison table)
+
+---
 ## [1.1.4] - 2026-04-09
 ### Changed
 - Update web-manager from v4.1.37 to v4.1.38

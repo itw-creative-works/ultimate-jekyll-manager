@@ -144,7 +144,47 @@ web_manager:
         site: null
       coinbase:
         enabled: false
-    products: []
+    products:
+      - id: basic
+        name: Basic
+        type: subscription
+        limits:
+          credits: 10
+          exports: "Watermarked"
+          storage: "7 days"
+      - id: plus
+        name: Plus
+        type: subscription
+        limits:
+          credits: 100
+          exports: -1
+          api_access: "Full"
+          priority_support: "24/7"
+        trial:
+          days: 14
+        prices:
+          monthly: 28
+          annually: 276
+      - id: pro
+        name: Pro
+        type: subscription
+        limits:
+          credits: 200
+          exports: -1
+        prices:
+          monthly: 50
+          annually: 504
+      - id: max
+        name: Max
+        type: subscription
+        limits:
+          credits: 500
+          exports: -1
+          team_collaboration: true
+          custom_branding: true
+        prices:
+          monthly: 100
+          annually: 960
 
 # OAuth2
 oauth2:
