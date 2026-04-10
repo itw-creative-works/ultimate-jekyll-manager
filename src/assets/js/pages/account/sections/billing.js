@@ -257,7 +257,7 @@ function setupCancellationForm() {
       throw new Error(response.message || 'Failed to cancel subscription. Please try again.');
     }
 
-    console.log('[Billing] Cancel complete:', { isTrialCancel, productId });
+    console.log('[Billing] Cancel complete:', { isTrialCancel, productId: currentAccount?.subscription?.product?.id });
 
     if (isTrialCancel) {
       cancelFormManager.showSuccess('Your trial has been cancelled. You\'ve been moved to the free plan. You can subscribe again anytime.');

@@ -146,7 +146,7 @@ QUESTIONS
 
 - easy system for a main css, js, etc bundle BUT user can make page specific bundles
 - uncompiled should move everything inside it to css/images/js/vendor
-- make an update fn that will update UJ eith er in `npx uj setup` or a separate process
+- make an update fn that will update UJ eith er in `npx mgr setup` or a separate process
 
 - we shoudl be able to MERGE site settings
   - so site is default, then merge layount, then merge page (each OVERWRITING the previous one)
@@ -366,7 +366,7 @@ MAYBE
       # - name: Run node build
       #   # run: npm run build -- --buildLocation='server'
       #   run: |
-      #     UJ_BUILD_MODE=true UJ_IS_SERVER=true node node_modules/ultimate-jekyll-manager/ensure-production-build.js && npx uj setup && npm run build
+      #     UJ_BUILD_MODE=true UJ_IS_SERVER=true node node_modules/ultimate-jekyll-manager/ensure-production-build.js && npx mgr setup && npm run build
       # - name: Create build.json
       #   run: |
       #     export TZ=UTC date
@@ -401,7 +401,7 @@ MAYBE
       #   with:
       #       name: github-pages
 
-    "deploy": "UJ_BUILD_MODE=true UJ_IS_SERVER=true npx uj setup && npm run build"
+    "deploy": "UJ_BUILD_MODE=true UJ_IS_SERVER=true npx mgr setup && npm run build"
 
 
 tempalte names

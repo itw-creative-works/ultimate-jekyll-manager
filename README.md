@@ -81,13 +81,13 @@ Here are some examples:
 ### Run the `audit` task:
 ```bash
 # Run the audit task
-npx uj audit
+npx mgr audit
 
 # Run with a Lighthouse URL (defaults to "/" if not provided)
-npx uj audit -- --lighthouseUrl="/contact"
+npx mgr audit -- --lighthouseUrl="/contact"
 
 # Add autoExit to continue developing and testing AFTER the audit
-npx uj audit -- --lighthouseUrl="/contact" --autoExit=false
+npx mgr audit -- --lighthouseUrl="/contact" --autoExit=false
 ```
 
 ### Run the `translation` task:
@@ -96,14 +96,14 @@ npx uj audit -- --lighthouseUrl="/contact" --autoExit=false
 GH_TOKEN=XXX \
 GITHUB_REPOSITORY=XXX \
 UJ_TRANSLATION_CACHE=true \
-npx uj translation
+npx mgr translation
 
 # Test with only 1 file
 UJ_TRANSLATION_ONLY="index.html" \
 GH_TOKEN=XXX \
 GITHUB_REPOSITORY=XXX \
 UJ_TRANSLATION_CACHE=true \
-npx uj translation
+npx mgr translation
 ```
 
 ### Run the `imagemin` task:
@@ -113,10 +113,10 @@ Test image optimization with GitHub cache in development mode:
 GH_TOKEN=XXX \
 GITHUB_REPOSITORY=XXX \
 UJ_IMAGEMIN_CACHE=true \
-npx uj imagemin
+npx mgr imagemin
 
 # Or run locally without cache
-npx uj imagemin
+npx mgr imagemin
 ```
 The imagemin task will:
 - Process images from `src/assets/images/**/*.{jpg,jpeg,png}`
@@ -136,7 +136,7 @@ npm run prepare:watch
 ### Run the `blogify` task:
 Create 12 test blog posts in the `_posts` directory with the `blogify` task. This is useful for testing and development purposes.
 ```bash
-npx uj blogify
+npx mgr blogify
 ```
 
 ## Page Frontmatter

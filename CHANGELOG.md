@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.6] - 2026-04-09
+### Changed
+- Add `hover-flex` prebuilt animation class to pricing page billing cycle toggle (Monthly/Annually) for subtle scale-up on hover
+- Update README and TODO docs to use `npx mgr` instead of `npx uj`
+- Fix `[Billing] Cancel complete` log to read product ID from current account instead of undefined variable
+
+---
 ## [1.1.5] - 2026-04-09
 ### Changed
 - Move pricing and feature limit values from layout frontmatter to default `_config.yml` under `web_manager.payment.products`, making the pricing page fully config-driven
