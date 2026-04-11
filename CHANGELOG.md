@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.7] - 2026-04-10
+### Changed
+- Update dependencies: web-manager to 4.1.39, webpack to 5.106.1, prettier to 3.8.2, libsodium-wrappers to 0.8.3, prepare-package to 2.1.0
+- Add empty `hooks` object to `preparePackage` config in package.json for prepare-package 2.1.0's new hooks feature
+
+---
 ## [1.1.6] - 2026-04-09
 ### Changed
 - Add `hover-flex` prebuilt animation class to pricing page billing cycle toggle (Monthly/Annually) for subtle scale-up on hover
