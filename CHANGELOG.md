@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.8] - 2026-04-22
+### Changed
+- Widen backend sidebar from 282px to 283px so inner content (after `p-3` horizontal padding) clears the 250px minimum required by Google AdSense units
+- Apply same 283px width to mobile offcanvas sidebar (`#mobileSidebar`) via `--bs-offcanvas-width` to override Bootstrap's default 400px
+- Simplify admin firebase page cell rendering: drop redundant `String()` wrapping around values passed to `escapeHTML()` (already coerces to string internally)
+
+---
 ## [1.1.7] - 2026-04-10
 ### Changed
 - Update dependencies: web-manager to 4.1.39, webpack to 5.106.1, prettier to 3.8.2, libsodium-wrappers to 0.8.3, prepare-package to 2.1.0
