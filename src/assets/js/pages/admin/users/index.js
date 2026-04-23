@@ -172,7 +172,7 @@ function renderUsers() {
       <td class="text-muted small">${updatedText}</td>
       <td>
         <div class="dropdown">
-          <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown">
+          <button class="btn btn-sm btn-adaptive rounded-circle" type="button" data-bs-toggle="dropdown">
             ${getPrerenderedIcon('ellipsis-vertical', 'fa-sm')}
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
@@ -191,6 +191,10 @@ function renderUsers() {
             <li><a class="dropdown-item small btn-view-firebase" href="#">
               ${getPrerenderedIcon('fire', 'fa-sm me-2')}
               View in Explorer
+            </a></li>
+            <li><a class="dropdown-item small btn-signin-as" href="#">
+              ${getPrerenderedIcon('right-to-bracket', 'fa-sm me-2')}
+              Sign in as user
             </a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item small text-danger btn-delete-user" href="#">
@@ -221,6 +225,11 @@ function renderUsers() {
     $row.querySelector('.btn-view-firebase').addEventListener('click', (e) => {
       e.preventDefault();
       window.location.href = `/admin/firebase?collection=users&doc=${uid}`;
+    });
+
+    $row.querySelector('.btn-signin-as').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInAsUser(uid, email);
     });
 
     $row.querySelector('.btn-delete-user').addEventListener('click', (e) => {
@@ -267,6 +276,105 @@ function viewUser(uid, userData) {
   // Show modal
   const modal = new bootstrap.Modal(document.getElementById('user-detail-modal'));
   modal.show();
+}
+
+async function signInAsUser(uid, email) {
+  openSignInAsModalLoading(email);
+
+  try {
+    const response = await authorizedFetch(`${webManager.getApiUrl()}/backend-manager/user/token`, {
+      method: 'POST',
+      timeout: 30000,
+      response: 'json',
+      tries: 1,
+      log: true,
+      body: { uid: uid },
+    });
+
+    const token = response?.token;
+    if (!token) {
+      throw new Error('No token returned from server');
+    }
+
+    const signinUrl = new URL('/signin', window.location.origin);
+    signinUrl.searchParams.set('authSignout', 'true');
+    signinUrl.searchParams.set('authCustomToken', token);
+    signinUrl.searchParams.set('authReturnUrl', '/dashboard');
+
+    showSignInAsModalReady(email, signinUrl.toString());
+  } catch (error) {
+    console.error('Failed to create sign-in link:', error);
+    showSignInAsModalError(error.message || 'Unknown error');
+  }
+}
+
+function openSignInAsModalLoading(email) {
+  const $loading = document.getElementById('signin-as-loading');
+  const $ready = document.getElementById('signin-as-ready');
+  const $error = document.getElementById('signin-as-error');
+  const $loadingEmail = document.getElementById('signin-as-loading-email');
+  const $navigateBtn = document.getElementById('btn-signin-as-navigate');
+
+  if ($loading) $loading.classList.remove('d-none');
+  if ($ready) $ready.classList.add('d-none');
+  if ($error) $error.classList.add('d-none');
+  if ($navigateBtn) $navigateBtn.classList.add('d-none');
+  if ($loadingEmail) $loadingEmail.textContent = email;
+
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('signin-as-modal'));
+  modal.show();
+}
+
+function showSignInAsModalReady(email, urlString) {
+  const $loading = document.getElementById('signin-as-loading');
+  const $ready = document.getElementById('signin-as-ready');
+  const $error = document.getElementById('signin-as-error');
+  const $email = document.getElementById('signin-as-email');
+  const $url = document.getElementById('signin-as-url');
+  const $copyBtn = document.getElementById('btn-signin-as-copy');
+  const $navigateBtn = document.getElementById('btn-signin-as-navigate');
+
+  if ($loading) $loading.classList.add('d-none');
+  if ($error) $error.classList.add('d-none');
+  if ($ready) $ready.classList.remove('d-none');
+  if ($navigateBtn) $navigateBtn.classList.remove('d-none');
+  if ($email) $email.textContent = email;
+  if ($url) $url.value = urlString;
+
+  if ($copyBtn) {
+    $copyBtn.onclick = async () => {
+      await navigator.clipboard.writeText(urlString).catch(() => {});
+      const originalHTML = $copyBtn.innerHTML;
+      $copyBtn.innerHTML = `${getPrerenderedIcon('circle-check', 'fa-sm')}`;
+      $copyBtn.classList.add('btn-success');
+      $copyBtn.classList.remove('btn-outline-adaptive');
+      setTimeout(() => {
+        $copyBtn.innerHTML = originalHTML;
+        $copyBtn.classList.remove('btn-success');
+        $copyBtn.classList.add('btn-outline-adaptive');
+      }, 1500);
+    };
+  }
+
+  if ($navigateBtn) {
+    $navigateBtn.onclick = () => {
+      window.open(urlString, '_blank', 'noopener');
+    };
+  }
+}
+
+function showSignInAsModalError(message) {
+  const $loading = document.getElementById('signin-as-loading');
+  const $ready = document.getElementById('signin-as-ready');
+  const $error = document.getElementById('signin-as-error');
+  const $errorMessage = document.getElementById('signin-as-error-message');
+  const $navigateBtn = document.getElementById('btn-signin-as-navigate');
+
+  if ($loading) $loading.classList.add('d-none');
+  if ($ready) $ready.classList.add('d-none');
+  if ($error) $error.classList.remove('d-none');
+  if ($navigateBtn) $navigateBtn.classList.add('d-none');
+  if ($errorMessage) $errorMessage.textContent = message;
 }
 
 async function deleteUser(uid, email) {

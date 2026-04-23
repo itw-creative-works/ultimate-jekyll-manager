@@ -22,6 +22,12 @@ export default function () {
     // Check for authSignout parameter first
     await handleAuthSignout();
 
+    // Check for authCustomToken parameter (admin impersonation / custom token sign-in)
+    const customTokenHandled = await handleCustomTokenSignin();
+    if (customTokenHandled) {
+      return;
+    }
+
     // Initialize the appropriate form based on the page (with autoReady: false)
     initializePageForm();
 
@@ -205,6 +211,48 @@ export default function () {
       }
 
       // Return false on error so form becomes interactive for user to try again
+      return false;
+    }
+  }
+
+  async function handleCustomTokenSignin() {
+    const url = new URL(window.location.href);
+    const customToken = url.searchParams.get('authCustomToken');
+
+    if (!customToken) {
+      return false;
+    }
+
+    try {
+      console.log('[Auth] Signing in with custom token');
+
+      const { getAuth, signInWithCustomToken } = await import('@firebase/auth');
+      const auth = getAuth();
+
+      const userCredential = await signInWithCustomToken(auth, customToken);
+      console.log('[Auth] Custom token sign-in successful:', userCredential.user.email || userCredential.user.uid);
+
+      trackLogin('custom-token', userCredential.user);
+
+      const authReturnUrl = url.searchParams.get('authReturnUrl');
+      const redirectTo = authReturnUrl && webManager.isValidRedirectUrl(authReturnUrl)
+        ? authReturnUrl
+        : '/dashboard';
+
+      window.location.href = redirectTo;
+      return true;
+    } catch (error) {
+      webManager.sentry().captureException(new Error('Custom token sign-in error', { cause: error }));
+      console.error('[Auth] Custom token sign-in failed:', error);
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete('authCustomToken');
+      window.history.replaceState({}, document.title, url.toString());
+
+      webManager.utilities().showNotification(
+        `Custom token sign-in failed: ${error.message || 'Invalid or expired token'}`,
+        { type: 'danger', timeout: 8000 }
+      );
       return false;
     }
   }

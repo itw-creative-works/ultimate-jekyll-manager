@@ -15,6 +15,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.9] - 2026-04-23
+### Added
+- Admin users page: "Sign in as user" dropdown option that calls BEM `POST /backend-manager/user/token` to generate a custom auth token, then shows a modal with the sign-in URL (copy button + open-in-new-tab button)
+- Modal opens immediately in a loading state while the token is generated, then swaps to ready/error state
+- Auth signin page: handle `authCustomToken` URL param via Firebase `signInWithCustomToken`, redirecting to `authReturnUrl` (validated) or `/dashboard`
+
+### Fixed
+- Billing section: cancel subscription button now appears for suspended paid subscriptions (previously hidden). Logic updated to `isPaid && rawStatus !== 'cancelled' && !resolved.cancelling` so it correctly shows for active, trialing, and suspended paid subs, while hiding for free users, already-cancelled subs, and subs with pending cancellation
+
+### Changed
+- Admin users table: dropdown trigger button restyled using `btn-outline-adaptive rounded-circle` for a cleaner look
+
+---
 ## [1.1.8] - 2026-04-22
 ### Changed
 - Widen backend sidebar from 282px to 283px so inner content (after `p-3` horizontal padding) clears the 250px minimum required by Google AdSense units

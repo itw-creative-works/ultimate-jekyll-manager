@@ -152,7 +152,15 @@ function updateAuthLinks() {
 
       $link.addEventListener('click', (e) => {
         const url = new URL($link.href, window.location.origin);
-        url.searchParams.set('authReturnUrl', window.location.href);
+        const currentUrl = new URL(window.location.href);
+        const existingReturnUrl = currentUrl.searchParams.get('authReturnUrl');
+
+        if (existingReturnUrl) {
+          url.searchParams.set('authReturnUrl', existingReturnUrl);
+        } else if (!authPaths.includes(currentUrl.pathname)) {
+          url.searchParams.set('authReturnUrl', window.location.href);
+        }
+
         $link.href = url.toString();
       });
     } catch (e) {}

@@ -140,7 +140,7 @@ function buildBillingState(account) {
         upgrade: !isPaid || rawStatus === 'cancelled',
         change: resolved.active,
         manage: isPaid && rawStatus !== 'cancelled',
-        cancel: resolved.active,
+        cancel: isPaid && rawStatus !== 'cancelled' && !resolved.cancelling,
       },
     },
   };
