@@ -13,7 +13,7 @@ const { template } = require('node-powertools');
 const yaml = require('js-yaml');
 const postcss = require('gulp-postcss');
 const purgeCss = require('@fullhuman/postcss-purgecss');
-const through2 = require('through2');
+const { Transform } = require('node:stream');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -324,19 +324,20 @@ function sass(complete) {
     let purgeCssLogged = false;
     stream = stream
       .pipe(postcss([purgeCssPlugin]))
-      .pipe(through2.obj(
-        function (file, enc, cb) {
+      .pipe(new Transform({
+        objectMode: true,
+        transform(file, enc, cb) {
           cb(null, file);
         },
-        function (cb) {
+        flush(cb) {
           if (!purgeCssLogged) {
             purgeCssLogged = true;
             const purgeCssTime = ((performance.now() - purgeCssStartTime) / 1000).toFixed(2);
             logger.log(`PurgeCSS completed in ${purgeCssTime}s`);
           }
           cb();
-        }
-      ));
+        },
+      }));
   }
 
   // Process

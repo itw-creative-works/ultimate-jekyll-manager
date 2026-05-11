@@ -15,6 +15,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.1.10] - 2026-05-10
+### Removed
+- `through2` dependency. Replaced with native `node:stream` `Transform` across 6 gulp task files (`defaults.js`, `distribute.js`, `jsonToHtml.js`, `minifyHtml.js`, `sass.js`, `utils/template-transform.js`). through2@5 became ESM-only with no `require` condition in its exports, breaking CJS require; the built-in `Transform` is a drop-in replacement
+
+### Changed
+- Bumped `@babel/preset-env` from ^7.29.2 to ^7.29.5
+- Bumped `dompurify` from ^3.3.3 to ^3.4.2
+- Bumped `dotenv` from ^17.4.1 to ^17.4.2
+- Bumped `fast-xml-parser` from ^5.5.11 to ^5.7.3
+- Bumped `gulp-filter` from ^9.0.1 to ^10.0.0 (Node 22 ESM-CJS interop keeps `require('gulp-filter').default` working)
+- Bumped `html-validate` from ^10.11.3 to ^10.16.0
+- Bumped `libsodium-wrappers` from ^0.8.3 to ^0.8.4
+- Bumped `postcss` from ^8.5.9 to ^8.5.14
+- Bumped `prettier` from ^3.8.2 to ^3.8.3
+- Bumped `web-manager` from ^4.1.40 to ^4.1.41
+- Bumped `webpack` from ^5.106.1 to ^5.106.2
+
+---
 ## [1.1.9] - 2026-04-23
 ### Added
 - Admin users page: "Sign in as user" dropdown option that calls BEM `POST /backend-manager/user/token` to generate a custom auth token, then shows a modal with the sign-in URL (copy button + open-in-new-tab button)

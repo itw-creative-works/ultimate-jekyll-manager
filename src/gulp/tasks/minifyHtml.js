@@ -4,7 +4,7 @@ const logger = Manager.logger('minifyHtml');
 const { src, dest, series } = require('gulp');
 const { minify: minifyRust } = require('@minify-html/node');
 const { minify: minifyJs } = require('terser');
-const through2 = require('through2');
+const { Transform } = require('node:stream');
 
 // Load package
 const package = Manager.getPackage('main');
@@ -85,61 +85,65 @@ function minifyHtmlTask(complete) {
 
   // Process HTML files
   return src(input)
-    .pipe(through2.obj(function(file, _enc, callback) {
-      if (file.isBuffer()) {
-        fileQueue.push({ file });
-        callback();
-      } else {
-        callback(null, file);
-      }
-    }, async function(callback) {
-      // This function is called when all files have been queued
-      if (fileQueue.length === 0) {
-        logger.log('No HTML files to minify');
-        return callback();
-      }
-
-      const totalFiles = fileQueue.length;
-      logger.log(`Minifying ${totalFiles} HTML files...`);
-
-      try {
-        // Process files in batches
-        for (let i = 0; i < fileQueue.length; i += CONCURRENCY_LIMIT) {
-          const batch = fileQueue.slice(i, i + CONCURRENCY_LIMIT);
-
-          // Process batch in parallel
-          const processedFiles = await Promise.all(
-            batch.map(async ({ file }) => {
-              try {
-                const htmlContent = file.contents.toString();
-                const finalHtml = await minifyFileContent(htmlContent, options, file.path);
-                file.contents = Buffer.from(finalHtml);
-                processed.count++;
-
-                // Log progress every 50 files or on last file
-                if (processed.count % 50 === 0 || processed.count === totalFiles) {
-                  const percentage = ((processed.count / totalFiles) * 100).toFixed(1);
-                  logger.log(`Progress: ${processed.count}/${totalFiles} files (${percentage}%)`);
-                  Manager.logMemory(logger, `After ${processed.count} files`);
-                }
-
-                return file;
-              } catch (err) {
-                logger.error(`Error minifying ${file.path}: ${err.message}`);
-                return file;
-              }
-            })
-          );
-
-          // Push processed files to the stream
-          processedFiles.forEach(file => this.push(file));
+    .pipe(new Transform({
+      objectMode: true,
+      transform(file, _enc, callback) {
+        if (file.isBuffer()) {
+          fileQueue.push({ file });
+          callback();
+        } else {
+          callback(null, file);
+        }
+      },
+      async flush(callback) {
+        // This function is called when all files have been queued
+        if (fileQueue.length === 0) {
+          logger.log('No HTML files to minify');
+          return callback();
         }
 
-        callback();
-      } catch (err) {
-        logger.error(`Batch processing error: ${err.message}`);
-        callback(err);
-      }
+        const totalFiles = fileQueue.length;
+        logger.log(`Minifying ${totalFiles} HTML files...`);
+
+        try {
+          // Process files in batches
+          for (let i = 0; i < fileQueue.length; i += CONCURRENCY_LIMIT) {
+            const batch = fileQueue.slice(i, i + CONCURRENCY_LIMIT);
+
+            // Process batch in parallel
+            const processedFiles = await Promise.all(
+              batch.map(async ({ file }) => {
+                try {
+                  const htmlContent = file.contents.toString();
+                  const finalHtml = await minifyFileContent(htmlContent, options, file.path);
+                  file.contents = Buffer.from(finalHtml);
+                  processed.count++;
+
+                  // Log progress every 50 files or on last file
+                  if (processed.count % 50 === 0 || processed.count === totalFiles) {
+                    const percentage = ((processed.count / totalFiles) * 100).toFixed(1);
+                    logger.log(`Progress: ${processed.count}/${totalFiles} files (${percentage}%)`);
+                    Manager.logMemory(logger, `After ${processed.count} files`);
+                  }
+
+                  return file;
+                } catch (err) {
+                  logger.error(`Error minifying ${file.path}: ${err.message}`);
+                  return file;
+                }
+              })
+            );
+
+            // Push processed files to the stream
+            processedFiles.forEach(file => this.push(file));
+          }
+
+          callback();
+        } catch (err) {
+          logger.error(`Batch processing error: ${err.message}`);
+          callback(err);
+        }
+      },
     }))
     .pipe(dest(output))
     .on('finish', () => {
