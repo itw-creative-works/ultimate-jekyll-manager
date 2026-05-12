@@ -17,6 +17,7 @@ const ALIASES = {
   // Tasks
   audit: ['-a', '--audit'],
   translation: ['-t', '--translation'],
+  test: ['--test'],
 };
 
 // Function to resolve command name from aliases

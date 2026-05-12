@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-page-path="/">
+<head>
+<meta charset="utf-8">
+<title>UJM Fixture Consumer</title>
+<meta name="description" content="Fixture site for UJM boot tests.">
+<link rel="stylesheet" href="/assets/css/main.bundle.css">
+</head>
+<body>
+  <main id="main-content">
+    <h1>UJM Fixture Consumer</h1>
+    <p>This is a minimal _site/ snapshot used by UJM's framework boot tests.</p>
+  </main>
+  <script>
+    window.Configuration = {
+      brand: { id: 'ujm-fixture', name: 'UJM Fixture Consumer' },
+      theme: { id: 'classy', target: 'frontend' },
+      uj:    { environment: 'production', cache_breaker: 'fixture-1' },
+    };
+  </script>
+  <script src="/assets/js/main.bundle.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "1.1.10",
+  "version": "1.2.0",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -13,7 +13,8 @@
     "prepare": "node -e \"require('prepare-package')()\"",
     "prepare:watch": "node -e \"require('prepare-package/watch')()\"",
     "wm:prod": "npm uninstall web-manager && npm i web-manager@latest",
-    "wm:local": "npm uninstall web-manager && npm i ../web-manager"
+    "wm:local": "npm uninstall web-manager && npm i ../web-manager",
+    "test": "node ./bin/ultimate-jekyll test"
   },
   "bin": {
     "uj": "bin/ultimate-jekyll",
@@ -32,7 +33,8 @@
     "start": "npx mgr clean && npx mgr setup && bundle exec npm run gulp --",
     "gulp": "gulp --cwd ./ --gulpfile ./node_modules/ultimate-jekyll-manager/dist/gulp/main.js",
     "build": "npx mgr clean && npx mgr setup && UJ_BUILD_MODE=true bundle exec npm run gulp -- build",
-    "deploy": "npx mgr deploy"
+    "deploy": "npx mgr deploy",
+    "test": "npx mgr test"
   },
   "engines": {
     "node": "22",
@@ -105,7 +107,7 @@
     "prettier": "^3.8.3",
     "sass": "^1.99.0",
     "spellchecker": "^3.7.1",
-    "web-manager": "^4.1.41",
+    "web-manager": "^4.1.42",
     "webpack": "^5.106.2",
     "wonderful-fetch": "^2.0.5",
     "wonderful-version": "^1.3.2",
@@ -115,6 +117,7 @@
     "gulp": "^5.0.1"
   },
   "devDependencies": {
-    "prepare-package": "^2.1.0"
+    "prepare-package": "^2.1.0",
+    "puppeteer": "^24.43.1"
   }
 }

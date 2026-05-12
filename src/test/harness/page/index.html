@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UJM Test Harness</title>
+<!--
+  Page-layer test harness. Loaded by Puppeteer from a tiny embedded HTTP server.
+  Stubs `window.Configuration` (what consumer sites get from Jekyll-rendered
+  HTML) and the data-attributes Manager.initialize() reads. Page-layer suites
+  run their `run(ctx)` body inside this page via `page.evaluate(payload)` —
+  the payload bakes assert.js + each test's body as inline async functions.
+
+  Test results are emitted as console messages prefixed `__UJM_TEST__` and
+  parsed by the parent runner via `page.on('console')`.
+-->
+</head>
+<body data-uj-test-harness>
+  <!--
+    Stub the same DOM signals the frontend Manager reads. The frontend
+    `src/index.js` reads `document.documentElement.dataset.pagePath` and
+    `dataset.assetPath` — set defaults here.
+  -->
+  <script>
+    document.documentElement.dataset.pagePath  = '/';
+    document.documentElement.dataset.assetPath = '';
+
+    // Minimal stub of what Jekyll renders as `window.Configuration` —
+    // enough that webManager.initialize() doesn't throw, and enough for
+    // tests to assert against. Tests that need richer config can mutate
+    // this in their own setup.
+    window.Configuration = {
+      brand:       { id: 'ujm-test', name: 'UJM Test' },
+      theme:       { id: 'classy', target: 'frontend' },
+      meta:        { title: 'UJM Test Harness' },
+      uj:          { environment: 'development', cache_breaker: '0' },
+      web_manager: { firebase: { app: { config: { apiKey: 'test', projectId: 'ujm-test' } } } },
+    };
+
+    // Prerendered icons template — the harness exposes a single icon so
+    // `getPrerenderedIcon('test')` works without any consumer page setup.
+    const tmpl = document.createElement('template');
+    tmpl.id = 'prerendered-icons';
+    tmpl.innerHTML = '<svg data-icon="test" viewBox="0 0 1 1"><rect width="1" height="1"/></svg>';
+    document.body.appendChild(tmpl);
+
+    // Signal the canonical test-mode flag so cross-context helpers can pick
+    // it up even though `process.env` is unreachable from a tab.
+    globalThis.UJ_TEST_MODE = true;
+  </script>
+</body>
+</html>

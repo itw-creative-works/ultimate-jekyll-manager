@@ -1,0 +1,6 @@
+{
+  "name": "ujm-fixture-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Fixture consumer site used by UJM's framework boot tests. Not published."
+}

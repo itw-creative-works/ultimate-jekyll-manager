@@ -15,6 +15,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.2.0] - 2026-05-12
+
+### Added
+
+- **Three-layer test framework** (`build` / `page` / `boot`, 60 framework tests passing in ~3s). New under `src/test/`: `assert.js` (Jest-compatible matcher set), `runner.js` (discovery + dispatch + reporter), `index.js` (public API), `runners/{chromium,boot}.js` (Puppeteer launchers with a zero-dep embedded HTTP server in `server.js` for serving `_site/` to Chromium — required because service workers can't register from `file://`), `harness/page/index.html` (stub harness page), `fixtures/consumer-site/` (minimal hand-built `_site/` for framework boot tests). Consumer-test discovery uses the `isFrameworkSelfTest` package-name check to scope framework `boot/` suites to UJM's own runs.
+- **`test` CLI command + `--test` alias** (`src/commands/test.js`) — avoids `-t` collision with the existing `translation` command. Sets `UJ_TEST_MODE=true` + auto-routes `UJ_TEST_BOOT_PROJECT` to the fixture when UJM tests itself. `"test": "node ./bin/ultimate-jekyll test"` added to scripts, `"test": "npx mgr test"` added to projectScripts.
+- **`src/utils/mode-helpers.js`** — `attachTo(Manager)` mixin exposing `isTesting`/`isDevelopment`/`isProduction`/`getVersion`. Wired into `src/build.js` (CJS, build-time Manager) and `src/index.js` (ESM, frontend Manager). Driven by `UJ_TEST_MODE` env in Node + `globalThis.UJ_TEST_MODE` in browser contexts.
+- **`puppeteer` devDep** — peer-optional for consumers (only needed if they write `page`/`boot` tests; `build` layer needs nothing extra).
+- **New `docs/<topic>.md` deep references** — `docs/test-framework.md`, `docs/test-boot-layer.md`, `docs/cross-context-helpers.md`. Plus `docs/_legacy-claude-md.md` as a holding pen for the previous 1832-line CLAUDE.md content awaiting future per-subsystem split.
+- **Consumer-shipped `src/defaults/CLAUDE.md`** with `# ========== Default Values ==========` / `# ========== Custom Values ==========` markers. Framework section stays live-synced across `npx mgr setup` while the Custom section is preserved verbatim — same merge protocol as `.env`/`.gitignore`.
+- **`'CLAUDE.md'` FILE_MAP rule** (`src/gulp/tasks/defaults.js`) with `mergeLines: true` — positioned after the `'**/*.md'` catch-all so the last-match-wins logic in `getFileOptions` activates the merge path.
+
+### Changed
+
+- **CLAUDE.md reorganized from 1832 to 195 lines** as a TOC hub with one-paragraph-per-subsystem + cross-links. Legacy content stashed in `docs/_legacy-claude-md.md` as a migration source.
+- **README.md updated** with a Testing section (build/page/boot layer overview + example test files) and a Sister Projects callout.
+
+### Fixed
+
+- **`mergeLineBasedFiles` idempotency bug** — the inline merge function unconditionally inserted a blank line before `CUSTOM_SECTION_MARKER`, causing first-merge after a fresh `jetpack.copy` to grow the file by one newline. Now skips the insert if `mergedDefaultSection` already ends blank. Affects `.env`/`.gitignore`/`CLAUDE.md` equally — first-merge is now a true no-op.
+
+---
 ## [1.1.10] - 2026-05-10
 ### Removed
 - `through2` dependency. Replaced with native `node:stream` `Transform` across 6 gulp task files (`defaults.js`, `distribute.js`, `jsonToHtml.js`, `minifyHtml.js`, `sass.js`, `utils/template-transform.js`). through2@5 became ESM-only with no `require` condition in its exports, breaking CJS require; the built-in `Transform` is a drop-in replacement

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "repo":      { "user": "itw-creative-works", "name": "ujm-fixture" },
+  "environment": "production",
+  "packages":  { "ultimate-jekyll-manager": "fixture", "web-manager": "fixture" },
+  "config": {
+    "brand": { "id": "ujm-fixture", "name": "UJM Fixture Consumer" },
+    "theme": { "id": "classy", "target": "frontend" },
+    "uj":    { "environment": "production", "cache_breaker": "fixture-1" }
+  }
+}

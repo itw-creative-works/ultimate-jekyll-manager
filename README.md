@@ -28,6 +28,7 @@
 * **SEO Optimized**: Ultimate Jekyll is fully SEO optimized.
 * **Blazingly Fast**: Ultimate Jekyll is blazingly fast.
 * **NPM & Gulp**: Ultimate Jekyll is fueled by an intuitive incorporation of npm and gulp.
+* **Built-in test framework**: three layers (`build` / `page` / `boot`) — plain Node, headless Chromium tab, headless Chromium against real `_site/` with SW registration verification.
 
 ## 🚀 Getting started
 1. [Create a repo](https://github.com/itw-creative-works/ultimate-jekyll/generate) from the **Ultimate Jekyll** template.
@@ -36,6 +37,49 @@
 ```bash
 npm start
 ```
+
+## 🧪 Testing
+
+UJM ships a built-in three-layer test harness. Write tests under `test/<layer>/*.test.js` and run with:
+
+```bash
+npx mgr test                   # all layers
+npx mgr test --layer build     # plain Node, fast
+npx mgr test --layer page      # headless Chromium tab against harness HTML
+npx mgr test --layer boot      # headless Chromium against built _site/
+```
+
+Test files use Jest-compatible matchers:
+
+```js
+// test/build/config.test.js
+const Manager = require('ultimate-jekyll-manager/build');
+
+module.exports = {
+  layer: 'build',
+  description: 'config has brand.id',
+  run: async (ctx) => {
+    const cfg = Manager.getConfig('project');
+    ctx.expect(cfg.brand.id).toBeTruthy();
+  },
+};
+```
+
+Boot tests run against your actually-built `_site/` after `npm run build`:
+
+```js
+// test/boot/site.test.js
+module.exports = {
+  layer: 'boot',
+  description: 'home renders + SW registers',
+  inspect: async ({ site, page, expect }) => {
+    await page.goto(site.baseUrl + '/');
+    expect((await page.title()).length).toBeGreaterThan(0);
+  },
+};
+```
+
+Full guide: [docs/test-framework.md](docs/test-framework.md). Boot layer deep-dive: [docs/test-boot-layer.md](docs/test-boot-layer.md).
 
 ## 📦 How to sync with the template
 1. Simply run `npm start` in Terminal to get all the latest updates from the **Ultimate Jekyll template** and launch your website in the browser.
@@ -761,23 +805,8 @@ Add this to any js file to ONLY run in development mode (it will be excluded in 
   /* @dev-only:end */
 ```
 
-> This project is "ultimate-jekyll", an NPM module that helps   │
-│   streamline development of Jekyll websites. A "consuming       │
-│   project" will require this NPM module to take advantage of    │
-│   its features like automatic folder structure setup, themes,   │
-│   and default pages to get a website up and running in          │
-│   seconds, while allowing further customization down the line.  │
-│   Right now i am struggling on the theme portion of this        │
-│   project. I want the user to be able to define the theme in    │
-│   their _config.yml (which currently they do by setting         │
-│   theme.id). I have some themes from the official bootstrap     │
-│   team. usually a theme comes with a frontend, a backend/admin  │
-│   dashboard, and docs. these 3 subparts of the theme have       │
-│   different html structure and css and js requirements. so i    │
-│   need a super easy system that allows me to make a file in     │
-│   the consuming project, say its the index.html for example,    │
-│   and i should easily be able to put which subseciton (or       │
-│   target as i call it) of the theme to use. so for an agency    │
-│   website i will probably use the frontend target, while for a  │
-│   chat app i will probably use the backend target. however, i   │
-│   need to be able to use
+## 🧰 Sister projects
+
+- [Electron Manager (EM)](https://github.com/itw-creative-works/electron-manager) — same patterns, but for Electron desktop apps
+- [Browser Extension Manager (BXM)](https://github.com/itw-creative-works/browser-extension-manager) — same patterns, but for cross-browser MV3 extensions
+- [Backend Manager (BEM)](https://github.com/itw-creative-works/backend-manager) — Firebase Functions backend framework

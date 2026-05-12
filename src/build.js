@@ -351,5 +351,8 @@ Manager.prototype.processBatches = Manager.processBatches;
 //   };
 // };
 
+// Mix in cross-context mode helpers (isDevelopment/isProduction/isTesting/getVersion).
+require('./utils/mode-helpers.js').attachTo(Manager);
+
 // Export
 module.exports = Manager;

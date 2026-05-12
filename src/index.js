@@ -1,5 +1,6 @@
 // Libraries
 import webManager from 'web-manager';
+import { attachTo as attachModeHelpers } from './utils/mode-helpers.js';
 
 // Manager Class
 class Manager {
@@ -132,6 +133,9 @@ class Manager {
     return e.code === 'MODULE_NOT_FOUND' && e.message.includes(filename);
   }
 }
+
+// Mix in cross-context mode helpers (isDevelopment/isProduction/isTesting/getVersion).
+attachModeHelpers(Manager);
 
 // Export
 export default Manager;
