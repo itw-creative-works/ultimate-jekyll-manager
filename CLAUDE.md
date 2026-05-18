@@ -1,6 +1,6 @@
 # Ultimate Jekyll Manager (UJM)
 
-> **Note for contributors and Claude:** This file is the architectural overview — identity, top-level conventions, and a map to deep references. The **meat** (per-subsystem APIs, page customization recipes, theming, behavior tables, defaults lists) lives in `docs/<topic>.md`. When extending or adding content, write it in the matching `docs/*.md` file and cross-link from here — do NOT inline it. If a topic doesn't have a doc yet, create one. Goal: keep this file under 300 lines. Long-form content that hasn't been migrated yet lives in `docs/_legacy-claude-md.md` — a holding pen for material to be split into proper `docs/<topic>.md` files over time.
+> **Note for contributors and Claude:** This file is the architectural overview — identity, top-level conventions, and a map to deep references. The **meat** (per-subsystem APIs, page customization recipes, theming, behavior tables, defaults lists) lives in `docs/<topic>.md`. When extending or adding content, write it in the matching `docs/*.md` file and cross-link from here — do NOT inline it. If a topic doesn't have a doc yet, create one. Goal: keep this file under 250 lines.
 
 ## Identity
 
@@ -20,6 +20,19 @@ The only things that ARE safe to run inside UJM itself:
 - `npm run prepare` — copies `src/` → `dist/` via prepare-package
 - `npm test` (aka `npx mgr test`) — runs UJM's own three-layer test suite
 
+## Recommended skills
+
+- **`UJM:patterns`** — SSOT for Ultimate Jekyll Manager architecture, gulp pipeline, frontend Manager, and theme conventions. Auto-loads on UJM-specific keywords (`_config.yml`, `theme.id`, `uj_icon`, `page.resolved`, `npx mgr setup`, etc.) and when touching files in `src/_layouts/`, `src/_includes/`, `src/pages/`, `src/assets/`, `config/ultimate-jekyll-manager.json`.
+- **`js:patterns`** — JavaScript/Node.js conventions: file structure, JSDoc, defensive coding (`?.` usage), template literals, `package.json` conventions. Auto-loads when creating new `.js` files or touching JS module structure.
+
+## 🚨 READ WEB-MANAGER TOO
+
+**UJM ships `web-manager` as a runtime singleton on every page** — it powers auth, Firebase, reactive `data-wm-bind` directives, analytics, error tracking, and utilities (`escapeHTML`, etc.). Any task that touches auth flows, Firestore reads/writes, subscription resolution, push notifications, or DOM bindings means you are working with web-manager as much as with UJM.
+
+**Required reading:**
+- **`node_modules/web-manager/CLAUDE.md`** — top-level overview + index
+- **`node_modules/web-manager/docs/`** — module deep references (Auth, Bindings, Firestore, Notifications, etc.)
+
 ## Quick Start
 
 ### For Consuming Projects
@@ -35,7 +48,7 @@ The only things that ARE safe to run inside UJM itself:
 
 1. `npm install` — install UJM's own deps
 2. `npm start` (≡ `npm run prepare:watch`) — copies `src/` → `dist/` on file change
-3. Test in a consumer project: `npm install --save-dev /Users/ian/.../ultimate-jekyll-manager`
+3. Test in a consumer project: from inside the consumer, run `npx mgr install local` (swaps UJM to the local repo via the `install` CLI). Reverse with `npx mgr install prod`.
 4. `npm test` — runs UJM's own 60 test suites
 
 ## Architecture
@@ -166,30 +179,44 @@ Don't ship behavioral changes with stale docs. Validate first, then document —
 
 ## Documentation
 
-Deep references live in `docs/`. Treat docs as a first-class deliverable.
+Deep references live in `docs/`. Treat docs as a first-class deliverable. **Whenever you make a behavioral change, update both this overview AND the relevant `docs/*.md` deep reference.**
+
+### Framework reference
 
 - [docs/test-framework.md](docs/test-framework.md) — three-layer test harness reference (build / page / boot)
 - [docs/test-boot-layer.md](docs/test-boot-layer.md) — boot layer deep-dive (_site/ discovery, HTTP server, fixture vs consumer)
 - [docs/cross-context-helpers.md](docs/cross-context-helpers.md) — `isTesting`/`isDevelopment`/`isProduction`/`getVersion`
-- [docs/_legacy-claude-md.md](docs/_legacy-claude-md.md) — holding pen for content not yet split into proper subsystem docs. Anything still in here should be migrated to the appropriate `docs/<topic>.md` when touched.
+- [docs/jekyll-plugin.md](docs/jekyll-plugin.md) — UJ Powertools gem: filters, tags, page variables (`page.resolved`, `uj_icon`, `uj_hash`, `iftruthy`, etc.)
+- [docs/audit.md](docs/audit.md) — workflow for fixing issues raised by `gulp/tasks/audit.js`
 
-Planned/expected (create as needed, sourcing from `_legacy-claude-md.md`):
-- `docs/build-system.md` — gulp pipeline, task graph, env-var matrix
-- `docs/cli.md` — CLI command surface, env-var conventions
-- `docs/templating.md` — `{ }` vs `[ ]` brackets, variable resolution
-- `docs/defaults.md` — FILE_MAP routing, merge strategies, theme fallback
-- `docs/webpack.md` — entry points, aliases, dev-block stripping
-- `docs/sass.md` — page-specific bundles, purgecss safelist, theme load paths
-- `docs/jekyll.md` — config merge chain, build.json, hooks
-- `docs/audit.md` — HTML validation, spellcheck, Lighthouse
-- `docs/translation.md` — AI translation pipeline, cache, ignored pages
-- `docs/imagemin.md` — responsive variants, GitHub cache
-- `docs/service-worker.md` — SW lifecycle, cache composition, Firebase messaging
-- `docs/managers.md` — frontend Manager class, dynamic page module loading
-- `docs/config-schema.md` — `_config.yml` fields, `ultimate-jekyll-manager.json` fields
-- `docs/setup.md` — what `npx mgr setup` does (7+ phases)
-- `docs/themes.md` — classy theme structure, custom themes, fallback
-- `docs/components.md` — account dropdown, nav, footer JSON-driven sections
-- `docs/page-customization.md` — frontmatter-driven page customization without HTML
+### Project & dev environment
+
+- [docs/project-structure.md](docs/project-structure.md) — UJM repo layout and consuming-project layout
+- [docs/local-development.md](docs/local-development.md) — browsersync URL, Firebase emulator connect, PurgeCSS safelist
+- [docs/assets.md](docs/assets.md) — UJM vs consumer file layout, section config (nav/footer/account), frontmatter-driven page customization, webpack aliases, page module pattern
+
+### Pages, layouts, content
+
+- [docs/layouts-and-pages.md](docs/layouts-and-pages.md) — page types, layout chain, `asset_path` frontmatter
+- [docs/images.md](docs/images.md) — `@post/` shortcut for blog post images, BEM admin/post image handling
+- [docs/icons.md](docs/icons.md) — Font Awesome conventions, `{% uj_icon %}` vs prerendered icons in JS, size reference
+- [docs/seo.md](docs/seo.md) — Alternatives collection (competitor comparison pages) + Schema/JSON-LD (`SoftwareApplication`, `FAQPage`)
+
+### Frontend behavior
+
+- [docs/css.md](docs/css.md) — section padding rule, theme-adaptive classes, cards in colored sections, `<html>` data attributes
+- [docs/appearance.md](docs/appearance.md) — dark/light/system mode switching: JS API, HTML attributes
+- [docs/page-loading.md](docs/page-loading.md) — page-loading protection, `.btn-action`, layered form-protection strategy
+- [docs/lazy-loading.md](docs/lazy-loading.md) — `data-lazy="@type value"` syntax and supported types
+- [docs/ads.md](docs/ads.md) — Vert units: AdSense include + Promo Server fallback, size presets
+
+### JS libraries & security
+
+- [docs/javascript-libraries.md](docs/javascript-libraries.md) — WebManager singleton + UJM libs at `src/assets/js/libs/` (prerendered icons, authorizedFetch, usage bindings, payment-config, FormManager)
+- [docs/xss-prevention.md](docs/xss-prevention.md) — zero-trust DOM injection rules, `escapeHTML`, postMessage origin checks, redirect validation
+
+### Analytics
+
+- [docs/analytics.md](docs/analytics.md) — ITM tracking, gtag/fbq/ttq guidelines, TikTok-specific rules
 
 `TODO.md` + `TODO-*.md` files at the repo root track pass-by-pass progress and decisions.

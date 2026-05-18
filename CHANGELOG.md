@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.2.1] - 2026-05-18
+
+### Changed
+
+- **Default `/extension` page** — removed the redundant downloads-section heading block ("Install" badge + "Available on every browser" headline + "Choose your browser below to get started" subheadline) that duplicated the role of the page hero. Browser-selector pills now sit directly under the hero. Affects `src/defaults/dist/_layouts/themes/classy/frontend/pages/extension/index.html` and drops the now-unused `downloads.superheadline` / `downloads.headline` / `downloads.headline_accent` / `downloads.subheadline` frontmatter keys.
+
+---
 ## [1.2.0] - 2026-05-12
 
 ### Added

@@ -1,15 +1,25 @@
 # ========== Default Values ==========
 # Ultimate Jekyll Manager (UJM) — consumer project
 
-> **Auto-managed file.** Everything between `# ========== Default Values ==========` and `# ========== Custom Values ==========` is owned by `ultimate-jekyll-manager` and rewritten on every `npx mgr setup`. Put your own project-specific notes BELOW the `Custom Values` marker — that section is preserved verbatim across setups.
-
 ## Framework
 
 This project consumes **Ultimate Jekyll Manager** (UJM) — a comprehensive framework for building modern Jekyll-powered static sites. UJM provides one-line bootstrap per context (build / frontend / service-worker), a multi-stage gulp pipeline (defaults / distribute / webpack / sass / imagemin / jekyll / audit / translation / minifyHtml / serve), default Jekyll layouts + themes, a frontend ES-module Manager with dynamic per-page module loading, a service worker with Firebase Messaging + cache management, and a built-in three-layer test framework.
 
-**Framework's own docs** (read these for deep-dives; both paths point to the same files, the absolute path works regardless of working directory):
-- Top-level overview: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/CLAUDE.md` (or `node_modules/ultimate-jekyll-manager/CLAUDE.md`)
-- Subsystem references: `/Users/ian/Developer/Repositories/ITW-Creative-Works/ultimate-jekyll-manager/docs/` (or `node_modules/ultimate-jekyll-manager/docs/`)
+## 🚨 READ THE FRAMEWORK DOCS FIRST
+
+**Before doing ANY work on this codebase, Claude MUST read the framework documentation — that is where the architecture, conventions, APIs, and gotchas live. Skipping these will result in solutions that conflict with framework patterns.**
+
+**Required reading:**
+- **`node_modules/ultimate-jekyll-manager/CLAUDE.md`** — top-level overview + index
+- **`node_modules/ultimate-jekyll-manager/docs/`** — subsystem deep references (read the relevant ones for the task at hand)
+
+## 🚨 READ WEB-MANAGER TOO
+
+**UJM ships `web-manager` as a runtime singleton on every page** — it powers auth, Firebase, reactive `data-wm-bind` directives, analytics, error tracking, and utilities (`escapeHTML`, etc.). Any task that touches auth flows, Firestore reads/writes, subscription resolution, push notifications, or DOM bindings means you are working with web-manager as much as with UJM.
+
+**Required reading:**
+- **`node_modules/web-manager/CLAUDE.md`** — top-level overview + index
+- **`node_modules/web-manager/docs/`** — module deep references (Auth, Bindings, Firestore, Notifications, etc.)
 
 ## Quick start
 
@@ -66,6 +76,8 @@ At build time, `require('ultimate-jekyll-manager/build')` exposes:
 - `Manager.isBuildMode()` / `isQuickMode()` / `isServer()` / `actLikeProduction()` — env-gated flags
 - `Manager.logger(name)` — timestamped logger instance
 - `Manager.require(path)` — escape hatch for UJM transitive deps (use sparingly)
+
+<!-- Everything above this marker is owned by the framework and rewritten on every `npx mgr setup`. Add your project-specific notes below — they are preserved across setups. -->
 
 # ========== Custom Values ==========
 
