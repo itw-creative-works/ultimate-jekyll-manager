@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.2.2] - 2026-05-18
+
+### Added
+
+- **`docs/<topic>.md` deep references** — 17 new files referenced by the v1.2.0 CLAUDE.md reorg that hadn't been committed yet: `ads.md`, `analytics.md`, `appearance.md`, `assets.md`, `audit.md`, `css.md`, `icons.md`, `images.md`, `javascript-libraries.md`, `jekyll-plugin.md`, `layouts-and-pages.md`, `lazy-loading.md`, `local-development.md`, `page-loading.md`, `project-structure.md`, `seo.md`, `xss-prevention.md`. Restores parity with the cross-links already shipped in [CLAUDE.md](CLAUDE.md).
+- **`src/defaults/docs/README.md`, `src/defaults/test/README.md`, `src/defaults/CHANGELOG.md`** — consumer-project scaffolding files distributed via the `defaults` gulp task.
+
+---
 ## [1.2.1] - 2026-05-18
 
 ### Changed
