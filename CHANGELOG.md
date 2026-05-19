@@ -15,6 +15,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.2.3] - 2026-05-19
+
+### Added
+
+- **Markdown table styles in blog posts** — `article .blog-post-content table` in `src/assets/css/pages/blog/post.scss` now renders any plain `| col | col |` markdown table with a rounded outer border, uppercase letter-spaced thead on a tinted background, zebra-striped tbody rows, hover highlight, and tighter padding/font-size on mobile (≤575.98px).
+
+### Changed
+
+- **Tidied heading-margin rule** in `src/assets/css/pages/blog/post.scss` — collapsed `h1..h6` onto one selector and removed the commented-out `:first-child` reset.
+
+---
 ## [1.2.2] - 2026-05-18
 
 ### Added
