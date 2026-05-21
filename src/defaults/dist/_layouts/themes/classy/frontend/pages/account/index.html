@@ -36,8 +36,8 @@ sections:
   - id: "profile"
     name: "Profile"
     icon: "user-circle"
-  # - id: "notifications"
-  #   name: "Notifications"
+  - id: "notifications"
+    name: "Notifications"
     icon: "bell"
   - id: "security"
     name: "Security"
@@ -777,29 +777,14 @@ badges:
 
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Email notifications</h5>
-
-            <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="marketing-emails" checked>
-              <label class="form-check-label" for="marketing-emails">
-                Marketing emails
-                <small class="d-block text-muted">Receive emails about new features and updates</small>
-              </label>
-            </div>
-
-            <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="security-emails" checked>
-              <label class="form-check-label" for="security-emails">
-                Security alerts
-                <small class="d-block text-muted">Get notified about important security updates</small>
-              </label>
-            </div>
+            <h5 class="card-title">Email preferences</h5>
 
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="product-emails">
-              <label class="form-check-label" for="product-emails">
-                Product updates
-                <small class="d-block text-muted">Receive updates about your products and services</small>
+              <input class="form-check-input" type="checkbox" id="marketing-emails">
+              <label class="form-check-label" for="marketing-emails">
+                Product updates, newsletters, and marketing communications
+                <small class="d-block text-muted">You can withdraw consent at any time.</small>
+                <small id="marketing-emails-grant-date" class="d-block text-muted d-none"></small>
               </label>
             </div>
           </div>

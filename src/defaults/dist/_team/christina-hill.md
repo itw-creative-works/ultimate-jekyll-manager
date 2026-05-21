@@ -24,10 +24,10 @@ member:
   links:
     - id: "linkedin"
       title: "LinkedIn"
-      url: "https://www.linkedin.com/in/christina-hill"
+      url: "https://www.linkedin.com/in/christina-hill-23487"
     - id: "twitter"
       title: "Twitter"
-      url: "https://twitter.com/christina-hill"
+      url: "https://twitter.com/christina-hill-23487"
 ---
 
 Hey there, I'm Christina!

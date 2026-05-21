@@ -104,12 +104,114 @@ export default function () {
     return async ({ data, $submitButton }) => {
       const provider = $submitButton?.getAttribute('data-provider');
 
+      // Capture consent BEFORE any Firebase call. On signup pages the checkbox state
+      // must survive any post-auth redirect so BEM's /user/signup can write it to the doc.
+      // Read from FormManager-collected data on signup; ignored on signin (no checkboxes there).
+      if (action === 'signup') {
+        captureSignupConsent(data);
+      }
+
       if (provider === 'email') {
         await emailHandler(data);
       } else if (provider) {
         await signInWithProvider(provider, action);
       }
     };
+  }
+
+  // Google's signInWithPopup/Redirect auto-creates accounts. If a user lands on /signin
+  // with a Google account that doesn't exist yet, Firebase creates one before we can stop it.
+  // This reverses that: delete the auth user, sign out, surface an inline error.
+  async function reverseAccidentalSignup(newUser) {
+    console.warn('[Auth] Reversing accidental signup from /signin (new Google account created with no consent on record)');
+
+    try {
+      await newUser.delete();
+    } catch (e) {
+      // Best-effort. If delete fails (network/token issue), the page-load consent guard
+      // is the backstop — the orphan account will be signed out on every future visit.
+      console.error('[Auth] Failed to delete accidental account:', e);
+      webManager.sentry().captureException(new Error('Failed to reverse accidental signup', { cause: e }));
+    }
+
+    try {
+      const { getAuth, signOut } = await import('@firebase/auth');
+      await signOut(getAuth());
+    } catch (e) {
+      console.error('[Auth] Failed to sign out after accidental signup:', e);
+    }
+
+    // Strip authReturnUrl so the next attempt doesn't redirect them away from /signin
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('authReturnUrl')) {
+      url.searchParams.delete('authReturnUrl');
+      window.history.replaceState({}, document.title, url.toString());
+    }
+
+    if (formManager) {
+      formManager.showError(`This account doesn't exist. Try signing up first or use a different account.`);
+      formManager.ready();
+    }
+  }
+
+  // Validate that the user has agreed to the legal terms. Instead of highlighting the
+  // single legal checkbox in red (which subtly frames it as "the one that matters"),
+  // we surround BOTH checkboxes with a red outline and surface a top-level banner.
+  // This frames consent as a unit the user is confirming, not a hurdle to clear.
+  function validateConsent({ data, setError }) {
+    if (data?.consentLegal === true) {
+      return;
+    }
+
+    // Phantom field name — blocks submit (FormManager checks errorCount > 0) but
+    // skips rendering since no DOM field matches '__consent'. The visual treatment
+    // is the wrapper outline + inline error message below.
+    setError('__consent', 'Agreement to Terms required');
+
+    const $group = document.getElementById('consent-group');
+    if ($group) {
+      // Match the same border color the email/password fields show when invalid.
+      // The HTML baseline is 'border: 1px solid transparent' so we only swap the color.
+      $group.style.borderColor = 'var(--bs-form-invalid-border-color, var(--bs-danger, #dc3545))';
+    }
+
+    const $err = document.getElementById('consent-error');
+    if ($err) {
+      $err.textContent = `Please select "I agree" to the Terms of Service and Privacy Policy.`;
+      $err.classList.remove('d-none');
+    }
+  }
+
+  // Clear the consent error styling once the user starts interacting with the boxes.
+  // Runs on every change to either checkbox. We only restore borderColor since the
+  // HTML baseline keeps 'border: 1px solid transparent' to reserve the layout space.
+  function clearConsentError() {
+    const $group = document.getElementById('consent-group');
+    if ($group) {
+      $group.style.borderColor = 'transparent';
+    }
+    const $err = document.getElementById('consent-error');
+    if ($err) {
+      $err.classList.add('d-none');
+    }
+  }
+
+  // Read the consent checkboxes and stash to storage. Survives the post-signup redirect
+  // the same way attribution does. BEM's /user/signup route picks it up via sendUserSignupMetadata.
+  function captureSignupConsent(data) {
+    const legalLabel = document.querySelector('label[for="consent-legal"]')?.innerText?.trim() || null;
+    const marketingLabel = document.querySelector('label[for="consent-marketing"]')?.innerText?.trim() || null;
+
+    webManager.storage().set('consent', {
+      legal: {
+        granted: data?.consentLegal === true || data?.consentLegal === 'on',
+        text: legalLabel,
+      },
+      marketing: {
+        granted: data?.consentMarketing === true || data?.consentMarketing === 'on',
+        text: marketingLabel,
+      },
+    });
   }
 
   // Initialize signin form
@@ -139,7 +241,12 @@ export default function () {
 
     formManager.on('statechange', stateChangeHandler);
     formManager.on('validation', validateEmailProvider);
+    formManager.on('validation', validateConsent);
     formManager.on('submit', createAuthSubmitHandler('signup', handleEmailSignup));
+
+    // Clear consent error styling when either checkbox is toggled
+    document.getElementById('consent-legal')?.addEventListener('change', clearConsentError);
+    document.getElementById('consent-marketing')?.addEventListener('change', clearConsentError);
   }
 
   // Initialize reset form
@@ -182,6 +289,14 @@ export default function () {
       const isNewUser = result.additionalUserInfo?.isNewUser;
       const pagePath = document.documentElement.getAttribute('data-page-path');
       const isSignupPage = pagePath === '/signup';
+
+      // Google quirk: if a new account was auto-created during a signin attempt
+      // (user came back from OAuth via the redirect path on /signin, not /signup),
+      // reverse it — they have no consent on record.
+      if (isNewUser && !isSignupPage) {
+        await reverseAccidentalSignup(result.user);
+        return true;
+      }
 
       if (isNewUser || isSignupPage) {
         trackSignup(providerId, result.user);
@@ -525,6 +640,15 @@ export default function () {
 
           // Track based on whether this is a new user
           const isNewUser = result.additionalUserInfo?.isNewUser;
+
+          // Google quirk: signInWithPopup auto-creates accounts. If a brand-new visitor
+          // clicks "Sign in with Google" on the SIGNIN page (not signup), reverse the
+          // auto-creation — they have no consent on record and never asked to create one.
+          if (isNewUser && action === 'signin') {
+            await reverseAccidentalSignup(result.user);
+            return;
+          }
+
           if (isNewUser || action === 'signup') {
             trackSignup(providerName, result.user);
             // Show success message

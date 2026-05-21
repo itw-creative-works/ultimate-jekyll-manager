@@ -15,6 +15,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.0] - 2026-05-21
+
+### Added
+
+- **Marketing consent capture on the signup form.** Frontend half of `backend-manager` v5.2.0's consent system. `src/defaults/dist/_layouts/themes/classy/frontend/pages/auth/signup.html` replaces the legal-copy line with two real checkboxes (`consent-legal`, `consent-marketing`) wrapped in a `#consent-group` so validation can highlight the pair as a unit. `consent-legal` is required to submit.
+- **`captureSignupConsent()` + `validateConsent()` in `src/assets/js/libs/auth.js`.** Pulls checkbox state + label text from the FormManager-collected data and writes it to `webManager.storage()` under key `consent` BEFORE Firebase auth fires — survives the post-signup redirect the same way `attribution` does. `validateConsent()` blocks submit via a phantom `__consent` field name and surfaces feedback via the wrapper outline + an inline error message instead of red-X-ing the single legal checkbox.
+- **`reverseAccidentalSignup()` for the Google quirk.** Landing on `/signin` with an unknown Google account auto-creates the Firebase auth user; this reverses that path — deletes the user, signs out, strips `authReturnUrl`, and surfaces an inline form error. Best-effort delete; the page-load consent guard (below, currently OFF) is the backstop if delete fails.
+- **`ENFORCE_CONSENT_GUARD` in `src/assets/js/core/auth.js`.** Page-load guard that silently signs out any authenticated user whose doc has `consent.legal.status !== 'granted'`. Default **FALSE** until the legacy-user migration runs (which sets all existing docs to `granted` + `source: 'imported'`); flipping it on before then would lock every existing user out.
+- **`consent` field on the `sendUserSignupMetadata` payload.** Forwards the storage-survived consent blob to BEM's `/user/signup` route so it can write the canonical `consent.{legal,marketing}` sub-tree on the new user doc.
+- **Marketing-emails toggle on the account page.** `src/defaults/dist/_layouts/themes/classy/frontend/pages/account/index.html` + `src/assets/js/pages/account/sections/notifications.js` reworked to read `account.consent.marketing.status` (not the old `preferences.notifications.marketing`) and POST to `/backend-manager/marketing/email-preferences` on change. Shows the original grant date below the toggle.
+
+### Changed
+
+- **`web-manager` bumped to `^4.2.0`** (was `file:../web-manager` from local dev). Locks in `DEFAULT_ACCOUNT.consent.{legal,marketing}` so `resolveAccount()` always returns a defined consent shape for legacy users.
+- Minor template touchups on `oauth2.html`, `reset.html`, `signin.html`, `token.html`, `signup.html` — heading casing, `filter-adaptive` class on the brandmark logo so it inverts in dark mode.
+
+### Fixed
+
+- **`_team` seed authors** — corrected LinkedIn/Twitter handles in `christina-hill.md`, `james-oconnor.md`, `marcus-johnson.md`, `priya-sharma.md`, `sarah-rodriguez.md` so the default scaffolded `/team/` page links don't 404.
+
+---
 ## [1.2.3] - 2026-05-19
 
 ### Added

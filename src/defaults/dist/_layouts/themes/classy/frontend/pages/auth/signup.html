@@ -26,13 +26,13 @@ social_signup:
       <!-- Logo -->
       <div class="text-center mb-3">
         <div class="avatar avatar-xl">
-          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }} Logo"/>
+          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" class="filter-adaptive" alt="{{ site.brand.name }} Logo"/>
         </div>
       </div>
 
       <!-- Header -->
       <div class="text-center mb-4">
-        <h1 class="h3 mb-2">Create Your Account</h1>
+        <h1 class="h3 mb-2">Create your account</h1>
         <p class="text-muted">Get started with {{ site.brand.name }} in seconds</p>
       </div>
 
@@ -94,10 +94,24 @@ social_signup:
           <!-- <div class="form-text">Must be at least 8 characters with letters and numbers</div> -->
         </div>
 
-        <div class="mb-3 text-center">
-          <p class="text-muted small">
-            By signing up, you agree to {{ site.brand.name }}'s <a href="/terms" class="text-decoration-none" target="_blank">Terms of Service</a> and <a href="/privacy" class="text-decoration-none" target="_blank">Privacy Policy</a>.
-          </p>
+        {% comment %} TODO: in regions that allow pre-checked consent (e.g. US), default both to checked. {% endcomment %}
+        <div id="consent-group" class="mb-3 text-start p-2 rounded" style="border: 1px solid transparent;">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="consent-legal" name="consentLegal">
+            <label class="form-check-label small" for="consent-legal">
+              I agree to {{ site.brand.name }}'s
+              <a href="/terms" class="text-decoration-none" target="_blank">Terms of Service</a>
+              and
+              <a href="/privacy" class="text-decoration-none" target="_blank">Privacy Policy</a>.
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="consent-marketing" name="consentMarketing">
+            <label class="form-check-label small" for="consent-marketing">
+              I agree to receive product updates, newsletters, and marketing communications from {{ site.brand.name }}. You can unsubscribe anytime.
+            </label>
+          </div>
+          <div id="consent-error" class="small mt-2 d-none" style="color: var(--bs-form-invalid-color, var(--bs-danger, #dc3545));"></div>
         </div>
 
         <button type="submit" class="btn btn-success _btn-lg w-100 mb-3" data-provider="email" disabled>

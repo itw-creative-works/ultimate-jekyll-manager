@@ -25,10 +25,10 @@ member:
   links:
     - id: "linkedin"
       title: "LinkedIn"
-      url: "https://www.linkedin.com/in/priya-sharma"
+      url: "https://www.linkedin.com/in/priya-sharma-5829947"
     - id: "twitter"
       title: "Twitter"
-      url: "https://twitter.com/priya-sharma"
+      url: "https://twitter.com/priya-sharma-5829947"
 ---
 
 Hi there, I'm Priya!

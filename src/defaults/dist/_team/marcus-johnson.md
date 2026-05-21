@@ -25,13 +25,13 @@ member:
   links:
     - id: "linkedin"
       title: "LinkedIn"
-      url: "https://www.linkedin.com/in/marcus-johnson"
+      url: "https://www.linkedin.com/in/marcus-johnson-381958"
     - id: "dribbble"
       title: "Dribbble"
-      url: "https://dribbble.com/marcus-johnson"
+      url: "https://dribbble.com/marcus-johnson-381958"
     - id: "instagram"
       title: "Instagram"
-      url: "https://www.instagram.com/marcus-johnson"
+      url: "https://www.instagram.com/marcus-johnson-381958"
 ---
 
 Hey there, I'm Marcus!

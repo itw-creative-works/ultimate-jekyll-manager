@@ -25,7 +25,7 @@ member:
   links:
     - id: "linkedin"
       title: "LinkedIn"
-      url: "https://www.linkedin.com/in/james-oconnor"
+      url: "https://www.linkedin.com/in/james-oconnor-88559"
 ---
 
 Hey! I'm James.

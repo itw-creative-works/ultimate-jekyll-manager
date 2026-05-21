@@ -25,13 +25,13 @@ member:
   links:
     - id: "linkedin"
       title: "LinkedIn"
-      url: "https://www.linkedin.com/in/sarah-rodriguez"
+      url: "https://www.linkedin.com/in/sarah-rodriguez-103863"
     - id: "twitter"
       title: "Twitter"
-      url: "https://twitter.com/sarah-rodriguez"
+      url: "https://twitter.com/sarah-rodriguez-103863"
     - id: "instagram"
       title: "Instagram"
-      url: "https://www.instagram.com/sarahrodriguez"
+      url: "https://www.instagram.com/sarah-rodriguez-103863"
 ---
 
 Hola! I'm Sarah.

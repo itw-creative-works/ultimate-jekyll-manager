@@ -4,6 +4,12 @@ import webManager from 'web-manager';
 // Constants
 const SIGNUP_MAX_AGE = 5 * 60 * 1000;
 
+// Enforce page-load consent guard. When true, any authenticated user whose doc has
+// consent.legal.status !== 'granted' is silently signed out. Keep FALSE until the
+// legacy user migration runs (sets all existing docs to status='granted',
+// source='imported'). Otherwise every existing user gets locked out on signin.
+const ENFORCE_CONSENT_GUARD = false;
+
 // Auth Module
 export default function () {
   // Get auth policy
@@ -58,6 +64,25 @@ export default function () {
       // Handle authentication state changes and page policies
       if (user) {
         // User is authenticated
+
+        // Consent guard: if the user is authenticated but their account doc shows
+        // no legal consent on record, they're an orphan from a reversed Google signup
+        // that failed to delete cleanly. Sign them out and surface a toast so the
+        // user knows what happened (especially if they just clicked Google and saw
+        // a success message before this fired).
+        // Gated by ENFORCE_CONSENT_GUARD (off until the legacy-user migration runs).
+        if (ENFORCE_CONSENT_GUARD) {
+          const legalStatus = state.account?.consent?.legal?.status;
+          if (legalStatus && legalStatus !== 'granted') {
+            console.warn('[Auth] Signing out user with no legal consent on record');
+            await webManager.auth().signOut();
+            webManager.utilities().showNotification(
+              `This account hasn't completed setup. Please sign up first.`,
+              { type: 'danger', timeout: 8000 }
+            );
+            return;
+          }
+        }
 
         // Send user signup metadata if account is new
         await sendUserSignupMetadata(user);
@@ -241,12 +266,14 @@ async function sendUserSignupMetadata(user) {
 
     // Get attribution data from storage
     const attribution = webManager.storage().get('attribution', {});
+    const consent = webManager.storage().get('consent', {});
 
     // Build the payload
     const payload = {
       // New structure
       attribution: attribution,
       context: webManager.utilities().getContext(),
+      consent: consent,
     };
 
     // Get server API URL
