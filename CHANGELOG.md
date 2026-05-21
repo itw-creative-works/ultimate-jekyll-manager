@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.1] - 2026-05-21
+
+### Changed
+
+- **`ENFORCE_CONSENT_GUARD` flipped to `true`** in `src/assets/js/core/auth.js`. The page-load consent guard now silently signs out any authenticated user whose doc has `consent.legal.status !== 'granted'`. Caveat: any pre-consent-system user doc (missing the field, or defaulted to `'revoked'`) will be signed out on page load — run the legacy-user migration first, or live-test against fresh signups.
+
+---
 ## [1.3.0] - 2026-05-21
 
 ### Added

@@ -8,7 +8,7 @@ const SIGNUP_MAX_AGE = 5 * 60 * 1000;
 // consent.legal.status !== 'granted' is silently signed out. Keep FALSE until the
 // legacy user migration runs (sets all existing docs to status='granted',
 // source='imported'). Otherwise every existing user gets locked out on signin.
-const ENFORCE_CONSENT_GUARD = false;
+const ENFORCE_CONSENT_GUARD = true;
 
 // Auth Module
 export default function () {
