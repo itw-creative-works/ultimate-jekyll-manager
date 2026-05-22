@@ -314,8 +314,13 @@ export default function () {
         webManager.sentry().captureException(new Error('Error handling redirect result', { cause: error }));
       }
 
-      // Handle specific OAuth errors
-      if (error.code === 'auth/account-exists-with-different-credential') {
+      // Handle specific OAuth errors. Check blocking-function rejections FIRST —
+      // those carry a custom message from BEM (rate limit, disposable email, etc.)
+      // that the user actually needs to see, hidden behind a generic Firebase code.
+      const blockingMessage = extractBlockingFunctionMessage(error);
+      if (blockingMessage) {
+        formManager.showError(blockingMessage);
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
         formManager.showError('An account already exists with the same email address but different sign-in credentials. Try signing in with a different provider.');
       } else if (error.code === 'auth/popup-blocked') {
         formManager.showError('Popup was blocked. Please allow popups for this site and try again.');
@@ -508,6 +513,13 @@ export default function () {
         }
       }
 
+      // Blocking-function rejections from BEM (rate limit, disposable email, etc.)
+      // — surface the BEM-side message instead of the opaque auth/internal-error.
+      const blockingMessage = extractBlockingFunctionMessage(error);
+      if (blockingMessage) {
+        throw new Error(blockingMessage);
+      }
+
       // Re-throw the error to be handled by the form handler
       throw error;
     }
@@ -523,14 +535,24 @@ export default function () {
     // Log
     console.log('[Auth] Attempting email sign-in for:', email);
 
-    // Sign in with email and password
-    const userCredential = await attemptEmailSignIn(email, password);
+    try {
+      // Sign in with email and password
+      const userCredential = await attemptEmailSignIn(email, password);
 
-    // Track login
-    trackLogin('email', userCredential.user);
+      // Track login
+      trackLogin('email', userCredential.user);
 
-    // Show success message
-    formManager.showSuccess('Successfully signed in!');
+      // Show success message
+      formManager.showSuccess('Successfully signed in!');
+    } catch (error) {
+      // Blocking-function rejections from BEM's before-signin (rate limit, etc.)
+      // — surface the BEM-side message instead of the opaque auth/internal-error.
+      const blockingMessage = extractBlockingFunctionMessage(error);
+      if (blockingMessage) {
+        throw new Error(blockingMessage);
+      }
+      throw error;
+    }
   }
 
   async function handlePasswordReset(formData) {
@@ -688,8 +710,13 @@ export default function () {
         webManager.sentry().captureException(new Error('OAuth provider sign-in error', { cause: error }));
       }
 
-      // Handle specific errors
-      if (error.code === 'auth/account-exists-with-different-credential') {
+      // Handle specific errors. Blocking-function rejections from BEM carry a
+      // custom message (rate limit, disposable email, etc.) that the user needs
+      // to see — check those FIRST before generic Firebase codes.
+      const blockingMessage = extractBlockingFunctionMessage(error);
+      if (blockingMessage) {
+        throw new Error(blockingMessage);
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
         throw new Error('An account already exists with the same email address but different sign-in credentials. Try signing in with a different provider.');
       } else if (error.code === 'auth/invalid-credential') {
         throw new Error('Invalid credentials. Please try again.');
@@ -755,6 +782,55 @@ export default function () {
       'auth/cancelled-popup-request'
     ];
     return userErrors.includes(errorCode);
+  }
+
+  // Extract the readable message from a Firebase Auth blocking-function error.
+  //
+  // When a BEM blocking function (before-create / before-signin) throws
+  // HttpsError('resource-exhausted', 'Too many signups...'), Firebase surfaces
+  // it as `auth/internal-error` (sometimes also `auth/error-code:-47`) and
+  // stashes the actual server response on `error.customData.serverResponse`.
+  // The blob looks like:
+  //
+  //   {
+  //     "error": {
+  //       "code": 400,
+  //       "message": "BLOCKING_FUNCTION_ERROR_RESPONSE : ((error : (message : \"Too many signups...\")))",
+  //       ...
+  //     }
+  //   }
+  //
+  // Returns just the inner message string, or null if nothing useful was found.
+  function extractBlockingFunctionMessage(error) {
+    const raw = error?.customData?.serverResponse;
+    if (!raw) {
+      return null;
+    }
+
+    let parsed;
+    try {
+      parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch (e) {
+      return null;
+    }
+
+    const message = parsed?.error?.message || '';
+    if (!message) {
+      return null;
+    }
+
+    // Unwrap "BLOCKING_FUNCTION_ERROR_RESPONSE : ((error : (message : \"...\")))"
+    const match = message.match(/message\s*:\s*"([^"]+)"/);
+    if (match) {
+      return match[1];
+    }
+
+    // Fall back to the raw message if it's not the BLOCKING_FUNCTION wrapper format
+    if (!message.startsWith('BLOCKING_FUNCTION')) {
+      return message;
+    }
+
+    return null;
   }
 
   function trackLogin(method, user) {

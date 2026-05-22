@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.4] - 2026-05-22
+
+### Added
+
+- **Surface BEM blocking-function error messages to users.** Firebase Auth blocking functions (`before-create`, `before-signin`) that throw `HttpsError('resource-exhausted', 'Too many signups...')` get wrapped by Firebase as the opaque `auth/internal-error` (sometimes `auth/error-code:-47`). The actual BEM-side message is buried in `error.customData.serverResponse` inside a `BLOCKING_FUNCTION_ERROR_RESPONSE : ((error : (message : "...")))` wrapper. New `extractBlockingFunctionMessage(error)` helper in `src/assets/js/libs/auth.js` unwraps it. Wired into all 4 auth error sites (OAuth popup, OAuth redirect, email signup, email signin) so users now see "Too many signups from your IP, please try again later" instead of "Firebase: Error (auth/error-code:-47)."
+
+---
 ## [1.3.3] - 2026-05-21
 
 ### Changed
