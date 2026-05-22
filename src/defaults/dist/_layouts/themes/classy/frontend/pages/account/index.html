@@ -36,9 +36,6 @@ sections:
   - id: "profile"
     name: "Profile"
     icon: "user-circle"
-  - id: "notifications"
-    name: "Notifications"
-    icon: "bell"
   - id: "security"
     name: "Security"
     icon: "shield-halved"
@@ -48,12 +45,15 @@ sections:
   - id: "billing"
     name: "Billing"
     icon: "credit-card"
-  - id: "team"
-    name: "Team"
-    icon: "users"
   - id: "referrals"
     name: "Referrals"
     icon: "user-plus"
+  - id: "team"
+    name: "Team"
+    icon: "users"
+  - id: "notifications"
+    name: "Notifications"
+    icon: "bell"
   - id: "api-keys"
     name: "API Keys"
     icon: "key"
@@ -771,26 +771,6 @@ badges:
         </form>
       </section>
 
-      <!-- Notifications Section -->
-      <section id="notifications-section" class="account-section d-none">
-        <h2 class="h3 mb-4" >Notifications</h2>
-
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Email preferences</h5>
-
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="marketing-emails">
-              <label class="form-check-label" for="marketing-emails">
-                Product updates, newsletters, and marketing communications
-                <small class="d-block text-muted">You can withdraw consent at any time.</small>
-                <small id="marketing-emails-grant-date" class="d-block text-muted d-none"></small>
-              </label>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- Security Section -->
       <section id="security-section" class="account-section d-none">
         <h2 class="h3 mb-4" >Security and data</h2>
@@ -1110,37 +1090,6 @@ badges:
         </div>
       </section>
 
-      <!-- Team Section -->
-      <section id="team-section" class="account-section d-none">
-        <h2 class="h3 mb-4" >Team</h2>
-
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="card-title mb-0">Team members</h5>
-              <button class="btn btn-primary btn-sm" id="invite-team-member-btn">
-                {% uj_icon "user-plus", "me-2" %}
-                <span class="button-text">
-                  Invite<span class="d-none d-md-inline"> Team Member</span>
-                </span>
-              </button>
-            </div>
-
-            <div class="list-group" id="team-list">
-              <div class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>You</strong>
-                    <small class="text-muted d-block">Owner</small>
-                  </div>
-                  <span class="badge bg-primary">Owner</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- Referrals Section -->
       <section id="referrals-section" class="account-section d-none">
         <h2 class="h3 mb-4" >Referrals</h2>
@@ -1202,6 +1151,57 @@ badges:
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Team Section -->
+      <section id="team-section" class="account-section d-none">
+        <h2 class="h3 mb-4" >Team</h2>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0">Team members</h5>
+              <button class="btn btn-primary btn-sm" id="invite-team-member-btn">
+                {% uj_icon "user-plus", "me-2" %}
+                <span class="button-text">
+                  Invite<span class="d-none d-md-inline"> Team Member</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="list-group" id="team-list">
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>You</strong>
+                    <small class="text-muted d-block">Owner</small>
+                  </div>
+                  <span class="badge bg-primary">Owner</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications Section -->
+      <section id="notifications-section" class="account-section d-none">
+        <h2 class="h3 mb-4" >Notifications</h2>
+
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Email preferences</h5>
+
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="marketing-emails">
+              <label class="form-check-label" for="marketing-emails">
+                Product updates, newsletters, and marketing communications
+                <small class="d-block text-muted">You can withdraw consent at any time.</small>
+                <small id="marketing-emails-grant-date" class="d-block text-muted d-none"></small>
+              </label>
             </div>
           </div>
         </div>

@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.3] - 2026-05-21
+
+### Changed
+
+- **Reordered account page sections** in `src/defaults/dist/_layouts/themes/classy/frontend/pages/account/index.html`. Sidebar nav and section blocks now run Profile → Security → Subscription → Billing → Referrals → Team → Notifications → API Keys, pushing the less-frequently-used Team and Notifications sections below Referrals. Section content unchanged.
+
+---
 ## [1.3.2] - 2026-05-22
 
 ### Fixed
