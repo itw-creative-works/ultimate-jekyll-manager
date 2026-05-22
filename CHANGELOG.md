@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.2] - 2026-05-22
+
+### Fixed
+
+- **Consent guard was running before `sendUserSignupMetadata`, killing every fresh signup.** `src/assets/js/core/auth.js`: on a brand-new signup the user doc exists with `consent.legal.status: 'revoked'` (the schema default written by BEM's `on-create` event); `sendUserSignupMetadata` is what flips it to `'granted'`. Previously the guard ran first and signed the user out before the metadata POST could fire — orphaned every new account. Reordered to run `sendUserSignupMetadata` first, and the guard now skips accounts younger than `SIGNUP_MAX_AGE` (5min) so a transient network error during the POST doesn't lock a user out forever — they can retry. After the grace window, the guard fires normally.
+
+---
 ## [1.3.1] - 2026-05-21
 
 ### Changed

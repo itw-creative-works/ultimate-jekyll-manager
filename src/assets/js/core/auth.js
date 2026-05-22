@@ -65,15 +65,30 @@ export default function () {
       if (user) {
         // User is authenticated
 
+        // Send user signup metadata if account is new.
+        // MUST run BEFORE the consent guard — on a brand-new signup the user doc
+        // exists with consent.legal.status: 'revoked' (the schema default written
+        // by the on-create auth event). sendUserSignupMetadata is what flips it
+        // to 'granted' with the captured consent payload. If we gate first, every
+        // fresh signup would be signed out before consent ever lands.
+        await sendUserSignupMetadata(user);
+
         // Consent guard: if the user is authenticated but their account doc shows
         // no legal consent on record, they're an orphan from a reversed Google signup
         // that failed to delete cleanly. Sign them out and surface a toast so the
-        // user knows what happened (especially if they just clicked Google and saw
-        // a success message before this fired).
+        // user knows what happened.
+        //
         // Gated by ENFORCE_CONSENT_GUARD (off until the legacy-user migration runs).
+        // Also skipped for accounts younger than SIGNUP_MAX_AGE — sendUserSignupMetadata
+        // above is responsible for the consent write on that path, but if it failed
+        // (network error, server 500, etc.) the guard would otherwise lock the user
+        // out forever. The 5min grace window lets a retry / refresh recover; after
+        // that, the doc legitimately has no legal consent and the guard fires.
         if (ENFORCE_CONSENT_GUARD) {
+          const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
+          const isFreshAccount = accountAge < SIGNUP_MAX_AGE;
           const legalStatus = state.account?.consent?.legal?.status;
-          if (legalStatus && legalStatus !== 'granted') {
+          if (!isFreshAccount && legalStatus && legalStatus !== 'granted') {
             console.warn('[Auth] Signing out user with no legal consent on record');
             await webManager.auth().signOut();
             webManager.utilities().showNotification(
@@ -83,9 +98,6 @@ export default function () {
             return;
           }
         }
-
-        // Send user signup metadata if account is new
-        await sendUserSignupMetadata(user);
 
         // Check if page requires user to be unauthenticated (e.g., signin page)
         if (policy === 'unauthenticated') {
