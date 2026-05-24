@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.5] - 2026-05-24
+
+### Added
+
+- **Diagnostic logging in `extractBlockingFunctionMessage()` (`src/assets/js/libs/auth.js`).** When BEM's `beforeCreate` rate limit (2 signups/day/IP) fires via Google OAuth redirect, the user just saw "Firebase: Error (auth/error-code:-47)" instead of the helpful "Unable to create account at this time. Please try again later." message. The 1.3.4 extraction handles the standard 400-with-`BLOCKING_FUNCTION_ERROR_RESPONSE` path, but the 503 path (Google's Identity Toolkit returns 503 directly with code -47, no `customData.serverResponse`) flows through to the generic `auth.code` branch. Added a `console.warn` that dumps the full error shape (code, message, customData, serverResponse) so the next failed signup attempt reveals exactly what Firebase delivers — then we can write a matching handler. Diagnostic ships first; fix follows in a subsequent version.
+
+---
 ## [1.3.4] - 2026-05-22
 
 ### Added

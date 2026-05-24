@@ -802,6 +802,20 @@ export default function () {
   //
   // Returns just the inner message string, or null if nothing useful was found.
   function extractBlockingFunctionMessage(error) {
+    // Diagnostic: dump the full shape of every error that lands here so we can
+    // see exactly what Firebase delivers when BEM's beforeCreate throws. The
+    // 503 path (Identity Toolkit returns 503 with code -47, no BLOCKING_FUNCTION
+    // wrapper) needs different handling than the 400 path.
+    console.warn('[Auth] extractBlockingFunctionMessage: error shape', {
+      code: error?.code,
+      message: error?.message,
+      name: error?.name,
+      hasCustomData: !!error?.customData,
+      hasServerResponse: !!error?.customData?.serverResponse,
+      serverResponse: error?.customData?.serverResponse,
+      fullError: error,
+    });
+
     const raw = error?.customData?.serverResponse;
     if (!raw) {
       return null;
