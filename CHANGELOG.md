@@ -15,6 +15,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.9] - 2026-05-24
+
+### Fixed
+
+- **Account-page marketing toggle showed "Failed to update email preferences" even on successful unsubscribe.** Root cause: `pages/account/sections/notifications.js` was checking `response.data?.success !== true`, but `authorizedFetch` returns the JSON body directly (no `data` wrapper), and BEM's `assistant.respond({ success: true })` writes the object at the response root via `res.json(response)`. So `response.success === true` and `response.data?.success === undefined` — the check fired even though the backend had successfully written `consent.marketing.status = 'revoked'` AND removed the contact from SendGrid + Beehiiv. Frontend UX showed a danger toast and reverted the toggle, but server state was already correct, putting the UI out of sync with reality. Fix: check `response.success` at the root.
+
+### Changed
+
+- **`pages/account/sections/notifications.js` refactored to use FormManager**, matching the project rule that all user-driven API forms use form-manager for in-flight/success/error UX. The toggle is now wrapped in `<form id="marketing-emails-form">` (classy account template, `src/defaults/dist/_layouts/themes/classy/frontend/pages/account/index.html`), and the change event triggers `formManager.submit()`. Success notification uses `formManager.showSuccess()`; failure throws so FormManager surfaces the error toast and the JS reverts the toggle to its last-known-good state. Replaces the ad-hoc `addEventListener('change')` + raw `authorizedFetch` + manual `webManager.utilities().showNotification()` pattern.
+
+---
 ## [1.3.8] - 2026-05-24
 
 ### Fixed

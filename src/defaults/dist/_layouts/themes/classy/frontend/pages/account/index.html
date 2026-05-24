@@ -1195,14 +1195,16 @@ badges:
           <div class="card-body">
             <h5 class="card-title">Email preferences</h5>
 
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="marketing-emails">
-              <label class="form-check-label" for="marketing-emails">
-                Product updates, newsletters, and marketing communications
-                <small class="d-block text-muted">You can withdraw consent at any time.</small>
-                <small id="marketing-emails-grant-date" class="d-block text-muted d-none"></small>
-              </label>
-            </div>
+            <form id="marketing-emails-form" novalidate onsubmit="return false">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="marketing-emails" name="enabled">
+                <label class="form-check-label" for="marketing-emails">
+                  Product updates, newsletters, and marketing communications
+                  <small class="d-block text-muted">You can withdraw consent at any time.</small>
+                  <small id="marketing-emails-grant-date" class="d-block text-muted d-none"></small>
+                </label>
+              </div>
+            </form>
           </div>
         </div>
       </section>
