@@ -266,7 +266,7 @@ export default function () {
   async function handleRedirectResult() {
     try {
       // Import Firebase auth functions
-      const { getAuth, getRedirectResult } = await import('@firebase/auth');
+      const { getAuth, getRedirectResult, getAdditionalUserInfo } = await import('@firebase/auth');
       const auth = getAuth();
 
       // Check for redirect result
@@ -285,10 +285,17 @@ export default function () {
       // Determine the provider from the result
       const providerId = result.providerId || result.user.providerData?.[0]?.providerId || 'unknown';
 
-      // Track based on whether this is a new user
-      const isNewUser = result.additionalUserInfo?.isNewUser;
+      // Track based on whether this is a new user. Firebase Auth v9+ modular SDK
+      // does NOT expose additionalUserInfo as a direct property on UserCredential —
+      // you must call getAdditionalUserInfo(result) to get it. The legacy compat SDK
+      // exposed it as a direct property, hence the v9 migration footgun. Verified
+      // against @firebase/auth's auth-public.d.ts: UserCredential only declares
+      // { user, providerId, operationType }.
+      const additionalUserInfo = getAdditionalUserInfo(result);
+      const isNewUser = additionalUserInfo?.isNewUser;
       const pagePath = document.documentElement.getAttribute('data-page-path');
       const isSignupPage = pagePath === '/signup';
+      console.warn('[Auth] redirect additionalUserInfo:', additionalUserInfo, 'isNewUser:', isNewUser, 'pagePath:', pagePath, 'isSignupPage:', isSignupPage, 'operationType:', result.operationType);
 
       // Google quirk: if a new account was auto-created during a signin attempt
       // (user came back from OAuth via the redirect path on /signin, not /signup),
@@ -598,6 +605,7 @@ export default function () {
         getAuth,
         signInWithPopup,
         signInWithRedirect,
+        getAdditionalUserInfo,
         GoogleAuthProvider,
         FacebookAuthProvider,
         TwitterAuthProvider,
@@ -660,8 +668,12 @@ export default function () {
           const result = await signInWithPopup(auth, provider);
           console.log('[Auth] Successfully authenticated via popup:', result.user.email);
 
-          // Track based on whether this is a new user
-          const isNewUser = result.additionalUserInfo?.isNewUser;
+          // Track based on whether this is a new user. v9 modular SDK requires
+          // getAdditionalUserInfo(result) — the legacy `result.additionalUserInfo`
+          // direct property does NOT exist on UserCredential in v9+.
+          const additionalUserInfoPopup = getAdditionalUserInfo(result);
+          const isNewUser = additionalUserInfoPopup?.isNewUser;
+          console.warn('[Auth] popup additionalUserInfo:', additionalUserInfoPopup, 'isNewUser:', isNewUser, 'action:', action);
 
           // Google quirk: signInWithPopup auto-creates accounts. If a brand-new visitor
           // clicks "Sign in with Google" on the SIGNIN page (not signup), reverse the

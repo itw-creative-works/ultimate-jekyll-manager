@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.7] - 2026-05-24
+
+### Fixed
+
+- **Reverse-signup detection on `/signin` was completely broken.** The reverse-signup-on-/signin flow in `src/assets/js/libs/auth.js` (lines 289 and 664) was reading `result.additionalUserInfo?.isNewUser` directly off the `UserCredential` returned by `getRedirectResult()` and `signInWithPopup()`. That property does NOT exist on the v9+ modular SDK — verified against `@firebase/auth`'s `auth-public.d.ts`, which declares `UserCredential` as exactly `{ user, providerId, operationType }`. The legacy compat SDK exposed `additionalUserInfo` as a direct property, hence the v9 migration footgun. On the modular SDK you must call the standalone helper `getAdditionalUserInfo(userCredential): AdditionalUserInfo | null` to access `isNewUser`. Result: `isNewUser` was always `undefined` → always falsy → the `if (isNewUser && !isSignupPage)` reverse gate at line 296 never fired in production. New Google accounts on `/signin` got signed in straight to `/account` with no consent on record, despite the reverse-signup code existing in the bundle since multiple versions ago. Confirmed live on Somiibo (Test 4 of `TODO-CONSENT-LIVETEST.md` failed 3× in a row with `operationType: 'signIn'` and no `[Auth] Reversing accidental signup` log line). Now both sites import `getAdditionalUserInfo` and call it on the result. Added two `console.warn` diagnostic logs (one per site) so future regressions surface immediately — can be removed once we're confident the fix sticks.
+
+---
 ## [1.3.6] - 2026-05-24
 
 ### Fixed
