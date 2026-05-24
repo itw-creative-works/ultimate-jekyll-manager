@@ -816,6 +816,16 @@ export default function () {
       fullError: error,
     });
 
+    // The OAuth redirect path (signInWithIdp → 503) delivers the rejection as
+    // `auth/error-code:-47` with NO `customData.serverResponse` blob — Firebase
+    // strips the BEM-side message before it reaches the client. The code is
+    // 1:1 with "blocking-function rejected this signup," so surface a generic-
+    // but-helpful message that covers all three BEM beforeCreate reasons
+    // (rate limit, disposable email, custom hook reject).
+    if (error?.code === 'auth/error-code:-47') {
+      return 'Account creation is temporarily restricted. This can happen if you\'ve recently created too many accounts, or your email is on our blocked list. Please try again later or contact support.';
+    }
+
     const raw = error?.customData?.serverResponse;
     if (!raw) {
       return null;

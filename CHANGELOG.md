@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.6] - 2026-05-24
+
+### Fixed
+
+- **`auth/error-code:-47` now shows a friendly message instead of the raw FirebaseError.** v1.3.5's diagnostic confirmed: on the OAuth redirect path (`signInWithIdp` → 503), Firebase strips the BEM-side `HttpsError` message and delivers `code: 'auth/error-code:-47'` with `customData: {}` — empty. There's nothing to extract because Firebase ate the message client-side. This contradicts Firebase's own [Identity Platform docs](https://cloud.google.com/identity-platform/docs/blocking-functions) which describe a `BLOCKING_FUNCTION_ERROR_RESPONSE` wrapper that SHOULD carry the original message. The wrapper works on the 400 path (email signup, OAuth popup) — our v1.3.4 extractor handles that fine. The 503 path is broken: tracked at [firebase-js-sdk#8054](https://github.com/firebase/firebase-js-sdk/issues/8054), where a Firebase engineer said "503 seems to be the working as design error codes" then the issue was auto-closed as stale 5 weeks later without a fix or workaround. The `-47` code is 1:1 with "blocking-function rejected this signup," so `extractBlockingFunctionMessage()` now returns a generic-but-helpful message covering all three BEM `beforeCreate` reasons (rate limit, disposable email, custom hook reject): "Account creation is temporarily restricted. This can happen if you've recently created too many accounts, or your email is on our blocked list. Please try again later or contact support." The original `customData.serverResponse` path stays as the primary handler — the `-47` catchall is an additive fallback for when Firebase eats the message.
+
+---
 ## [1.3.5] - 2026-05-24
 
 ### Added
