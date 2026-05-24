@@ -15,6 +15,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.10] - 2026-05-24
+
+### Added
+
+- **Generate signin link** — advanced-user feature on `/account#security` that creates a temporary `/signin?authCustomToken=<token>` URL via `POST /backend-manager/user/token`. Centered text-link trigger sits under the Active sessions card (same Bootstrap utility classes as Cancel subscription: `btn btn-link btn-sm text-muted text-decoration-underline opacity-50`). Opens a danger-bordered modal with a typed-phrase gate (`I will not share this link`) that enables the red Generate button. On success, the warning view swaps in-place for the link inside a readonly monospaced input + Copy button, with a prominent 1-hour expiry warning. Token never persists outside the input — `show.bs.modal` resets state every open. Backend route already existed (`functions/routes/user/token/post.js`) and the existing `handleCustomTokenSignin` flow in `src/assets/js/libs/auth.js` consumes the resulting URL.
+
+### Changed
+
+- **Account-page marketing toggle now requires an explicit "Save preferences" button.** v1.3.9 made the toggle auto-submit on change. Cleaner UX: user flips the toggle, sees the new state visually, then clicks Save when they actually want to commit. Markup adds a `<button type="submit" class="btn btn-primary">Save preferences</button>` to the `#marketing-emails-form` (classy account template). JS drops the `addEventListener('change', () => formManager.submit())` line. On failure, the toggle stays where the user left it (no auto-revert) — they see the error message via FormManager and can hit Save again.
+
+### Removed
+
+- **`.cancel-trigger-link` SCSS class.** Replaced with Bootstrap utilities on both the existing Cancel subscription button and the new Generate signin link button (`text-muted opacity-50` instead of the custom `opacity: 0.7` + hover transition + `0.8125rem` font size). Avoids inventing project-specific classes when Bootstrap utilities cover the same styling.
+
+---
 ## [1.3.9] - 2026-05-24
 
 ### Fixed

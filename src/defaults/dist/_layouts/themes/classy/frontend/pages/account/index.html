@@ -863,6 +863,73 @@ badges:
             </div>
           </div>
         </div>
+
+        <!-- Generate Signin Link (advanced) -->
+        <div id="generate-signin-link-trigger" class="text-center">
+          <button type="button" class="btn btn-link btn-sm text-muted text-decoration-underline opacity-50" data-bs-toggle="modal" data-bs-target="#generate-signin-link-modal">
+            Generate signin link
+          </button>
+        </div>
+
+        <!-- Generate Signin Link Modal -->
+        <div class="modal fade" id="generate-signin-link-modal" tabindex="-1" aria-labelledby="generate-signin-link-title" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border border-danger">
+              <div class="modal-header">
+                <h5 class="modal-title text-danger" id="generate-signin-link-title">
+                  {% uj_icon "triangle-exclamation", "fa-lg me-2" %}
+                  Generate signin link
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <!-- Warning view -->
+                <div id="generate-signin-link-warning">
+                  <div class="alert alert-danger">
+                    <strong>This is a dangerous feature for advanced users.</strong>
+                    <p class="mb-2 mt-2 small">
+                      Generating a signin link creates a single URL that lets <strong>anyone who has it</strong> sign in to your account — no password, no 2FA, no email verification.
+                    </p>
+                    <ul class="small mb-0">
+                      <li>Use it only to sign in to your own account on another browser or device.</li>
+                      <li><strong>Never share, message, email, or paste this link anywhere.</strong> Anyone with the link gets full access to your account.</li>
+                      <li>The link expires in 1 hour, but treat it as a live key until then.</li>
+                      <li>If you suspect the link was exposed, sign out of all sessions immediately.</li>
+                    </ul>
+                  </div>
+
+                  <p class="mb-2">Type the following phrase exactly to confirm you understand the risks:</p>
+                  <p class="mb-2"><code id="signin-link-confirm-phrase">I will not share this link</code></p>
+
+                  <input type="text" class="form-control" id="signin-link-confirm-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type the phrase above">
+                </div>
+
+                <!-- Result view (hidden until generated) -->
+                <div id="generate-signin-link-result" class="d-none">
+                  <div class="alert alert-warning small mb-3">
+                    {% uj_icon "clock", "me-1" %}
+                    This link expires in <strong>1 hour</strong>. Use it immediately and do not share it.
+                  </div>
+                  <label for="signin-link-output" class="form-label small text-muted mb-1">Your signin link:</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control font-monospace small" id="signin-link-output" readonly>
+                    <button type="button" class="btn btn-outline-primary" id="signin-link-copy-btn">
+                      {% uj_icon "copy", "me-1" %}
+                      <span class="button-text">Copy</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="signin-link-generate-btn" disabled>
+                  {% uj_icon "key", "me-1" %}
+                  <span class="button-text">Generate link</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Connections Section -->
@@ -1026,7 +1093,7 @@ badges:
 
         <!-- Cancel Subscription (only visible for paid users) -->
         <div id="cancel-subscription-trigger" class="text-center" data-wm-bind="@show billing.buttons.cancel" hidden>
-          <button type="button" class="btn btn-link btn-sm text-muted text-decoration-underline cancel-trigger-link" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion" aria-expanded="false" aria-controls="cancel-subscription-accordion">
+          <button type="button" class="btn btn-link btn-sm text-muted text-decoration-underline opacity-50" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion" aria-expanded="false" aria-controls="cancel-subscription-accordion">
             Cancel subscription
           </button>
         </div>
@@ -1195,8 +1262,8 @@ badges:
           <div class="card-body">
             <h5 class="card-title">Email preferences</h5>
 
-            <form id="marketing-emails-form" novalidate onsubmit="return false">
-              <div class="form-check form-switch">
+            <form id="marketing-emails-form" novalidate>
+              <div class="form-check form-switch mb-3">
                 <input class="form-check-input" type="checkbox" id="marketing-emails" name="enabled">
                 <label class="form-check-label" for="marketing-emails">
                   Product updates, newsletters, and marketing communications
@@ -1204,6 +1271,9 @@ badges:
                   <small id="marketing-emails-grant-date" class="d-block text-muted d-none"></small>
                 </label>
               </div>
+              <button type="submit" class="btn btn-primary">
+                <span class="button-text">Save preferences</span>
+              </button>
             </form>
           </div>
         </div>

@@ -20,6 +20,7 @@ const useAuthPopup = url.searchParams.get('authPopup') === 'true' || window !== 
 export function init() {
   initializeSigninMethods();
   initializeSignoutAllForm();
+  initializeSigninLinkGenerator();
 }
 
 // Load security data
@@ -399,6 +400,96 @@ function initializeSignoutAllForm() {
       // Note: The page will likely redirect due to auth state change
     });
   }
+}
+
+// Initialize signin link generator (advanced feature).
+// Creates a temporary signin URL using a Firebase custom token. The link grants
+// full account access to anyone who holds it, so we gate it behind a typed
+// confirmation phrase before hitting BEM's /user/token route.
+function initializeSigninLinkGenerator() {
+  const $modal = document.getElementById('generate-signin-link-modal');
+  if (!$modal) {
+    return;
+  }
+
+  const $phrase = document.getElementById('signin-link-confirm-phrase');
+  const $input = document.getElementById('signin-link-confirm-input');
+  const $generateBtn = document.getElementById('signin-link-generate-btn');
+  const $warningView = document.getElementById('generate-signin-link-warning');
+  const $resultView = document.getElementById('generate-signin-link-result');
+  const $output = document.getElementById('signin-link-output');
+  const $copyBtn = document.getElementById('signin-link-copy-btn');
+
+  const expectedPhrase = $phrase.textContent.trim();
+
+  // Reset modal state every time it opens. The custom token is never persisted
+  // outside the input — closing the modal must drop it from the DOM.
+  $modal.addEventListener('show.bs.modal', () => {
+    $input.value = '';
+    $output.value = '';
+    $generateBtn.disabled = true;
+    $warningView.classList.remove('d-none');
+    $resultView.classList.add('d-none');
+  });
+
+  // Enable Generate only when the typed phrase matches exactly.
+  $input.addEventListener('input', () => {
+    $generateBtn.disabled = $input.value.trim() !== expectedPhrase;
+  });
+
+  $generateBtn.addEventListener('click', async () => {
+    // Defensive: the button is disabled until the phrase matches, but re-check
+    // in case anything bypassed the input handler.
+    if ($input.value.trim() !== expectedPhrase) {
+      return;
+    }
+
+    const originalText = $generateBtn.querySelector('.button-text').textContent;
+    $generateBtn.disabled = true;
+    $generateBtn.querySelector('.button-text').textContent = 'Generating...';
+
+    try {
+      const tokenURL = `${webManager.getApiUrl()}/backend-manager/user/token`;
+      const data = await authorizedFetch(tokenURL, {
+        method: 'POST',
+        timeout: 60000,
+        response: 'json',
+        tries: 2,
+      });
+
+      const token = data?.token;
+      if (!token) {
+        throw new Error('No token returned from server');
+      }
+
+      const signinURL = new URL('/signin', window.location.origin);
+      signinURL.searchParams.set('authCustomToken', token);
+
+      $output.value = signinURL.toString();
+      $warningView.classList.add('d-none');
+      $resultView.classList.remove('d-none');
+    } catch (error) {
+      console.error('[Security] Failed to generate signin link:', error);
+      webManager.utilities().showNotification(
+        `Failed to generate signin link: ${error.message || 'Unknown error'}`,
+        { type: 'danger', timeout: 8000 }
+      );
+      $generateBtn.disabled = false;
+    } finally {
+      $generateBtn.querySelector('.button-text').textContent = originalText;
+    }
+  });
+
+  $copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText($output.value);
+      webManager.utilities().showNotification('Signin link copied to clipboard', 'success');
+    } catch (error) {
+      $output.select();
+      document.execCommand('copy');
+      webManager.utilities().showNotification('Signin link copied to clipboard', 'success');
+    }
+  });
 }
 
 // Connect Google provider
