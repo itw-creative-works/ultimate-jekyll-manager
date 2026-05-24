@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.11] - 2026-05-24
+
+### Changed
+
+- **Account page UI polish.** Three small consistency fixes on `/account`: (1) Notifications "Save preferences" button now has the `floppy-disk` icon to match the profile section's "Save Changes" button. (2) Generate signin link modal no longer shows a redundant Cancel button in its footer — the X in the modal header already dismisses it. (3) Connections "Manage connections" card no longer renders a divider between the section title and the first item (dropped `list-group list-group-flush` from `#connections-list`); the per-item `border-top` already handles inter-item separation, matching the Sign-in methods card's pattern.
+
+---
 ## [1.3.10] - 2026-05-24
 
 ### Added
