@@ -51,6 +51,16 @@ export default function () {
       // Log
       console.log('[Auth] state changed:', state);
 
+      // Short-circuit if a reverse-signup is in progress (libs/auth.js#reverseAccidentalSignup
+      // sets this synchronously before .delete() + signOut()). Without this, the brief
+      // window where Firebase shows user=<about-to-be-deleted-account> would trigger the
+      // policy-based redirect to /account (or authReturnUrl) BEFORE the user sees the
+      // inline error on /signin. Flag is cleared at the end of reverseAccidentalSignup.
+      if (window.__UJM_REVERSING_SIGNUP) {
+        console.warn('[Auth] Skipping state-change processing — reverse-signup in progress');
+        return;
+      }
+
       // Set user ID for analytics tracking
       setAnalyticsUserId(user);
 

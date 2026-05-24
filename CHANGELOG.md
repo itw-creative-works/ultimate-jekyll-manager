@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.8] - 2026-05-24
+
+### Fixed
+
+- **Reverse-signup now keeps the user on `/signin` so they actually see the inline error.** v1.3.7 fixed `isNewUser` detection, but a follow-on race appeared: when Firebase's `getRedirectResult()` returns a fresh-signup user, the auth-state-change listener in `core/auth.js` fires `state.user = <about-to-be-deleted>` BEFORE `reverseAccidentalSignup`'s `await newUser.delete() → signOut()` chain completes. The listener's `policy === 'unauthenticated'` branch then redirects to `/account` (or `authReturnUrl`), and by the time the inline `showError()` call fires, the user is already off the page. Fixed with a `window.__UJM_REVERSING_SIGNUP` flag set synchronously before the delete + cleared after signOut's followup state-change. The listener checks the flag at the top and short-circuits the entire callback — no redirect, no metadata POST, no consent guard, nothing — until the reversal completes and the user lands on `user = null` with the inline error visible on `/signin`.
+
+---
 ## [1.3.7] - 2026-05-24
 
 ### Fixed

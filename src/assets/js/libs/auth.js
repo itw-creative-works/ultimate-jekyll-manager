@@ -125,6 +125,16 @@ export default function () {
   async function reverseAccidentalSignup(newUser) {
     console.warn('[Auth] Reversing accidental signup from /signin (new Google account created with no consent on record)');
 
+    // SYNCHRONOUSLY flag the reversal so the auth-state-change listener in
+    // core/auth.js short-circuits its policy-based redirect for this user.
+    // Without this, Firebase's redirect-result-success path triggers an auth
+    // state change with user=<the-about-to-be-deleted-account> BEFORE we
+    // finish .delete() + signOut(), and the listener redirects to /account
+    // (or authReturnUrl) before the user ever sees the inline error.
+    // Cleared in the finally block after signOut() has fired the followup
+    // auth-state-change with user=null.
+    window.__UJM_REVERSING_SIGNUP = true;
+
     try {
       await newUser.delete();
     } catch (e) {
@@ -152,6 +162,11 @@ export default function () {
       formManager.showError(`This account doesn't exist. Try signing up first or use a different account.`);
       formManager.ready();
     }
+
+    // Clear the flag now that signOut() has fired its auth-state-change
+    // with user=null. Future state changes (e.g. user re-clicks Continue
+    // with Google after seeing the error) get normal listener processing.
+    window.__UJM_REVERSING_SIGNUP = false;
   }
 
   // Validate that the user has agreed to the legal terms. Instead of highlighting the
