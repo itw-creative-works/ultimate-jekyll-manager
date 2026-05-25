@@ -90,11 +90,6 @@ module.exports = async function (options) {
     await ensureRubyVersion();
   }
 
-  // Ensure proper bundler version + install/update gems
-  if (options.checkBundle) {
-    await ensureBundle();
-  }
-
   // Ensure peer dependencies are installed
   if (options.checkPeerDependencies) {
     await ensurePeerDependencies();
@@ -107,9 +102,15 @@ module.exports = async function (options) {
     setupScripts();
   }
 
-  // Ensure _config.yml exists
+  // Ensure _config.yml + scaffolded files (Gemfile, etc.) exist.
+  // Must run BEFORE ensureBundle so `bundle install` has a Gemfile to read on first setup.
   if (options.ensureCoreFiles) {
     await ensureCoreFiles();
+  }
+
+  // Ensure proper bundler version + install/update gems
+  if (options.checkBundle) {
+    await ensureBundle();
   }
 
   // Create CNAME file
@@ -267,11 +268,20 @@ async function ensureCoreFiles() {
 
   logger.log('No src/_config.yml found. Creating default config file...');
 
-  const sourcePath = path.join(rootPathPackage, 'dist/defaults/src/_config.yml');
-  const targetPath = path.join(rootPathProject, 'src/_config.yml');
+  // Files that must exist BEFORE the gulpfile loads. Several task modules
+  // (sass/distribute/imagemin) read these at module top-level, so a fresh
+  // consumer can't even invoke `gulp defaults` without them.
+  const coreFiles = [
+    'src/_config.yml',
+    'config/ultimate-jekyll-manager.json',
+  ];
 
-  jetpack.copy(sourcePath, targetPath);
-  logger.log(`Copied default _config.yml to src/_config.yml`);
+  coreFiles.forEach((relPath) => {
+    const sourcePath = path.join(rootPathPackage, 'dist/defaults', relPath);
+    const targetPath = path.join(rootPathProject, relPath);
+    jetpack.copy(sourcePath, targetPath, { overwrite: false });
+    logger.log(`Copied default ${relPath}`);
+  });
 
   // Inject new config into config variable
   config = Manager.getConfig('project');

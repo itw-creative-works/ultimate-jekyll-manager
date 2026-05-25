@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.3.12] - 2026-05-25
+
+### Fixed
+
+- **Fresh-consumer `npx mgr setup` now works on the first run.** Two ordering bugs prevented setup from succeeding on a brand-new consumer project: (1) `ensureBundle()` ran `bundle install` before `ensureCoreFiles()` scaffolded the `Gemfile`, failing with "Could not locate Gemfile" — reordered so core files are scaffolded first. (2) The gulpfile eagerly `require()`s every task module at load time, and `sass.js`/`distribute.js`/`imagemin.js` all call `Manager.getUJMConfig()` at module top-level, so a fresh consumer (with no `config/ultimate-jekyll-manager.json`) couldn't even invoke `gulp defaults` — extended `ensureCoreFiles()` to seed both `src/_config.yml` and `config/ultimate-jekyll-manager.json` from `dist/defaults/` before invoking gulp. Both steps remain idempotent (existing-file guard + `{ overwrite: false }` copy).
+
+---
 ## [1.3.11] - 2026-05-24
 
 ### Changed
