@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.4.1] - 2026-05-27
+
+### Changed
+
+- **Bumped `puppeteer` `^24.43.1` → `^25.1.0`.** Puppeteer 25 is ESM-only and requires Node 22+; UJM's existing `require('puppeteer')` calls in [src/test/runners/boot.js](src/test/runners/boot.js) and [src/test/runners/chromium.js](src/test/runners/chromium.js) keep working via Node 22's native ESM-require interop.
+- **Bumped `html-validate` `^10.17.0` → `^11.4.0`.** Used by [src/gulp/tasks/audit.js](src/gulp/tasks/audit.js); audit suite still passes.
+
+---
 ## [1.4.0] - 2026-05-27
 
 ### Added
