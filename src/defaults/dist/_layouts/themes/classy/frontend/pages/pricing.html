@@ -43,7 +43,7 @@ pricing:
           icon: "download"
         # Additional features
         - id: "storage"
-          name: "Logo Storage"
+          name: "Logo storage"
           icon: "clock"
 
     - id: "plus"
@@ -63,7 +63,7 @@ pricing:
           name: "API Access"
           icon: "code"
         - id: "priority_support"
-          name: "Priority Support"
+          name: "Priority support"
           icon: "headset"
 
     - id: "pro"
@@ -95,10 +95,10 @@ pricing:
           icon: "download"
         # Additional features
         - id: "team_collaboration"
-          name: "Team Collaboration"
+          name: "Team collaboration"
           icon: "users"
         - id: "custom_branding"
-          name: "Custom Branding"
+          name: "Custom branding"
           icon: "palette"
 
 # Feature Comparison Section
@@ -137,7 +137,7 @@ cta:
   headline_accent: "needs?"
   subheadline: "Talk to our support team 24/7"
   button:
-    text: "Talk to Us"
+    text: "Talk to us"
     icon: "headset"
     href: "/contact"
 
@@ -223,7 +223,7 @@ faqs:
           {{ page.resolved.hero.headline }} <span class="text-gradient-rainbow">{{ page.resolved.hero.headline_accent }}</span>
         </h1>
         {% iftruthy page.resolved.hero.subheadline %}
-          <p class="fs-5 text-muted">
+          <p class="fs-5 text-muted mb-0">
             {{ page.resolved.hero.subheadline }}
           </p>
         {% endiftruthy %}
@@ -240,23 +240,24 @@ faqs:
         <div class="text-center mb-5">
           <div class="btn-group" role="group" aria-label="Billing toggle" data-lazy="@class animation-popup">
             <input type="radio" class="btn-check" name="billing" id="monthly" autocomplete="off" data-billing="monthly">
-            <label class="btn btn-outline-adaptive rounded-start-pill hover-flex" for="monthly">Monthly</label>
+            <label class="btn btn-outline-adaptive rounded-start-pill" for="monthly">Monthly</label>
 
             <input type="radio" class="btn-check" name="billing" id="annually" autocomplete="off" checked data-billing="annually">
-            <label class="btn btn-primary rounded-end-pill position-relative hover-flex" for="annually">
+            <label class="btn btn-primary rounded-end-pill position-relative" for="annually">
               Annually
-              <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                up to 20% off
-                <span class="visually-hidden">discount</span>
-              </span> -->
             </label>
 
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                up to 20% off!
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-adaptive-inverse text-adaptive">
+                🎁 up to 20% off!
                 <span class="visually-hidden">discount</span>
             </span>
           </div>
         </div>
+
+        <p class="small text-muted text-center mb-4">
+          {% uj_icon "shield-check", "me-1 text-success" %}
+          Every paid plan backed by a 7-day money-back guarantee
+        </p>
 
         {% assign plan_count = page.resolved.pricing.plans | size %}
 
@@ -397,21 +398,27 @@ faqs:
                       {% iftruthy plan.url %}
                         <a href="{{ plan.url }}" class="btn {% if _plan_monthly == 0 %}btn-adaptive{% else %}{{ btn_style }}{% endif %} btn-md fw-semibold px-2 fs-5">
                           {% if _plan_monthly == 0 %}
-                            Get Started
+                            Get started
+                          {% elsif plan.trial.days > 0 %}
+                            Get free trial
                           {% else %}
-                            Get Free Trial
+                            Get started
                           {% endif %}
                         </a>
                       {% endiftruthy %}
                       {% iffalsy plan.url %}
                         <button class="btn {{ btn_style }} btn-md fw-semibold px-2 fs-5" data-plan-id="{{ plan.id }}">
-                          Get Free Trial
+                          {% if plan.trial.days > 0 %}
+                            Get free trial
+                          {% else %}
+                            Get started
+                          {% endif %}
                         </button>
                       {% endiffalsy %}
                     </div>
 
                     <!-- Billing info -->
-                    <p class="text-center text-muted small mb-3">
+                    <p class="text-center text-muted small mb-1">
                       {% if _plan_monthly == 0 %}
                         <span>No credit card required</span>
                       {% else %}
@@ -420,6 +427,19 @@ faqs:
                         </span>
                       {% endif %}
                     </p>
+
+                    <!-- Guarantee badge (paid plans only) -->
+                    {% if _plan_monthly > 0 %}
+                      <p class="text-center text-muted small mb-3">
+                        {% uj_icon "shield-check", "me-1 text-success" %}
+                        7-day money-back guarantee
+                      </p>
+                    {% else %}
+                      <p class="text-center text-muted small mb-3">
+                        {% uj_icon "rocket", "me-1 text-success" %}
+                        Upgrade any time
+                      </p>
+                    {% endif %}
 
                     <hr class="border-1">
 
@@ -608,7 +628,7 @@ faqs:
                 <button class="btn btn-primary btn-lg" data-plan-id="enterprise">
                   {% uj_icon "envelope", "fa-lg me-2" %}
                   <span class="button-text">
-                    Contact Us
+                    Contact us
                   </span>
                 </button>
               </div>
@@ -668,7 +688,7 @@ faqs:
   <div class="container">
     <div class="table-responsive" data-lazy="@class animation-slide-up">
       <table class="table caption-top">
-        <caption>Compare Features</caption>
+        <caption>Compare features</caption>
         <thead>
           <tr>
             <th scope="col">Feature</th>

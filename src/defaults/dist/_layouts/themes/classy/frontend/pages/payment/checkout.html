@@ -123,7 +123,7 @@ web_manager:
             </div>
             <hr class="my-2">
             <div class="mb-2">
-              <label class="form-label mb-1 text-body-secondary">Trial Eligible</label>
+              <label class="form-label mb-1 text-body-secondary">Trial eligible</label>
               <select data-dev-param="_dev_trialEligible" class="form-select form-select-sm">
                 <option value="">(use API)</option>
                 <option value="true">Force true</option>
@@ -131,7 +131,7 @@ web_manager:
               </select>
             </div>
             <div class="mb-2">
-              <label class="form-label mb-1 text-body-secondary">Card Processor</label>
+              <label class="form-label mb-1 text-body-secondary">Card processor</label>
               <select data-dev-param="_dev_cardProcessor" class="form-select form-select-sm">
                 <option value="">(auto)</option>
                 <option value="test">Test</option>
@@ -147,7 +147,7 @@ web_manager:
                 <option value="empty">Send empty token</option>
               </select>
             </div>
-            <button id="checkout-dev-apply" class="btn btn-primary btn-sm w-100 fw-bold">Apply &amp; Reload</button>
+            <button id="checkout-dev-apply" class="btn btn-primary btn-sm w-100 fw-bold">Apply &amp; reload</button>
           </div>
         </div>
       </div>
@@ -212,7 +212,7 @@ web_manager:
                                 <span data-wm-bind="@text checkout.pricing.annualMonthlyRate">$--</span>
                                 <span class="opacity-60 fs-6 fw-normal">/mo</span>
                               </div>
-                              <div class="opacity-80 small">Annual Plan</div>
+                              <div class="opacity-80 small">Annual plan</div>
                             </label>
                           </div>
                         </div>
@@ -229,7 +229,7 @@ web_manager:
                                 <span data-wm-bind="@text checkout.pricing.monthlyPrice">$--</span>
                                 <span class="opacity-60 fs-6 fw-normal">/mo</span>
                               </div>
-                              <div class="opacity-80 small">Monthly Plan</div>
+                              <div class="opacity-80 small">Monthly plan</div>
                             </label>
                           </div>
                         </div>
@@ -246,7 +246,7 @@ web_manager:
                                 <span data-wm-bind="@text checkout.pricing.weeklyPrice">$--</span>
                                 <span class="opacity-60 fs-6 fw-normal">/wk</span>
                               </div>
-                              <div class="opacity-80 small">Weekly Plan</div>
+                              <div class="opacity-80 small">Weekly plan</div>
                             </label>
                           </div>
                         </div>
@@ -263,7 +263,7 @@ web_manager:
                                 <span data-wm-bind="@text checkout.pricing.dailyPrice">$--</span>
                                 <span class="opacity-60 fs-6 fw-normal">/day</span>
                               </div>
-                              <div class="opacity-80 small">Daily Plan</div>
+                              <div class="opacity-80 small">Daily plan</div>
                             </label>
                           </div>
                         </div>
@@ -274,12 +274,12 @@ web_manager:
                         * Pay <span data-wm-bind="@text checkout.pricing.frequencyPaymentText">$-- monthly</span>
                       </div>
 
-                      <!-- Subscription info badge (default: cancel anytime, replaced by trial if eligible) -->
+                      <!-- Subscription info badge (default: money-back guarantee, replaced by trial if eligible) -->
                       <div class="alert alert-secondary mt-3 mb-0 p-2"
                            data-wm-bind="@show !checkout.trial.show">
                         <small class="d-flex align-items-center mb-0">
-                          {% uj_icon "circle-check", "me-2 text-success" %}
-                          You can cancel your subscription at any time.
+                          {% uj_icon "shield-check", "me-2 text-success" %}
+                          Backed by our 7-day money-back guarantee.
                         </small>
                       </div>
 
@@ -355,12 +355,12 @@ web_manager:
 
           </div>
 
-          <!-- HR before Order Summary (mobile only) -->
+          <!-- HR before Order summary (mobile only) -->
           <div class="col-12 order-2 d-lg-none">
             <hr class="my-3">
           </div>
 
-          <!-- Section 2: Order Summary -->
+          <!-- Section 2: Order summary -->
           <div class="col-12 col-lg-5 mb-lg-0 order-2 ms-lg-auto">
             <div class="order-summary-sticky">
               <div class="accordion checkout-accordion _card _border-1 _border-secondary _shadow-sm">
@@ -435,12 +435,12 @@ web_manager:
                         <div class="d-flex justify-content-between mb-3 text-success"
                              data-wm-bind="@show checkout.trial.hasFreeTrial"
                              hidden>
-                          <span>Free Trial Discount</span>
+                          <span>Free trial discount</span>
                           <span>-$<span data-wm-bind="@text checkout.trial.discountAmount"></span></span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-3 wm-binding-skeleton" data-wm-bind="@show checkout">
-                          <span class="fw-bold fs-5">Total Due Today</span>
+                          <span class="fw-bold fs-5">Total due today</span>
                           <span class="fw-bold fs-4" data-wm-bind="@text checkout.pricing.total">$--</span>
                         </div>
 
@@ -506,9 +506,9 @@ web_manager:
   <!-- Security badges (below main card) -->
   <div class="text-center mt-3">
     <div class="d-flex justify-content-center align-items-center gap-3 small text-muted">
-      <span>{% uj_icon "shield-check", "text-success" %} Secure Checkout</span>
+      <span>{% uj_icon "handshake", "text-success" %} Secure Checkout</span>
       <span>{% uj_icon "lock", "text-success" %} SSL Encrypted</span>
-      <span>{% uj_icon "check-circle", "text-success" %} Money-back guarantee</span>
+      <span>{% uj_icon "shield-check", "text-success" %} Money-back guarantee</span>
     </div>
   </div>
 </section>

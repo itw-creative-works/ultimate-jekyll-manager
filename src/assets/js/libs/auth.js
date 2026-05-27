@@ -530,8 +530,9 @@ export default function () {
           formManager.showSuccess('Successfully signed in!');
           return;
         } catch (signInError) {
-          // Throw error for outer catch to handle
-          throw new Error('An account with this email already exists');
+          // Couldn't auto-sign-them-in — surface inline on the email field so
+          // the user sees exactly which input is the problem.
+          formManager.throwFieldErrors({ email: 'An account with this email already exists' });
         }
       }
 
@@ -540,6 +541,12 @@ export default function () {
       const blockingMessage = extractBlockingFunctionMessage(error);
       if (blockingMessage) {
         throw new Error(blockingMessage);
+      }
+
+      // Password-specific Firebase errors should land on the password field, not
+      // the form-level banner — gives the user a clear "fix this input" signal.
+      if (isPasswordError(error.code)) {
+        formManager.throwFieldErrors({ password: passwordErrorMessage(error) });
       }
 
       // Re-throw the error to be handled by the form handler
@@ -573,6 +580,27 @@ export default function () {
       if (blockingMessage) {
         throw new Error(blockingMessage);
       }
+
+      // Firebase intentionally collapses wrong-email and wrong-password into a
+      // single `auth/invalid-credential` to prevent email enumeration. Since we
+      // don't know which field is wrong, highlight both with a shared message.
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        formManager.throwFieldErrors({
+          email: 'Incorrect email or password',
+          password: 'Incorrect email or password',
+        });
+      }
+
+      // Password-format errors on the password field (e.g. missing).
+      if (isPasswordError(error.code)) {
+        formManager.throwFieldErrors({ password: passwordErrorMessage(error) });
+      }
+
+      // Bad email format → email field.
+      if (error.code === 'auth/invalid-email') {
+        formManager.throwFieldErrors({ email: 'Please enter a valid email address' });
+      }
+
       throw error;
     }
   }
@@ -792,6 +820,38 @@ export default function () {
         }
       });
     });
+  }
+
+  // Firebase password-related auth error codes — these belong on the password
+  // field, not the form-level error banner.
+  function isPasswordError(errorCode) {
+    return [
+      'auth/weak-password',
+      'auth/missing-password',
+      'auth/wrong-password',
+      'auth/password-does-not-meet-requirements',
+    ].includes(errorCode);
+  }
+
+  // Map a Firebase password error to a short, field-appropriate message.
+  function passwordErrorMessage(error) {
+    if (error?.code === 'auth/weak-password') {
+      return 'Password is too weak. Use at least 6 characters.';
+    }
+    if (error?.code === 'auth/missing-password') {
+      return 'Password is required';
+    }
+    if (error?.code === 'auth/wrong-password') {
+      return 'Incorrect password';
+    }
+    if (error?.code === 'auth/password-does-not-meet-requirements') {
+      // Firebase message looks like: "Firebase: Missing password requirements:
+      // [Password must contain at least 8 characters] (auth/...)."  Pull the
+      // bracketed list so the user sees the actual rule(s) they missed.
+      const match = error?.message?.match(/\[([^\]]+)\]/);
+      return match ? match[1] : 'Password does not meet the requirements';
+    }
+    return error?.message || 'Invalid password';
   }
 
   // Helper function to determine if an error is a user error

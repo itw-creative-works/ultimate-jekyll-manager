@@ -4,10 +4,10 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
 
 ### PAGE CONFIG ###
 features:
-  - title: "Secure Login"
+  - title: "Secure login"
     description: "Your data is protected with enterprise-grade security"
     icon: "shield-check"
-  - title: "Quick Access"
+  - title: "Quick access"
     description: "Get back to what matters most in seconds"
     icon: "clock"
   - title: "Multi-Device"
@@ -39,7 +39,7 @@ social_signin:
       <!-- Spinner -->
       {% capture initializing_spinner %}<span class="spinner-border spinner-border-sm me-2 form-initializing-spinner"></span>{% endcapture %}
 
-      <!-- Sign In Form -->
+      <!-- Sign in Form -->
       <form id="auth-form" autocomplete="on" novalidate onsubmit="return false">
         <!-- Hidden default submit button for Enter key -->
         <button type="submit" class="d-none" data-provider="email" aria-hidden="true" tabindex="-1"></button>
@@ -82,21 +82,22 @@ social_signin:
             </button>
           </div>
 
-          <a href="/reset" class="text-decoration-none small mt-1">Forgot password?</a>
         </div>
 
-        <button type="submit" class="btn btn-success _btn-lg w-100 mb-3" data-provider="email" disabled>
+        <button type="submit" class="btn btn-success _btn-lg w-100 mb-2" data-provider="email" disabled>
           {{ initializing_spinner }}
           {% uj_icon "arrow-right-to-bracket", "me-2" %}
-          <span class="button-text">Sign In</span>
+          <span class="button-text">Sign in</span>
         </button>
+
+        <a href="/reset" class="btn btn-outline-adaptive w-100 mb-3">
+          {% uj_icon "key", "me-2" %}
+          Recover account
+        </a>
       </form>
 
       <!-- Links -->
       <div class="text-center">
-        <!-- <p class="text-muted mb-2">
-          <a href="/reset" class="text-decoration-none small">Forgot password?</a>
-        </p> -->
         <p class="text-muted mb-0">
           Don't have an account yet?
           <a href="/signup" class="text-decoration-none fw-semibold">Sign up</a>

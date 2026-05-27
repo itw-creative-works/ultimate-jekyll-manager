@@ -55,13 +55,13 @@ sections:
     name: "Notifications"
     icon: "bell"
   - id: "api-keys"
-    name: "API Keys"
+    name: "API keys"
     icon: "key"
   - id: "data-request"
-    name: "Data Request"
+    name: "Data request"
     icon: "file-export"
   - id: "delete"
-    name: "Delete Account"
+    name: "Delete account"
     icon: "trash"
   - id: "refund"
     name: "Refund"
@@ -210,11 +210,11 @@ badges:
             {% endfor %}
           </ul>
 
-          <!-- Sign Out Button -->
+          <!-- Sign out Button -->
           <div class="mt-3 pt-3 border-top">
             <button class="btn btn-danger w-100 d-flex align-items-center justify-content-center auth-signout-btn">
               {% uj_icon "arrow-right-from-bracket", "me-2" %}
-              <span class="button-text">Sign Out</span>
+              <span class="button-text">Sign out</span>
             </button>
           </div>
         </div>
@@ -310,11 +310,11 @@ badges:
               <!-- Name Fields Row -->
               <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                  <label for="first-name-input" class="form-label small text-muted">First Name</label>
+                  <label for="first-name-input" class="form-label small text-muted">First name</label>
                   <input type="text" class="form-control" id="first-name-input" name="personal.name.first" autocomplete="given-name" placeholder="Enter first name">
                 </div>
                 <div class="col-md-6">
-                  <label for="last-name-input" class="form-label small text-muted">Last Name</label>
+                  <label for="last-name-input" class="form-label small text-muted">Last name</label>
                   <input type="text" class="form-control" id="last-name-input" name="personal.name.last" autocomplete="family-name" placeholder="Enter last name">
                 </div>
               </div>
@@ -763,7 +763,7 @@ badges:
               <div class="mt-3 d-grid d-sm-block">
                 <button type="submit" class="btn btn-primary">
                   {% uj_icon "floppy-disk", "me-2" %}
-                  <span class="button-text">Save Changes</span>
+                  <span class="button-text">Save changes</span>
                 </button>
               </div>
             </div>
@@ -1066,15 +1066,15 @@ badges:
             <div class="d-grid d-sm-flex gap-2">
               <button id="upgrade-plan-btn" class="btn btn-success plan-action-btn" data-wm-bind="@show billing.buttons.upgrade" hidden>
                 {% uj_icon "crown", "me-2" %}
-                <span class="button-text">Upgrade Plan</span>
+                <span class="button-text">Upgrade plan</span>
               </button>
               <button id="change-plan-btn" class="btn btn-outline-adaptive plan-action-btn" data-wm-bind="@show billing.buttons.change" hidden>
                 {% uj_icon "arrow-right-arrow-left", "me-2" %}
-                <span class="button-text">Change Plan</span>
+                <span class="button-text">Change plan</span>
               </button>
               <button id="manage-billing-btn" class="btn btn-primary plan-action-btn" data-wm-bind="@show billing.buttons.manage" hidden>
                 {% uj_icon "credit-card", "me-2" %}
-                <span class="button-text">Manage Billing</span>
+                <span class="button-text">Manage billing</span>
               </button>
             </div>
           </div>
@@ -1140,13 +1140,13 @@ badges:
                   <div class="col-12 col-md-6 order-md-2">
                     <button type="submit" class="btn btn-outline-adaptive w-100" id="cancel-subscription-btn">
                       {% uj_icon "ban", "fa-sm me-2" %}
-                      <span class="button-text">Cancel Subscription</span>
+                      <span class="button-text">Cancel subscription</span>
                     </button>
                   </div>
                   <div class="col-12 col-md-6 order-md-1">
                     <button type="button" class="btn btn-primary w-100" id="keep-plan-btn" data-bs-toggle="collapse" data-bs-target="#cancel-subscription-accordion">
                       {% uj_icon "circle-check", "fa-sm me-2" %}
-                      <span>Keep My Plan</span>
+                      <span>Keep my plan</span>
                     </button>
                   </div>
                 </div>
@@ -1233,7 +1233,7 @@ badges:
               <button class="btn btn-primary btn-sm" id="invite-team-member-btn">
                 {% uj_icon "user-plus", "me-2" %}
                 <span class="button-text">
-                  Invite<span class="d-none d-md-inline"> Team Member</span>
+                  Invite<span class="d-none d-md-inline"> team member</span>
                 </span>
               </button>
             </div>
@@ -1291,7 +1291,7 @@ badges:
                 <button type="submit" class="btn btn-outline-danger btn-sm" id="reset-api-key-btn">
                   {% uj_icon "rotate", "me-1" %}
                   <span class="button-text">
-                    Reset<span class="d-none d-md-inline"> API Key</span>
+                    Reset<span class="d-none d-md-inline"> API key</span>
                   </span>
                 </button>
               </form>
@@ -1378,7 +1378,7 @@ badges:
             <div class="card-body">
               <h5 class="card-title">
                 {% uj_icon "clock", "fa-lg me-2" %}
-                <span id="data-request-status-title">Request Status</span>
+                <span id="data-request-status-title">Request status</span>
               </h5>
               <p id="data-request-status-message" class="card-text text-muted"></p>
               <div id="data-request-download" class="d-none">
@@ -1441,13 +1441,13 @@ badges:
                     <div class="col-12 col-md-6 order-md-2">
                       <button type="submit" class="btn btn-outline-adaptive w-100" id="data-request-submit-btn">
                         {% uj_icon "file-export", "fa-sm me-2" %}
-                        <span class="button-text">Submit Data Request</span>
+                        <span class="button-text">Submit data request</span>
                       </button>
                     </div>
                     <div class="col-12 col-md-6 order-md-1">
                       <a href="/account" class="btn btn-primary w-100">
                         {% uj_icon "arrow-left", "fa-sm me-2" %}
-                        <span>Return to Profile</span>
+                        <span>Return to profile</span>
                       </a>
                     </div>
                   </div>
@@ -1544,13 +1544,13 @@ badges:
                   <div class="col-12 col-md-6 order-md-2">
                     <button type="submit" class="btn btn-outline-adaptive w-100" id="delete-account-btn">
                       {% uj_icon "trash", "fa-sm me-2" %}
-                      <span class="button-text">Delete My Account Permanently</span>
+                      <span class="button-text">Delete my account permanently</span>
                     </button>
                   </div>
                   <div class="col-12 col-md-6 order-md-1">
                     <a href="/account" class="btn btn-danger w-100" id="cancel-delete-btn">
                       {% uj_icon "arrow-left", "fa-sm me-2" %}
-                      <span>Return to Profile</span>
+                      <span>Return to profile</span>
                     </a>
                   </div>
                 </div>
@@ -1674,13 +1674,13 @@ badges:
                   <div class="col-12 col-md-6 order-md-2">
                     <button type="submit" class="btn btn-outline-adaptive w-100" id="refund-submit-btn">
                       {% uj_icon "rotate-left", "fa-sm me-2" %}
-                      <span class="button-text">Request Refund</span>
+                      <span class="button-text">Request refund</span>
                   </button>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
                   <a href="#billing" class="btn btn-primary w-100">
                     {% uj_icon "arrow-left", "fa-sm me-2" %}
-                    <span>Return to Billing</span>
+                    <span>Return to billing</span>
                   </a>
                 </div>
               </div>

@@ -11,7 +11,7 @@
       href: null,
       links: [
         {
-          label: 'About Us',
+          label: 'About us',
           href: '/about',
         },
         {
@@ -19,7 +19,7 @@
           href: '/pricing',
         },
         {
-          label: 'Contact Us',
+          label: 'Contact us',
           href: '/contact',
         },
         {
@@ -51,15 +51,15 @@
       href: null,
       links: [
         {
-          label: 'Sign Up',
+          label: 'Sign up',
           href: '/signup',
         },
         {
-          label: 'Sign In',
+          label: 'Sign in',
           href: '/signin',
         },
         {
-          label: 'My Account',
+          label: 'My account',
           href: '/account',
         },
       ],

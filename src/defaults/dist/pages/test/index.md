@@ -7,9 +7,9 @@ permalink: /test
 sitemap:
   include: false
 meta:
-  title: "Test Page"
+  title: "Test page"
   description: "This is a test page for the Ultimate Jekyll Manager."
-  breadcrumb: "Test Page"
+  breadcrumb: "Test page"
   index: false
 ---
 

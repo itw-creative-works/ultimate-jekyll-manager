@@ -24,14 +24,14 @@ downloads:
     - "Android"
     - "iOS"
   loading:
-    headline: "Detecting Platform"
+    headline: "Detecting platform"
     description: "Determining your operating system..."
-    button_text: "Please Wait"
+    button_text: "Please wait"
   coming_soon_mobile:
     headline: "Coming Soon to Mobile"
     description: "Enter your email below and we'll send you the desktop version download link."
   not_available:
-    headline: "Not Available Yet"
+    headline: "Not available yet"
     description: "{{ site.brand.name }} is not currently available for {{ platform.name }}. Please choose another platform."
   platforms:
     - id: "windows"
@@ -40,7 +40,7 @@ downloads:
       description: "Windows 10+"
       types:
         - type: "universal"
-          name: "Windows Installer"
+          name: "Windows installer"
           icon: "download"
     - id: "mac"
       name: "macOS"
@@ -48,7 +48,7 @@ downloads:
       description: "macOS 10.15+ (Apple Silicon & Intel)"
       types:
         - type: "universal"
-          name: "macOS Installer"
+          name: "macOS installer"
           icon: "download"
     - id: "linux"
       name: "Linux"
@@ -56,10 +56,10 @@ downloads:
       description: "Ubuntu 18.04+"
       types:
         - type: "debian"
-          name: "Debian Package"
+          name: "Debian package"
           icon: "download"
         - type: "snap"
-          name: "Snap Package"
+          name: "Snap package"
           icon: "download"
     - id: "android"
       name: "Android"
@@ -67,7 +67,7 @@ downloads:
       description: "Android 8.0+"
       types:
         - type: "universal"
-          name: "APK Download"
+          name: "APK download"
           icon: "download"
     - id: "ios"
       name: "iOS"
@@ -152,11 +152,11 @@ cta:
   headline_accent: "started?"
   subheadline: "Our support team is here 24/7 to help you with installation and setup"
   primary_button:
-    text: "Contact Support"
+    text: "Contact support"
     icon: "headset"
     href: "/contact"
   secondary_button:
-    text: "View Docs"
+    text: "View docs"
     icon: "book"
     href: "#docs"
 ---
@@ -350,7 +350,7 @@ cta:
                 {% if platform.id == "android" or platform.id == "ios" %}
                   <div class="mb-4 text-start">
                     <form id="mobile-email-form-{{ platform.id }}" class="mobile-email-form" data-platform="{{ platform.id }}" onsubmit="return false">
-                      <label for="email-{{ platform.id }}" class="form-label">Email Address</label>
+                      <label for="email-{{ platform.id }}" class="form-label">Email address</label>
                       <div class="row g-3">
                         <div class="col-12 col-md-8">
                           <input
@@ -366,7 +366,7 @@ cta:
                         <div class="col-12 col-md-4">
                           <button type="submit" class="btn btn-primary btn-md w-100">
                             {% uj_icon "paper-plane", "me-2" %}
-                            Send Link
+                            Send link
                           </button>
                         </div>
                       </div>
@@ -822,7 +822,7 @@ cta:
             <div class="steps-slideshow-slides">
             <div class="step-slide" data-step="1">
               <div class="step-number-badge">1</div>
-                <h5 class="step-title">Open Terminal</h5>
+                <h5 class="step-title">Open terminal</h5>
               <!-- <p class="text-muted mb-3">Press <strong>Ctrl+Alt+T</strong></p> -->
               <div class="instruction-step-container bg-body-tertiary rounded-4 p-4 d-flex align-items-center justify-content-center overflow-hidden position-relative">
                 <div class="d-flex flex-column align-items-center gap-2 position-relative">

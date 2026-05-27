@@ -595,6 +595,16 @@ export class FormManager {
     // Add invalid class to field
     $field.classList.add('is-invalid');
 
+    // Bootstrap requires `.has-validation` on the wrapping `.input-group` so the
+    // trailing element (e.g. a password-visibility toggle button) keeps its
+    // border-radius once a sibling `.invalid-feedback` is rendered. Without
+    // this, the appended feedback makes the trailing button no longer
+    // `:last-child` and Bootstrap strips its right corners to 0.
+    const $inputGroup = $field.closest('.input-group');
+    if ($inputGroup) {
+      $inputGroup.classList.add('has-validation');
+    }
+
     // Find or create feedback element
     let $feedback = $field.parentElement.querySelector('.invalid-feedback');
     if (!$feedback) {

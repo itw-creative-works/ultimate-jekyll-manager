@@ -7,9 +7,9 @@ permalink: /test/translation
 sitemap:
   include: false
 meta:
-  title: "Test Translation Page"
+  title: "Test translation page"
   description: "This is a test Translation page for the Ultimate Jekyll Manager."
-  breadcrumb: "Test Translation Page"
+  breadcrumb: "Test translation page"
   index: false
 
 ### WEB MANAGER CONFIG ###
@@ -47,7 +47,7 @@ By vising {{ brand }}, you agree to comply.
 ## This is an input
 <div class="form-group">
   <label for="test-email" class="visually-hidden">Your email</label>
-  <input type="email" id="test-email" name="email" class="form-control" placeholder="Your Email">
+  <input type="email" id="test-email" name="email" class="form-control" placeholder="Your email">
 </div>
 
 ## This button has a title

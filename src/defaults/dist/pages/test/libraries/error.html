@@ -7,9 +7,9 @@ permalink: /test/libraries/error
 sitemap:
   include: false
 meta:
-  title: "Error Test Page"
+  title: "Error test page"
   description: "Test page for demonstrating error handling"
-  breadcrumb: "Error Test"
+  breadcrumb: "Error test"
   index: false
 ---
 
@@ -17,11 +17,11 @@ meta:
 <div class="container">
   <div class="row">
     <div class="col-lg-8 mx-auto">
-      <h1 class="h2 mb-4">Error Test Page</h1>
+      <h1 class="h2 mb-4">Error test page</h1>
       <p class="lead mb-5">This page demonstrates different error handling scenarios.</p>
 
-      <!-- Trigger Auth Signin Error -->
-      <button id="trigger-error" class="btn btn-danger">Trigger Auth Signin Error</button>
+      <!-- Trigger auth signin error -->
+      <button id="trigger-error" class="btn btn-danger">Trigger auth signin error</button>
       <script>
         document.getElementById('trigger-error').addEventListener('click', function() {
           Manager.webManager.auth().signInWithEmailAndPassword('invalid@example.com', 'wrongpassword')

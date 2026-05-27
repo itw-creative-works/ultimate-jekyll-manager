@@ -24,7 +24,7 @@
           icon: 'list'
         },
         {
-          label: 'Create New',
+          label: 'Create new',
           href: '/admin/users/new',
           icon: 'plus'
         }

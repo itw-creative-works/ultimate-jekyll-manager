@@ -5,7 +5,8 @@
 // Input Groups
 // ============================================
 .input-group {
-  > .form-control {
+  > .form-control,
+  > .form-control.is-invalid {
     border-radius: $classy-radius-lg;
 
     &:not(:last-child) {
@@ -60,6 +61,21 @@
       border-bottom-left-radius: 0;
     }
   }
+
+  // When FormManager appends a sibling `.invalid-feedback` inside the
+  // input-group, the trailing button/input-group-text is no longer
+  // `:last-child` and the rules above strip its right border-radius.
+  // Bootstrap signals this layout with `.has-validation` on the input-group;
+  // restore the rounded right corners for the visually-last interactive
+  // element (the `:nth-last-child(2)` — i.e. the element before the feedback).
+  &.has-validation {
+    > .btn:nth-last-child(2),
+    > .input-group-text:nth-last-child(2),
+    > .form-control:nth-last-child(2) {
+      border-top-right-radius: $classy-radius-lg;
+      border-bottom-right-radius: $classy-radius-lg;
+    }
+  }
 }
 
 // ============================================
@@ -76,6 +92,14 @@
     border-color: $primary;
     box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
     background-color: var(--bs-body-bg);
+  }
+
+  // Keep danger styling visible when an invalid field is focused. Without this
+  // override the classy `:focus` rule above wins on specificity and the user
+  // sees the brand-blue ring instead of the red one Bootstrap normally applies.
+  &.is-invalid:focus {
+    border-color: $danger;
+    box-shadow: 0 0 0 0.25rem rgba($danger, 0.25);
   }
 
   // // Override Chrome/Safari autofill background color with subtle indicator

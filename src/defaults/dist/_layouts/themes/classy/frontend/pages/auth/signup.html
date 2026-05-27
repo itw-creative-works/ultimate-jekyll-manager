@@ -4,10 +4,10 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
 
 ### PAGE CONFIG ###
 benefits:
-  - title: "Free Forever"
+  - title: "Free forever"
     description: "Start with our free plan and upgrade when you're ready"
     icon: "gift"
-  - title: "No Setup Fees"
+  - title: "No setup fees"
     description: "Get started instantly with no hidden costs or setup fees"
     icon: "credit-card"
   - title: "24/7 Support"
@@ -39,7 +39,7 @@ social_signup:
       <!-- Spinner -->
       {% capture initializing_spinner %}<span class="spinner-border spinner-border-sm me-2 form-initializing-spinner"></span>{% endcapture %}
 
-      <!-- Sign Up Form -->
+      <!-- Sign up Form -->
       <form id="auth-form" autocomplete="on" novalidate onsubmit="return false">
         <!-- Hidden default submit button for Enter key -->
         <button type="submit" class="d-none" data-provider="email" aria-hidden="true" tabindex="-1"></button>
@@ -64,11 +64,11 @@ social_signup:
         </div>
         <!-- <div class="row g-3 mb-3 text-start">
           <div class="col-md-6">
-            <label for="firstName" class="form-label fw-semibold">First Name</label>
+            <label for="firstName" class="form-label fw-semibold">First name</label>
             <input type="text" class="form-control form-control-md" id="firstName" name="firstName" placeholder="John" autocomplete="given-name" required>
           </div>
           <div class="col-md-6">
-            <label for="lastName" class="form-label fw-semibold">Last Name</label>
+            <label for="lastName" class="form-label fw-semibold">Last name</label>
             <input type="text" class="form-control form-control-md" id="lastName" name="lastName" placeholder="Doe" autocomplete="family-name" required>
           </div>
         </div> -->
@@ -108,7 +108,7 @@ social_signup:
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="consent-marketing" name="consentMarketing">
             <label class="form-check-label small" for="consent-marketing">
-              I agree to receive product updates, newsletters, and marketing communications from {{ site.brand.name }}. You can unsubscribe anytime.
+              I agree to receive product updates, newsletters, and other marketing communications from {{ site.brand.name }}. You can unsubscribe anytime.
             </label>
           </div>
           <div id="consent-error" class="small mt-2 d-none" style="color: var(--bs-form-invalid-color, var(--bs-danger, #dc3545));"></div>
@@ -117,11 +117,11 @@ social_signup:
         <button type="submit" class="btn btn-success _btn-lg w-100 mb-3" data-provider="email" disabled>
           {{ initializing_spinner }}
           {% uj_icon "user-plus", "me-2" %}
-          <span class="button-text">Create Account</span>
+          <span class="button-text">Create account</span>
         </button>
       </form>
 
-      <!-- Sign In Link -->
+      <!-- Sign in Link -->
       <div class="text-center">
         <p class="text-muted mb-0">
           Already have an account?

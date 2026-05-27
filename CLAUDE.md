@@ -192,13 +192,13 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 ### Project & dev environment
 
 - [docs/project-structure.md](docs/project-structure.md) — UJM repo layout and consuming-project layout
-- [docs/local-development.md](docs/local-development.md) — browsersync URL, Firebase emulator connect, PurgeCSS safelist
+- [docs/local-development.md](docs/local-development.md) — browsersync URL, Firebase emulator connect, PurgeCSS safelist, log files (`logs/dev.log`, `logs/build.log`)
 - [docs/assets.md](docs/assets.md) — UJM vs consumer file layout, section config (nav/footer/account), frontmatter-driven page customization, webpack aliases, page module pattern
 
 ### Pages, layouts, content
 
 - [docs/layouts-and-pages.md](docs/layouts-and-pages.md) — page types, layout chain, `asset_path` frontmatter
-- [docs/images.md](docs/images.md) — `@post/` shortcut for blog post images, BEM admin/post image handling
+- [docs/images.md](docs/images.md) — `@post/` shortcut for blog post images, BEM admin/post image handling, imagemin pipeline + source-size constraints + `UJ_IMAGEMIN_REWRITE_SOURCES` cleanup flag
 - [docs/icons.md](docs/icons.md) — Font Awesome conventions, `{% uj_icon %}` vs prerendered icons in JS, size reference
 - [docs/seo.md](docs/seo.md) — Alternatives collection (competitor comparison pages) + Schema/JSON-LD (`SoftwareApplication`, `FAQPage`)
 

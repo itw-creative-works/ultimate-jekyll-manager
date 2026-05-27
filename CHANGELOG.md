@@ -15,6 +15,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.4.0] - 2026-05-27
+
+### Added
+
+- **`UJ_IMAGEMIN_REWRITE_SOURCES=true` flag** (opt-in, off by default) — when set, the `imagemin` gulp task scans every image scheduled for processing and rewrites in place any whose longest dimension exceeds 4096px. Uses `sharp` with `fit: 'inside'` (aspect-preserving), JPEG quality 80 / mozjpeg / progressive, PNG quality 80. Cache hashes for affected files are updated so the new content becomes the new cache key. Intended as a one-off cleanup for repos with pre-existing oversized source images that silently stall `gulp-responsive-modern`/`sharp`. See [docs/images.md](docs/images.md#cleanup-for-existing-oversized-sources-uj_imagemin_rewrite_sources).
+- **Log-file tee** (`src/utils/attach-log-file.js`): every line of stdout/stderr produced by the gulp pipeline is duplicated to `logs/dev.log` (during `npm start`) or `logs/build.log` (during `npm run build`) in the consumer project root. ANSI color codes are stripped from the file output; terminal output is unchanged. Files truncate fresh on each run. Skipped when `UJ_IS_SERVER=true` (CI/cloud) — no `logs/` directory is created in workspace contexts. Attached at the top of `src/gulp/main.js`. See [docs/local-development.md](docs/local-development.md#log-files).
+- **Pricing page: 7-day money-back guarantee badge** under the billing toggle and per-card on each paid plan; free plan shows "Upgrade any time" with a rocket icon.
+- **Pricing page: trial-aware CTA copy** — buttons now read "Get free trial" only when the plan's `trial.days > 0`, otherwise "Get started". Free plan stays "Get started". Avoids misleading users into thinking they need a trial for a free plan or that every paid plan offers one.
+- **Auth: field-level error rendering.** New `isPasswordError()` and `passwordErrorMessage()` helpers in `src/assets/js/libs/auth.js` route Firebase password errors (`auth/weak-password`, `auth/missing-password`, `auth/wrong-password`, `auth/password-does-not-meet-requirements`) onto the password input via `FormManager.throwFieldErrors()` instead of the form-level banner. Signin: `auth/invalid-credential` | `auth/wrong-password` | `auth/user-not-found` highlight both email + password with "Incorrect email or password" (Firebase intentionally collapses these to prevent email enumeration). `auth/invalid-email` highlights the email field. Signup: when the email already exists and auto-signin fails, the message lands inline on the email field rather than throwing a generic banner error.
+- **Dev-only consent-guard warning** in `src/assets/js/core/auth.js` `sendUserSignupMetadata` catch block: shows a `webManager.utilities().showNotification()` with the exact wall-clock time the consent guard will sign the user out (and remaining mm:ss) when the metadata POST fails. Wrapped in `/* @dev-only:start */` blocks so production builds strip it.
+
+### Changed
+
+- **Sentence-case copy normalization** across ~60 layouts, pages, and section configs. Examples: "Sign Out" → "Sign out", "API Keys" → "API keys", "Save Changes" → "Save changes", "Contact Us" → "Contact us", "Main Menu" → "Main menu", "All Items" → "All items", "Admin Panel" → "Admin panel", "Sign Up" → "Sign up". Touches frontend pages (account, auth, contact, download, extension, index, payment, pricing, team, etc.), blueprint admin/legal/portal pages, test pages, and nav/footer/sidebar/account JSON section configs.
+- **FormManager: `.has-validation` on input-group when a field is marked invalid.** Bootstrap requires this class on the wrapping `.input-group` so the trailing element (e.g. a password-visibility toggle) keeps its border-radius once a sibling `.invalid-feedback` is appended.
+- **Classy theme forms SCSS:** restored rounded right corners on `.input-group.has-validation > *:nth-last-child(2)` so the visually-last interactive element keeps its `$classy-radius-lg`. Also added `.form-control.is-invalid:focus` override to keep the danger (red) focus ring instead of the brand-blue ring the classy theme was applying.
+
+### Fixed
+
+- **`imagemin` gulp task race condition (build mode):** the task was declared `async function imagemin(complete)` and returned a stream directly. Async functions wrap their return value in a Promise, so gulp resolved the task on the (already-resolved) Promise instead of waiting for the stream's `'finish'` event. Downstream tasks (jekyll, audit, minifyHtml) then started while imagemin was still writing to `dist/`, and jekyll would snapshot `_site/` before late images landed. Builds reported success while silently shipping a partial site. Fixed by explicitly `await`ing stream completion via `new Promise((resolve, reject) => { ... .on('finish', resolve).on('error', reject) })` before moving to the cache-push step, then `return complete()`. The wait only ever runs in build mode (dev mode short-circuits earlier in the task), so `npm start` startup is unaffected.
+- **Oversized source images silently failing to land in `_site/`.** Source images with very large dimensions (10000px+ longest side) decode into hundreds of MB per worker in `sharp`, which can stall the `gulp-responsive-modern` stream so quietly that gulp reports the task complete. The build appears successful but some images never reach `_site/`. Documented the constraint and the new `UJ_IMAGEMIN_REWRITE_SOURCES` cleanup flag in [docs/images.md](docs/images.md). Recommended fix is to cap images at the upload step; the rewrite flag is a fallback for cleaning up existing repos.
+
+---
 ## [1.3.12] - 2026-05-25
 
 ### Fixed

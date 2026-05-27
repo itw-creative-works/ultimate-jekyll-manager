@@ -320,6 +320,20 @@ async function sendUserSignupMetadata(user) {
   } catch (error) {
     console.error('[Auth] Error sending user metadata:', error);
     // Don't throw - we don't want to block the signup flow
+
+    /* @dev-only:start */
+    {
+      const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
+      const msRemaining = Math.max(0, SIGNUP_MAX_AGE - accountAge);
+      const signoutAt = new Date(Date.now() + msRemaining).toLocaleTimeString();
+      const minutes = Math.floor(msRemaining / 1000 / 60);
+      const seconds = Math.floor((msRemaining / 1000) % 60);
+      webManager.utilities().showNotification(
+        `[DEV] Failed to send signup metadata. User will be signed out by consent guard at ${signoutAt} (in ${minutes}m ${seconds}s) unless retried.`,
+        { type: 'warning', timeout: 0 }
+      );
+    }
+    /* @dev-only:end */
   }
 }
 

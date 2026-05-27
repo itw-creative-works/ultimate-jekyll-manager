@@ -9,7 +9,7 @@ sitemap:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Firestore Version Test</title>
+  <title>Firestore version test</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: monospace; padding: 16px; font-size: 13px; background: #111; color: #eee; }
@@ -192,7 +192,7 @@ sitemap:
         document.getElementById('status').textContent = 'All tests complete.';
         const $summary = document.getElementById('summary');
         $summary.style.display = 'block';
-        $summary.innerHTML = '<h2 style="margin-bottom:8px">Results Summary</h2>' +
+        $summary.innerHTML = '<h2 style="margin-bottom:8px">Results summary</h2>' +
           Object.entries(results).map(([k, v]) =>
             `<div style="color:${v === 'PASS' ? '#0f0' : '#f00'}">${v}: ${k}</div>`
           ).join('');

@@ -42,13 +42,13 @@ alternative:
           value: "Full REST API"
         theirs:
           value: "Limited"
-      - name: "Custom Branding"
+      - name: "Custom branding"
         icon: "palette"
         ours:
           value: true
         theirs:
           value: false
-      - name: "Priority Support"
+      - name: "Priority support"
         icon: "headset"
         ours:
           value: "24/7"

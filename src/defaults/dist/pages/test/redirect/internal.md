@@ -7,9 +7,9 @@ permalink: /test/redirect/internal
 sitemap:
   include: false
 meta:
-  title: "Internal Redirect Test Page"
+  title: "Internal redirect test page"
   description: "This is a test Internal Redirect page for the Ultimate Jekyll Manager."
-  breadcrumb: "Internal Redirect Test Page"
+  breadcrumb: "Internal redirect test page"
   index: false
 
 ### REDIRECT PAGES ###

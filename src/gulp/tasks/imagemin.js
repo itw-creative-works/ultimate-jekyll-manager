@@ -4,6 +4,7 @@ const logger = Manager.logger('imagemin');
 const { src, dest, watch, series } = require('gulp');
 const glob = require('glob').globSync;
 const responsive = require('gulp-responsive-modern');
+const sharp = require('sharp');
 const path = require('path');
 const jetpack = require('fs-jetpack');
 const GitHubCache = require('./utils/github-cache');
@@ -15,6 +16,8 @@ const ujmConfig = Manager.getUJMConfig();
 // Settings
 const CACHE_DIR = '.temp/cache/imagemin';
 const CACHE_BRANCH = 'cache-uj-imagemin';
+const MAX_SOURCE_DIMENSION = 4096;
+const REWRITE_QUALITY = 80;
 
 // Variables
 let githubCache;
@@ -120,6 +123,15 @@ async function imagemin(complete) {
     githubCache.cleanDeletedFromMetadata(meta, files, rootPathProject);
   }
 
+  // Optionally rewrite oversized source images on disk (opt-in via UJ_IMAGEMIN_REWRITE_SOURCES=true).
+  // Caps longest dimension at MAX_SOURCE_DIMENSION so gulp-responsive-modern + sharp don't stall
+  // on huge inputs. Runs BEFORE determineFilesToProcess so cached-but-oversized images get
+  // rewritten too; the new on-disk content hashes differently than the stored meta hash, so
+  // determineFilesToProcess naturally picks the rewritten image up for re-optimization.
+  if (process.env.UJ_IMAGEMIN_REWRITE_SOURCES === 'true') {
+    await rewriteOversizedSources(files);
+  }
+
   // Determine what needs processing
   const { filesToProcess, validCachePaths } = await determineFilesToProcess(files, meta, githubCache, stats);
 
@@ -159,87 +171,101 @@ async function imagemin(complete) {
   // Progress counter
   let processedOutputs = 0;
 
-  // Process images
-  return src(filesToProcess, { base: 'src/assets/images' })
-    .pipe(responsive({
-      [`**/${RESPONSIVE_GLOB}`]: responsiveConfigs
-    }, {
-      quality: 80,
-      progressive: true,
-      withMetadata: false,
-      withoutEnlargement: false,
-      skipOnEnlargement: false,
-      errorOnUnusedImage: false,
-      passThroughUnused: true,
-    }))
-    .pipe(dest(output))
-    .on('data', (file) => {
-      // Progress tracking
-      processedOutputs++;
-      const relativePath = path.relative(path.join(rootPathProject, output), file.path);
-      logger.log(`🖼️  ${processedOutputs}/${expectedOutputs}: ${relativePath}`);
+  // Process images.
+  //
+  // CRITICAL: this function is `async`, which means returning a stream from it yields a
+  // Promise<Stream> to gulp — gulp resolves the task immediately on the Promise rather than
+  // waiting for the stream's 'finish' event. Downstream tasks (jekyll, audit, etc.) then start
+  // before imagemin has actually written its outputs to disk, and the build "succeeds" while
+  // silently shipping a partial _site/. We must explicitly await stream completion + cache push
+  // before returning, so gulp sees the real completion.
+  //
+  // This await only ever runs in build mode — dev mode short-circuits via `!Manager.isBuildMode()`
+  // above (so `npm start` never blocks on this), letting BrowserSync reload as images land later.
+  await new Promise((resolve, reject) => {
+    src(filesToProcess, { base: 'src/assets/images' })
+      .pipe(responsive({
+        [`**/${RESPONSIVE_GLOB}`]: responsiveConfigs
+      }, {
+        quality: 80,
+        progressive: true,
+        withMetadata: false,
+        withoutEnlargement: false,
+        skipOnEnlargement: false,
+        errorOnUnusedImage: false,
+        passThroughUnused: true,
+      }))
+      .on('error', reject)
+      .pipe(dest(output))
+      .on('error', reject)
+      .on('data', (file) => {
+        // Progress tracking
+        processedOutputs++;
+        const relativePath = path.relative(path.join(rootPathProject, output), file.path);
+        logger.log(`🖼️  ${processedOutputs}/${expectedOutputs}: ${relativePath}`);
 
-      // Save to cache
-      const cachePath = path.join(CACHE_DIR, 'images', relativePath);
-      jetpack.copy(file.path, cachePath, { overwrite: true });
+        // Save to cache
+        const cachePath = path.join(CACHE_DIR, 'images', relativePath);
+        jetpack.copy(file.path, cachePath, { overwrite: true });
 
-      // Track size after optimization
-      const fileStats = jetpack.inspect(file.path);
-      if (fileStats) {
-        stats.sizeAfter += fileStats.size;
+        // Track size after optimization
+        const fileStats = jetpack.inspect(file.path);
+        if (fileStats) {
+          stats.sizeAfter += fileStats.size;
+        }
+      })
+      .on('finish', resolve);
+  });
+
+  // Calculate final statistics
+  stats.savedBytes = stats.sizeBefore - stats.sizeAfter;
+
+  // Calculate timing
+  const endTime = Date.now();
+  const elapsedMs = endTime - startTime;
+
+  // Log statistics
+  logImageStatistics(stats, startTime, endTime);
+
+  // Save metadata and push cache
+  if (githubCache && githubCache.hasCredentials()) {
+    githubCache.saveMetadata(metaPath, meta);
+
+    logger.log(`📊 Updating cache with ${stats.optimized} new optimizations and README stats...`);
+
+    // Collect all cache files to push (metadata will be auto-included)
+    const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
+
+    // Push to GitHub with atomic replacement
+    await githubCache.pushBranch(allCacheFiles, {
+      validFiles: validCachePaths,
+      stats: {
+        timestamp: new Date().toISOString(),
+        sourceCount: files.length,
+        cachedCount: allCacheFiles.length - 1,
+        processedNow: stats.optimized,
+        fromCache: stats.fromCache,
+        newlyProcessed: stats.optimized,
+        timing: {
+          startTime,
+          endTime,
+          elapsedMs
+        },
+        imageStats: {
+          totalImages: stats.totalImages,
+          optimized: stats.optimized,
+          skipped: stats.fromCache,
+          totalSizeBefore: stats.sizeBefore,
+          totalSizeAfter: stats.sizeAfter,
+          totalSaved: stats.savedBytes
+        },
+        details: `Optimized ${stats.optimized} images, ${stats.fromCache} from cache\n\n### Files from cache:\n${stats.cachedFiles.length > 0 ? stats.cachedFiles.map(f => `- ${f}`).join('\n') : 'None'}\n\n### Newly optimized files:\n${stats.optimizedFiles.length > 0 ? stats.optimizedFiles.map(f => `- ${f}`).join('\n') : 'None'}`
       }
-    })
-    .on('finish', async () => {
-      // Calculate final statistics
-      stats.savedBytes = stats.sizeBefore - stats.sizeAfter;
-
-      // Calculate timing
-      const endTime = Date.now();
-      const elapsedMs = endTime - startTime;
-
-      // Log statistics
-      logImageStatistics(stats, startTime, endTime);
-
-      // Save metadata and push cache
-      if (githubCache && githubCache.hasCredentials()) {
-        githubCache.saveMetadata(metaPath, meta);
-
-        logger.log(`📊 Updating cache with ${stats.optimized} new optimizations and README stats...`);
-
-        // Collect all cache files to push (metadata will be auto-included)
-        const allCacheFiles = glob(path.join(CACHE_DIR, '**/*'), { nodir: true });
-
-        // Push to GitHub with atomic replacement
-        await githubCache.pushBranch(allCacheFiles, {
-          validFiles: validCachePaths,
-          stats: {
-            timestamp: new Date().toISOString(),
-            sourceCount: files.length,
-            cachedCount: allCacheFiles.length - 1,
-            processedNow: stats.optimized,
-            fromCache: stats.fromCache,
-            newlyProcessed: stats.optimized,
-            timing: {
-              startTime,
-              endTime,
-              elapsedMs
-            },
-            imageStats: {
-              totalImages: stats.totalImages,
-              optimized: stats.optimized,
-              skipped: stats.fromCache,
-              totalSizeBefore: stats.sizeBefore,
-              totalSizeAfter: stats.sizeAfter,
-              totalSaved: stats.savedBytes
-            },
-            details: `Optimized ${stats.optimized} images, ${stats.fromCache} from cache\n\n### Files from cache:\n${stats.cachedFiles.length > 0 ? stats.cachedFiles.map(f => `- ${f}`).join('\n') : 'None'}\n\n### Newly optimized files:\n${stats.optimizedFiles.length > 0 ? stats.optimizedFiles.map(f => `- ${f}`).join('\n') : 'None'}`
-          }
-        });
-      }
-
-      logger.log('✅ Finished!');
-      return complete();
     });
+  }
+
+  logger.log('✅ Finished!');
+  return complete();
 }
 
 // Watcher task
@@ -272,6 +298,61 @@ module.exports = series(
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+// Rewrite oversized source images in place, capping longest dimension at MAX_SOURCE_DIMENSION.
+// Only affects files whose decoded longest side exceeds the cap. Cache invalidation is implicit:
+// the new content hashes differently than the previously-cached entry, so determineFilesToProcess
+// will pick affected files up for re-optimization on its own.
+async function rewriteOversizedSources(files) {
+  const responsiveFiles = files.filter(f => RESPONSIVE_EXTENSIONS.has(path.extname(f).slice(1).toLowerCase()));
+  if (responsiveFiles.length === 0) {
+    return;
+  }
+
+  logger.log(`🔍 Checking ${responsiveFiles.length} source images for oversize (>${MAX_SOURCE_DIMENSION}px longest side)...`);
+
+  let rewritten = 0;
+  for (const file of responsiveFiles) {
+    const metadata = await sharp(file).metadata();
+    const longest = Math.max(metadata.width || 0, metadata.height || 0);
+
+    if (longest <= MAX_SOURCE_DIMENSION) {
+      continue;
+    }
+
+    const ext = path.extname(file).slice(1).toLowerCase();
+    const sizeBefore = jetpack.inspect(file)?.size || 0;
+
+    // Resize, encode to a buffer (sharp can't write back to its own input file directly), then overwrite.
+    const pipeline = sharp(file).resize({
+      width: MAX_SOURCE_DIMENSION,
+      height: MAX_SOURCE_DIMENSION,
+      fit: 'inside',
+      withoutEnlargement: true,
+    });
+
+    const buffer = ext === 'png'
+      ? await pipeline.png({ quality: REWRITE_QUALITY }).toBuffer()
+      : await pipeline.jpeg({ quality: REWRITE_QUALITY, progressive: true, mozjpeg: true }).toBuffer();
+
+    jetpack.write(file, buffer);
+    const sizeAfter = buffer.length;
+
+    // No cache bookkeeping needed: the rewritten file has new content, so the next
+    // determineFilesToProcess() call computes a different hash than the stored meta hash and
+    // naturally treats this image as needing reprocessing. Stored meta will be overwritten
+    // with the new hash when determineFilesToProcess() runs.
+
+    rewritten++;
+    logger.log(`✂️  Rewrote ${path.relative(rootPathProject, file)}: ${metadata.width}x${metadata.height} → max ${MAX_SOURCE_DIMENSION}px, ${formatBytes(sizeBefore)} → ${formatBytes(sizeAfter)}`);
+  }
+
+  if (rewritten === 0) {
+    logger.log(`✅ No oversized sources found (all within ${MAX_SOURCE_DIMENSION}px)`);
+  } else {
+    logger.log(`✂️  Rewrote ${rewritten} oversized source image(s)`);
+  }
+}
 
 // Build responsive configurations from PICTURE_SIZES
 function getResponsiveConfigs() {

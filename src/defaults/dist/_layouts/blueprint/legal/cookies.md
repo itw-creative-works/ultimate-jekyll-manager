@@ -25,7 +25,7 @@ web_manager:
 </p>
 
 <p>
-  <strong>What Are Cookies</strong>
+  <strong>What are cookies</strong>
 </p>
 
 <p>
@@ -38,7 +38,7 @@ web_manager:
 </p>
 
 <p>
-  <strong>How We Use Cookies</strong>
+  <strong>How we use cookies</strong>
 </p>
 
 <p>
@@ -47,7 +47,7 @@ web_manager:
   </p>
 
 <p>
-  <strong>Disabling Cookies</strong>
+  <strong>Disabling cookies</strong>
 </p>
 
 <p>
@@ -57,7 +57,7 @@ web_manager:
 
 
 <p>
-  <strong>The Cookies We Set</strong>
+  <strong>The cookies we set</strong>
 </p>
 
 <ul>
@@ -133,7 +133,7 @@ web_manager:
 </ul>
 
 <p>
-  <strong>Third Party Cookies</strong>
+  <strong>Third party cookies</strong>
 </p>
 
 <p>
@@ -191,7 +191,7 @@ web_manager:
 {{ content | uj_content_format }}
 
 <p>
-  <strong>More Information</strong>
+  <strong>More information</strong>
 </p>
 
 <p>

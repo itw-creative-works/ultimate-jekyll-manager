@@ -12,7 +12,7 @@
     },
     {
       header: true,
-      label: 'Main Menu'
+      label: 'Main menu'
     },
     // {
     //   label: 'Analytics',
@@ -25,12 +25,12 @@
       icon: 'folder',
       dropdown: [
         {
-          label: 'All Items',
+          label: 'All items',
           href: '/dashboard/items',
           icon: 'list'
         },
         {
-          label: 'Create New',
+          label: 'Create new',
           href: '/dashboard/items/new',
           icon: 'plus'
         }

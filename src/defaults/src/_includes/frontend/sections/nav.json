@@ -41,7 +41,7 @@
   ],
   actions: [
     {
-      label: 'Sign Up',
+      label: 'Sign up',
       href: '/signup',
       class: 'btn-adaptive',
       icon: 'user-plus',

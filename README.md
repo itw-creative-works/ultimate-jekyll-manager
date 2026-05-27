@@ -113,6 +113,8 @@ npm start -- --all-posts
 ### Other ENV variables
 ```bash
 UJ_PURGECSS=true # Enables PurgeCSS to remove unused CSS (normally only happens in production builds)
+UJ_IMAGEMIN_CACHE=false # Disables the GitHub-backed imagemin cache (forces local processing)
+UJ_IMAGEMIN_REWRITE_SOURCES=true # One-off cleanup: shrinks oversized source images (>4096px) in place. See docs/images.md
 ```
 
 ## Running Specific Tasks
@@ -167,6 +169,8 @@ The imagemin task will:
 - Generate multiple sizes (1024px, 425px) and WebP formats
 - Cache processed images in `cache-imagemin` branch (when using GitHub cache)
 - Skip already processed images on subsequent runs
+
+**Keep sources reasonably sized.** Source images larger than ~4096px on the longest side can stall `sharp`/`gulp-responsive-modern` in a way gulp can't detect, causing them to silently fail to land in `_site/`. Cap images at the upload step where possible. For one-off cleanup of an existing repo, run with `UJ_IMAGEMIN_REWRITE_SOURCES=true npm run build` — see [docs/images.md](docs/images.md#cleanup-for-existing-oversized-sources-uj_imagemin_rewrite_sources) for details.
 
 <!-- Developing -->
 ## 🛠 Developing

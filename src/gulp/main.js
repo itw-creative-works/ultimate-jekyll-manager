@@ -1,10 +1,15 @@
 // Libraries
 const Manager = new (require('../build.js'));
+const attachLogFile = require('../utils/attach-log-file.js');
 const logger = Manager.logger('main');
 const argv = Manager.getArguments();
 const { series, parallel } = require('gulp');
 const path = require('path');
 const glob = require('glob').globSync;
+
+// Tee stdout/stderr to logs/<name>.log in the consumer project. Skipped on UJ_IS_SERVER.
+// build.log for production builds (UJ_BUILD_MODE=true), dev.log for everything else.
+attachLogFile(Manager.isBuildMode() ? 'build' : 'dev');
 
 // Load package
 const package = Manager.getPackage('main');
