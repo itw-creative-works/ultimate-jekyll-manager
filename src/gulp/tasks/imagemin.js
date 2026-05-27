@@ -25,8 +25,12 @@ let githubCache;
 // Supported image extensions
 const ALL_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
 const RESPONSIVE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
-const ALL_IMAGE_GLOB = `*.{${ALL_IMAGE_EXTENSIONS.join(',')}}`;
-const RESPONSIVE_GLOB = `*.{${[...RESPONSIVE_EXTENSIONS].join(',')}}`;
+// Globs include upper- and lower-case variants so micromatch (used by gulp-responsive-modern)
+// matches files like IMG_3119.JPG. micromatch is strictly case-sensitive even on case-insensitive
+// filesystems, so we expand each extension to both cases rather than relying on a nocase flag.
+const expandCases = (exts) => exts.flatMap((ext) => [ext, ext.toUpperCase()]);
+const ALL_IMAGE_GLOB = `*.{${expandCases(ALL_IMAGE_EXTENSIONS).join(',')}}`;
+const RESPONSIVE_GLOB = `*.{${expandCases([...RESPONSIVE_EXTENSIONS]).join(',')}}`;
 
 // Glob
 const input = [

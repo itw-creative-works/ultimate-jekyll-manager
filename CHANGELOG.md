@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.4.2] - 2026-05-27
+
+### Fixed
+
+- **Imagemin: uppercase image extensions (e.g. `IMG_3119.JPG`) no longer break the responsive build.** `gulp-responsive-modern` uses micromatch internally, which is strictly case-sensitive regardless of filesystem. On macOS APFS, gulp's `src()` would discover the file and count it toward expected outputs, but the lowercase-only `**/*.{jpg,jpeg,png}` pattern wouldn't match — producing zero outputs and erroring with "Available images do not match the following config". [src/gulp/tasks/imagemin.js](src/gulp/tasks/imagemin.js) now expands `ALL_IMAGE_GLOB` and `RESPONSIVE_GLOB` to include uppercase variants so consumers don't need to rename camera/phone files.
+
+---
 ## [1.4.1] - 2026-05-27
 
 ### Changed
