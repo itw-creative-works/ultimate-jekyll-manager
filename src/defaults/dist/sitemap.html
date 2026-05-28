@@ -54,7 +54,7 @@ web_manager:
   {%- endif -%}
 
   {% assign url_parts = page.url | split: '/' %}
-  {% assign section_name = "Root Pages" %}
+  {% assign section_name = "Root pages" %}
 
   {% if url_parts.size > 2 %}
     {% assign section_name = url_parts[1] | replace: '-', ' ' | replace: '_', ' ' | capitalize %}
@@ -104,7 +104,7 @@ web_manager:
               {%- endif -%}
 
               {% assign url_parts = page.url | split: '/' %}
-              {% assign page_section = "Root Pages" %}
+              {% assign page_section = "Root pages" %}
 
               {% if url_parts.size > 2 %}
                 {% assign page_section = url_parts[1] | replace: '-', ' ' | replace: '_', ' ' | capitalize %}

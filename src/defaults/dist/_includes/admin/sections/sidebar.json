@@ -19,7 +19,7 @@
       icon: 'users',
       dropdown: [
         {
-          label: 'All Users',
+          label: 'All users',
           href: '/admin/users',
           icon: 'list'
         },
@@ -46,7 +46,7 @@
     },
     {
       header: true,
-      label: 'External Tools'
+      label: 'External tools'
     },
     {
       label: 'Stackblitz',

@@ -18,25 +18,25 @@ alternative:
 
   comparison:
     features:
-      - name: "Free Plan"
+      - name: "Free plan"
         icon: "gift"
         ours:
           value: true
         theirs:
           value: true
-      - name: "AI-Powered Features"
+      - name: "AI-powered features"
         icon: "sparkles"
         ours:
           value: "Advanced"
         theirs:
           value: "Basic"
-      - name: "Real-time Collaboration"
+      - name: "Real-time collaboration"
         icon: "users"
         ours:
           value: true
         theirs:
           value: false
-      - name: "API Access"
+      - name: "API access"
         icon: "code"
         ours:
           value: "Full REST API"
@@ -60,13 +60,13 @@ alternative:
           value: "200+"
         theirs:
           value: "50+"
-      - name: "Mobile App"
+      - name: "Mobile app"
         icon: "mobile"
         ours:
           value: true
         theirs:
           value: true
-      - name: "Export Formats"
+      - name: "Export formats"
         icon: "download"
         ours:
           value: "PDF, CSV, JSON"

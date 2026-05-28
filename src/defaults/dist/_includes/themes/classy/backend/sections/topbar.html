@@ -36,7 +36,7 @@
           {% capture action_attributes %}{% if action.attributes %}{% for attr in action.attributes %} {{ attr[0] }}="{{ attr[1] }}"{% endfor %}{% endif %}{% endcapture %}
           <div class="dropdown">
             <button class="btn btn-link position-relative p-2" type="button" data-bs-toggle="dropdown" {{ action_attributes }} aria-expanded="false">
-              {% uj_icon action.icon | default: "bell", "fa-lg text-body" %}
+              {% uj_icon action.icon, "fa-lg text-body" %}
               {% if action.badge %}
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill {{ action.badge.class | default: 'bg-danger' }}">
                   {{ action.badge.text }}

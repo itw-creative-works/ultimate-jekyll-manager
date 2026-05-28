@@ -1,9 +1,6 @@
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import webManager from 'web-manager';
 
-// Constants
-const SIGNUP_MAX_AGE = 5 * 60 * 1000;
-
 // Enforce page-load consent guard. When true, any authenticated user whose doc has
 // consent.legal.status !== 'granted' is silently signed out. Keep FALSE until the
 // legacy user migration runs (sets all existing docs to status='granted',
@@ -81,7 +78,7 @@ export default function () {
         // by the on-create auth event). sendUserSignupMetadata is what flips it
         // to 'granted' with the captured consent payload. If we gate first, every
         // fresh signup would be signed out before consent ever lands.
-        await sendUserSignupMetadata(user);
+        await sendUserSignupMetadata(state.account);
 
         // Consent guard: if the user is authenticated but their account doc shows
         // no legal consent on record, they're an orphan from a reversed Google signup
@@ -89,16 +86,15 @@ export default function () {
         // user knows what happened.
         //
         // Gated by ENFORCE_CONSENT_GUARD (off until the legacy-user migration runs).
-        // Also skipped for accounts younger than SIGNUP_MAX_AGE — sendUserSignupMetadata
-        // above is responsible for the consent write on that path, but if it failed
-        // (network error, server 500, etc.) the guard would otherwise lock the user
-        // out forever. The 5min grace window lets a retry / refresh recover; after
-        // that, the doc legitimately has no legal consent and the guard fires.
+        // Only fires once signup has been processed — sendUserSignupMetadata above is what
+        // writes consent, and it runs whenever flags.signupProcessed is false. If signup
+        // hasn't been processed yet (or just failed and will retry next load), we must NOT
+        // sign the user out; a processed doc with no legal consent is a genuine orphan
+        // (e.g. a reversed Google signup that failed to delete cleanly).
         if (ENFORCE_CONSENT_GUARD) {
-          const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
-          const isFreshAccount = accountAge < SIGNUP_MAX_AGE;
+          const signupProcessed = state.account?.flags?.signupProcessed === true;
           const legalStatus = state.account?.consent?.legal?.status;
-          if (!isFreshAccount && legalStatus && legalStatus !== 'granted') {
+          if (signupProcessed && legalStatus && legalStatus !== 'granted') {
             console.warn('[Auth] Signing out user with no legal consent on record');
             await webManager.auth().signOut();
             webManager.utilities().showNotification(
@@ -260,7 +256,7 @@ function setAnalyticsUserId(user) {
 }
 
 // Send user metadata to server (affiliate, UTM params, etc.)
-async function sendUserSignupMetadata(user) {
+async function sendUserSignupMetadata(account) {
   try {
     // Skip on auth pages to avoid blocking redirect (metadata will be sent on destination page)
     const pagePath = document.documentElement.getAttribute('data-page-path');
@@ -269,20 +265,17 @@ async function sendUserSignupMetadata(user) {
       return;
     }
 
-    // Check if this is a new user account (created in last X minutes)
-    const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
-    const signupProcessed = webManager.storage().get('flags.signupProcessed', null) === user.uid;
+    // The user doc's flags.signupProcessed is the single source of truth. We have the full
+    // account doc on every page load, so gate on it directly — no account-age window, no
+    // client-only localStorage flag. Fire whenever the doc shows signup is unprocessed; the
+    // server is idempotent and rejects if it was already processed.
+    const signupProcessed = account?.flags?.signupProcessed === true;
 
     /* @dev-only:start */
-    {
-      // Log account age for debugging
-      const ageInMinutes = Math.floor(accountAge / 1000 / 60);
-      console.log('[Auth] Account age:', ageInMinutes, 'minutes, signupProcessed:', signupProcessed);
-    }
+    console.log('[Auth] signupProcessed:', signupProcessed);
     /* @dev-only:end */
 
-    // Only proceed if account is new and we haven't sent signup metadata yet
-    if (accountAge >= SIGNUP_MAX_AGE || signupProcessed) {
+    if (signupProcessed) {
       return;
     }
 
@@ -312,27 +305,19 @@ async function sendUserSignupMetadata(user) {
       body: payload,
     });
 
-    // Log
+    // Log — the server set flags.signupProcessed on the doc, so the next page load's
+    // state.account reflects it and this won't fire again. No client-side flag needed.
     console.log('[Auth] User metadata sent successfully:', response);
-
-    // Mark signup as sent for this user (keep the attribution data for reference)
-    webManager.storage().set('flags.signupProcessed', user.uid);
   } catch (error) {
     console.error('[Auth] Error sending user metadata:', error);
-    // Don't throw - we don't want to block the signup flow
+    // Don't throw - we don't want to block the signup flow. The doc still shows
+    // signupProcessed=false, so a refresh / next page load retries automatically.
 
     /* @dev-only:start */
-    {
-      const accountAge = Date.now() - new Date(user.metadata.creationTime).getTime();
-      const msRemaining = Math.max(0, SIGNUP_MAX_AGE - accountAge);
-      const signoutAt = new Date(Date.now() + msRemaining).toLocaleTimeString();
-      const minutes = Math.floor(msRemaining / 1000 / 60);
-      const seconds = Math.floor((msRemaining / 1000) % 60);
-      webManager.utilities().showNotification(
-        `[DEV] Failed to send signup metadata. User will be signed out by consent guard at ${signoutAt} (in ${minutes}m ${seconds}s) unless retried.`,
-        { type: 'warning', timeout: 0 }
-      );
-    }
+    webManager.utilities().showNotification(
+      `[DEV] Failed to send signup metadata. Will retry on next page load (flags.signupProcessed is still false).`,
+      { type: 'warning', timeout: 0 }
+    );
     /* @dev-only:end */
   }
 }

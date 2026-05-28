@@ -7,9 +7,9 @@ permalink: /test/libraries/ads
 sitemap:
   include: false
 meta:
-  title: "AdSense Test Page"
+  title: "AdSense test page"
   description: "Test page for demonstrating AdSense ad units"
-  breadcrumb: "AdSense Test"
+  breadcrumb: "AdSense test"
   index: false
 ---
 
@@ -17,12 +17,12 @@ meta:
 <div class="container">
   <div class="row">
     <div class="col-lg-8 mx-auto">
-      <h1 class="h2 mb-4">AdSense Test Page</h1>
+      <h1 class="h2 mb-4">AdSense test page</h1>
       <p class="lead mb-5">This page demonstrates different AdSense ad unit types and lazy loading behavior.</p>
 
       <!-- Display Ad -->
       <section>
-        <h2 class="h4 mb-3">1. Display Ad</h2>
+        <h2 class="h4 mb-3">1. Display ad</h2>
         {% include /modules/adunits/adsense.html type="display" %}
       </section>
 
@@ -30,7 +30,7 @@ meta:
 
       <!-- In-Article Ad -->
       <section>
-        <h2 class="h4 mb-3">2. In-Article Ad</h2>
+        <h2 class="h4 mb-3">2. In-article ad</h2>
         {% include /modules/adunits/adsense.html type="in-article" %}
       </section>
 
@@ -38,7 +38,7 @@ meta:
 
       <!-- In-Feed Ad (Image Above) -->
       <section>
-        <h2 class="h4 mb-3">3. In-Feed Ad (Image Above)</h2>
+        <h2 class="h4 mb-3">3. In-feed ad (image above)</h2>
         {% include /modules/adunits/adsense.html type="in-feed" layout="image-above" %}
       </section>
 
@@ -46,7 +46,7 @@ meta:
 
       <!-- In-Feed Ad (Image Side) -->
       <section>
-        <h2 class="h4 mb-3">4. In-Feed Ad (Image Side)</h2>
+        <h2 class="h4 mb-3">4. In-feed ad (image side)</h2>
         {% include /modules/adunits/adsense.html type="in-feed" layout="image-side" %}
       </section>
 
@@ -54,7 +54,7 @@ meta:
 
       <!-- Multiplex Ad -->
       <section>
-        <h2 class="h4 mb-3">5. Multiplex Ad</h2>
+        <h2 class="h4 mb-3">5. Multiplex ad</h2>
         {% include /modules/adunits/adsense.html type="multiplex" %}
       </section>
 
@@ -63,7 +63,7 @@ meta:
 
       <!-- Lazy loaded display ad -->
       <section>
-        <h2 class="h4 mb-3">6. Lazy Loaded Display Ad (Below the Fold)</h2>
+        <h2 class="h4 mb-3">6. Lazy loaded display ad (below the fold)</h2>
         <p class="text-muted mb-3">This ad should only load when scrolled into view.</p>
         {% include /modules/adunits/adsense.html type="display" %}
       </section>

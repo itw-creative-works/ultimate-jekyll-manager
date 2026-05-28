@@ -6,6 +6,7 @@ const glob = require('glob').globSync;
 const responsive = require('gulp-responsive-modern');
 const sharp = require('sharp');
 const path = require('path');
+const { Transform } = require('stream');
 const jetpack = require('fs-jetpack');
 const GitHubCache = require('./utils/github-cache');
 
@@ -188,6 +189,7 @@ async function imagemin(complete) {
   // above (so `npm start` never blocks on this), letting BrowserSync reload as images land later.
   await new Promise((resolve, reject) => {
     src(filesToProcess, { base: 'src/assets/images' })
+      .pipe(lowercaseExtTransform())
       .pipe(responsive({
         [`**/${RESPONSIVE_GLOB}`]: responsiveConfigs
       }, {
@@ -356,6 +358,24 @@ async function rewriteOversizedSources(files) {
   } else {
     logger.log(`✂️  Rewrote ${rewritten} oversized source image(s)`);
   }
+}
+
+// Lowercase the extension on each Vinyl file's path before piping into gulp-responsive-modern.
+// gulp-responsive-modern's lib/format.js uses a case-sensitive switch on path.extname() and returns
+// the string 'unsupported' for anything else, which then crashes sharp.toFormat(). Files saved
+// straight off a camera (IMG_3119.JPG) hit this. Rewriting the Vinyl path in-stream keeps the
+// on-disk file untouched while letting the plugin recognize the format.
+function lowercaseExtTransform() {
+  return new Transform({
+    objectMode: true,
+    transform(file, _enc, cb) {
+      const ext = path.extname(file.path);
+      if (ext && ext !== ext.toLowerCase()) {
+        file.path = file.path.slice(0, -ext.length) + ext.toLowerCase();
+      }
+      cb(null, file);
+    },
+  });
 }
 
 // Build responsive configurations from PICTURE_SIZES
@@ -552,21 +572,26 @@ function logImageStatistics(stats, startTime, endTime) {
   // Size reduction stats
   if (stats.sizeBefore > 0 && stats.sizeAfter > 0) {
     const savedPercent = ((stats.savedBytes / stats.sizeBefore) * 100).toFixed(1);
+    const label = stats.savedBytes < 0 ? 'Total added' : 'Total saved';
     logger.log('\n💾 Size Reduction:');
     logger.log(`   Original size:       ${formatBytes(stats.sizeBefore)}`);
     logger.log(`   Optimized size:      ${formatBytes(stats.sizeAfter)}`);
-    logger.log(`   Total saved:         ${formatBytes(stats.savedBytes)} (${savedPercent}%)`);
+    logger.log(`   ${label}:         ${formatBytes(Math.abs(stats.savedBytes))} (${savedPercent}%)`);
   }
 
   logger.log('═══════════════════════════════════════\n');
 }
 
-// Helper to format bytes
+// Helper to format bytes. Handles negative inputs — when responsive variants (8 per source)
+// sum to more than the cached original, savedBytes goes negative; without the absolute-value
+// guard, Math.log(negative) is NaN and the suffix index becomes NaN -> "NaN undefined".
 function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
+  const sign = bytes < 0 ? '-' : '';
+  const abs = Math.abs(bytes);
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.min(Math.floor(Math.log(abs) / Math.log(k)), sizes.length - 1);
+  return sign + parseFloat((abs / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }

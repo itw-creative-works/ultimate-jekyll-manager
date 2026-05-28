@@ -15,6 +15,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.4.3] - 2026-05-28
+
+### Fixed
+
+- **Imagemin: uppercase-extension images (e.g. `IMG_3119.JPG`) now build end to end.** v1.4.2 made the glob case-insensitive so the file was discovered, but `gulp-responsive-modern`'s `lib/format.js` does a case-sensitive `switch` on `path.extname()` and returns the string `'unsupported'` for `.JPG`, which then crashes `sharp.toFormat()`. [src/gulp/tasks/imagemin.js](src/gulp/tasks/imagemin.js) now pipes each file through an in-stream `Transform` that lowercases the extension on the Vinyl path before the responsive plugin sees it (the on-disk source is left untouched).
+- **Log files no longer truncate before the crash that caused them.** [src/utils/attach-log-file.js](src/utils/attach-log-file.js) switched from `fs.createWriteStream` (async-buffered) to synchronous `fs.writeSync` against an open fd. The buffered stream dropped its tail when a gulp task threw and the process exited — so the lines describing the failure never reached `logs/build.log`. Synchronous writes guarantee the full error + stack survive an immediate exit.
+
+### Changed
+
+- **Auth: signup-consent gating now keys off the user doc's `flags.signupProcessed` instead of a time window.** [src/assets/js/core/auth.js](src/assets/js/core/auth.js) drops the `SIGNUP_MAX_AGE` (5-minute) heuristic and the client-only `localStorage` flag. `sendUserSignupMetadata` fires whenever the doc shows signup unprocessed (the server is idempotent), and the consent guard only signs a user out once signup has actually been processed — removing the risk of locking users out on a transient metadata-send failure.
+- **Footer language dropdown always renders.** No longer gated on `site.translation.enabled`; falls back to `site.translation.default` (or `"en"`) when no extra languages are configured. [src/defaults/dist/_includes/themes/classy/frontend/sections/footer.html](src/defaults/dist/_includes/themes/classy/frontend/sections/footer.html)
+- **Sentence-case copy normalization** across default pages (pricing, alternatives, admin/test pages, sitemap section labels): "API access", "Flash sale", "Root pages", "…and more:" etc.
+- **Updates feed:** the `v0.0.1` sample entry is marked `draft: true` so it's hidden from the listing and sitemap (dev-only).
+
+---
 ## [1.4.2] - 2026-05-27
 
 ### Fixed

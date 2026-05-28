@@ -6,7 +6,7 @@ layout: themes/classy/admin/core/minimal-viewport-locked
 theme:
   header:
     title:
-      content: "Marketing Calendar"
+      content: "Marketing calendar"
       icon: "calendar-days"
     breadcrumbs:
       items:
@@ -16,7 +16,7 @@ theme:
         - label: "Calendar"
     actions:
       items:
-        - label: "Create Campaign"
+        - label: "Create campaign"
           icon: "plus"
           color: "primary"
           attributes:
@@ -24,7 +24,7 @@ theme:
 
 ### REGULAR PAGES ###
 meta:
-  title: "Marketing Calendar - Admin"
+  title: "Marketing calendar - Admin"
   description: "Schedule and manage marketing campaigns — emails and push notifications"
   breadcrumb: "Calendar"
 
@@ -88,7 +88,7 @@ prerender_icons:
           <!-- Campaign Type -->
           <h6 class="mb-3">
             {% uj_icon "bullhorn", "fa-sm me-2 text-info" %}
-            Campaign Type
+            Campaign type
           </h6>
           <div class="row mb-4">
             <div class="col-6">
@@ -102,7 +102,7 @@ prerender_icons:
               <input type="radio" class="btn-check" name="campaign.type" id="campaign-type-push" value="push" autocomplete="off">
               <label class="btn btn-outline-adaptive w-100 d-flex align-items-center justify-content-center" for="campaign-type-push">
                 {% uj_icon "bell", "fa-sm me-2" %}
-                Push Notification
+                Push notification
               </label>
             </div>
           </div>
@@ -126,7 +126,7 @@ prerender_icons:
             <div class="tab-pane fade show active" id="panel-edit" role="tabpanel">
               <div class="mb-3">
                 <label for="campaign-name" class="form-label">
-                  Campaign Name <span class="text-danger">*</span>
+                  Campaign name <span class="text-danger">*</span>
                 </label>
                 <input type="text"
                        class="form-control"
@@ -221,7 +221,7 @@ prerender_icons:
 
             <div class="mb-3">
               <label for="campaign-click-action" class="form-label">
-                Click Action URL
+                Click action URL
               </label>
               <input type="url"
                      class="form-control"
@@ -236,7 +236,7 @@ prerender_icons:
             <div class="mb-3">
               <label for="campaign-push-tags" class="form-label">
                 {% uj_icon "tags", "fa-sm me-1 text-info" %}
-                Filter by Tags
+                Filter by tags
                 <small class="text-muted fw-normal ms-1">(comma-separated)</small>
               </label>
               <input type="text"
@@ -274,7 +274,7 @@ prerender_icons:
           <!-- Discount Code -->
           <div class="mb-3">
             <label for="campaign-discount-code" class="form-label">
-              Discount Code
+              Discount code
               <small class="text-muted fw-normal ms-1">(optional)</small>
             </label>
             <input type="text"
@@ -332,7 +332,7 @@ prerender_icons:
             <div class="col-md-3 d-flex align-items-end">
               <button type="button" class="btn btn-sm btn-outline-primary w-100" id="btn-send-now">
                 {% uj_icon "paper-plane", "fa-sm me-1" %}
-                Send Now
+                Send now
               </button>
             </div>
           </div>
@@ -484,7 +484,7 @@ prerender_icons:
 
           <div class="mb-3">
             <label for="campaign-exclude-segments" class="form-label">
-              Exclude Segments
+              Exclude segments
               <small class="text-muted fw-normal ms-1">(comma-separated IDs)</small>
             </label>
             <input type="text"
@@ -498,7 +498,7 @@ prerender_icons:
           <h6 class="mb-3 mt-4">
             <a class="text-decoration-none" data-bs-toggle="collapse" href="#advanced-settings" role="button" aria-expanded="false">
               {% uj_icon "sliders", "fa-sm me-2 text-info" %}
-              Advanced Settings
+              Advanced settings
               <small class="text-muted fw-normal ms-1">(optional)</small>
             </a>
           </h6>
@@ -527,7 +527,7 @@ prerender_icons:
             </div>
 
             <div class="mb-3">
-              <label class="form-label">UTM Overrides</label>
+              <label class="form-label">UTM overrides</label>
               <div class="row g-2" id="utm-fields">
                 <div class="col-md-6">
                   <input type="text" class="form-control form-control-sm" name="campaign.utm.utm_source" placeholder="utm_source">
