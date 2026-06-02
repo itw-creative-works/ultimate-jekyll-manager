@@ -66,10 +66,17 @@ class Manager {
           .catch(e => console.error('Failed to load ultimate-jekyll-manager.js:', e))
       );
 
+      // Theme page module path (resolved via the __theme__ webpack alias)
+      const themeModulePathFull = `__theme__/pages/${pageModulePath}`;
+
       console.log(`Page-specific module loading: #main/${pageModulePathFull}`);
+      console.log(`Page-specific module loading: #theme/${themeModulePathFull}`);
       console.log(`Page-specific module loading: #project/${pageModulePathFull}`);
 
-      // Load page-specific scripts
+      // Load page-specific scripts.
+      // Three layers, executed in order: #main (framework default) → #theme
+      // (active theme) → #project (consumer). Mirrors the page-CSS cascade.
+      // A missing module at any layer is a no-op — no fallback needed.
       modulePromises.push(
         // Import the main page-specific script
         import(`__main_assets__/js/pages/${pageModulePath}`)
@@ -86,10 +93,28 @@ class Manager {
       );
 
       modulePromises.push(
+        // Import the active theme's page-specific script.
+        // webpackInclude restricts the dynamic-import context to .js files — the
+        // theme's pages/ dir also contains page CSS (.scss), which must NOT be
+        // pulled into the JS context (webpack would try to parse it as JS).
+        import(/* webpackInclude: /\.js$/ */ `__theme__/pages/${pageModulePath}`)
+          .then(mod => {
+            modules[1] = { tag: 'theme', default: mod?.default };
+          })
+          .catch(e => {
+            if (this.isNotFound(e, pageModulePath)) {
+              console.warn(`Page-specific module missing: #theme/${themeModulePathFull}`);
+            } else {
+              console.error(`Page-specific module error: #theme/${themeModulePathFull}`, e);
+            }
+          })
+      );
+
+      modulePromises.push(
         // Import the project page-specific script
         import(`__project_assets__/js/pages/${pageModulePath}`)
           .then(mod => {
-            modules[1] = { tag: 'project', default: mod?.default };
+            modules[2] = { tag: 'project', default: mod?.default };
           })
           .catch(e => {
             if (this.isNotFound(e, pageModulePath)) {
@@ -111,12 +136,13 @@ class Manager {
         }
 
         // Execute the module function
+        const modPathLabel = mod.tag === 'theme' ? themeModulePathFull : pageModulePathFull;
         try {
-          console.log(`Page-specific module loaded: #${mod.tag}/${pageModulePathFull}`);
+          console.log(`Page-specific module loaded: #${mod.tag}/${modPathLabel}`);
 
           await mod.default({ manager: this, options });
         } catch (e) {
-          console.error(`Page-specific module error: #${mod.tag}/${pageModulePathFull}`, e);
+          console.error(`Page-specific module error: #${mod.tag}/${modPathLabel}`, e);
           break; // Stop execution if any module fails
         }
       }

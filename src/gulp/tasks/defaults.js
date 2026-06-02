@@ -8,6 +8,7 @@ const path = require('path');
 const { minimatch } = require('minimatch');
 const { template } = require('node-powertools');
 const createTemplateTransform = require('./utils/template-transform');
+const manageTestLayers = require('./utils/manage-test-layers');
 const argv = require('yargs')(process.argv.slice(2)).parseSync();
 const JSON5 = require('json5');
 
@@ -390,6 +391,13 @@ function defaults(complete, changedFile) {
   // Log
   logger.log('Starting...');
   Manager.logMemory(logger, 'Start');
+
+  // Test-layer fixtures (dev only): clean any prior generated files, and generate
+  // fresh ones into the consumer src when UJ_TEST_LAYERS=true — at build START so
+  // sass + jekyll pick them up. Only on a full run, not per-changed-file in watch.
+  if (!changedFile) {
+    manageTestLayers(Manager, logger);
+  }
 
   // Use changedFile if provided, otherwise use all inputs
   const filesToProcess = changedFile ? [changedFile] : input;

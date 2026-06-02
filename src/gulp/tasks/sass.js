@@ -44,6 +44,24 @@ const bundleFiles = [
   'src/assets/css/bundles/*.scss',
 ];
 
+// Build the active theme's page-CSS globs, but ONLY for `pages` dirs that exist —
+// gulp's src() throws ENOENT when it scandirs a missing directory. Project theme
+// takes priority over the package theme (matches the __theme__ resolution rule).
+function themePageGlobs() {
+  if (!config.theme.id) {
+    return [];
+  }
+
+  const candidates = [
+    path.resolve(rootPathProject, 'src/assets/themes', config.theme.id, 'pages'),
+    path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id, 'pages'),
+  ];
+
+  return candidates
+    .filter((dir) => jetpack.exists(dir))
+    .map((dir) => `${dir}/**/*.scss`);
+}
+
 // Glob
 const input = [
   // Bundle files (admin, and any future bundles)
@@ -56,9 +74,22 @@ const input = [
   `${rootPathPackage}/dist/assets/css/pages/**/*.scss`,
   'src/assets/css/pages/**/*.scss',
 
+  // Theme page-specific CSS (theme-aware page styles).
+  // Compiles to a SEPARATE bundle (pages/<path>/index.<themeId>.bundle.css)
+  // that head.html links IN ADDITION to the base + consumer page bundles.
+  // Missing = nothing loads (component styles handle it) — no fallback needed.
+  //
+  // Only include a glob whose base `pages` dir exists — gulp's src() throws ENOENT
+  // if it scandirs a non-existent directory. Most consumers don't shadow the theme,
+  // so the project-side path usually won't exist.
+  ...themePageGlobs(),
+
   // Files to exclude
   // '!dist/**',
 ];
+
+// Marker appended to theme page bundles so head.html can find them by theme id.
+const THEME_PAGE_SUFFIX = config.theme.id ? `.${config.theme.id}` : '';
 
 // Additional files to watch (but not compile as entry points)
 const watchInput = [
@@ -345,7 +376,17 @@ function sass(complete) {
     .pipe(cleanCSS({
       format: Manager.actLikeProduction() ? 'compressed' : 'beautify',
     }))
-    .pipe(rename((file) => {
+    .pipe(rename((file, vinyl) => {
+      // Theme page CSS originates from .../themes/<id>/pages/... — tag the bundle
+      // with the theme id (e.g. index.neobrutalism.bundle.css) so it compiles to
+      // its own file that head.html links alongside the base + consumer bundles.
+      const sourcePath = (vinyl && vinyl.history[0]) || '';
+      const isThemePage = THEME_PAGE_SUFFIX
+        && sourcePath.replace(/\\/g, '/').includes(`/themes/${config.theme.id}/pages/`);
+      if (isThemePage) {
+        file.basename += THEME_PAGE_SUFFIX;
+      }
+
       // Add bundle to the name
       file.basename += '.bundle';
 
@@ -355,7 +396,7 @@ function sass(complete) {
       bundleNames.push('main'); // main.scss is always a root bundle
 
       // Check if this is a root-level bundle
-      const baseName = file.basename.replace('.bundle', '');
+      const baseName = file.basename.replace('.bundle', '').replace(THEME_PAGE_SUFFIX, '');
       const isBundle = bundleNames.includes(baseName);
 
       // Check

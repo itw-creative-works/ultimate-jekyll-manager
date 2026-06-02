@@ -26,12 +26,15 @@
 
 {% iftruthy page.resolved.asset_path %}
   {% capture page-css-path %}/assets/css/pages/{{ page.resolved.asset_path }}.bundle.css{% endcapture %}
+  {% capture page-css-theme-path %}/assets/css/pages/{{ page.resolved.asset_path }}.{{ page.resolved.theme.id }}.bundle.css{% endcapture %}
 {% endiftruthy %}
 {% iffalsy page.resolved.asset_path %}
   {% if page.canonical.path == "/" %}
     {% capture page-css-path %}/assets/css/pages/index.bundle.css{% endcapture %}
+    {% capture page-css-theme-path %}/assets/css/pages/index.{{ page.resolved.theme.id }}.bundle.css{% endcapture %}
   {% else %}
     {% capture page-css-path %}/assets/css/pages{{ page.canonical.path }}/index.bundle.css{% endcapture %}
+    {% capture page-css-theme-path %}/assets/css/pages{{ page.canonical.path }}/index.{{ page.resolved.theme.id }}.bundle.css{% endcapture %}
   {% endif %}
 {% endiffalsy %}
 
@@ -206,6 +209,20 @@
   {% if jekyll.environment == "development" %}
     <script>
       console.info("Page-specific css loading: #main{{ page-css-path }}");
+    </script>
+  {% endif %}
+{% endiffile %}
+
+<!-- Then, the active theme's page-specific bundle (loaded AFTER base so it can override).
+     Only present when the theme ships page CSS for this path — otherwise nothing loads
+     and the theme's component/general styles handle the page. No fallback needed. -->
+{% iffile page-css-theme-path %}
+  <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-theme-path }}?cb={{ site.uj.cache_breaker }}"/>
+
+  <!-- Dev log -->
+  {% if jekyll.environment == "development" %}
+    <script>
+      console.info("Theme page-specific css loading: #main{{ page-css-theme-path }}");
     </script>
   {% endif %}
 {% endiffile %}

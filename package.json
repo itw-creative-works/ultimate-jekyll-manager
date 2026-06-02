@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -31,6 +31,7 @@
   },
   "projectScripts": {
     "start": "npx mgr clean && npx mgr setup && bundle exec npm run gulp --",
+    "start:test-layers": "UJ_TEST_LAYERS=true npm start",
     "gulp": "gulp --cwd ./ --gulpfile ./node_modules/ultimate-jekyll-manager/dist/gulp/main.js",
     "build": "npx mgr clean && npx mgr setup && UJ_BUILD_MODE=true bundle exec npm run gulp -- build",
     "deploy": "npx mgr deploy",
