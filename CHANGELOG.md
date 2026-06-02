@@ -15,6 +15,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.5.0] - 2026-06-02
+
+### Added
+
+- **Neobrutalism theme** — a complete second shipped theme (alongside `classy`), not a recolor: hard ink borders, offset "press" shadows, chunky display type, flat color-blocks, square controls. Custom homepage + pricing layouts. It restyles **standard Bootstrap classes** (`.btn`, `.card`, `.text-bg-*`) and a **universal semantic layout vocabulary** (`.section-hero`, `.showcase-row`, `.stat-block`, `.pricing-plan`, `.cta-panel`, …) — **no theme-prefixed classes** — so the same markup is swappable across themes (change `theme.id`, done). [src/assets/themes/neobrutalism/](src/assets/themes/neobrutalism/)
+- **Theme system: three-layer page-asset cascade (Global → Theme → Consumer) for BOTH CSS and JS.**
+  - Theme page CSS: `themes/<id>/pages/<path>/index.scss` compiles to a theme-suffixed bundle (`index.<themeId>.bundle.css`) via [src/gulp/tasks/sass.js](src/gulp/tasks/sass.js), linked by [head.html](src/defaults/dist/_includes/core/head.html) with `{% iffile %}`. Missing = nothing loads (component styles handle it), no fallback needed.
+  - Theme page JS: `__theme__/pages/<path>/index.js` loaded as the `#theme` layer in [src/index.js](src/index.js), executed `main → theme → project` (a `webpackInclude: /\.js$/` guard stops `.scss` from being pulled into the JS import context).
+  - Per-page HTML layout overrides under `_layouts/themes/<id>/` reuse classy's `page.resolved.*` frontmatter data contract and fall back to classy when a layout is absent.
+- **Theme-authoring template** at [src/assets/themes/_template/](src/assets/themes/_template/) + a full **[docs/themes.md](docs/themes.md)** reference for building a theme inside UJM or in a consumer project (selection/resolution, classy fallback, page CSS/JS layers, the no-prefix vocabulary, adaptive-button + interactive-accent gotchas).
+- **Single interactive-accent token** (`--nb-accent-interactive` = `var(--bs-primary)`) drives all hover/active states (blue), distinct from the yellow signature accent reserved for static blocks. Adaptive buttons (`btn-adaptive`/`-inverse`) get explicit theme overrides so they render solid and press like every other button.
+- **Asset-layer test harness** — `UJ_TEST_LAYERS` flag + [manage-test-layers.js](src/gulp/tasks/utils/manage-test-layers.js) generate real consumer-side test files; the `/test/libraries/layers` page renders the Global/Theme/Consumer cascade as red/green dots to prove all three layers load in order. `npm run start:test-layers` enables it.
+
+---
 ## [1.4.3] - 2026-05-28
 
 ### Fixed
