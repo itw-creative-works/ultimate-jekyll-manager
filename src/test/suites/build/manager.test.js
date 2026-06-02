@@ -86,18 +86,25 @@ module.exports = {
       },
     },
     {
-      name: 'getEnvironment maps server flag to environment string',
+      name: 'getEnvironment maps to development/testing/production',
       run: async (ctx) => {
         const Manager = require('../../../build.js');
-        const original = process.env.UJ_IS_SERVER;
+        const origServer = process.env.UJ_IS_SERVER;
+        const origTest = process.env.UJ_TEST_MODE;
         try {
+          // Testing wins over everything.
+          process.env.UJ_TEST_MODE = 'true';
+          process.env.UJ_IS_SERVER = 'true';
+          ctx.expect(Manager.getEnvironment()).toBe('testing');
+          // With testing cleared, server flag → production; absent → development.
+          delete process.env.UJ_TEST_MODE;
           process.env.UJ_IS_SERVER = 'true';
           ctx.expect(Manager.getEnvironment()).toBe('production');
           delete process.env.UJ_IS_SERVER;
           ctx.expect(Manager.getEnvironment()).toBe('development');
         } finally {
-          if (original === undefined) delete process.env.UJ_IS_SERVER;
-          else process.env.UJ_IS_SERVER = original;
+          if (origServer === undefined) delete process.env.UJ_IS_SERVER; else process.env.UJ_IS_SERVER = origServer;
+          if (origTest === undefined) delete process.env.UJ_TEST_MODE; else process.env.UJ_TEST_MODE = origTest;
         }
       },
     },

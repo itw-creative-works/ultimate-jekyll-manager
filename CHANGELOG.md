@@ -15,6 +15,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.0] - 2026-06-02
+
+### Changed
+
+- **`getEnvironment()` is now the single source of truth for environment detection** (and `testing` is a first-class environment). [src/utils/mode-helpers.js](src/utils/mode-helpers.js) — `getEnvironment()` is the ONLY function that reads the raw signals (`UJ_TEST_MODE` / `window.Configuration.uj.environment` / `UJ_BUILD_MODE` / `UJ_IS_SERVER` / `NODE_ENV`) and resolves them to exactly one of `'development' | 'testing' | 'production'` (mutually exclusive; **testing wins**). `isDevelopment()` / `isProduction()` / `isTesting()` now **derive** from it, so they can never disagree and exactly one is always true. `isProduction()` is a real positive check, not `!isDevelopment()`. [src/build.js](src/build.js) drops its own `getEnvironment()` (now mixed in via `attachTo`). Doc renamed `cross-context-helpers.md` → [docs/environment-detection.md](docs/environment-detection.md).
+- **Redirect delay now keys off non-production (dev OR testing), not dev-only.** [src/assets/js/modules/redirect.js](src/assets/js/modules/redirect.js) delays the redirect whenever `environment !== 'production'` so it's observable in tests too.
+- **Footer language dropdown gates the extra-languages list on `translation.enabled`** (+ vertical-alignment fix). [footer.html](src/defaults/dist/_includes/themes/classy/frontend/sections/footer.html)
+
+### Added
+
+- **`test/_init.js` pre-test lifecycle hook (setup-only).** [src/test/runner.js](src/test/runner.js) loads an optional `test/_init.js` from BOTH the framework and consumer test roots and runs its `setup()` once before any suite (the `_`-prefix keeps it out of discovery). Mirrors BEM/EM/BXM. Default scaffold at [src/defaults/test/_init.js](src/defaults/test/_init.js). [docs/test-framework.md](docs/test-framework.md) adds a "NEVER mock — test against the real harness" section + `_init.js` reference, and tests now assert the env invariant across every signal scenario.
+- **`translation.exclude` config** — folder or page paths excluded from AI translation (added to both the files and folders match sets). Default [_config.yml](src/defaults/src/_config.yml) excludes `blog`. [src/gulp/tasks/translation.js](src/gulp/tasks/translation.js)
+- **`setup` prunes legacy first-name-only default team members** (e.g. `team/alex`) and their image dirs via `removeLegacyTeamMembers()`. [src/commands/setup.js](src/commands/setup.js)
+- **`npx mgr install live`** accepted as an alias for `prod`/`production`. [src/commands/install.js](src/commands/install.js); docs use `install dev` / `install live` consistently.
+
+### Fixed
+
+- **Download buttons use a `[data-download]` hook** instead of the brittle `.btn-primary:not([type="submit"])` selector. [download.html](src/defaults/dist/_layouts/themes/classy/frontend/pages/download.html) + [download/index.js](src/assets/js/pages/download/index.js)
+- **Feedback review modal:** $100 gift-card incentive + an explicit "you must actually post your review" warning, and copy normalized "Write a review" → "Post your review". [feedback.html](src/defaults/dist/_layouts/themes/classy/frontend/pages/feedback.html) + [feedback/index.js](src/assets/js/pages/feedback/index.js)
+- Removed a leftover `package copy.json` from the repo root.
+
+---
 ## [1.5.0] - 2026-06-02
 
 ### Added

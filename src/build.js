@@ -110,11 +110,8 @@ Manager.actLikeProduction = function () {
 }
 Manager.prototype.actLikeProduction = Manager.actLikeProduction;
 
-// getEnvironment (calls isServer ? 'production' : 'development')
-Manager.getEnvironment = function () {
-  return Manager.isServer() ? 'production' : 'development';
-}
-Manager.prototype.getEnvironment = Manager.getEnvironment;
+// getEnvironment() is the SSOT and lives in src/utils/mode-helpers.js (alongside the is*()
+// family). It's mixed onto the Manager via the attachTo() call below, same as in EM/BXM.
 
 // getConfig: requires and parses config.yml
 Manager.getConfig = function (type) {

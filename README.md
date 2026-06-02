@@ -28,6 +28,7 @@
 * **SEO Optimized**: Ultimate Jekyll is fully SEO optimized.
 * **Blazingly Fast**: Ultimate Jekyll is blazingly fast.
 * **NPM & Gulp**: Ultimate Jekyll is fueled by an intuitive incorporation of npm and gulp.
+* **Themes**: Pick a shipped theme with `theme.id` (`classy` or `neobrutalism`), or author your own. New themes inherit all default page layouts automatically and only restyle/override what differs. See [docs/themes.md](docs/themes.md).
 * **Built-in test framework**: three layers (`build` / `page` / `boot`) — plain Node, headless Chromium tab, headless Chromium against real `_site/` with SW registration verification.
 
 ## 🚀 Getting started

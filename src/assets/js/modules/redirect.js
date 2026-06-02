@@ -54,9 +54,10 @@ const performRedirect = () => {
     }
   }
 
-  // Determine redirect delay
-  const isDevelopment = config.environment === 'development';
-  const timeout = isDevelopment ? 3000 : 1;
+  // Determine redirect delay — slow in any non-production environment (development OR
+  // testing) so the redirect is observable; near-instant in production.
+  const isNonProduction = config.environment !== 'production';
+  const timeout = isNonProduction ? 3000 : 1;
 
   // Build redirect URL
   let redirectUrl;
@@ -111,7 +112,7 @@ const performRedirect = () => {
   console.groupEnd();
 
   // Show user-friendly message in development
-  if (isDevelopment) {
+  if (config.environment === 'development') {
     console.log(`[Redirect] Delaying redirect by ${timeout}ms for development mode`);
   }
 

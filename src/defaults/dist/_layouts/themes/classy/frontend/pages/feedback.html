@@ -167,9 +167,13 @@ prerender_icons:
           <img src="https://cdn.itwcreativeworks.com/assets/general/images/feedback/love.png?cb={{ site.uj.cache_breaker }}" alt="Thank you" width="80" height="80">
         </div>
         <h3 class="mb-3" id="review-modal-label">You're awesome!</h3>
-        <p class="text-muted mb-4">
-          We're so glad you love {{ site.brand.name }}! Would you mind sharing your experience on a review site? It really helps us grow.
+        <p class="text-muted mb-3">
+          We're so glad you love {{ site.brand.name }}! Share your experience on a review site to be entered to win a $100 gift card.
         </p>
+        <div class="alert alert-warning text-start small mb-4" role="alert">
+          {% uj_icon "circle-exclamation", "me-1" %}
+          You must actually post your review to be eligible for the $100 gift card &mdash; closing this without publishing a review won't qualify.
+        </div>
 
         <!-- Copy-paste feedback -->
         <div class="text-start mb-4">
@@ -188,7 +192,7 @@ prerender_icons:
 
         <a id="review-modal-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg mb-3">
           {% uj_icon "arrow-up-right-from-square", "me-2" %}
-          Write a review
+          Post your review
         </a>
         <div>
           <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Maybe later</button>

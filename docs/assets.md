@@ -2,6 +2,11 @@
 
 This document covers UJM's asset layout, consuming-project overrides, the JSON-driven section configuration system (nav, footer, account dropdown), frontmatter-driven page customization, webpack aliases, and the page module pattern.
 
+> **Authoring or selecting a theme?** The `themes/[theme-id]/` layout/include
+> paths and the `__theme__` SCSS/JS resolution referenced throughout this doc are
+> explained in full — including the classy layout fallback and how to build a new
+> theme — in [docs/themes.md](themes.md).
+
 ## Ultimate Jekyll Manager Files (THIS project)
 
 **CSS:**
@@ -269,7 +274,7 @@ import { getPrerenderedIcon } from '__main_assets__/js/libs/prerendered-icons.js
 import(`__project_assets__/js/pages/${pageModulePath}`)
 ```
 
-**How they work together:** `src/index.js` loads page modules from both aliases — first from `__main_assets__` (UJM defaults), then from `__project_assets__` (project overrides/extensions). If a project module doesn't exist, it gracefully skips. This enables a layered system where UJM provides defaults and consuming projects can extend or override page behavior.
+**How they work together:** `src/index.js` loads page modules from **three** layers, executed in order: `__main_assets__` (UJM default) → `__theme__/pages/...` (active theme) → `__project_assets__` (consumer override/extension). A missing module at any layer gracefully skips. This layered system mirrors the page-CSS cascade — UJM provides defaults, the theme customizes, and the consuming project always gets the final say. See [docs/themes.md → Page-specific JS](themes.md#5-page-specific-js-theme-aware-additive--mirrors-page-css).
 
 **When to use which:**
 - **`__main_assets__`** — When importing UJM-provided libraries, core modules, or referencing UJM's built-in page scripts

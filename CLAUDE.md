@@ -8,7 +8,7 @@ Ultimate Jekyll Manager (UJM) is a comprehensive framework for building modern J
 
 - One-line bootstrap per context (build / frontend / service-worker)
 - Multi-stage gulp pipeline (15 tasks: defaults / distribute / webpack / sass / imagemin / jekyll / jsonToHtml / preprocess / audit / translation / minifyHtml / serve / setup / developmentRebuild)
-- Default Jekyll layouts + themes (`classy` shipped; per-theme SCSS load paths)
+- Default Jekyll layouts + themes (`classy` + `neobrutalism` shipped; new themes inherit classy's layouts via the build-time fallback — see [docs/themes.md](docs/themes.md))
 - Frontend ES-module Manager with dynamic per-page module loading
 - Service worker with Firebase Messaging + cache management
 - A built-in **three-layer test framework** (build / page / boot)
@@ -48,7 +48,7 @@ The only things that ARE safe to run inside UJM itself:
 
 1. `npm install` — install UJM's own deps
 2. `npm start` (≡ `npm run prepare:watch`) — copies `src/` → `dist/` on file change
-3. Test in a consumer project: from inside the consumer, run `npx mgr install local` (swaps UJM to the local repo via the `install` CLI). Reverse with `npx mgr install prod`.
+3. Test in a consumer project: from inside the consumer, run `npx mgr install dev` to swap UJM to this local repo — required whenever you edit the framework source and want the consumer to pick up the changes (the consumer otherwise keeps its installed `node_modules/ultimate-jekyll-manager`). Reverse with `npx mgr install live`.
 4. `npm test` — runs UJM's own 60 test suites
 
 ## Architecture
@@ -63,7 +63,7 @@ UJM exposes three Manager entry points:
 | Frontend (browser ES module) | `import Manager from 'ultimate-jekyll-manager'` | `new Manager().initialize()` → wires webManager + loads page module |
 | Service worker | `importScripts('/build.js')` then construct `Manager` | Manages cache + Firebase Messaging |
 
-All three Managers mix in shared helpers via `attachTo(Manager)` from [src/utils/mode-helpers.js](src/utils/mode-helpers.js): `isDevelopment()`, `isProduction()`, `isTesting()`, `getVersion()`. See [docs/cross-context-helpers.md](docs/cross-context-helpers.md).
+All three Managers mix in shared helpers via `attachTo(Manager)` from [src/utils/mode-helpers.js](src/utils/mode-helpers.js): `isDevelopment()`, `isProduction()`, `isTesting()`, `getVersion()`. `getEnvironment()` returns `'development' | 'testing' | 'production'` (mutually exclusive — testing wins over dev); gate side effects on the INTENTIONAL check (`isProduction()` for prod-only, `isDevelopment() || isTesting()` for local-or-test) — never `!isDevelopment()`. See [docs/environment-detection.md](docs/environment-detection.md).
 
 ### Gulp pipeline
 
@@ -100,8 +100,8 @@ ES module class. Constructor stores `this.webManager`. `initialize()`:
 
 1. Calls `webManager.initialize(window.Configuration)`
 2. Reads `document.documentElement.dataset.pagePath` + `.assetPath`
-3. Loads (in parallel) `__main_assets__/js/ultimate-jekyll-manager.js` + page-specific modules from both `__main_assets__/js/pages/<path>/index.js` (UJM defaults) AND `__project_assets__/js/pages/<path>/index.js` (consumer overrides)
-4. Sequentially executes loaded modules (stops on first error)
+3. Loads (in parallel) `__main_assets__/js/ultimate-jekyll-manager.js` + page-specific modules from three layers: `__main_assets__/js/pages/<path>/index.js` (UJM default), `__theme__/pages/<path>/index.js` (active theme), and `__project_assets__/js/pages/<path>/index.js` (consumer). Missing at any layer is a no-op. See [docs/themes.md](docs/themes.md#5-page-specific-js-theme-aware-additive--mirrors-page-css).
+4. Sequentially executes loaded modules in order **main → theme → project** (stops on first error)
 
 Webpack aliases:
 - `__main_assets__` → UJM's `dist/assets/`
@@ -185,7 +185,7 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 
 - [docs/test-framework.md](docs/test-framework.md) — three-layer test harness reference (build / page / boot)
 - [docs/test-boot-layer.md](docs/test-boot-layer.md) — boot layer deep-dive (_site/ discovery, HTTP server, fixture vs consumer)
-- [docs/cross-context-helpers.md](docs/cross-context-helpers.md) — `isTesting`/`isDevelopment`/`isProduction`/`getVersion`
+- [docs/environment-detection.md](docs/environment-detection.md) — `isTesting`/`isDevelopment`/`isProduction`/`getVersion`
 - [docs/jekyll-plugin.md](docs/jekyll-plugin.md) — UJ Powertools gem: filters, tags, page variables (`page.resolved`, `uj_icon`, `uj_hash`, `iftruthy`, etc.)
 - [docs/audit.md](docs/audit.md) — workflow for fixing issues raised by `gulp/tasks/audit.js`
 
@@ -197,6 +197,7 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 
 ### Pages, layouts, content
 
+- [docs/themes.md](docs/themes.md) — theme system: selection + resolution (SCSS loadPaths, `__theme__`, classy layout fallback), shared vs per-theme layers, authoring a theme inside UJM OR in a consumer project, live validation
 - [docs/layouts-and-pages.md](docs/layouts-and-pages.md) — page types, layout chain, `asset_path` frontmatter
 - [docs/images.md](docs/images.md) — `@post/` shortcut for blog post images, BEM admin/post image handling, imagemin pipeline + source-size constraints + `UJ_IMAGEMIN_REWRITE_SOURCES` cleanup flag
 - [docs/icons.md](docs/icons.md) — Font Awesome conventions, `{% uj_icon %}` vs prerendered icons in JS, size reference

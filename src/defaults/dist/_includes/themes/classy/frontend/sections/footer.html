@@ -70,10 +70,10 @@
     </div>
 
     <!-- Bottom Section -->
-    <div class="row mt-4 pt-3 border-top">
+    <div class="row mt-4 pt-3 border-top align-items-center">
       <div class="col-md-6 d-flex align-items-center">
         <!-- Language Dropdown -->
-        <div class="d-inline-block me-3">
+        <div class="d-flex align-items-center me-3">
             <div class="dropup uj-language-dropdown">
               <button class="btn btn-sm btn-outline-adaptive dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa fa-sm me-1">
@@ -85,7 +85,7 @@
               </button>
               <ul class="dropdown-menu">
                 {% assign default_language = site.translation.default | default: "en" %}
-                {% if site.translation.languages.size > 0 %}
+                {% if site.translation.enabled and site.translation.languages.size > 0 %}
                   {% assign all_languages = site.translation.languages | push: default_language %}
                 {% else %}
                   {% assign all_languages = "" | split: "" | push: default_language %}
@@ -105,7 +105,7 @@
 
         <!-- Social Links -->
         {% if data.socials.enabled %}
-          <div class="d-inline-block">
+          <div class="d-flex align-items-center">
             {% if data.socials.list and data.socials.list.size > 0 %}
               {% assign social_list = data.socials.list %}
             {% else %}

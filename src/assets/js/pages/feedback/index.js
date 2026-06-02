@@ -120,7 +120,7 @@ function showReviewModal(reviewURL, data) {
   // Extract site name for display
   try {
     const siteName = new URL(fullURL).hostname.replace('www.', '');
-    $link.innerHTML = `${getPrerenderedIcon('arrow-up-right-from-square', 'me-2')} Write a Review on ${webManager.utilities().escapeHTML(siteName)}`;
+    $link.innerHTML = `${getPrerenderedIcon('arrow-up-right-from-square', 'me-2')} Post your review on ${webManager.utilities().escapeHTML(siteName)}`;
   } catch (e) {
     // Use default text
   }

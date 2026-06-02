@@ -2,51 +2,72 @@
 // (build-time `src/build.js`, frontend ES module `src/index.js`, service worker
 // `src/service-worker.js`).
 //
-// Three orthogonal concepts:
-//   isDevelopment() — true when running in dev mode (jekyll dev server, not a
-//                     production build). Detected via NODE_ENV / UJ_BUILD_MODE /
-//                     site config.
-//   isProduction()  — inverse. Running a production-built `_site/`.
-//   isTesting()     — true when UJM's test framework is running this process. Set
-//                     by UJM's test runners (UJ_TEST_MODE=true) and consumer test
-//                     setups that want the same signal.
+// `getEnvironment()` is the SINGLE SOURCE OF TRUTH: it is the ONLY function that reads the
+// raw signals (UJ_TEST_MODE / window.Configuration.uj.environment / UJ_BUILD_MODE /
+// UJ_IS_SERVER / NODE_ENV) and resolves them to exactly ONE of three mutually-exclusive
+// values. The three is*() checks DERIVE from it — they never read raw signals themselves,
+// so they can never disagree with getEnvironment().
 //
-// Use these whenever behavior should differ by *what kind of process* you're in —
-// shorter timeouts in tests, prompts suppressed in tests, dev-only banners.
-// Don't use them for "should we hit dev or prod backends" — that's a config
-// concern; use `getEnvironment()` for that (in build.js).
+//   isDevelopment() — `getEnvironment() === 'development'`: running in dev mode (jekyll dev
+//                     server, not a production build), and NOT testing.
+//   isTesting()     — `getEnvironment() === 'testing'`: UJM's test framework is running this
+//                     process (UJ_TEST_MODE=true). TAKES PRECEDENCE — a test run is not dev.
+//   isProduction()  — `getEnvironment() === 'production'`: running a production-built `_site/`,
+//                     and NOT testing. A real positive check — NOT `!isDevelopment()`.
 //
-// Context caveat: in build-time Node (gulp / CLI), `window` is undefined. We
-// detect via `typeof window` so the same code works in every context. In test
-// mode the browser-side check is short-circuited via UJ_TEST_MODE / global so
-// `isTesting()` returns a stable value regardless of which test layer is running.
+// To gate "anything non-production" use `!isProduction()` or `isDevelopment() ||
+// isTesting()` intentionally — never assume two values.
+//
+// Context caveat: in build-time Node (gulp / CLI), `window` is undefined. getEnvironment()
+// detects via `typeof window` so the same code works in every context. Browser detection
+// reads `window.Configuration.uj.environment` (baked into the page at build time).
 
-function isDevelopment() {
-  // Build-time Node fallback.
+// getEnvironment() — the SINGLE SOURCE OF TRUTH. Reads every raw signal and resolves to
+// exactly ONE of 'development' | 'testing' | 'production' (mutually exclusive; testing wins).
+// Precedence: testing → production → development.
+function getEnvironment() {
+  // 1. Testing wins — set by UJM's test runners / harness, or a testing-baked build.
+  //    Works in Node (process.env), browser (globalThis set before consumer JS), and
+  //    config-baked builds (window.Configuration.uj.environment === 'testing').
+  if (typeof process !== 'undefined' && process.env && process.env.UJ_TEST_MODE === 'true') return 'testing';
+  if (typeof globalThis !== 'undefined' && globalThis.UJ_TEST_MODE === true) return 'testing';
+  if (typeof window !== 'undefined' && window.Configuration && window.Configuration.uj
+    && window.Configuration.uj.environment === 'testing') return 'testing';
+
+  // 2. Build-time Node signals (a production build or the running dev server).
   if (typeof process !== 'undefined' && process.env) {
-    if (process.env.UJ_BUILD_MODE === 'true') return false;
-    if (process.env.NODE_ENV === 'development') return true;
-    if (process.env.UJ_IS_SERVER === 'true') return false;
+    if (process.env.UJ_BUILD_MODE === 'true') return 'production';
+    if (process.env.UJ_IS_SERVER === 'true') return 'production';
+    if (process.env.NODE_ENV === 'development') return 'development';
   }
-  // Browser-side: look at window.Configuration if present.
+
+  // 3. Browser-side: the environment baked into the page at build time.
   if (typeof window !== 'undefined' && window.Configuration && window.Configuration.uj) {
-    if (window.Configuration.uj.environment === 'development') return true;
-    if (window.Configuration.uj.environment === 'production') return false;
+    if (window.Configuration.uj.environment === 'development') return 'development';
+    if (window.Configuration.uj.environment === 'production') return 'production';
   }
-  return false;
+
+  // 4. Default: development. UJM's deployed artifacts ALWAYS carry their signal — the
+  //    browser has `window.Configuration.uj.environment` baked in, and build-time Node
+  //    always sets UJ_BUILD_MODE / UJ_IS_SERVER. So reaching here means a bare tooling /
+  //    local-script context, where development is the sensible answer. (Contrast BEM/EM,
+  //    whose deployed RUNTIME can legitimately lack a signal, so they default to production.)
+  return 'development';
+}
+
+// The three checks DERIVE from getEnvironment() — they never read raw signals, so they can
+// never disagree with it. isDevelopment() is NOT true in testing; isProduction() is a real
+// positive check (never `!isDevelopment()`).
+function isDevelopment() {
+  return getEnvironment() === 'development';
 }
 
 function isProduction() {
-  return !this.isDevelopment();
+  return getEnvironment() === 'production';
 }
 
 function isTesting() {
-  // Canonical signal — set by UJM's test runners and consumer test setups alike.
-  // Works in Node (process.env) AND in browser contexts (the harness preload sets
-  // globalThis.UJ_TEST_MODE before any consumer code runs).
-  if (typeof process !== 'undefined' && process.env && process.env.UJ_TEST_MODE === 'true') return true;
-  if (typeof globalThis !== 'undefined' && globalThis.UJ_TEST_MODE === true) return true;
-  return false;
+  return getEnvironment() === 'testing';
 }
 
 // `getVersion()` — returns UJM's own version string.
@@ -64,19 +85,23 @@ function getVersion() {
 
 // Mix the helpers into a Manager constructor's prototype + the constructor itself
 // (so `Manager.isTesting()` works statically too, matching BEM/EM/BXM pattern).
+// getEnvironment() is the SSOT and is attached here too — build.js no longer defines it.
 function attachTo(Manager) {
-  Manager.prototype.isDevelopment = isDevelopment;
-  Manager.prototype.isProduction  = isProduction;
-  Manager.prototype.isTesting     = isTesting;
-  Manager.prototype.getVersion    = getVersion;
-  Manager.isDevelopment = isDevelopment;
-  Manager.isProduction  = isProduction;
-  Manager.isTesting     = isTesting;
-  Manager.getVersion    = getVersion;
+  Manager.prototype.getEnvironment = getEnvironment;
+  Manager.prototype.isDevelopment  = isDevelopment;
+  Manager.prototype.isProduction   = isProduction;
+  Manager.prototype.isTesting      = isTesting;
+  Manager.prototype.getVersion     = getVersion;
+  Manager.getEnvironment = getEnvironment;
+  Manager.isDevelopment  = isDevelopment;
+  Manager.isProduction   = isProduction;
+  Manager.isTesting      = isTesting;
+  Manager.getVersion     = getVersion;
 }
 
 module.exports = {
   attachTo,
+  getEnvironment,
   isDevelopment,
   isProduction,
   isTesting,

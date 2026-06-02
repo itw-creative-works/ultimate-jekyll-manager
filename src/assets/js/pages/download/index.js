@@ -38,7 +38,7 @@ const config = {
   selectors: {
     platformButtons: '.platform-btn',
     platformDownloads: '[data-platform]',
-    downloadButtons: '.tab-pane[data-platform] .btn-primary:not([type="submit"])',
+    downloadButtons: '.tab-pane[data-platform] [data-download]',
   },
 };
 

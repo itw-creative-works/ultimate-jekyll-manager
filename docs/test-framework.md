@@ -2,6 +2,28 @@
 
 UJM ships a built-in three-layer test harness. `npx mgr test` discovers framework suites from `<ujm>/dist/test/suites/**/*.js` and consumer suites from `<cwd>/test/**/*.js`, partitions by `layer`, and runs each layer in the right environment. Same shape as the sister harnesses in EM (electron-manager) and BXM (browser-extension-manager).
 
+## 🚫 NEVER mock — test against the real harness (HARD RULE)
+
+**Do NOT hand-roll fake/stub/mock objects.** Every test runs against a real environment, and the harness hands the test the real thing — use it:
+
+- **`build` layer** gets the **real** `Manager` from `require('ultimate-jekyll-manager/build')` — call its real API (`getConfig`, `getUJMConfig`, `getPackage`, `isTesting`, the gulp pure helpers). Never fake a `Manager` whose `getConfig()` returns canned data.
+- **`page` layer** runs in a **real** headless Chromium tab with real `window`/`document` and the harness-provided `window.Configuration`. Drive the real frontend Manager surface; don't stub DOM globals in your test.
+- **`boot` layer** runs against the **real** built `_site/` served over a **real** HTTP origin — exercise the actually-shipped site through Puppeteer.
+- **Pure functions (zero I/O) are the ONLY thing you call directly** — e.g. `mergeJekyllConfigs`, `validateYAMLFrontMatter`, `createTemplateTransform`, `collectTextNodes`. `require()` them and pass plain inputs. That is NOT mocking — there is nothing to mock. The moment a function touches real I/O (config files, the DOM, the HTTP server, an external API), it MUST run against the real harness/build, not a stub.
+
+If you find yourself writing `const mockX = {...}` to satisfy code under test, STOP — use the real context the layer already provides, or (if it's genuinely pure) call it with plain data.
+
+### The ONLY two exceptions where a narrow stub is allowed
+
+Mock **nothing** by default. There are exactly two cases where the real dependency genuinely cannot run in the test environment — and even then, stub the *smallest possible seam* (one method / one object), restore it immediately, and comment *why*:
+
+1. **A side effect that would destroy the test run itself.** If the real call would kill or corrupt the harness — a process-exit, a destructive `_site/` wipe, a recursive re-invocation of the build/test command — stub *that one call* to a no-op, assert the surrounding logic, then restore. You are preventing the harness from terminating mid-assertion, not faking behavior.
+2. **A real dependency the test environment can't provide.** When the real thing only exists from infra you can't stand up in the current layer (an external service with no local equivalent, a second running instance), a unit test may hand minimal inputs to exercise the logic in isolation — but a real-harness test (`page`/`boot`) MUST still cover the wired path where one exists.
+
+If you can run it for real, you must. These exceptions are not a license to unit-test in isolation when a real-harness layer would work.
+
+**External APIs are skipped in-source, NOT mocked.** UJM build/gulp code that would hit the network (e.g. fetching Firebase auth files) short-circuits in its own source when `Manager.isTesting()` is true — it returns early, it does not return canned/mocked data. See [environment-detection.md](environment-detection.md). If a suite has slower live-integration tests, gate them behind the `--integration` flag (`UJ_TEST_INTEGRATION=1`) and run the real path; anything such a test creates externally MUST be cleaned up by the test (`cleanup`/`inspect` teardown) — the runner does not clean external systems.
+
 ## Quick start
 
 ```bash
@@ -135,7 +157,7 @@ The public surface exposed by `require('ultimate-jekyll-manager/build')` include
 - `Manager.logger(name)` — returns a `Logger` instance
 - `Manager.require(path)` — escape hatch when you really need a UJM transitive dep
 
-See [docs/cross-context-helpers.md](cross-context-helpers.md) for `isTesting`/`isDevelopment` semantics.
+See [docs/environment-detection.md](environment-detection.md) for `isTesting`/`isDevelopment` semantics.
 
 ## Reporter contract — `__UJM_TEST__` JSON-line events
 
@@ -162,12 +184,35 @@ Same protocol as EM (`__EM_TEST__`) and BXM (`__BXM_TEST__`). One marker per fra
 - **Excluded**: any directory starting with `_` (handy for shared helpers).
 - **Framework boot suites** are excluded when the cwd's `package.json#name` is not `ultimate-jekyll-manager` — they target UJM's fixture site, not the consumer's. Consumers write their own boot tests in `<cwd>/test/boot/`.
 
+## `test/_init.js` — pre-test lifecycle hook
+
+The runner loads an optional `test/_init.js` from **both** test roots — the framework (`<UJM>/test/_init.js`) and the consumer project (`<cwd>/test/_init.js`) — and runs it **once, before any suite** (it is NOT itself run as a test; the `_`-prefix keeps it out of discovery). Mirrors the same hook in BEM/EM/BXM so all four frameworks share one shape.
+
+The module **must export a function** — `module.exports = (ctx) => ({ ... })` — called with `{ projectRoot }` and returning the hook object. It may declare:
+
+- `async setup({ projectRoot })` — runs once before the suites, e.g. to scaffold a fixture file the boot layer needs.
+
+There is **no `cleanup` hook** and **no `accounts` field** (unlike BEM — these frameworks have no auth/user system): tests clean up after themselves, so there is nothing project-level to tear down.
+
+```javascript
+// <cwd>/test/_init.js
+const fs = require('fs');
+const path = require('path');
+
+module.exports = ({ projectRoot }) => ({
+  async setup() {
+    // Seed any fixture a suite needs before it runs.
+    fs.mkdirSync(path.join(projectRoot, '.temp'), { recursive: true });
+  },
+});
+```
+
 ## Env vars
 
 | Env | Set by | Purpose |
 |---|---|---|
 | `UJ_TEST_MODE=true`         | `npx mgr test` always | Canonical test signal. `Manager.isTesting()` reads this. Use it to short-circuit network calls / prompts / long timers in code that runs during tests. |
-| `UJ_TEST_INTEGRATION=1`     | `--integration` flag | Opt-in flag for slower integration tests if your suite has them |
+| `UJ_TEST_INTEGRATION=1`     | `--integration` flag | Opt-in flag for slower live-integration tests if your suite has them. These run the **real** external path (NOT mocked); anything they create externally MUST be cleaned up by the test. |
 | `UJ_TEST_BOOT_PROJECT`      | Auto-set when UJM tests itself; else manual | Project root the boot runner uses (its `_site/` is the boot target) |
 | `UJ_TEST_BOOT_DIR`          | Manual | Absolute override for the `_site/` directory. Wins over `UJ_TEST_BOOT_PROJECT/_site` and `<cwd>/_site` |
 | `UJ_TEST_DEBUG=1`           | Manual | Verbose Puppeteer console output piped to the parent stdout |
@@ -179,5 +224,5 @@ Puppeteer is a `devDependency` of UJM itself. Consumers don't get it unless they
 ## See also
 
 - [test-boot-layer.md](test-boot-layer.md) — deep dive on boot layer (`_site/` discovery, HTTP server, fixture vs consumer)
-- [cross-context-helpers.md](cross-context-helpers.md) — `Manager.isTesting()` / `isDevelopment()` semantics
+- [environment-detection.md](environment-detection.md) — `Manager.isTesting()` / `isDevelopment()` semantics
 - [cli.md](cli.md) — CLI surface, env-var conventions

@@ -995,6 +995,11 @@ function getIgnoredPages() {
   const socials = config?.socials || {};
   // const downloads = config?.downloads || {};
 
+  // User-configured excludes (translation.exclude). Each entry can be a folder
+  // (e.g. "blog" → /blog/**) or a single page path (e.g. "some-page"). We add
+  // each to BOTH files and folders so it matches either way.
+  const userExcludes = config?.translation?.exclude || [];
+
   const redirectsDir = path.join('dist', 'redirects');
   const redirectFiles = glob(`${redirectsDir}/**/*.html`);
   const redirectPermalinks = [];
@@ -1045,6 +1050,9 @@ function getIgnoredPages() {
 
       // Redirects
       ...redirectPermalinks,
+
+      // User-configured excludes (treated as a page path)
+      ...userExcludes,
     ],
     folders: [
       // Languages
@@ -1055,6 +1063,9 @@ function getIgnoredPages() {
 
       // Firestore auth pages
       '__/auth',
+
+      // User-configured excludes (treated as a folder)
+      ...userExcludes,
     ],
   };
 }

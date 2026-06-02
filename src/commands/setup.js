@@ -39,6 +39,7 @@ module.exports = async function (options) {
   options.checkLocality = options.checkLocality !== 'false';
   options.publishGitHubToken = options.publishGitHubToken !== 'false';
   options.deduplicatePosts = options.deduplicatePosts !== 'false';
+  options.removeLegacyTeamMembers = options.removeLegacyTeamMembers !== 'false';
   options.migrate = options.migrate !== 'false';
 
   // Quick mode: skip slow/network operations
@@ -136,6 +137,11 @@ module.exports = async function (options) {
   // Deduplicate posts (remove duplicate posts with same slug but different dates)
   if (options.deduplicatePosts) {
     await deduplicatePosts();
+  }
+
+  // Remove legacy default team members (first-name-only format, e.g. team/alex)
+  if (options.removeLegacyTeamMembers) {
+    await removeLegacyTeamMembers();
   }
 };
 
@@ -524,6 +530,41 @@ async function deduplicatePosts() {
     logger.log(`Report saved to: ${reportPath}`);
   } else {
     logger.log('No duplicate posts found');
+  }
+}
+
+async function removeLegacyTeamMembers() {
+  // Legacy default team members that used the first-name-only format.
+  // These shipped before team members were renamed to first-last (e.g. team/alex -> team/alex-raeburn).
+  const legacyTeamMembers = ['alex'];
+
+  logger.log('Checking for legacy default team members to remove...');
+
+  let removedCount = 0;
+
+  legacyTeamMembers.forEach((slug) => {
+    // The _team collection file (any markdown/html extension)
+    const memberFiles = glob(`src/_team/${slug}.{md,markdown,html}`, { nodir: true });
+
+    memberFiles.forEach((filePath) => {
+      jetpack.remove(filePath);
+      logger.log(`  ✓ Removed legacy team member: ${filePath}`);
+      removedCount++;
+    });
+
+    // The associated image directory (src/assets/images/team/<slug>)
+    const imageDir = path.join(process.cwd(), 'src', 'assets', 'images', 'team', slug);
+
+    if (jetpack.exists(imageDir)) {
+      jetpack.remove(imageDir);
+      logger.log(`  ✓ Removed legacy team member image directory: team/${slug}`);
+    }
+  });
+
+  if (removedCount > 0) {
+    logger.log(logger.format.green(`✓ Removed ${removedCount} legacy team member(s)`));
+  } else {
+    logger.log('No legacy team members found');
   }
 }
 

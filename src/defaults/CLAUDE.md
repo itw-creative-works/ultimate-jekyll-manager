@@ -29,7 +29,11 @@ npm run build       # production build (UJ_BUILD_MODE=true): clean → setup →
 npm run deploy      # build → `npu sync --message='Deploy'` (publishes _site/)
 npx mgr test        # run framework + project test suites (build / page / boot layers)
 npx mgr audit       # HTML validation + spellcheck + optional Lighthouse
+npx mgr install dev  # use LOCAL ultimate-jekyll-manager source (to test framework edits)
+npx mgr install live # restore the published ultimate-jekyll-manager from npm
 ```
+
+> Editing the UJM framework source while working here? Run `npx mgr install dev` so this project picks up your uncommitted framework changes (it otherwise uses its installed `node_modules/ultimate-jekyll-manager`). Run `npx mgr install live` to switch back.
 
 ## Where things live
 
@@ -72,7 +76,7 @@ At build time, `require('ultimate-jekyll-manager/build')` exposes:
 - `Manager.getConfig(type)` — read `_config.yml` (`'project'` or `'main'`)
 - `Manager.getPackage(type)` — read `package.json` (`'project'` or `'main'`)
 - `Manager.getUJMConfig()` — read `config/ultimate-jekyll-manager.json`
-- `Manager.getEnvironment()` — `'development'` or `'production'`
+- `Manager.getEnvironment()` — `'development' | 'testing' | 'production'` (mutually exclusive; testing wins). Gate side effects on the intentional check (`isProduction()` for prod-only; `isDevelopment() || isTesting()` for local-or-test) — never `!isDevelopment()`.
 - `Manager.isBuildMode()` / `isQuickMode()` / `isServer()` / `actLikeProduction()` — env-gated flags
 - `Manager.logger(name)` — timestamped logger instance
 - `Manager.require(path)` — escape hatch for UJM transitive deps (use sparingly)
