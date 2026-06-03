@@ -268,31 +268,28 @@ function setupScripts() {
 }
 
 async function ensureCoreFiles() {
-  if (jetpack.exists('src/_config.yml')) {
-    return;
+  // First-time setup: scaffold core files that must exist before gulp can load
+  if (!jetpack.exists('src/_config.yml')) {
+    logger.log('No src/_config.yml found. Creating default config file...');
+
+    const coreFiles = [
+      'src/_config.yml',
+      'config/ultimate-jekyll-manager.json',
+    ];
+
+    coreFiles.forEach((relPath) => {
+      const sourcePath = path.join(rootPathPackage, 'dist/defaults', relPath);
+      const targetPath = path.join(rootPathProject, relPath);
+      jetpack.copy(sourcePath, targetPath, { overwrite: false });
+      logger.log(`Copied default ${relPath}`);
+    });
+
+    // Inject new config into config variable
+    config = Manager.getConfig('project');
   }
 
-  logger.log('No src/_config.yml found. Creating default config file...');
-
-  // Files that must exist BEFORE the gulpfile loads. Several task modules
-  // (sass/distribute/imagemin) read these at module top-level, so a fresh
-  // consumer can't even invoke `gulp defaults` without them.
-  const coreFiles = [
-    'src/_config.yml',
-    'config/ultimate-jekyll-manager.json',
-  ];
-
-  coreFiles.forEach((relPath) => {
-    const sourcePath = path.join(rootPathPackage, 'dist/defaults', relPath);
-    const targetPath = path.join(rootPathProject, relPath);
-    jetpack.copy(sourcePath, targetPath, { overwrite: false });
-    logger.log(`Copied default ${relPath}`);
-  });
-
-  // Inject new config into config variable
-  config = Manager.getConfig('project');
-
-  // Run gulp defaults task since this is likely the first run
+  // Always run gulp defaults — merges new framework keys into .env, .gitignore,
+  // CLAUDE.md, and config files without overwriting user values
   await execute('UJ_BUILD_MODE=true npm run gulp -- defaults', { log: true });
 }
 

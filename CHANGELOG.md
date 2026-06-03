@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.2] - 2026-06-02
+
+### Fixed
+
+- **`npx mgr setup` now merges new `.env` keys into existing consumer projects.** Previously, `ensureCoreFiles()` returned early when `src/_config.yml` existed, skipping the `gulp defaults` task that handles `.env` merging. New framework keys (like `BACKEND_MANAGER_OPENAI_API_KEY`) were never added to consumers that had already run setup once.
+
+---
 ## [1.6.1] - 2026-06-02
 
 ### Changed
