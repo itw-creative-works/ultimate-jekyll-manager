@@ -15,6 +15,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.3] - 2026-06-03
+
+### Changed
+
+- **Workflow template dynamically generates secrets from `.env`.** `defaults.js` reads the default `_.env`, extracts all key names, and produces a `{ github.secrets }` template variable — no more hardcoding individual secrets in `build.yml`.
+- **`publishSecrets()` replaces `publishGitHubToken()` in setup.** Now reads the consumer's `.env` and publishes ALL non-empty keys as GitHub Actions repo secrets (not just `GH_TOKEN`).
+
+### Added
+
+- **Country flag SVGs:** id, in, ph, pk, ru, vn (modern-square style).
+- **Auto-create `pages/` dir for custom themes** in webpack.js — prevents `Module not found: __theme__/pages` error when a consumer theme lacks a `pages/` directory.
+
+### Removed
+
+- **`BACKEND_MANAGER_KEY`** removed from workflow template (replaced by dynamic `.env` secrets).
+
+---
 ## [1.6.2] - 2026-06-02
 
 ### Fixed

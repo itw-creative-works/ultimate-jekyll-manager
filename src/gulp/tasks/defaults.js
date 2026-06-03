@@ -30,6 +30,19 @@ const ujConfig = jetpack.exists(ujConfigPath) ? JSON5.parse(jetpack.read(ujConfi
 // const cleanVersions = { versions: Manager.getCleanVersions()};
 const cleanVersions = { versions: package.engines };
 
+// Build GitHub Actions secrets env block from default .env
+const defaultEnvPath = path.join(rootPathPackage, 'dist/defaults/_.env');
+const githubSecrets = (() => {
+  const content = jetpack.exists(defaultEnvPath) ? jetpack.read(defaultEnvPath) : '';
+  const lines = content.split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith('#') && l.includes('='))
+    .map(l => l.split('=')[0].trim())
+    .map(key => `${key}: \${{ secrets.${key} }}`);
+
+  return { github: { secrets: lines.join('\n  ') } };
+})();
+
 // File MAP
 const FILE_MAP = {
   // Files to skip overwrite
@@ -116,7 +129,7 @@ const FILE_MAP = {
 
   // Files to run templating on
   '.github/workflows/build.yml': {
-    template: { ...cleanVersions, ...ujConfig },
+    template: { ...cleanVersions, ...ujConfig, ...githubSecrets },
   },
   '.nvmrc': {
     template: cleanVersions,

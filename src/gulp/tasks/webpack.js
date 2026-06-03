@@ -158,7 +158,10 @@ function getSettings() {
           const projectThemePath = path.resolve(rootPathProject, 'src/assets/themes', config.theme.id);
           const ujmThemePath = path.resolve(rootPathPackage, 'dist/assets/themes', config.theme.id);
           // Use project theme if it exists, otherwise fall back to UJM theme
-          return jetpack.exists(projectThemePath) ? projectThemePath : ujmThemePath;
+          const resolved = jetpack.exists(projectThemePath) ? projectThemePath : ujmThemePath;
+          // Ensure pages/ directory exists so dynamic imports don't fail
+          jetpack.dir(path.join(resolved, 'pages'));
+          return resolved;
         })(),
       },
       // Add module resolution paths for local web-manager

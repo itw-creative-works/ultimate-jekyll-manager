@@ -129,9 +129,9 @@ module.exports = async function (options) {
     checkLocality();
   }
 
-  // Publish GH_TOKEN as repository secret
+  // Publish .env secrets as repository secrets
   if (options.publishGitHubToken) {
-    await publishGitHubToken();
+    await publishSecrets();
   }
 
   // Deduplicate posts (remove duplicate posts with same slug but different dates)
@@ -389,7 +389,7 @@ function checkLocality() {
   }
 }
 
-async function publishGitHubToken() {
+async function publishSecrets() {
   if (!process.env.GH_TOKEN) {
     logger.warn('GH_TOKEN not found in environment variables. Skipping secret publication.');
     return;
@@ -401,37 +401,67 @@ async function publishGitHubToken() {
   }
 
   if (Manager.isBuildMode()) {
-    logger.log('Skipping GH_TOKEN publication in build mode.');
+    logger.log('Skipping secret publication in build mode.');
+    return;
+  }
+
+  // Read .env and collect all keys with non-empty values
+  const envPath = path.join(process.cwd(), '.env');
+  if (!jetpack.exists(envPath)) {
+    logger.warn('.env file not found. Skipping secret publication.');
+    return;
+  }
+
+  const envContent = jetpack.read(envPath);
+  const secrets = {};
+
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      return;
+    }
+    const match = trimmed.match(/^([A-Z_][A-Z0-9_]*)=["']?(.+?)["']?$/);
+    if (match && match[2]) {
+      secrets[match[1]] = match[2];
+    }
+  });
+
+  const secretNames = Object.keys(secrets);
+  if (!secretNames.length) {
+    logger.warn('No secrets with values found in .env. Skipping secret publication.');
     return;
   }
 
   try {
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-
     const octokit = new Octokit({ auth: process.env.GH_TOKEN });
 
-    logger.log(`Publishing GH_TOKEN as repository secret for ${owner}/${repo}...`);
+    logger.log(`Publishing ${secretNames.length} secret(s) for ${owner}/${repo}: ${secretNames.join(', ')}`);
 
     await sodium.ready;
 
     const { data: publicKeyData } = await octokit.actions.getRepoPublicKey({ owner, repo });
-
-    const secretBytes = Buffer.from(process.env.GH_TOKEN);
     const keyBytes = Buffer.from(publicKeyData.key, 'base64');
-    const encryptedBytes = sodium.crypto_box_seal(secretBytes, keyBytes);
-    const encryptedValue = Buffer.from(encryptedBytes).toString('base64');
 
-    await octokit.actions.createOrUpdateRepoSecret({
-      owner,
-      repo,
-      secret_name: 'GH_TOKEN',
-      encrypted_value: encryptedValue,
-      key_id: publicKeyData.key_id,
-    });
+    for (const [name, value] of Object.entries(secrets)) {
+      const secretBytes = Buffer.from(value);
+      const encryptedBytes = sodium.crypto_box_seal(secretBytes, keyBytes);
+      const encryptedValue = Buffer.from(encryptedBytes).toString('base64');
 
-    logger.log(`Successfully published GH_TOKEN as repository secret`);
+      await octokit.actions.createOrUpdateRepoSecret({
+        owner,
+        repo,
+        secret_name: name,
+        encrypted_value: encryptedValue,
+        key_id: publicKeyData.key_id,
+      });
+
+      logger.log(`  ✅ ${name}`);
+    }
+
+    logger.log(`Successfully published ${secretNames.length} secret(s)`);
   } catch (error) {
-    logger.error(`Failed to publish GH_TOKEN as repository secret: ${error.message}`);
+    logger.error(`Failed to publish secrets: ${error.message}`);
   }
 }
 

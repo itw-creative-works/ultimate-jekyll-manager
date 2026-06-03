@@ -117,6 +117,21 @@ $el.innerHTML = '<i class="fa-solid fa-check"></i> Text';
 $el.innerHTML = `${getPrerenderedIcon('circle-check', 'fa-sm me-1')} Text`;
 ```
 
+## Country Flag Icons
+
+UJM ships rounded-square country flag SVGs at `assets/icons/flags/modern-square/`. The `{% uj_icon %}` tag resolves language codes to country flags via a `LANGUAGE_TO_COUNTRY` mapping in [jekyll-uj-powertools](https://github.com/itw-creative-works/jekyll-uj-powertools) (`lib/tags/icon.rb`). For example, `{% uj_icon "es" %}` resolves to `es.svg` (Spain), and `{% uj_icon "ja" %}` maps `ja` → `jp` → `jp.svg` (Japan).
+
+Most flags are from a Flaticon rounded-square icon pack. The following 6 were hand-created to match the pack's style:
+
+- `in.svg` (India) — saffron/white/green tricolor + Ashoka Chakra
+- `ru.svg` (Russia) — white/blue/red tricolor
+- `id.svg` (Indonesia) — red/white bicolor
+- `vn.svg` (Vietnam) — red background + yellow star
+- `pk.svg` (Pakistan) — green + white stripe, crescent & star
+- `ph.svg` (Philippines) — blue/red + white triangle, sun & stars
+
+When adding new flags, match the existing style: 152×152 viewBox, `clipPath` using the shared rounded-square path, flat/simplified design.
+
 ## Benefits
 
 - Icons are rendered server-side with proper Font Awesome classes
