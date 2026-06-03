@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.4] - 2026-06-03
+
+### Fixed
+
+- **Workflow template `{ github.secrets }` clobbered `{ github.workflows.build.schedule }`.** Renamed to flat `{ githubSecrets }` key to avoid namespace collision in the template spread.
+
+---
 ## [1.6.3] - 2026-06-03
 
 ### Changed

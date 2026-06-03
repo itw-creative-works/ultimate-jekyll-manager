@@ -18,7 +18,7 @@ concurrency:
 #   contents: write
 
 env:
-  { github.secrets }
+  { githubSecrets }
   RUBY_VERSION: '{ versions.ruby }'
   BUNDLER_VERSION: '{ versions.bundler }'
   NODE_VERSION: '{ versions.node }'

@@ -40,7 +40,7 @@ const githubSecrets = (() => {
     .map(l => l.split('=')[0].trim())
     .map(key => `${key}: \${{ secrets.${key} }}`);
 
-  return { github: { secrets: lines.join('\n  ') } };
+  return { githubSecrets: lines.join('\n  ') };
 })();
 
 // File MAP
