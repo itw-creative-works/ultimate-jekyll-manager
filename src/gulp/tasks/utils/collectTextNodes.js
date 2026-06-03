@@ -16,6 +16,11 @@ const collectTextNodes = ($, options) => {
       return;
     }
 
+    // Skip elements (and their children) marked with data-uj-no-translate
+    if (node.closest('[data-uj-no-translate]').length) {
+      return;
+    }
+
     // Handle <title>
     if (node.is('title')) {
       const i = textNodes.length;

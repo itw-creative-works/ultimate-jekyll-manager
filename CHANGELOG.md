@@ -15,6 +15,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.1] - 2026-06-02
+
+### Changed
+
+- **Translation system overhauled: JSON array format, gpt-5.4-nano model, .env API key.** Replaced tagged text `[0]...[/0]` format with JSON arrays (eliminates tag corruption). Upgraded from `gpt-4.1-mini` to `gpt-5.4-nano` (3.5x cheaper). API key now read from `BACKEND_MANAGER_OPENAI_API_KEY` in `.env` instead of remote `fetchOpenAIKey()`. Uses GPT-5+ Responses API (`developer` role, `reasoning: { effort: 'low' }`).
+- **Translation concurrency: node-powertools `queue()` replaces batched delays.** Removed 25-page batches with 10s sleeps; now uses `queue({ concurrency: 5 })` for steady throughput.
+- **Translation retries simplified.** Removed recursive subdivision system. On JSON array length mismatch, retries up to `MAX_RETRIES` (2) with file/language context in logs.
+
+### Added
+
+- **`data-uj-no-translate` HTML attribute** — marks DOM elements (and children) to skip during translation. Applied to country and phone code `<select>` dropdowns on the account page, reducing account.html from ~1241 to ~454 translatable strings.
+- **`BACKEND_MANAGER_OPENAI_API_KEY`** added to default `.env` template.
+- **Prompt cache HIT/MISS logging** with entry counts per language.
+- **`IGNORE_EXCEPTIONS`** — allows specific pages through folder-level exclusions (e.g. `test/translation.html` survives the `test/` folder exclusion).
+
+### Removed
+
+- **`fetchOpenAIKey()`** — remote API key fetch from `api.itwcreativeworks.com` removed.
+- **Subdivision retry system** (`subdivideAndTranslate`) — replaced by simple length-mismatch retry.
+- **`test/`, `team/`, `updates/` folders** excluded from translation by default.
+
+---
 ## [1.6.0] - 2026-06-02
 
 ### Changed
