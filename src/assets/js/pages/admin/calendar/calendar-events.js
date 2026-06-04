@@ -47,7 +47,11 @@ export default class CalendarEvents {
       this._setType('email');
       this._resetRecurrence();
       document.getElementById('campaign-modal-title-text').textContent = 'Create Campaign';
+      document.getElementById('campaign-local-time-row').style.display = 'none';
     });
+
+    document.getElementById('campaign-date').addEventListener('input', () => this._updateLocalTimeHint());
+    document.getElementById('campaign-time').addEventListener('input', () => this._updateLocalTimeHint());
   }
 
   _initResultsModal() {
@@ -168,6 +172,8 @@ export default class CalendarEvents {
     const $patternSelect = document.getElementById('campaign-recurrence-pattern');
     const $dayHint = document.getElementById('recurrence-day-hint');
     const $monthRow = document.getElementById('recurrence-month-row');
+    const $nthRow = document.getElementById('recurrence-nth-row');
+    const $dayInput = document.getElementById('campaign-recurrence-day');
 
     $checkbox.addEventListener('change', () => {
       $fields.classList.toggle('d-none', !$checkbox.checked);
@@ -175,14 +181,21 @@ export default class CalendarEvents {
 
     $patternSelect.addEventListener('change', () => {
       const pattern = $patternSelect.value;
-      // Update day hint based on pattern
-      if (pattern === 'weekly') {
+
+      const isWeekday = pattern === 'weekly' || pattern === 'monthly-weekday';
+
+      if (isWeekday) {
         $dayHint.textContent = '(of week, 0=Sun)';
+        $dayInput.min = 0;
+        $dayInput.max = 6;
       } else {
         $dayHint.textContent = '(of month)';
+        $dayInput.min = 1;
+        $dayInput.max = 31;
       }
-      // Show month field only for yearly
+
       $monthRow.classList.toggle('d-none', pattern !== 'yearly');
+      $nthRow.classList.toggle('d-none', pattern !== 'monthly-weekday');
     });
   }
 
@@ -226,6 +239,7 @@ export default class CalendarEvents {
     // Pre-fill date and time
     document.getElementById('campaign-date').value = date || '';
     document.getElementById('campaign-time').value = time || '09:00';
+    this._updateLocalTimeHint();
 
     this._getEditorModal().show();
   }
@@ -359,23 +373,32 @@ export default class CalendarEvents {
     const $recurrenceFields = document.getElementById('recurrence-fields');
 
     if (recurrence) {
+      const pattern = recurrence.pattern || 'monthly';
+      const isWeekday = pattern === 'weekly' || pattern === 'monthly-weekday';
+
       $recurringCheckbox.checked = true;
       $recurrenceFields.classList.remove('d-none');
-      document.getElementById('campaign-recurrence-pattern').value = recurrence.pattern || 'monthly';
+      document.getElementById('campaign-recurrence-pattern').value = pattern;
       document.getElementById('campaign-recurrence-hour').value = recurrence.hour || 0;
+      document.getElementById('campaign-recurrence-minute').value = recurrence.minute || 0;
       document.getElementById('campaign-recurrence-day').value = recurrence.day || 1;
+      document.getElementById('campaign-recurrence-nth').value = recurrence.nth || 2;
       document.getElementById('campaign-recurrence-month').value = recurrence.month || 1;
 
-      // Show month row if yearly
-      document.getElementById('recurrence-month-row').classList.toggle('d-none', recurrence.pattern !== 'yearly');
+      document.getElementById('recurrence-month-row').classList.toggle('d-none', pattern !== 'yearly');
+      document.getElementById('recurrence-nth-row').classList.toggle('d-none', pattern !== 'monthly-weekday');
 
-      // Update day hint
       const $dayHint = document.getElementById('recurrence-day-hint');
-      $dayHint.textContent = recurrence.pattern === 'weekly' ? '(of week, 0=Sun)' : '(of month)';
+      const $dayInput = document.getElementById('campaign-recurrence-day');
+      $dayHint.textContent = isWeekday ? '(of week, 0=Sun)' : '(of month)';
+      $dayInput.min = isWeekday ? 0 : 1;
+      $dayInput.max = isWeekday ? 6 : 31;
     } else {
       $recurringCheckbox.checked = false;
       $recurrenceFields.classList.add('d-none');
     }
+
+    this._updateLocalTimeHint();
   }
 
   _setType(type) {
@@ -384,6 +407,35 @@ export default class CalendarEvents {
       $radio.checked = true;
       $radio.dispatchEvent(new Event('change'));
     }
+  }
+
+  _updateLocalTimeHint() {
+    const $row = document.getElementById('campaign-local-time-row');
+    const $hint = document.getElementById('campaign-time-local');
+    const date = document.getElementById('campaign-date').value;
+    const time = document.getElementById('campaign-time').value;
+
+    if (!date || !time) {
+      $row.style.display = 'none';
+      return;
+    }
+
+    const [y, mo, d] = date.split('-').map(Number);
+    const [h, m] = time.split(':').map(Number);
+    const utc = new Date(Date.UTC(y, mo - 1, d, h, m));
+
+    const localStr = utc.toLocaleString('en', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+
+    $hint.textContent = `Local: ${localStr}`;
+    $row.style.display = '';
   }
 
   // ============================================
@@ -498,12 +550,17 @@ export default class CalendarEvents {
     // Recurrence
     if (c.recurring) {
       const rec = c.recurrence || {};
+      const pattern = rec.pattern || 'monthly';
       payload.recurrence = {
-        pattern: rec.pattern || 'monthly',
+        pattern,
         hour: parseInt(rec.hour, 10) || 0,
+        minute: parseInt(rec.minute, 10) || 0,
         day: parseInt(rec.day, 10) || 1,
       };
-      if (rec.pattern === 'yearly') {
+      if (pattern === 'monthly-weekday') {
+        payload.recurrence.nth = parseInt(rec.nth, 10) || 1;
+      }
+      if (pattern === 'yearly') {
         payload.recurrence.month = parseInt(rec.month, 10) || 1;
       }
     }
@@ -616,8 +673,13 @@ export default class CalendarEvents {
 
     // Update recurrence metadata for the backend cron
     recurrence.hour = d.getUTCHours();
+    recurrence.minute = d.getUTCMinutes();
     if (recurrence.pattern === 'weekly') {
       recurrence.day = d.getUTCDay();
+    } else if (recurrence.pattern === 'monthly-weekday') {
+      recurrence.day = d.getUTCDay();
+      // Calculate which occurrence of this weekday falls on this date (1st, 2nd, 3rd, 4th)
+      recurrence.nth = Math.ceil(d.getUTCDate() / 7);
     } else if (recurrence.pattern === 'monthly' || recurrence.pattern === 'quarterly') {
       recurrence.day = d.getUTCDate();
     } else if (recurrence.pattern === 'yearly') {
@@ -735,9 +797,12 @@ export default class CalendarEvents {
     document.getElementById('recurrence-fields').classList.add('d-none');
     document.getElementById('campaign-recurrence-pattern').value = 'monthly';
     document.getElementById('campaign-recurrence-hour').value = '14';
+    document.getElementById('campaign-recurrence-minute').value = '0';
     document.getElementById('campaign-recurrence-day').value = '1';
+    document.getElementById('campaign-recurrence-nth').value = '2';
     document.getElementById('campaign-recurrence-month').value = '1';
     document.getElementById('recurrence-month-row').classList.add('d-none');
+    document.getElementById('recurrence-nth-row').classList.add('d-none');
   }
 
 }

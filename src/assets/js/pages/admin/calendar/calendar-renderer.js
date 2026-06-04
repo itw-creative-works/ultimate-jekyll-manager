@@ -110,10 +110,9 @@ export default class CalendarRenderer {
       html += `<div class="calendar-cell-date">${cell.date.getUTCDate()}</div>`;
       html += '<div class="calendar-cell-events">';
 
-      const maxVisible = 3;
-      campaigns.slice(0, maxVisible).forEach((c) => { html += this._renderEventPill(c); });
-      if (campaigns.length > maxVisible) {
-        html += `<div class="calendar-cell-more" data-date="${dateStr}">+${campaigns.length - maxVisible} more</div>`;
+      campaigns.forEach((c) => { html += this._renderEventPill(c); });
+      if (campaigns.length > 0) {
+        html += `<div class="calendar-cell-more" data-date="${dateStr}" style="display:none"></div>`;
       }
 
       html += '</div></div>';
@@ -121,9 +120,61 @@ export default class CalendarRenderer {
     html += '</div>';
 
     this.$grid.innerHTML = html;
+    this._fitMonthEvents();
     this._bindCellClicks();
     this._bindCampaignClicks();
     this._bindDragAndDrop();
+  }
+
+  _fitMonthEvents() {
+    this.$grid.querySelectorAll('.calendar-cell').forEach(($cell) => {
+      const $events = $cell.querySelector('.calendar-cell-events');
+      if (!$events) { return; }
+
+      const $pills = $events.querySelectorAll('.calendar-event');
+      const $more = $events.querySelector('.calendar-cell-more');
+      if ($pills.length === 0) { return; }
+
+      // Available height = cell inner height minus everything above the events container
+      const cellRect = $cell.getBoundingClientRect();
+      const eventsRect = $events.getBoundingClientRect();
+      const available = cellRect.bottom - eventsRect.top;
+
+      const pillHeight = $pills[0].getBoundingClientRect().height;
+      const gap = 1;
+
+      // Measure "+more" line height
+      if ($more) {
+        $more.textContent = '+1 more';
+        $more.style.display = '';
+      }
+      const moreLineHeight = $more ? $more.getBoundingClientRect().height + gap : 0;
+      if ($more) { $more.style.display = 'none'; }
+
+      let shown = 0;
+
+      for (let i = 0; i < $pills.length; i++) {
+        const heightSoFar = (shown + 1) * pillHeight + shown * gap;
+        const remaining = $pills.length - i - 1;
+        const wouldNeedMore = remaining > 0;
+        const totalNeeded = heightSoFar + (wouldNeedMore ? moreLineHeight : 0);
+
+        if (totalNeeded <= available) {
+          $pills[i].style.display = '';
+          shown++;
+        } else {
+          $pills[i].style.display = 'none';
+        }
+      }
+
+      if ($more) {
+        const hidden = $pills.length - shown;
+        if (hidden > 0) {
+          $more.textContent = `+${hidden} more`;
+          $more.style.display = '';
+        }
+      }
+    });
   }
 
   // ============================================
@@ -138,12 +189,6 @@ export default class CalendarRenderer {
     weekDates.forEach((date) => {
       const isToday = core.isToday(date);
       html += `<div class="calendar-week-header-cell ${isToday ? 'calendar-cell--today' : ''}">${DAY_ABBREVS[date.getUTCDay()]}<span class="calendar-week-header-date">${date.getUTCDate()}</span></div>`;
-    });
-    html += '</div>';
-
-    html += '<div class="calendar-week-allday"><div class="calendar-week-time-label">all-day</div>';
-    weekDates.forEach((date) => {
-      html += `<div class="calendar-cell" data-date="${formatDateUTC(date)}" data-allday="true" style="min-height:auto;border-bottom:none;"></div>`;
     });
     html += '</div>';
 
@@ -277,7 +322,7 @@ export default class CalendarRenderer {
         html += `<tr class="calendar-list-date-header"><td colspan="4">${dayName}, ${monthName} ${d.getUTCDate()}, ${d.getUTCFullYear()}${todayBadge}</td></tr>`;
       }
 
-      const timeStr = this._formatTime(formatTimeUTC(campaign.sendAt));
+      const timeStr = this._formatLocalTime(campaign.sendAt);
       const name = (campaign.settings && campaign.settings.name) || 'Untitled';
       const statusStyle = core.campaignStatusStyle(campaign);
       const isRecurring = core.isRecurring(campaign);
@@ -320,7 +365,7 @@ export default class CalendarRenderer {
 
   _renderEventPill(campaign) {
     const core = this.core;
-    const timeStr = this._formatTime(formatTimeUTC(campaign.sendAt));
+    const timeStr = this._formatLocalTime(campaign.sendAt);
     const color = core.campaignColor(campaign);
     const statusStyle = core.campaignStatusStyle(campaign);
     const name = (campaign.settings && campaign.settings.name) || 'Untitled';
@@ -356,11 +401,11 @@ export default class CalendarRenderer {
 
   _renderTimeEvent(campaign, layout) {
     const core = this.core;
-    const time = formatTimeUTC(campaign.sendAt);
-    const [hours, minutes] = time.split(':').map(Number);
+    const utcTime = formatTimeUTC(campaign.sendAt);
+    const [hours, minutes] = utcTime.split(':').map(Number);
     const topPx = (hours * 60 + minutes);
     const heightPx = Math.max(core.campaignDuration(), 15);
-    const timeStr = this._formatTime(time);
+    const timeStr = this._formatLocalTime(campaign.sendAt);
     const color = core.campaignColor(campaign);
     const statusStyle = core.campaignStatusStyle(campaign);
     const name = (campaign.settings && campaign.settings.name) || 'Untitled';
@@ -452,7 +497,7 @@ export default class CalendarRenderer {
   // ============================================
   _startNowLine() {
     clearInterval(this._nowLineInterval);
-    if (this.core.viewMode !== 'day' && this.core.viewMode !== 'week') {
+    if (this.core.viewMode !== 'day' && this.core.viewMode !== 'week' && this.core.viewMode !== 'month') {
       return;
     }
     this._updateNowLine();
@@ -466,6 +511,7 @@ export default class CalendarRenderer {
     const todayStr = formatDateUTC(now);
     const minutesSinceMidnight = now.getUTCHours() * 60 + now.getUTCMinutes();
 
+    // Week/day views: absolute position in px (1px per minute)
     const $cols = this.$grid.querySelectorAll(
       `.calendar-week-day-col[data-date="${todayStr}"], .calendar-day-col[data-date="${todayStr}"]`
     );
@@ -476,6 +522,24 @@ export default class CalendarRenderer {
       $line.style.top = `${minutesSinceMidnight}px`;
       $col.appendChild($line);
     });
+
+    // Month view: position on the grid container so the dot isn't clipped by cell overflow
+    if (this.core.viewMode === 'month') {
+      const $cell = this.$grid.querySelector(`.calendar-cell[data-date="${todayStr}"]`);
+      if ($cell) {
+        const gridRect = this.$grid.getBoundingClientRect();
+        const cellRect = $cell.getBoundingClientRect();
+        const pct = minutesSinceMidnight / 1440;
+        const topPx = (cellRect.top - gridRect.top) + (cellRect.height * pct);
+
+        const $line = document.createElement('div');
+        $line.className = 'calendar-now-line';
+        $line.style.top = `${topPx}px`;
+        $line.style.left = `${cellRect.left - gridRect.left}px`;
+        $line.style.width = `${cellRect.width}px`;
+        this.$grid.appendChild($line);
+      }
+    }
   }
 
   // ============================================
@@ -675,6 +739,15 @@ export default class CalendarRenderer {
   _formatTime(timeStr) {
     if (!timeStr) { return ''; }
     const [h, m] = timeStr.split(':').map(Number);
+    const period = h >= 12 ? 'p' : 'a';
+    const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${display}${m > 0 ? ':' + String(m).padStart(2, '0') : ''}${period}`;
+  }
+
+  _formatLocalTime(sendAt) {
+    const d = new Date(sendAt * 1000);
+    const h = d.getHours();
+    const m = d.getMinutes();
     const period = h >= 12 ? 'p' : 'a';
     const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
     return `${display}${m > 0 ? ':' + String(m).padStart(2, '0') : ''}${period}`;

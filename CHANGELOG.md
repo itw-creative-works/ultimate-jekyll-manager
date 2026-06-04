@@ -17,15 +17,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 ## [1.6.5] - 2026-06-04
 
+### Added
+
+- **Dynamic event fitting in month view.** Calendar cells now show as many events as physically fit instead of a hardcoded max of 3; "+N more" only appears when events genuinely overflow.
+- **Local time display on calendar events.** Event pills show local time (data layer remains UTC). Editor modal shows a local date+time badge below the UTC inputs.
+- **Hover states on event pills.** Brightness + box-shadow effect on hover for month, week, and day views.
+- **Now line on month view.** Red progress line shows current time of day in today's cell, with dot rendered above cell borders.
+- **Left tab accent on all event pills.** Consistent dark left border matches week/day view style.
+- **Monthly-weekday (Nth weekday) recurrence pattern.** Calendar supports "2nd Wednesday of every month" style recurring campaigns with calendar-relative date stepping.
+
 ### Changed
 
 - **Per-string translation caching replaces all-or-nothing page caching.** Each page's cache is now a `hash→translation` map (`es/pages/index.html.json`). Only strings whose content hash changed are sent to the API — unchanged strings are served from cache. Dramatically reduces API calls and cost on incremental builds.
 - **Prompt hash mismatch now wipes page cache files** (not just meta entries) for a clean slate.
 - **Translation stats now track cached vs new strings** instead of whole-page hit/miss.
+- **Outside-month calendar cells** now fade only content (date number + events), keeping borders at full opacity for consistent grid lines.
+- **Imagemin constants renamed** (`MAX_SOURCE_DIMENSION` → `IMAGE_MAX_DIMENSION`) and default max dimension lowered from 4096 to 2048.
 
 ### Removed
 
 - **`RECHECK_DAYS`** — per-string content hashes make age-based invalidation unnecessary.
+- **All-day row** removed from week view (no all-day event concept in marketing calendar).
 
 ---
 ## [1.6.4] - 2026-06-03

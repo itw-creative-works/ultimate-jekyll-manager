@@ -17,8 +17,8 @@ const ujmConfig = Manager.getUJMConfig();
 // Settings
 const CACHE_DIR = '.temp/cache/imagemin';
 const CACHE_BRANCH = 'cache-uj-imagemin';
-const MAX_SOURCE_DIMENSION = 4096;
-const REWRITE_QUALITY = 80;
+const IMAGE_MAX_DIMENSION = 2048;
+const IMAGE_JPEG_QUALITY = 80;
 
 // Variables
 let githubCache;
@@ -129,7 +129,7 @@ async function imagemin(complete) {
   }
 
   // Optionally rewrite oversized source images on disk (opt-in via UJ_IMAGEMIN_REWRITE_SOURCES=true).
-  // Caps longest dimension at MAX_SOURCE_DIMENSION so gulp-responsive-modern + sharp don't stall
+  // Caps longest dimension at IMAGE_MAX_DIMENSION so gulp-responsive-modern + sharp don't stall
   // on huge inputs. Runs BEFORE determineFilesToProcess so cached-but-oversized images get
   // rewritten too; the new on-disk content hashes differently than the stored meta hash, so
   // determineFilesToProcess naturally picks the rewritten image up for re-optimization.
@@ -305,7 +305,7 @@ module.exports = series(
 // Helper Functions
 // ============================================================================
 
-// Rewrite oversized source images in place, capping longest dimension at MAX_SOURCE_DIMENSION.
+// Rewrite oversized source images in place, capping longest dimension at IMAGE_MAX_DIMENSION.
 // Only affects files whose decoded longest side exceeds the cap. Cache invalidation is implicit:
 // the new content hashes differently than the previously-cached entry, so determineFilesToProcess
 // will pick affected files up for re-optimization on its own.
@@ -315,14 +315,14 @@ async function rewriteOversizedSources(files) {
     return;
   }
 
-  logger.log(`🔍 Checking ${responsiveFiles.length} source images for oversize (>${MAX_SOURCE_DIMENSION}px longest side)...`);
+  logger.log(`🔍 Checking ${responsiveFiles.length} source images for oversize (>${IMAGE_MAX_DIMENSION}px longest side)...`);
 
   let rewritten = 0;
   for (const file of responsiveFiles) {
     const metadata = await sharp(file).metadata();
     const longest = Math.max(metadata.width || 0, metadata.height || 0);
 
-    if (longest <= MAX_SOURCE_DIMENSION) {
+    if (longest <= IMAGE_MAX_DIMENSION) {
       continue;
     }
 
@@ -331,15 +331,15 @@ async function rewriteOversizedSources(files) {
 
     // Resize, encode to a buffer (sharp can't write back to its own input file directly), then overwrite.
     const pipeline = sharp(file).resize({
-      width: MAX_SOURCE_DIMENSION,
-      height: MAX_SOURCE_DIMENSION,
+      width: IMAGE_MAX_DIMENSION,
+      height: IMAGE_MAX_DIMENSION,
       fit: 'inside',
       withoutEnlargement: true,
     });
 
     const buffer = ext === 'png'
-      ? await pipeline.png({ quality: REWRITE_QUALITY }).toBuffer()
-      : await pipeline.jpeg({ quality: REWRITE_QUALITY, progressive: true, mozjpeg: true }).toBuffer();
+      ? await pipeline.png({ quality: IMAGE_JPEG_QUALITY }).toBuffer()
+      : await pipeline.jpeg({ quality: IMAGE_JPEG_QUALITY, progressive: true, mozjpeg: true }).toBuffer();
 
     jetpack.write(file, buffer);
     const sizeAfter = buffer.length;
@@ -350,11 +350,11 @@ async function rewriteOversizedSources(files) {
     // with the new hash when determineFilesToProcess() runs.
 
     rewritten++;
-    logger.log(`✂️  Rewrote ${path.relative(rootPathProject, file)}: ${metadata.width}x${metadata.height} → max ${MAX_SOURCE_DIMENSION}px, ${formatBytes(sizeBefore)} → ${formatBytes(sizeAfter)}`);
+    logger.log(`✂️  Rewrote ${path.relative(rootPathProject, file)}: ${metadata.width}x${metadata.height} → max ${IMAGE_MAX_DIMENSION}px, ${formatBytes(sizeBefore)} → ${formatBytes(sizeAfter)}`);
   }
 
   if (rewritten === 0) {
-    logger.log(`✅ No oversized sources found (all within ${MAX_SOURCE_DIMENSION}px)`);
+    logger.log(`✅ No oversized sources found (all within ${IMAGE_MAX_DIMENSION}px)`);
   } else {
     logger.log(`✂️  Rewrote ${rewritten} oversized source image(s)`);
   }

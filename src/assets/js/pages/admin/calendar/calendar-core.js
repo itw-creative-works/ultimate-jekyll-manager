@@ -358,15 +358,23 @@ export default class CalendarCore {
 
   /**
    * Generate virtual occurrences using the template's sendAt as seed.
-   * Pure unix math — no Date objects, no timezone issues.
+   * Fixed-interval patterns (daily, weekly) use pure unix math.
+   * Calendar-relative patterns (monthly, monthly-weekday, quarterly, yearly)
+   * step through actual dates so they land correctly every month.
    */
   _generateOccurrences(template, startUNIX, endUNIX) {
-    const interval = this._getIntervalSeconds(template.recurrence.pattern);
+    const { pattern } = template.recurrence;
     const occurrences = [];
     const seedUNIX = template.sendAt;
 
-    // Walk backward from seed to find first occurrence >= startUNIX
+    if (pattern === 'monthly-weekday') {
+      return this._generateNthWeekdayOccurrences(template, startUNIX, endUNIX);
+    }
+
+    // Fixed-interval patterns
+    const interval = this._getIntervalSeconds(pattern);
     let cursorUNIX = seedUNIX;
+
     while (cursorUNIX > startUNIX + interval) {
       cursorUNIX -= interval;
     }
@@ -376,21 +384,79 @@ export default class CalendarCore {
 
     let maxIterations = 400;
     while (cursorUNIX <= endUNIX && maxIterations-- > 0) {
-      occurrences.push({
-        id: `${template.id}__virtual__${cursorUNIX}`,
-        sendAt: cursorUNIX,
-        status: 'pending',
-        type: template.type,
-        settings: template.settings,
-        recurrence: template.recurrence,
-        _virtual: true,
-        _recurringSourceId: template.id,
-      });
-
+      occurrences.push(this._buildVirtualEvent(template, cursorUNIX));
       cursorUNIX += interval;
     }
 
     return occurrences;
+  }
+
+  /**
+   * Generate Nth-weekday-of-month occurrences (e.g., 2nd Wednesday).
+   * Walks month by month, computing the actual calendar date each time.
+   */
+  _generateNthWeekdayOccurrences(template, startUNIX, endUNIX) {
+    const { nth = 1, day: dayOfWeek = 0, hour = 0, minute = 0 } = template.recurrence;
+    const occurrences = [];
+
+    // Start scanning 2 months before the visible range
+    const startDate = new Date(startUNIX * 1000);
+    let year = startDate.getUTCFullYear();
+    let month = startDate.getUTCMonth() - 2;
+
+    let maxIterations = 100;
+    while (maxIterations-- > 0) {
+      const ts = this._nthWeekdayOfMonth(year, month, nth, dayOfWeek, hour, minute);
+
+      if (ts > endUNIX) {
+        break;
+      }
+
+      if (ts >= startUNIX) {
+        occurrences.push(this._buildVirtualEvent(template, ts));
+      }
+
+      month++;
+      if (month > 11) {
+        month = 0;
+        year++;
+      }
+    }
+
+    return occurrences;
+  }
+
+  /**
+   * Find the Nth occurrence of a weekday in a given month (UTC).
+   * Returns unix timestamp.
+   */
+  _nthWeekdayOfMonth(year, month, nth, dayOfWeek, hour, minute) {
+    const first = new Date(Date.UTC(year, month, 1));
+    let dateNum = 1;
+
+    // Advance to the first matching weekday
+    while (first.getUTCDay() !== dayOfWeek) {
+      dateNum++;
+      first.setUTCDate(dateNum);
+    }
+
+    // Advance to the Nth occurrence
+    dateNum += (nth - 1) * 7;
+
+    return Date.UTC(year, month, dateNum, hour, minute, 0) / 1000;
+  }
+
+  _buildVirtualEvent(template, sendAtUNIX) {
+    return {
+      id: `${template.id}__virtual__${sendAtUNIX}`,
+      sendAt: sendAtUNIX,
+      status: 'pending',
+      type: template.type,
+      settings: template.settings,
+      recurrence: template.recurrence,
+      _virtual: true,
+      _recurringSourceId: template.id,
+    };
   }
 
   _getIntervalSeconds(pattern) {
