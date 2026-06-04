@@ -15,6 +15,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.5] - 2026-06-04
+
+### Changed
+
+- **Per-string translation caching replaces all-or-nothing page caching.** Each page's cache is now a `hash→translation` map (`es/pages/index.html.json`). Only strings whose content hash changed are sent to the API — unchanged strings are served from cache. Dramatically reduces API calls and cost on incremental builds.
+- **Prompt hash mismatch now wipes page cache files** (not just meta entries) for a clean slate.
+- **Translation stats now track cached vs new strings** instead of whole-page hit/miss.
+
+### Removed
+
+- **`RECHECK_DAYS`** — per-string content hashes make age-based invalidation unnecessary.
+
+---
 ## [1.6.4] - 2026-06-03
 
 ### Fixed

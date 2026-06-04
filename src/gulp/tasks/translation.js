@@ -42,7 +42,6 @@ const AI = {
 }
 const CACHE_DIR = '.temp/cache/translation';
 const CACHE_BRANCH = 'cache-uj-translation';
-const RECHECK_DAYS = 0;
 // const LOUD = false;
 const LOUD = process.env.UJ_LOUD_LOGS === 'true';
 const CONTROL = 'UJ-TRANSLATION-CONTROL';
@@ -171,8 +170,6 @@ module.exports = series(
 async function processTranslation() {
   const enabled = config?.translation?.enabled !== false;
   const languages = config?.translation?.languages || [];
-  const updatedFiles = new Set();
-
   // Track timing
   const startTime = Date.now();
 
@@ -199,14 +196,12 @@ async function processTranslation() {
   logger.log(`Translating ${allFiles.length} files for ${languages.length} supported languages: ${languages.join(', ')}`);
   // logger.log(allFiles);
 
-  // Prepare meta caches per language
-  const metas = {
-    global: {
-      skipped: new Set(),
-    }
-  };
+  // Prepare prompt hash for cache invalidation
   const promptHash = crypto.createHash('sha256').update(SYSTEM_PROMPT).digest('hex');
+  const skippedFiles = new Set();
 
+  // Load per-language meta (prompt hash only)
+  const metas = {};
   for (const lang of languages) {
     const metaPath = path.join(CACHE_DIR, lang, 'meta.json');
     let meta = {};
@@ -218,30 +213,30 @@ async function processTranslation() {
       }
     }
 
-    // Check if the promptHash matches; if not, invalidate the cache
+    // Check if the promptHash matches; if not, wipe all page caches for this language
     if (meta.prompt?.hash !== promptHash) {
-      logger.warn(`⚠️ Prompt cache MISS [${lang}]: hash mismatch — invalidating ${Object.keys(meta).length - 1} cached entries.`);
-      meta = {};
+      const pagesDir = path.join(CACHE_DIR, lang, 'pages');
+      const existing = jetpack.exists(pagesDir) ? jetpack.find(pagesDir, { matching: '**/*', files: true }).length : 0;
+      logger.warn(`⚠️ Prompt cache MISS [${lang}]: hash mismatch — clearing ${existing} cached page files.`);
+      jetpack.remove(pagesDir);
     } else {
-      const entries = Object.keys(meta).filter(k => k !== 'prompt').length;
-      logger.log(`✅ Prompt cache HIT [${lang}]: ${entries} cached entries available.`);
+      const pagesDir = path.join(CACHE_DIR, lang, 'pages');
+      const existing = jetpack.exists(pagesDir) ? jetpack.find(pagesDir, { matching: '**/*', files: true }).length : 0;
+      logger.log(`✅ Prompt cache HIT [${lang}]: ${existing} cached page files available.`);
     }
 
-    // Store the current promptHash in the meta file
     meta.prompt = { hash: promptHash };
-    metas[lang] = { meta, path: metaPath, skipped: new Set() };
+    metas[lang] = { meta, path: metaPath };
   }
 
   // Track token usage and statistics
   const tokens = { input: 0, output: 0 };
   const tasks = [];
   const stats = {
-    fromCache: 0,
-    newlyProcessed: 0,
-    totalProcessed: 0,
-    failedFiles: [],
-    cachedFiles: [],
-    processedFiles: []
+    totalPages: 0,
+    cachedStrings: 0,
+    newStrings: 0,
+    failedPages: [],
   };
 
   // Calculate total tasks for progress tracking
@@ -264,29 +259,24 @@ async function processTranslation() {
     // Collect text nodes
     const textNodes = collectTextNodes($, { tag: false });
 
-    // Build strings array for translation
+    // Build strings array and per-string hashes
     const strings = textNodes.map(n => n.text);
-
-    // Compute hash from the strings
-    const hash = crypto.createHash('sha256').update(JSON.stringify(strings)).digest('hex');
+    const stringHashes = strings.map(s => crypto.createHash('sha256').update(s).digest('hex').slice(0, 12));
 
     // Skip all except the specified HTML file
     if (ujOnly && relativePath !== ujOnly) {
-      // Update to work with the new SET protocol
-      metas.global.skipped.add(`${relativePath} (UJ_TRANSLATION_ONLY set)`);
+      skippedFiles.add(`${relativePath} (UJ_TRANSLATION_ONLY set)`);
       continue;
     }
 
     // Log the page being processed
-    logger.log(`🔍 Processing: ${relativePath} (${strings.length} strings, hash: ${hash})`);
+    logger.log(`🔍 Processing: ${relativePath} (${strings.length} strings)`);
     if (LOUD) logger.log(`🔍 Strings: \n${JSON.stringify(strings, null, 2)}`)
 
-    // Translate this file for all languages in parallel
+    // Translate this file for all languages
     for (const lang of languages) {
       const task = async () => {
-        const meta = metas[lang].meta;
-        const cachePath = path.join(CACHE_DIR, lang, 'pages', relativePath);
-        // const outPath = path.join('_site', lang, relativePath);
+        const cachePath = path.join(CACHE_DIR, lang, 'pages', `${relativePath}.json`);
         const isHomepage = relativePath === 'index.html';
         const outPath = isHomepage
           ? path.join('_site', `${lang}.html`)
@@ -301,74 +291,74 @@ async function processTranslation() {
         // Log
         logger.log(`🌐 Started [${progress} - ${percentage}%]: ${logTag}`);
 
-        // Skip if the file is not in the meta or if it has no text nodes
-        let translated = null;
-        const entry = meta[relativePath];
-        const age = entry?.timestamp
-          ? (Date.now() - new Date(entry.timestamp).getTime()) / (1000 * 60 * 60 * 24)
-          : Infinity;
-        const useCached = entry
-          && entry.hash === hash
-          && (RECHECK_DAYS === 0 || age < RECHECK_DAYS);
         const startTime = Date.now();
 
-        function setResult(success) {
-          if (success) {
-            meta[relativePath] = {
-              timestamp: new Date().toISOString(),
-              hash,
-            };
-          } else {
-            meta[relativePath] = {
-              timestamp: 0,
-              hash: '__fail__',
-            };
+        // Load existing per-string cache for this page
+        let pageCache = {};
+        if (jetpack.exists(cachePath)) {
+          try {
+            pageCache = jetpack.read(cachePath, 'json') || {};
+          } catch (e) {
+            pageCache = {};
           }
         }
 
-        // Check if we can use cached translation
-        if (
-          (useCached || process.env.UJ_TRANSLATION_CACHE === 'true')
-          && jetpack.exists(cachePath)
-        ) {
-          translated = jetpack.read(cachePath, 'json');
-          logger.log(`📦 Success [${progress} - ${percentage}%]: ${logTag} - Using cache`);
-          stats.fromCache++;
-          stats.cachedFiles.push(logTag);
+        // Separate cached vs uncached strings
+        const translated = new Array(strings.length);
+        const uncachedIndices = [];
+
+        for (let i = 0; i < strings.length; i++) {
+          const cached = pageCache[stringHashes[i]];
+          if (cached !== undefined) {
+            translated[i] = cached;
+            stats.cachedStrings++;
+          } else {
+            uncachedIndices.push(i);
+          }
+        }
+
+        const cachedCount = strings.length - uncachedIndices.length;
+
+        // If everything is cached, skip API call
+        if (uncachedIndices.length === 0) {
+          const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+          logger.log(`📦 Success [${progress} - ${percentage}%]: ${logTag} — All ${strings.length} strings from cache (${elapsedTime}s)`);
         } else {
+          // Translate only the uncached strings
+          const uncachedStrings = uncachedIndices.map(i => strings[i]);
+
           try {
-            const { result, usage } = await translateWithAPI(openAIKey, strings, lang, logTag);
+            const { result, usage } = await translateWithAPI(openAIKey, uncachedStrings, lang, logTag);
 
-            // Log
-            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            logger.log(`✅ Success [${progress} - ${percentage}%]: ${logTag} - Translated (Elapsed time: ${elapsedTime}s)`);
-
-            // Set translated result
-            translated = result;
+            // Place translations back at their original indices and update cache
+            for (let j = 0; j < uncachedIndices.length; j++) {
+              const origIndex = uncachedIndices[j];
+              translated[origIndex] = result[j];
+              pageCache[stringHashes[origIndex]] = result[j];
+            }
 
             // Update token totals
             tokens.input += usage.input_tokens || 0;
             tokens.output += usage.output_tokens || 0;
+            stats.newStrings += uncachedIndices.length;
 
-            // Save to cache (JSON array)
-            jetpack.write(cachePath, translated);
-
-            // Set result
-            setResult(true);
-            stats.newlyProcessed++;
-            stats.processedFiles.push(logTag);
+            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            logger.log(`✅ Success [${progress} - ${percentage}%]: ${logTag} — ${uncachedIndices.length} new + ${cachedCount} cached (${elapsedTime}s)`);
           } catch (e) {
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            logger.error(`❌ Failed [${progress} - ${percentage}%]: ${logTag} — ${e.message} (Elapsed time: ${elapsedTime}s)`);
+            logger.error(`❌ Failed [${progress} - ${percentage}%]: ${logTag} — ${e.message} (${elapsedTime}s)`);
 
-            // Fallback to original strings
-            translated = strings;
+            // Fill uncached slots with originals
+            for (const i of uncachedIndices) {
+              translated[i] = strings[i];
+            }
 
-            // Save failure to cache
-            setResult(false);
-            stats.failedFiles.push(logTag);
+            stats.failedPages.push(logTag);
           }
         }
+
+        // Save updated page cache
+        jetpack.write(cachePath, pageCache);
 
         // Reset the DOM to avoid conflicts between languages
         const $ = cheerio.load(originalHtml);
@@ -387,8 +377,7 @@ async function processTranslation() {
             translation.includes(CONTROL)
             && n.node.attr('id') !== CONTROL
           ) {
-            logger.error(`❌ Failed: ${logTag} — Control tag mismatch at index ${i}`);
-            return setResult(false);
+            return logger.error(`❌ Failed: ${logTag} — Control tag mismatch at index ${i}`);
           }
 
           // Preserve original leading/trailing whitespace
@@ -419,11 +408,8 @@ async function processTranslation() {
           || controlTag.text() !== CONTROL
         ) {
           logger.error(`❌ Failed: ${logTag} — Control tag mismatch or missing`);
-          return setResult(false);
+          return;
         }
-
-        // Delete the control tag
-        // controlTag.remove();
 
         // Set the lang attribute on the <html> tag
         $('html').attr('lang', lang);
@@ -453,25 +439,7 @@ async function processTranslation() {
         const sitemapXml = jetpack.read(sitemapPath);
         await insertLanguageTags(cheerio.load(sitemapXml, { xmlMode: true }), languages, relativePath, sitemapPath);
 
-        // Save output
-        // const formatted = await formatDocument($.html(), 'html');
-
-        // console.log('----relativePath', relativePath);
-        // console.log('----filePath', filePath);
-        // console.log('----outPath', outPath);
-        // console.log('----FORMATTED.ERROR', formatted.error);
-
-        // Write the translated file
-        // jetpack.write(outPath, formatted.content);
-        // logger.log(`✅ Wrote: ${outPath}`);
-
-        // Track updated files only if it's new or updated
-        // if (!useCached || !entry || entry.hash !== hash) {
-        // }
-        // Track updated files
-        updatedFiles.add(cachePath);
-        updatedFiles.add(metas[lang].path);
-        stats.totalProcessed++;
+        stats.totalPages++;
       };
 
       // Add to tasks
@@ -484,17 +452,9 @@ async function processTranslation() {
   await Promise.all(tasks.map(task => q.add(task)));
 
   // Log skipped files
-  logger.warn('🚫 Skipped files:');
-  let totalSkipped = 0;
-  for (const [lang, meta] of Object.entries(metas)) {
-    if (meta.skipped.size > 0) {
-      logger.warn(`  [${lang}] ${meta.skipped.size} skipped files:`);
-      meta.skipped.forEach(f => logger.warn(`    ${f}`));
-      totalSkipped += meta.skipped.size;
-    }
-  }
-  if (totalSkipped === 0) {
-    logger.warn('  NONE');
+  if (skippedFiles.size > 0) {
+    logger.warn(`🚫 Skipped ${skippedFiles.size} files:`);
+    skippedFiles.forEach(f => logger.warn(`    ${f}`));
   }
 
   // Save all updated meta files
@@ -526,13 +486,15 @@ async function processTranslation() {
   logger.log(`   End time:        ${new Date(endTime).toLocaleTimeString()}`);
   logger.log(`   Total elapsed:   ${elapsedFormatted}`);
 
-  // File processing stats
-  logger.log('\n📁 File Processing:');
-  logger.log(`   Total processed:     ${stats.totalProcessed}`);
-  logger.log(`   From cache:          ${stats.fromCache} (${((stats.fromCache / stats.totalProcessed) * 100).toFixed(1)}%)`);
-  logger.log(`   Newly translated:    ${stats.newlyProcessed} (${((stats.newlyProcessed / stats.totalProcessed) * 100).toFixed(1)}%)`);
-  if (stats.failedFiles.length > 0) {
-    logger.log(`   Failed:              ${stats.failedFiles.length}`);
+  // Processing stats
+  const totalStrings = stats.cachedStrings + stats.newStrings;
+  logger.log('\n📁 Processing:');
+  logger.log(`   Pages processed:     ${stats.totalPages}`);
+  logger.log(`   Strings total:       ${totalStrings.toLocaleString()}`);
+  logger.log(`   From cache:          ${stats.cachedStrings.toLocaleString()} (${totalStrings ? ((stats.cachedStrings / totalStrings) * 100).toFixed(1) : 0}%)`);
+  logger.log(`   Newly translated:    ${stats.newStrings.toLocaleString()} (${totalStrings ? ((stats.newStrings / totalStrings) * 100).toFixed(1) : 0}%)`);
+  if (stats.failedPages.length > 0) {
+    logger.log(`   Failed pages:        ${stats.failedPages.length}`);
   }
 
   // Token usage
@@ -563,40 +525,15 @@ async function processTranslation() {
       forceRecreate: true,  // ALWAYS create a fresh branch - no history needed
       stats: {
         timestamp: new Date().toISOString(),
-        sourceCount: allFiles.length,
-        cachedCount: allCacheFiles.length,
-        processedNow: stats.totalProcessed,
-        fromCache: stats.fromCache,
-        newlyProcessed: stats.newlyProcessed,
-        timing: {
-          startTime,
-          endTime,
-          elapsedMs
-        },
-        tokenUsage: tokens.input > 0 || tokens.output > 0 ? {
-          inputTokens: tokens.input,
-          outputTokens: tokens.output,
-          totalTokens: tokens.input + tokens.output,
-          inputCost,
-          outputCost,
-          totalCost
-        } : undefined,
-        languageBreakdown: languages.map(lang => ({
-          language: lang,
-          total: stats.totalProcessed / languages.length,
-          fromCache: stats.cachedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
-          newlyTranslated: stats.processedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
-          failed: stats.failedFiles.filter(f => f.startsWith(`[${lang}]`)).length
-        })),
-        details: `Translated ${allFiles.length} pages to ${languages.length} languages (${languages.join(', ')})\n\n### Language Breakdown:\n${languages.map(lang => {
-          const langStats = {
-            total: stats.totalProcessed / languages.length,
-            fromCache: stats.cachedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
-            newlyTranslated: stats.processedFiles.filter(f => f.startsWith(`[${lang}]`)).length,
-            failed: stats.failedFiles.filter(f => f.startsWith(`[${lang}]`)).length
-          };
-          return `**${lang.toUpperCase()}:** ${langStats.total} total (${langStats.fromCache} cached, ${langStats.newlyTranslated} new${langStats.failed > 0 ? `, ${langStats.failed} failed` : ''})`;
-        }).join('\n')}\n\n### Files from cache:\n${stats.cachedFiles.length > 0 ? stats.cachedFiles.slice(0, 10).map(f => `- ${f}`).join('\n') + (stats.cachedFiles.length > 10 ? `\n- ... and ${stats.cachedFiles.length - 10} more` : '') : 'None'}\n\n### Newly translated files:\n${stats.processedFiles.length > 0 ? stats.processedFiles.slice(0, 10).map(f => `- ${f}`).join('\n') + (stats.processedFiles.length > 10 ? `\n- ... and ${stats.processedFiles.length - 10} more` : '') : 'None'}${stats.failedFiles.length > 0 ? `\n\n### Failed translations:\n${stats.failedFiles.slice(0, 10).map(f => `- ${f}`).join('\n') + (stats.failedFiles.length > 10 ? `\n- ... and ${stats.failedFiles.length - 10} more` : '')}` : ''}`
+        pages: stats.totalPages,
+        strings: { cached: stats.cachedStrings, new: stats.newStrings, total: totalStrings },
+        failed: stats.failedPages.length,
+        languages: languages.join(', '),
+        timing: { startTime, endTime, elapsedMs },
+        tokenUsage: tokens.input > 0 || tokens.output > 0
+          ? { input: tokens.input, output: tokens.output, total: tokens.input + tokens.output, cost: totalCost }
+          : undefined,
+        details: `Translated ${stats.totalPages} pages to ${languages.length} languages (${languages.join(', ')}): ${stats.cachedStrings} cached + ${stats.newStrings} new strings${stats.failedPages.length > 0 ? `, ${stats.failedPages.length} failed pages` : ''}`
       }
     });
   }
