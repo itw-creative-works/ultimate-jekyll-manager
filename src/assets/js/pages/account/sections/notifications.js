@@ -19,6 +19,7 @@ const TOGGLE_ID = 'marketing-emails';
 const GRANT_DATE_ID = 'marketing-emails-grant-date';
 
 let formManager = null;
+let pushFormManager = null;
 
 export function init() {
   const $form = document.getElementById(FORM_ID);
@@ -90,4 +91,91 @@ export function loadData(account) {
   }
 
   formManager.ready();
+
+  initPushNotifications();
+}
+
+function updatePushUI() {
+  const $status = document.getElementById('push-notification-status');
+  const $tokenInput = document.getElementById('push-token-value');
+
+  if (!$status) {
+    return;
+  }
+
+  const notifications = webManager.notifications();
+  const stored = webManager.storage().get('notifications', {});
+  const permission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+
+  let state;
+  if (stored.subscribed && stored.token) {
+    state = 'subscribed';
+    $status.innerHTML = '<span class="badge bg-success">Subscribed</span>';
+    if ($tokenInput) { $tokenInput.value = stored.token; }
+    if (pushFormManager) { pushFormManager._setDisabled(true); }
+  } else if (!notifications.isSupported()) {
+    state = 'not-supported';
+    $status.innerHTML = '<span class="badge bg-warning">Not supported</span>';
+    if (pushFormManager) { pushFormManager._setDisabled(true); }
+  } else if (permission === 'denied') {
+    state = 'denied';
+    $status.innerHTML = '<span class="badge bg-danger">Denied</span>';
+    if (pushFormManager) { pushFormManager._setDisabled(true); }
+  } else {
+    state = 'not-subscribed';
+    $status.innerHTML = '<span class="badge bg-secondary">Not subscribed</span>';
+    if ($tokenInput) { $tokenInput.value = ''; }
+    if (pushFormManager) { pushFormManager.ready(); }
+  }
+
+  console.log('[Account:push] updatePushUI →', state, { storedSubscribed: stored.subscribed, storedToken: stored.token?.slice(-8), permission });
+}
+
+async function initPushNotifications() {
+  const $status = document.getElementById('push-notification-status');
+  const $form = document.getElementById('push-subscribe-form');
+  const $copyBtn = document.getElementById('copy-push-token-btn');
+
+  if (!$status) {
+    return;
+  }
+
+  const notifications = webManager.notifications();
+
+  // Full sync: validates permission + token + Firestore, then updates localStorage
+  await notifications.syncSubscription();
+
+  // Create the form (always starts disabled), then let updatePushUI control its state
+  if (notifications.isSupported() && $form) {
+    $form.style.display = '';
+
+    pushFormManager = new FormManager('#push-subscribe-form', {
+      autoReady: false,
+      allowResubmit: true,
+    });
+
+    pushFormManager.on('submit', async () => {
+      console.log('[Account:push] Subscribe button clicked');
+      await notifications.subscribe();
+      console.log('[Account:push] Subscribe complete — updating UI');
+      setTimeout(() => updatePushUI(), 0);
+    });
+  }
+
+  // Now that the form exists, let updatePushUI set the correct state
+  updatePushUI();
+
+  if ($copyBtn) {
+    const $tokenInput = document.getElementById('push-token-value');
+    const originalHtml = $copyBtn.innerHTML;
+    $copyBtn.addEventListener('click', () => {
+      if (!$tokenInput?.value) {
+        return;
+      }
+      navigator.clipboard.writeText($tokenInput.value).then(() => {
+        $copyBtn.textContent = 'Copied!';
+        setTimeout(() => { $copyBtn.innerHTML = originalHtml; }, 2000);
+      });
+    });
+  }
 }

@@ -14,6 +14,18 @@ export default class CalendarRenderer {
     this.$toolbar = document.getElementById('calendar-toolbar');
     this.$grid = document.getElementById('calendar-grid');
     this._nowLineInterval = null;
+    this._resizeObserver = null;
+
+    this._initResizeObserver();
+  }
+
+  _initResizeObserver() {
+    this._resizeObserver = new ResizeObserver(() => {
+      if (this.core.viewMode === 'month') {
+        this._fitMonthEvents();
+      }
+    });
+    this._resizeObserver.observe(this.$grid);
   }
 
   // ============================================
@@ -90,6 +102,7 @@ export default class CalendarRenderer {
   // Month View
   // ============================================
   _renderMonthView() {
+    this._pillHeight = null;
     const core = this.core;
     const cells = core.getMonthGrid();
 
@@ -120,13 +133,26 @@ export default class CalendarRenderer {
     html += '</div>';
 
     this.$grid.innerHTML = html;
-    this._fitMonthEvents();
+    requestAnimationFrame(() => this._fitMonthEvents());
     this._bindCellClicks();
     this._bindCampaignClicks();
     this._bindDragAndDrop();
   }
 
   _fitMonthEvents() {
+    // Measure natural pill height once from a detached clone so flex
+    // compression doesn't skew the value
+    if (!this._pillHeight) {
+      const $sample = this.$grid.querySelector('.calendar-event');
+      if ($sample) {
+        const $clone = $sample.cloneNode(true);
+        $clone.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;';
+        document.body.appendChild($clone);
+        this._pillHeight = $clone.getBoundingClientRect().height;
+        $clone.remove();
+      }
+    }
+
     this.$grid.querySelectorAll('.calendar-cell').forEach(($cell) => {
       const $events = $cell.querySelector('.calendar-cell-events');
       if (!$events) { return; }
@@ -135,12 +161,15 @@ export default class CalendarRenderer {
       const $more = $events.querySelector('.calendar-cell-more');
       if ($pills.length === 0) { return; }
 
-      // Available height = cell inner height minus everything above the events container
+      // Hide everything first so the cell has its natural empty height
+      $pills.forEach(($p) => { $p.style.display = 'none'; });
+      if ($more) { $more.style.display = 'none'; }
+
       const cellRect = $cell.getBoundingClientRect();
       const eventsRect = $events.getBoundingClientRect();
       const available = cellRect.bottom - eventsRect.top;
 
-      const pillHeight = $pills[0].getBoundingClientRect().height;
+      const pillHeight = this._pillHeight || 20;
       const gap = 1;
 
       // Measure "+more" line height
@@ -151,24 +180,26 @@ export default class CalendarRenderer {
       const moreLineHeight = $more ? $more.getBoundingClientRect().height + gap : 0;
       if ($more) { $more.style.display = 'none'; }
 
-      let shown = 0;
-
-      for (let i = 0; i < $pills.length; i++) {
-        const heightSoFar = (shown + 1) * pillHeight + shown * gap;
-        const remaining = $pills.length - i - 1;
-        const wouldNeedMore = remaining > 0;
-        const totalNeeded = heightSoFar + (wouldNeedMore ? moreLineHeight : 0);
-
-        if (totalNeeded <= available) {
-          $pills[i].style.display = '';
-          shown++;
+      // Calculate how many pills fit
+      let maxVisible = 0;
+      for (let n = 1; n <= $pills.length; n++) {
+        const pillsHeight = n * pillHeight + (n - 1) * gap;
+        const needsMore = n < $pills.length;
+        const total = pillsHeight + (needsMore ? moreLineHeight : 0);
+        if (total <= available) {
+          maxVisible = n;
         } else {
-          $pills[i].style.display = 'none';
+          break;
         }
       }
 
+      // Apply visibility
+      $pills.forEach(($p, i) => {
+        $p.style.display = i < maxVisible ? '' : 'none';
+      });
+
       if ($more) {
-        const hidden = $pills.length - shown;
+        const hidden = $pills.length - maxVisible;
         if (hidden > 0) {
           $more.textContent = `+${hidden} more`;
           $more.style.display = '';

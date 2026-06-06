@@ -60,6 +60,7 @@ prerender_icons:
   - name: "wifi"
   - name: "battery-full"
   - name: "table-list"
+  - name: "vial"
 ---
 
 <!-- Calendar Root -->
@@ -79,6 +80,7 @@ prerender_icons:
         <h5 class="modal-title" id="campaign-modal-title">
           {% uj_icon "plus", "fa-md me-2" %}
           <span id="campaign-modal-title-text">Create campaign</span>
+          <small class="text-muted fw-normal ms-2 d-none" id="campaign-modal-id" style="font-size: 0.6rem"></small>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -87,7 +89,7 @@ prerender_icons:
 
           <!-- Campaign Type -->
           <h6 class="mb-3">
-            {% uj_icon "bullhorn", "fa-sm me-2 text-info" %}
+            {% uj_icon "bullhorn", "me-2 text-info" %}
             Campaign type
           </h6>
           <div class="row mb-4">
@@ -186,9 +188,8 @@ prerender_icons:
                   <div class="col-md-6">
                     <label for="campaign-template" class="form-label">Template</label>
                     <select class="form-select" id="campaign-template" name="campaign.template">
-                      <option value="default" selected>Default</option>
-                      <option value="main/basic/card">Card</option>
-                      <option value="main/basic/plain">Plain</option>
+                      <option value="card" selected>Card</option>
+                      <option value="plain">Plain</option>
                     </select>
                   </div>
                   <div class="col-md-6">
@@ -200,6 +201,18 @@ prerender_icons:
                       <option value="orders">Orders</option>
                     </select>
                   </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="campaign-discount-code" class="form-label">
+                    Discount code
+                    <small class="text-muted fw-normal ms-1">(optional — resolves {discount.code} and {discount.percent})</small>
+                  </label>
+                  <input type="text"
+                         class="form-control"
+                         id="campaign-discount-code"
+                         name="campaign.discountCode"
+                         placeholder="e.g. UPGRADE15">
                 </div>
               </div>
 
@@ -271,19 +284,6 @@ prerender_icons:
             </div>
           </div>
 
-          <!-- Discount Code -->
-          <div class="mb-3">
-            <label for="campaign-discount-code" class="form-label">
-              Discount code
-              <small class="text-muted fw-normal ms-1">(optional)</small>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="campaign-discount-code"
-                   name="campaign.discountCode"
-                   placeholder="e.g. UPGRADE15">
-          </div>
-
           <!-- Test Mode -->
           <div class="form-check mb-4">
             <input class="form-check-input"
@@ -300,7 +300,7 @@ prerender_icons:
 
           <!-- Schedule -->
           <h6 class="mb-3 mt-4">
-            {% uj_icon "clock", "fa-sm me-2 text-info" %}
+            {% uj_icon "clock", "me-2 text-info" %}
             Schedule
             <small class="text-muted fw-normal ms-1">(UTC)</small>
           </h6>
@@ -330,9 +330,9 @@ prerender_icons:
               <div class="invalid-feedback">Time is required</div>
             </div>
             <div class="col-md-3 d-flex align-items-end">
-              <button type="button" class="btn btn-sm btn-outline-primary w-100" id="btn-send-now">
-                {% uj_icon "paper-plane", "fa-sm me-1" %}
-                Send now
+              <button type="button" class="btn btn-md btn-outline-primary w-100" id="btn-send-now">
+                {% uj_icon "clock", "fa-sm me-1" %}
+                Set now
               </button>
             </div>
           </div>
@@ -342,7 +342,7 @@ prerender_icons:
 
           <!-- Recurrence -->
           <h6 class="mb-3 mt-4">
-            {% uj_icon "repeat", "fa-sm me-2 text-info" %}
+            {% uj_icon "repeat", "me-2 text-info" %}
             Recurrence
             <small class="text-muted fw-normal ms-1">(optional)</small>
           </h6>
@@ -445,7 +445,7 @@ prerender_icons:
 
           <!-- Targeting -->
           <h6 class="mb-3 mt-4">
-            {% uj_icon "users", "fa-sm me-2 text-success" %}
+            {% uj_icon "users", "me-2 text-success" %}
             Targeting
           </h6>
 
@@ -499,32 +499,33 @@ prerender_icons:
 
           <div class="mb-3">
             <label for="campaign-segments" class="form-label">
-              Segments
-              <small class="text-muted fw-normal ms-1">(comma-separated IDs)</small>
+              Include segments
+              <small class="text-muted fw-normal ms-1">(AND — contacts must match ALL listed segments)</small>
             </label>
             <input type="text"
                    class="form-control"
                    id="campaign-segments"
                    name="campaign.segments"
-                   placeholder="e.g. seg_abc123, seg_def456">
+                   placeholder="e.g. subscription_free, lifecycle_30d">
+            <small class="form-text text-muted">SSOT keys: subscription_free, subscription_paid, subscription_trialing, subscription_cancelled, subscription_churned_trial, subscription_churned_paid, lifecycle_7d, lifecycle_30d, engagement_active_30d, engagement_inactive_90d, etc.</small>
           </div>
 
           <div class="mb-3">
             <label for="campaign-exclude-segments" class="form-label">
               Exclude segments
-              <small class="text-muted fw-normal ms-1">(comma-separated IDs)</small>
+              <small class="text-muted fw-normal ms-1">(AND — contacts matching ANY excluded segment are removed)</small>
             </label>
             <input type="text"
                    class="form-control"
                    id="campaign-exclude-segments"
                    name="campaign.excludeSegments"
-                   placeholder="e.g. seg_unsubscribed">
+                   placeholder="e.g. subscription_paid, subscription_trialing">
           </div>
 
           <!-- Advanced Settings (collapsible) -->
           <h6 class="mb-3 mt-4">
             <a class="text-decoration-none" data-bs-toggle="collapse" href="#advanced-settings" role="button" aria-expanded="false">
-              {% uj_icon "sliders", "fa-sm me-2 text-info" %}
+              {% uj_icon "sliders", "me-2 text-info" %}
               Advanced settings
               <small class="text-muted fw-normal ms-1">(optional)</small>
             </a>
@@ -575,22 +576,25 @@ prerender_icons:
             </div>
           </div>
 
+          <div class="modal-footer d-flex justify-content-between">
+            <div>
+              <button type="submit" name="action" value="delete" formnovalidate class="btn btn-outline-danger d-none" id="btn-delete-campaign">
+                {% uj_icon "trash", "fa-sm me-1" %}
+                <span class="button-text">Delete</span>
+              </button>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" name="action" value="test" formnovalidate class="btn btn-outline-warning" id="btn-send-test">
+                {% uj_icon "vial", "fa-sm me-1" %}
+                <span class="button-text">Send test</span>
+              </button>
+              <button type="submit" name="action" value="save" class="btn btn-adaptive" id="btn-save-campaign">
+                {% uj_icon "paper-plane", "fa-sm me-1" %}
+                <span class="button-text">Save campaign</span>
+              </button>
+            </div>
+          </div>
         </form>
-      </div>
-      <div class="modal-footer d-flex justify-content-between">
-        <div>
-          <button type="button" class="btn btn-outline-danger d-none" id="btn-delete-campaign">
-            {% uj_icon "trash", "fa-sm me-1" %}
-            Delete
-          </button>
-        </div>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-adaptive" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" form="campaign-editor-form" class="btn btn-adaptive" id="btn-save-campaign">
-            {% uj_icon "paper-plane", "fa-sm me-1" %}
-            <span class="button-text">Save campaign</span>
-          </button>
-        </div>
       </div>
     </div>
   </div>

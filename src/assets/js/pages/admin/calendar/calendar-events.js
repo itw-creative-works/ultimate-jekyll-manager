@@ -32,7 +32,6 @@ export default class CalendarEvents {
     this._initTypeToggle();
     this._initRecurrenceToggle();
     this._initSendNow();
-    this._initDeleteButton();
     this._initCreateButton();
     this._initPreview();
   }
@@ -47,6 +46,7 @@ export default class CalendarEvents {
       this._setType('email');
       this._resetRecurrence();
       document.getElementById('campaign-modal-title-text').textContent = 'Create Campaign';
+      document.getElementById('campaign-modal-id').classList.add('d-none');
       document.getElementById('campaign-local-time-row').style.display = 'none';
     });
 
@@ -86,15 +86,57 @@ export default class CalendarEvents {
       allowResubmit: true,
     });
 
-    this.formManager.on('submit', async ({ data }) => {
-      const payload = this._buildPayload(data);
+    this.formManager.on('validation', ({ $submitButton }) => {
+      const action = $submitButton?.value || 'save';
+      if (action === 'delete' || action === 'test') {
+        this.formManager.clearFieldErrors();
+      }
+    });
 
+    this.formManager.on('submit', async ({ data, $submitButton }) => {
+      const action = $submitButton?.value || 'save';
+
+      if (action === 'delete') {
+        if (!this.editingCampaignId) { return; }
+        if (!confirm('Delete this campaign? This cannot be undone.')) {
+          this.formManager.ready();
+          return;
+        }
+        await this._deleteCampaign(this.editingCampaignId);
+        this._getEditorModal().hide();
+        return;
+      }
+
+      if (action === 'test') {
+        const payload = this._buildPayload(data);
+        payload.test = true;
+        payload.sendAt = 'now';
+        delete payload.recurrence;
+
+        if (this.editingCampaignId) {
+          payload.recurringId = this.editingCampaignId;
+        }
+
+        const url = `${webManager.getApiUrl()}/backend-manager/marketing/campaign`;
+        await authorizedFetch(url, {
+          method: 'POST',
+          timeout: 60000,
+          response: 'json',
+          tries: 1,
+          log: true,
+          body: payload,
+        });
+        this.formManager.showSuccess('Test sent');
+        return;
+      }
+
+      // Default: save
+      const payload = this._buildPayload(data);
       if (this.editingCampaignId) {
         await this._updateCampaign(this.editingCampaignId, payload);
       } else {
         await this._createCampaign(payload);
       }
-
       this._getEditorModal().hide();
     });
   }
@@ -109,7 +151,7 @@ export default class CalendarEvents {
         const isEmail = $radio.value === 'email';
         $emailFields.classList.toggle('d-none', !isEmail);
         $pushFields.classList.toggle('d-none', isEmail);
-        $subjectHint.textContent = isEmail ? '(email subject line)' : '(notification body text)';
+        $subjectHint.textContent = isEmail ? '(email subject line)' : '(notification body — campaign name is used as title)';
       });
     });
   }
@@ -204,27 +246,10 @@ export default class CalendarEvents {
       const now = new Date();
       document.getElementById('campaign-date').value = formatDateUTC(now);
       document.getElementById('campaign-time').value = formatTimeUTC(now);
+      this._updateLocalTimeHint();
     });
   }
 
-  _initDeleteButton() {
-    document.getElementById('btn-delete-campaign').addEventListener('click', async () => {
-      if (!this.editingCampaignId) {
-        return;
-      }
-
-      if (!confirm('Delete this campaign? This cannot be undone.')) {
-        return;
-      }
-
-      try {
-        await this._deleteCampaign(this.editingCampaignId);
-        this._getEditorModal().hide();
-      } catch (error) {
-        this.formManager.showError(`Delete failed: ${error.message}`);
-      }
-    });
-  }
 
   // ============================================
   // Modal Operations
@@ -233,6 +258,7 @@ export default class CalendarEvents {
     this.editingCampaignId = null;
     this.formManager.reset();
     this._toggleDeleteButton(false);
+    this._showCampaignId(null);
     this._setType('email');
     document.getElementById('campaign-modal-title-text').textContent = 'Create Campaign';
 
@@ -260,6 +286,7 @@ export default class CalendarEvents {
       }
       this.editingCampaignId = template.id;
       this._toggleDeleteButton(true);
+      this._showCampaignId(template.id);
       document.getElementById('campaign-modal-title-text').textContent = 'Edit Recurring Campaign';
       this._populateFormFromCampaign(template, true);
       this._getEditorModal().show();
@@ -274,10 +301,15 @@ export default class CalendarEvents {
       return;
     }
 
-    // Recurring template: editable (changes apply to all future sends)
+    // Recurring template: editable only if still pending
     if (displayType === DISPLAY_TYPES.RECURRING_TEMPLATE) {
+      if (campaign.status === 'sent' || campaign.status === 'failed') {
+        this._openResultsModal(campaign);
+        return;
+      }
       this.editingCampaignId = campaignId;
       this._toggleDeleteButton(true);
+      this._showCampaignId(campaignId);
       document.getElementById('campaign-modal-title-text').textContent = 'Edit Recurring Campaign';
       this._populateFormFromCampaign(campaign, true);
       this._getEditorModal().show();
@@ -287,6 +319,7 @@ export default class CalendarEvents {
     // One-off pending: fully editable
     this.editingCampaignId = campaignId;
     this._toggleDeleteButton(true);
+    this._showCampaignId(campaignId);
     document.getElementById('campaign-modal-title-text').textContent = 'Edit Campaign';
     this._populateFormFromCampaign(campaign, true);
     this._getEditorModal().show();
@@ -323,7 +356,8 @@ export default class CalendarEvents {
     document.getElementById('campaign-subject').value = settings.subject || '';
     document.getElementById('campaign-date').value = formatDateUTC(d);
     document.getElementById('campaign-time').value = formatTimeUTC(d);
-    document.getElementById('campaign-discount-code').value = settings.discountCode || '';
+    const contentData = settings.data?.content || {};
+    document.getElementById('campaign-discount-code').value = contentData.discountCode || '';
     document.getElementById('campaign-test').checked = !!settings.test;
 
     // Targeting
@@ -333,8 +367,8 @@ export default class CalendarEvents {
 
     // Email fields
     document.getElementById('campaign-preheader').value = settings.preheader || '';
-    document.getElementById('campaign-content').value = settings.content || '';
-    document.getElementById('campaign-template').value = settings.template || 'default';
+    document.getElementById('campaign-content').value = contentData.message || '';
+    document.getElementById('campaign-template').value = settings.template || 'card';
     document.getElementById('campaign-sender').value = settings.sender || 'marketing';
 
     // Push fields
@@ -409,6 +443,16 @@ export default class CalendarEvents {
     }
   }
 
+  _showCampaignId(id) {
+    const $el = document.getElementById('campaign-modal-id');
+    if (id) {
+      $el.textContent = id;
+      $el.classList.remove('d-none');
+    } else {
+      $el.classList.add('d-none');
+    }
+  }
+
   _updateLocalTimeHint() {
     const $row = document.getElementById('campaign-local-time-row');
     const $hint = document.getElementById('campaign-time-local');
@@ -456,9 +500,6 @@ export default class CalendarEvents {
     };
 
     // Config
-    if (c.discountCode) {
-      payload.discountCode = c.discountCode.trim();
-    }
     if (c.test) {
       payload.test = true;
     }
@@ -492,14 +533,22 @@ export default class CalendarEvents {
       if (c.preheader) {
         payload.preheader = c.preheader.trim();
       }
-      if (c.content) {
-        payload.content = c.content;
-      }
-      if (c.template && c.template !== 'default') {
+      if (c.template && c.template !== 'card') {
         payload.template = c.template;
       }
       if (c.sender) {
         payload.sender = c.sender;
+      }
+
+      const content = {};
+      if (c.content) {
+        content.message = c.content;
+      }
+      if (c.discountCode) {
+        content.discountCode = c.discountCode.trim();
+      }
+      if (Object.keys(content).length) {
+        payload.data = { ...payload.data, content };
       }
     }
 
@@ -732,9 +781,12 @@ export default class CalendarEvents {
     html += `<span class="badge bg-${campaign.type === 'email' ? 'primary' : 'success'}">${campaign.type === 'email' ? 'Email' : 'Push'}</span>`;
     html += `</div>`;
     html += `<table class="table table-sm table-borderless mb-0">`;
-    html += `<tr><td class="text-muted" style="width:120px">Name</td><td>${webManager.utilities().escapeHTML(settings.name || '')}</td></tr>`;
+    html += `<tr><td class="text-muted" style="width:120px">ID</td><td><code>${webManager.utilities().escapeHTML(campaign.id)}</code></td></tr>`;
+    html += `<tr><td class="text-muted">Name</td><td>${webManager.utilities().escapeHTML(settings.name || '')}</td></tr>`;
     html += `<tr><td class="text-muted">Subject</td><td>${webManager.utilities().escapeHTML(settings.subject || '')}</td></tr>`;
-    html += `<tr><td class="text-muted">Sent At</td><td>${formatDateUTC(d)} ${formatTimeUTC(d)} UTC</td></tr>`;
+    html += `<tr><td class="text-muted">Test</td><td>${settings.test ? '<span class="badge bg-warning">Yes</span>' : 'No'}</td></tr>`;
+    const localStr = d.toLocaleString('en', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    html += `<tr><td class="text-muted">Sent At</td><td>${formatDateUTC(d)} ${formatTimeUTC(d)} UTC <span class="text-muted">(${localStr})</span></td></tr>`;
 
     if (campaign.type === 'email') {
       if (settings.preheader) {
@@ -767,10 +819,11 @@ export default class CalendarEvents {
     html += '</div>';
 
     // Content (email only)
-    if (campaign.type === 'email' && settings.content) {
+    const resultContent = settings.data?.content?.message;
+    if (campaign.type === 'email' && resultContent) {
       html += '<div class="mb-4">';
       html += '<h6>Content</h6>';
-      html += `<pre class="bg-body-tertiary p-3 rounded small" style="white-space:pre-wrap;max-height:200px;overflow-y:auto">${webManager.utilities().escapeHTML(settings.content)}</pre>`;
+      html += `<pre class="bg-body-tertiary p-3 rounded small" style="white-space:pre-wrap;max-height:200px;overflow-y:auto">${webManager.utilities().escapeHTML(resultContent)}</pre>`;
       html += '</div>';
     }
 

@@ -145,6 +145,27 @@ class Manager {
     // Initialize messaging
     this.libraries.messaging = firebase.messaging();
 
+    // Handle background push messages (when the page is not focused)
+    this.libraries.messaging.onBackgroundMessage((payload) => {
+      console.log('Background message received:', payload);
+
+      const notification = payload.notification || {};
+      const data = payload.data || {};
+
+      const title = notification.title || 'New notification';
+      const options = {
+        body: notification.body || '',
+        icon: notification.icon || notification.image || '/assets/images/favicon/favicon-192x192.png',
+        data: payload,
+      };
+
+      if (data.click_action) {
+        options.data.click_action = data.click_action;
+      }
+
+      serviceWorker.registration.showNotification(title, options);
+    });
+
     // Attach firebase to SWManager
     this.libraries.firebase = firebase;
   }
