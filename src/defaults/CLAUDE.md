@@ -28,6 +28,9 @@ npm start           # dev: clean → setup → bundle exec gulp serve (Jekyll + 
 npm run build       # production build (UJ_BUILD_MODE=true): clean → setup → full gulp pipeline → _site/
 npm run deploy      # build → `npu sync --message='Deploy'` (publishes _site/)
 npx mgr test        # run framework + project test suites (build / page / boot layers)
+npx mgr test pages/home           # run a specific test by path (relative to test/)
+npx mgr test ujm:pages/home       # run only framework tests matching a path
+npx mgr test project:custom-test  # run only consumer project tests matching a path
 npx mgr audit       # HTML validation + spellcheck + optional Lighthouse
 npx mgr install dev  # use LOCAL ultimate-jekyll-manager source (to test framework edits)
 npx mgr install live # restore the published ultimate-jekyll-manager from npm

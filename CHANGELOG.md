@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.8] - 2026-06-07
+
+### Fixed
+
+- **Lazy loading animation flash.** Elements with `data-lazy="@class animation-*"` were briefly visible before the IntersectionObserver fired, causing a jarring flash (visible → disappear → fade-in). Added CSS rule to hide these elements from initial paint so they smoothly animate in.
+
+---
 ## [1.6.5] - 2026-06-04
 
 ### Added

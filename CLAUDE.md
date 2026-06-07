@@ -43,6 +43,10 @@ The only things that ARE safe to run inside UJM itself:
 4. `npm run build` — production build (`UJ_BUILD_MODE=true`)
 5. `npm run deploy` — build + `npu sync --message='Deploy'`
 6. `npm test` (or `npx mgr test`) — runs framework + project test suites
+   - `npx mgr test pages/home` — run a specific test by path (relative to `test/`)
+   - `npx mgr test ujm:pages/home` — run only framework tests matching a path
+   - `npx mgr test project:custom-test` — run only consumer project tests matching a path
+   - Prefix with `TEST_EXTENDED_MODE=true` for tests that hit real external APIs
 
 ### For Framework Development (This Repository)
 

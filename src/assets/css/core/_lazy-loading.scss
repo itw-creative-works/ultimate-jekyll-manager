@@ -12,6 +12,12 @@ img[data-lazy] {
   height: auto; // Maintain aspect ratio
 }
 
+// Hide elements with pending animation classes to prevent flash
+// (visible → disappear → fade-in) when IntersectionObserver fires
+[data-lazy*="animation-"] {
+  opacity: 0;
+}
+
 // Hide video/audio elements until loaded to prevent ugly native controls showing during shimmer
 [data-lazy-load-container].lazy-loading video,
 [data-lazy-load-container].lazy-loading audio {

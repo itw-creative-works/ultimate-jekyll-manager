@@ -37,6 +37,26 @@ npx mgr test --reporter json   # machine-readable __UJM_TEST__ events
 
 `npm test` works too — added to consumer `package.json#scripts.test` on `npx mgr setup`.
 
+### Filtering tests
+
+Pass a path (relative to `test/`) as a positional argument to run specific tests:
+
+```bash
+# Run a single test file
+npx mgr test pages/home
+
+# Run only UJM framework tests
+npx mgr test ujm:pages/home
+
+# Run only consumer project tests
+npx mgr test project:custom-test
+
+# Combine with extended mode
+TEST_EXTENDED_MODE=true npx mgr test pages/boot-test
+```
+
+The filter matches against the test file path. `ujm:` and `project:` prefixes scope the filter to framework-only or project-only tests respectively. Without a prefix, both are searched.
+
 ## Layers
 
 | Layer | Runs in | Use for |
