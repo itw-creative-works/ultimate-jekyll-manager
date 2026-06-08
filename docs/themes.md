@@ -345,6 +345,56 @@ their own (frozen) text color. Nav/dropdown/footer links already win on specific
 
 ---
 
+## 🚨 BOOTSTRAP-FIRST — NEVER reinvent the wheel
+
+**This is the #1 theme authoring mistake.** A theme's job is to RESTYLE Bootstrap — not to build a parallel design system alongside it.
+
+### The rule
+
+Every HTML element must use **Bootstrap classes first**. Custom CSS exists ONLY to override how those Bootstrap classes look (colors, shadows, borders, radii, typography) via the theme's SCSS. You should NEVER:
+
+- Invent custom layout classes when Bootstrap grid/flex utilities exist (`.row`, `.col-*`, `.d-flex`, `.gap-*`, `.justify-content-*`, `.align-items-*`, `.text-center`, `.mx-auto`, etc.)
+- Create custom button classes (`.my-btn`, `.lm-btn`) when `.btn .btn-primary`, `.btn .btn-outline-dark`, etc. already exist — restyle `.btn` in theme SCSS instead
+- Create custom spacing/sizing classes when Bootstrap has `p-*`, `m-*`, `w-*`, `rounded-*`, `shadow-*`
+- Create custom text utilities when Bootstrap has `.text-muted`, `.lead`, `.display-*`, `.fw-*`, `.fs-*`
+- Create custom card/container classes when `.card`, `.card-body`, `.container`, `.lh-*` exist
+- Write `position`, `display`, `flex`, `gap`, `padding`, `margin`, `border-radius`, `text-align`, `font-weight`, `font-size` in custom CSS when a Bootstrap utility class does the same thing
+
+### What theme CSS IS for
+
+- Overriding Bootstrap component appearance: `.btn { border-radius: 50px; box-shadow: ... }` — changes how ALL buttons look
+- Setting design tokens: `$primary`, `$border-radius`, `$font-family-sans-serif` — passed to Bootstrap's `@forward`
+- CSS custom properties for the theme palette: `--lm-accent`, `--lm-ink`, etc.
+- Dark mode overrides via `[data-bs-theme="dark"]` variable remapping
+- Truly novel components with no Bootstrap equivalent (grain overlays, animated hero cards, marquee strips)
+- Mixins/utilities that compose Bootstrap patterns, not replace them
+
+### How to check yourself
+
+Before writing ANY custom CSS class, ask: "Does Bootstrap already have a class for this?" If yes, use it. If the Bootstrap class doesn't look right, override its appearance in theme SCSS — don't create a parallel class. The HTML should be 90%+ Bootstrap classes with custom classes only for genuinely novel UI patterns.
+
+### Anti-pattern example
+
+```html
+<!-- BAD: parallel design system -->
+<div class="lm-wrap">
+  <div class="lm-section">
+    <a class="lm-btn lm-btn-primary">Click</a>
+  </div>
+</div>
+
+<!-- GOOD: Bootstrap classes, theme restyled -->
+<div class="container">
+  <section class="py-5">
+    <a class="btn btn-primary">Click</a>
+  </section>
+</div>
+```
+
+The GOOD version uses zero custom CSS for layout/buttons — the theme's `_buttons.scss` restyled `.btn` and `.btn-primary` to look however it wants. The page `main.scss` only adds styles for genuinely novel components.
+
+---
+
 ## Authoring conventions (both paths)
 
 1. **Every token is `!default`** so consumers can override without forking.

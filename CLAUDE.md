@@ -158,6 +158,10 @@ Same `{ layer, description, run(ctx) }` contract as EM/BXM. JSON-line reporter p
 
 Note: `-t` short alias belongs to `translation`. The `test` command uses `--test` flag + `test` positional only. See [docs/cli.md](docs/cli.md) (planned).
 
+## Development Workflow
+
+- **🚫 NEVER run `npm start` / `npm run build` / `npm test` in a consumer project** unless the user explicitly asks. The user runs the dev server — running it again kills theirs. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error). If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change.
+
 ## File Conventions
 
 - **CommonJS** in build-time / Node files (gulp tasks, commands, lib/). **ESM** in `src/index.js` (frontend Manager — webpack-bundled).

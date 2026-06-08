@@ -15,6 +15,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.6.9] - 2026-06-08
+
+### Added
+
+- **Bootstrap-first theming convention.** Added comprehensive guidance to `docs/themes.md` and the default consumer `CLAUDE.md` — themes must restyle Bootstrap classes, not create parallel design systems.
+- **Dev workflow documentation.** Added explicit instructions to `CLAUDE.md` and consumer defaults to check `logs/dev.log` instead of running `npm start`/`npm test` in consumer projects.
+
+### Fixed
+
+- **Signup metadata failure notification timeout.** Changed dev-only notification from permanent (`timeout: 0`) to 1 second (`timeout: 1000`) so it doesn't block the screen during development.
+
+---
 ## [1.6.8] - 2026-06-07
 
 ### Fixed

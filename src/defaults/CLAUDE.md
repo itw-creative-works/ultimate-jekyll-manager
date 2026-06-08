@@ -38,6 +38,26 @@ npx mgr install live # restore the published ultimate-jekyll-manager from npm
 
 > Editing the UJM framework source while working here? Run `npx mgr install dev` so this project picks up your uncommitted framework changes (it otherwise uses its installed `node_modules/ultimate-jekyll-manager`). Run `npx mgr install live` to switch back.
 
+## 🚨 BOOTSTRAP-FIRST — NEVER reinvent the wheel
+
+**UJM is built on Bootstrap 5.** Every page MUST use Bootstrap classes for layout, spacing, typography, buttons, cards, grid, flex, and all standard components. Custom CSS exists ONLY to override how Bootstrap classes LOOK (via theme SCSS), NOT to replace them with parallel classes.
+
+- **DO:** Use `.btn .btn-primary`, `.container`, `.row`, `.col-*`, `.d-flex`, `.gap-*`, `.py-5`, `.text-center`, `.card`, `.lead`, `.shadow`, `.rounded-*`, etc.
+- **DO NOT:** Create custom `.my-btn`, `.my-wrap`, `.my-section` classes when Bootstrap already has equivalents. Don't write `padding`, `display: flex`, `gap`, `margin`, `text-align`, `font-weight` in custom CSS when a Bootstrap utility does the same thing.
+- **Theme SCSS overrides appearance:** `.btn { border-radius: 50px; box-shadow: ... }` changes ALL buttons site-wide. You don't need `.lm-btn` — just restyle `.btn`.
+- **Custom CSS is for genuinely novel components only:** animated hero illustrations, grain overlays, marquee strips — things with no Bootstrap equivalent.
+
+See `node_modules/ultimate-jekyll-manager/docs/themes.md` for the full "Bootstrap-first" convention.
+
+## 🚨 Development workflow — MUST follow
+
+- **🚫 NEVER run `npm start`, `npm run build`, or `npm test`** unless the user explicitly asks. Assume the user is already running the dev server. Running these commands kills the user's process and wastes time.
+- **✅ ALWAYS check `logs/dev.log`** after editing source files (SCSS, JS, HTML, config) to confirm the build succeeded. The dev server's gulp watcher recompiles on file change — check the log for errors.
+  - Success: `Reloading Browsers...`
+  - Failure: `'sass' errored`, `'webpack' errored`, `'build-error'`, `'jekyll' errored`
+- If editing multiple files in a batch, check the log once after the last edit. Wait a few seconds for the watcher to recompile before reading the log.
+- **If the log shows an error, fix it immediately.** A change that breaks the build is not a completed change.
+
 ## Where things live
 
 - `src/_config.yml` — Jekyll config: brand, theme, meta, web_manager (Firebase). `Manager.getConfig('project')` reads this. **`brand.id` + `theme.id` are required.**

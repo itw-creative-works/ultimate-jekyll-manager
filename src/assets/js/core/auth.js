@@ -316,7 +316,7 @@ async function sendUserSignupMetadata(account) {
     /* @dev-only:start */
     webManager.utilities().showNotification(
       `[DEV] Failed to send signup metadata. Will retry on next page load (flags.signupProcessed is still false).`,
-      { type: 'warning', timeout: 0 }
+      { type: 'warning', timeout: 1000 }
     );
     /* @dev-only:end */
   }
