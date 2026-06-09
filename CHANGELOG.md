@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Push notification subscribe on payment confirmation CTA click** — hooks `subscribe()` onto CTA button clicks on the payment confirmation page. Requires a user gesture for the browser permission prompt, so uses `{ once: true }` click listeners.
 
+### Fixed
+
+- **FormManager spinner layout in icon-only buttons** — `_showSpinner()` no longer adds `me-2` margin when `submittingText` is empty. Previously, the unnecessary right margin squished the spinner off-center in small round buttons (e.g. chat send).
+
 ---
 ## [1.7.1] - 2026-06-09
 

@@ -314,7 +314,7 @@ initializing → ready ⇄ submitting → ready (or submitted)
   allowResubmit: true,       // Allow resubmission after success (false = 'submitted' state)
   resetOnSuccess: false,     // Clear form fields after successful submission
   warnOnUnsavedChanges: true, // Warn user before leaving page with unsaved changes
-  submittingText: 'Processing...', // Text shown on submit button during submission
+  submittingText: 'Processing...', // Text shown on submit button during submission (use '' for icon-only buttons)
   submittedText: 'Processed!', // Text shown on submit button after success (when allowResubmit: false)
   inputGroup: null           // Filter getData() by data-input-group attribute (null = all fields)
 }
