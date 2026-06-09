@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.7.2] - 2026-06-09
+
+### Added
+
+- **Push notification subscribe on payment confirmation CTA click** — hooks `subscribe()` onto CTA button clicks on the payment confirmation page. Requires a user gesture for the browser permission prompt, so uses `{ once: true }` click listeners.
+
+---
 ## [1.7.1] - 2026-06-09
 
 ### Added

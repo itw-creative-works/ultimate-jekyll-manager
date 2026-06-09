@@ -813,7 +813,10 @@ export class FormManager {
       if (show) {
         // Store original content
         $btn._originalHTML = $btn.innerHTML;
-        $btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${webManager.utilities().escapeHTML(this.config.submittingText)}`;
+        const text = this.config.submittingText;
+        $btn.innerHTML = text
+          ? `<span class="spinner-border spinner-border-sm me-2"></span>${webManager.utilities().escapeHTML(text)}`
+          : '<span class="spinner-border spinner-border-sm"></span>';
       } else if ($btn._originalHTML) {
         $btn.innerHTML = $btn._originalHTML;
       }

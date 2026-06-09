@@ -35,6 +35,15 @@ async function initializeConfirmation() {
 
   // Trigger celebration animation
   await triggerCelebration();
+
+  // Subscribe to push notifications on CTA click (requires user gesture)
+  document.querySelectorAll('.btn').forEach(($btn) => {
+    $btn.addEventListener('click', () => {
+      webManager.notifications().subscribe().catch((e) => {
+        console.warn('[Confirmation] Notification subscribe failed:', e.message);
+      });
+    }, { once: true });
+  });
 }
 
 // Parse URL parameters into minimal state
