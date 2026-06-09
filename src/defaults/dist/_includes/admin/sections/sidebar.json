@@ -46,6 +46,15 @@
     },
     {
       header: true,
+      label: 'Content'
+    },
+    {
+      label: 'Animation Studio',
+      href: '/admin/studio',
+      icon: 'clapperboard',
+    },
+    {
+      header: true,
       label: 'External tools'
     },
     {

@@ -74,6 +74,16 @@ See `node_modules/ultimate-jekyll-manager/docs/themes.md` for the full "Bootstra
 - `dist/` — intermediate compile output (webpack bundles, sass, processed images) before Jekyll merges them into `_site/`.
 - `test/**/*.js` — your project test suites (framework auto-runs them alongside its own).
 
+## Animation Studio
+
+UJM ships a default Animation Studio admin page at `/admin/studio` for creating screen-recording-ready product demo clips. The framework provides all boilerplate (sidebar, controls, canvas, clip runner engine). Consumer projects only supply clip definitions and clip-specific CSS:
+
+- **Clips:** Set `window.STUDIO_CLIPS` in `src/assets/js/pages/admin/studio/index.js` — each clip has a `label`, `duration`, and `build($canvas, helpers)` function. Helpers include `animate`, `el`, and reusable builders: `flowClip`, `cardClip`, `chatClip`.
+- **Clip CSS:** Put animation primitives in `src/assets/css/pages/admin/studio/index.scss` (must include `@use 'studio'` to pull in boilerplate)
+- **No page file needed** — the framework default provides the page
+
+See `node_modules/ultimate-jekyll-manager/docs/animation-studio.md` for the full reference (clip contract, helpers, aspect ratios, playback controls).
+
 ## Per-context imports
 
 ```js

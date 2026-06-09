@@ -205,6 +205,7 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 
 ### Pages, layouts, content
 
+- [docs/animation-studio.md](docs/animation-studio.md) — Animation Studio admin page: clip registration via `window.STUDIO_CLIPS`, helpers (`animate`, `el`, `flowClip`, `cardClip`, `chatClip`), resolution picker, recording, aspect ratio modes
 - [docs/themes.md](docs/themes.md) — theme system: selection + resolution (SCSS loadPaths, `__theme__`, classy layout fallback), shared vs per-theme layers, authoring a theme inside UJM OR in a consumer project, live validation
 - [docs/layouts-and-pages.md](docs/layouts-and-pages.md) — page types, layout chain, `asset_path` frontmatter
 - [docs/images.md](docs/images.md) — `@post/` shortcut for blog post images, BEM admin/post image handling, imagemin pipeline + source-size constraints + `UJ_IMAGEMIN_REWRITE_SOURCES` cleanup flag

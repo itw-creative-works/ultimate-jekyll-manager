@@ -15,6 +15,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.7.0] - 2026-06-09
+
+### Added
+
+- **Animation Studio admin page** (`/admin/studio`). New default admin page for creating screen-recording-ready product demo animation clips. Framework provides all boilerplate: sidebar, FormManager controls, resolution picker (540p–4K), aspect ratio toggle (16:9/9:16), playback loop with speed/pause controls, and 60fps tab recording via `getDisplayMedia` + `CropTarget`.
+- **Clip builder helpers** — `flowClip`, `cardClip`, `chatClip` passed alongside `animate`/`el` to clip `build()` functions. Consumers declare data, not structure.
+- **Studio CSS partial** (`_studio.scss`) — importable via `@use 'studio'` in consumer page CSS. Includes boilerplate layout + generic animation primitives (`.s-hidden`, `.s-step-bg`, `.s-bar-fill`).
+- **`docs/animation-studio.md`** — full reference for the clip contract, helpers, recording, resolution, aspect ratios.
+- **Admin sidebar entry** for Animation Studio under new "Content" section.
+
+---
 ## [1.6.9] - 2026-06-08
 
 ### Added
