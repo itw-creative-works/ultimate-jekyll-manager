@@ -105,6 +105,11 @@ export default function () {
           }
         }
 
+        // Prompt for push notification subscription (fire-and-forget)
+        webManager.notifications().subscribe().catch((e) => {
+          console.warn('[Auth] Notification subscribe failed:', e.message);
+        });
+
         // Check if page requires user to be unauthenticated (e.g., signin page)
         if (policy === 'unauthenticated') {
           // Check for authReturnUrl first (takes precedence)

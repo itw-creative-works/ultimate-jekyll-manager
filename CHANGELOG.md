@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.7.1] - 2026-06-09
+
+### Added
+
+- **Auto-subscribe push notifications on authenticated page load** — calls `webManager.notifications().subscribe()` in the core auth listener after the consent guard passes. Fires for both fresh signups and returning sign-ins. Failure logs a warning and never blocks navigation.
+
+---
 ## [1.7.0] - 2026-06-09
 
 ### Added
