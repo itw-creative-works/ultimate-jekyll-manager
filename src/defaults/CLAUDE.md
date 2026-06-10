@@ -114,6 +114,12 @@ At build time, `require('ultimate-jekyll-manager/build')` exposes:
 - `Manager.logger(name)` — timestamped logger instance
 - `Manager.require(path)` — escape hatch for UJM transitive deps (use sparingly)
 
+## Dependency resolution
+
+- **Do NOT install framework dependencies directly** (`firebase`, `web-manager`, etc.). UJM's webpack config resolves them through the framework's own `node_modules/`. If something doesn't resolve, the issue is in UJM's webpack config — not your `package.json`.
+- **web-manager owns Firebase.** Never `import firebase from 'firebase/app'`. Use `import webManager from 'web-manager'` → `webManager.auth()`, `webManager.firestore()`.
+- **`Manager.require(name)`** resolves from UJM's module context at runtime for unbundled code (gulp tasks, test fixtures).
+
 <!-- Everything above this marker is owned by the framework and rewritten on every `npx mgr setup`. Add your project-specific notes below — they are preserved across setups. -->
 
 # ========== Custom Values ==========
