@@ -158,9 +158,16 @@ Same `{ layer, description, run(ctx) }` contract as EM/BXM. JSON-line reporter p
 
 Note: `-t` short alias belongs to `translation`. The `test` command uses `--test` flag + `test` positional only. See [docs/cli.md](docs/cli.md) (planned).
 
+## Dependency Resolution
+
+- **Consumer code can `import`/`require()` any UJM dependency** — webpack's `resolve.modules` includes the framework's own `node_modules/`. Consumer projects do NOT need to `npm install firebase`, `web-manager`, or any other UJM transitive dep. If a dep doesn't resolve, the fix is in UJM's webpack config — not the consumer's `package.json`.
+- **web-manager owns Firebase.** Consumer code NEVER imports Firebase directly (`import firebase from 'firebase/app'`). Use `import webManager from 'web-manager'` → `webManager.auth()`, `webManager.firestore()`. Same rule in EM and BXM.
+- **`Manager.require(name)`** resolves from UJM's module context at runtime (static + prototype). Use in gulp tasks or unbundled code (e.g. test fixtures). Webpack `resolve.modules` handles the bundled case.
+
 ## Development Workflow
 
 - **🚫 NEVER run `npm start` / `npm run build` / `npm test` in a consumer project** unless the user explicitly asks. The user runs the dev server — running it again kills theirs. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error). If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change.
+- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. See `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
 
 ## File Conventions
 
