@@ -151,6 +151,15 @@ This is the single source of truth for account dropdown menu items. Consuming pr
 
 This renders the full account dropdown: avatar button with profile photo, user info header (displayName + email), and the menu items from `account.json`.
 
+Each dropdown item supports:
+
+- `label` — Display text
+- `href` — Link URL (omit for button behavior, e.g. Sign Out)
+- `icon` — Font Awesome icon name
+- `class` — Additional CSS classes
+- `divider: true` — Renders a divider line
+- `attributes` — Array of `[name, value]` pairs (e.g. `data-wm-bind` for visibility)
+
 **Parameters:**
 
 | Parameter | Default | Description |

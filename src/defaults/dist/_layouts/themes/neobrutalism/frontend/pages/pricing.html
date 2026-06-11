@@ -154,6 +154,33 @@ faqs:
 {% endcomment %}
 
 <!-- ============================================ -->
+<!-- PROMO BANNER — revealed + populated by the framework pricing JS
+     (sale name, countdown, navbar offset). The ids are the contract;
+     ship it hidden and let the JS do the rest. -->
+<!-- ============================================ -->
+<div id="pricing-promo-banner" class="position-fixed top-0 start-0 w-100 text-center animation-slide-down" style="z-index: 1050;" hidden>
+  <div class="bg-primary text-white py-2 position-relative">
+    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 mt-2 me-2" aria-label="Close" onclick="this.closest('#pricing-promo-banner').hidden=true;document.querySelector('.navbar-wrapper').style.marginTop='';document.querySelector('main > section:first-of-type').style.paddingTop=''"></button>
+    <div class="container-fluid">
+      <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap pe-4">
+        <span id="pricing-promo-badge" class="badge bg-warning text-dark px-2 py-1 fs-6 animation-wiggle">
+          15% OFF!
+        </span>
+        <span id="pricing-promo-text" class="fw-bold">
+          Flash sale
+        </span>
+        <span class="text-white-50">
+          Ending in <span id="pricing-promo-countdown" class="fw-semibold text-white">--</span>
+        </span>
+        <span class="text-white-50">
+          Use code <span id="pricing-promo-code" class="badge bg-white bg-opacity-25 px-2 py-1 fs-6">WELCOME15</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
 <!-- HERO -->
 <!-- ============================================ -->
 <section class="pricing-hero">
@@ -208,30 +235,17 @@ faqs:
 
     <div class="pricing-plan-grid">
       {% for plan in page.resolved.pricing.plans %}
-        {% comment %} Look up matching config product (same as classy) {% endcomment %}
-        {% assign _config_product = nil %}
-        {% for p in site.web_manager.payment.products %}
-          {% if p.id == plan.id %}{% assign _config_product = p %}{% break %}{% endif %}
-        {% endfor %}
-
-        {% if plan.pricing.monthly or plan.pricing.monthly == 0 %}
-          {% assign _plan_monthly = plan.pricing.monthly %}
-        {% elsif _config_product.prices.monthly or _config_product.prices.monthly == 0 %}
-          {% assign _plan_monthly = _config_product.prices.monthly %}
-        {% else %}{% assign _plan_monthly = 0 %}{% endif %}
-
-        {% if plan.pricing.annually or plan.pricing.annually == 0 %}
-          {% assign _plan_annually = plan.pricing.annually %}
-        {% elsif _config_product.prices.annually or _config_product.prices.annually == 0 %}
-          {% assign _plan_annually = _config_product.prices.annually %}
-        {% else %}{% assign _plan_annually = 0 %}{% endif %}
+        {% comment %} Shared pricing math (assigns _plan_monthly/_plan_annually/per-unit into this scope) {% endcomment %}
+        {% include core/pricing/resolve-plan.html plan=plan %}
 
         <article class="card pricing-plan {% if plan.popular %}pricing-plan--popular{% endif %}">
           {% if plan.popular %}
             <span class="pricing-plan-flag">Most Popular</span>
           {% endif %}
 
-          <h3 class="pricing-plan-name">{{ plan.name }}</h3>
+          <!-- .card-title is load-bearing: the framework pricing JS reads the plan
+               name for analytics via `.h3, .h2, .card-title` inside the card. -->
+          <h3 class="card-title pricing-plan-name">{{ plan.name }}</h3>
           <p class="pricing-plan-tagline">{{ plan.tagline }}</p>
 
           <!-- Price -->
@@ -244,23 +258,8 @@ faqs:
           </div>
 
           {% if page.resolved.pricing.price_per_unit.enabled %}
-            {% comment %} Resolve the per-unit value; only render if it's a usable positive number {% endcomment %}
-            {% assign _ppu_value = nil %}
-            {% if _plan_monthly > 0 %}
-              {% for feature in plan.features %}
-                {% if feature.id == page.resolved.pricing.price_per_unit.feature_id %}
-                  {% assign _ppu_value = feature.value %}
-                  {% if _config_product and _ppu_value == nil %}
-                    {% for _lim in _config_product.limits %}{% if _lim[0] == feature.id %}{% assign _ppu_value = _lim[1] %}{% break %}{% endif %}{% endfor %}
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-            {% endif %}
             <p class="pricing-plan-ppu">
-              {% if _plan_monthly > 0 and _ppu_value and _ppu_value > 0 %}
-                {% assign monthly_price_per_unit = _plan_monthly | times: 1.0 | divided_by: _ppu_value | round: 2 %}
-                {% assign annual_monthly_price = _plan_annually | divided_by: 12.0 %}
-                {% assign annual_price_per_unit = annual_monthly_price | divided_by: _ppu_value | round: 2 %}
+              {% if monthly_price_per_unit %}
                 <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.pricing.price_per_unit.label }}
               {% elsif _plan_monthly == 0 %}
                 Perfect for trying out

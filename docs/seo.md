@@ -1,9 +1,125 @@
-# SEO — Alternatives Pages & Structured Data
+# SEO & Content
 
-This doc covers two SEO-focused subsystems:
+This doc covers UJM's SEO and content subsystems:
 
-1. **Alternatives Collection** — competitor comparison landing pages.
-2. **Schema / Structured Data (JSON-LD)** — `SoftwareApplication` and `FAQPage` JSON-LD blocks.
+1. **Content writing rules** — headlines, sentence case, keywords (applies to ALL pages).
+2. **Content page types** — Services (main offerings), Solutions (SEO landing pages), Alternatives (competitor comparisons).
+3. **Schema / Structured Data (JSON-LD)** — `SoftwareApplication` and `FAQPage` JSON-LD blocks.
+
+## Content Writing Rules (applies to ALL pages)
+
+### H1 Headlines
+
+- **Start with an action verb** — tell the user what they're getting immediately
+- "Grow your business with social media ads" NOT "Social Media Advertising Services"
+- "Automate your workflow in minutes" NOT "Workflow Automation Platform"
+
+### Sentence Case (ALL headings)
+
+- First word capitalized, rest lowercase
+- "Grow your business with social media ads" NOT "Grow Your Business With Social Media Ads"
+
+### Keywords
+
+- Use primary keywords naturally throughout the page — in headings, subheadings, and body text
+- Keep content readable and natural — don't keyword stuff but still use primary and secondary keywords where relevant
+
+### Headline Structure (headline / headline_accent)
+
+**Section headlines (non-hero):**
+
+- Maximum 5-6 words total
+- ONLY the LAST word should be accented (placed in `headline_accent`)
+
+```yaml
+# CORRECT — Last word only
+headline: "Compare all"
+headline_accent: "plans"
+
+headline: "Frequently asked"
+headline_accent: "questions"
+
+# WRONG — Multiple words accented or wrong position
+headline: "Compare"
+headline_accent: "all plans"  # Too many words accented
+```
+
+**Hero section headlines (exception):**
+
+- Hero sections may accent MORE than just the last word — up to half of the phrase for emphasis
+
+```yaml
+hero:
+  headline: "The right plans for"
+  headline_accent: "your business"  # Multiple words OK in hero
+```
+
+**Homepage hero (special case):** more flexible — longer phrases with creative accent placement; focus on impact and brand messaging.
+
+### Frontmatter SEO Rules
+
+- **Default pages** (blueprint layouts): Do NOT include `meta.title` or `meta.description` — these are already set in the layout
+- **Custom pages**: MUST include `meta.title` and `meta.description` in frontmatter
+
+### Superheadline Rules
+
+- Homepage: Do NOT change (keep default icon AND text)
+- Other pages: Can customize `text` but keep default `icon`
+
+### General Content Guidelines
+
+- Keep copy concise and scannable; use active voice
+- Focus on benefits, not features
+- Match the brand tone from `_config.yml`
+- Maintain consistency across all pages
+
+## Services Pages (Main Offerings)
+
+Services (or Features) pages represent the MAIN OFFERINGS of the business — the core products, services, or capabilities the business publicly promotes (e.g. an agency's "Social Media Advertising", "SEO Services", "Web Design").
+
+**Structure:**
+
+```
+src/pages/services/
+├── index.md              # Lists all services
+├── [service-1].md        # layout: blueprint/index
+├── [service-2].md
+└── [service-3].md
+```
+
+**Page strategy — exactly 3 service pages** based on the business's core offerings:
+
+- Featured prominently in nav dropdown AND the services index page
+- Linked throughout the site (footer, CTAs, internal links)
+- Fully customized with tailored features, testimonials, case studies, etc.
+
+Each service page uses `layout: blueprint/index` with a hero like:
+
+```yaml
+hero:
+  tagline: "{{ site.brand.name }}"
+  headline: "Professional"
+  headline_accent: "[Service Name]"
+  subheadline: "[Value proposition for this service]"
+```
+
+**Navigation:** add a `Services` dropdown to `src/_includes/frontend/sections/nav.json` (3 services + divider + "All Services" link) and a `Services` column to `footer.json` — see [assets.md](assets.md) for the JSON section system.
+
+## Solutions Pages (SEO Landing Pages)
+
+Solutions pages are SEO-focused landing pages that target SPECIFIC keywords, niches, or audience segments. They are NOT publicly linked on the site — they LINK BACK to the main Services pages (e.g. for a "Social Media Advertising" service: "TikTok Ads Agency", "Facebook Ads for E-commerce").
+
+**Purpose:** drive organic traffic via long-tail keywords; target specific industries/platforms/use cases; funnel visitors to main service pages via CTAs and internal links.
+
+**Structure:** individual pages only (`src/pages/solutions/*.md`, `layout: blueprint/index`) — **NO index page**; solutions are discovered via search engines, not site navigation.
+
+**Guidelines:**
+
+- **NOT linked in nav, footer, or services index** — search-engine discovery only
+- **Always link back** to the related main service page (CTAs, body content, related-services section)
+- Can be lighter customizations (hero + key sections) since they're keyword-focused
+- Focus on specific search intent (e.g., "[Platform] + [Service] + [Location/Industry]")
+- Any number of pages — use keyword research to identify opportunities
 
 ## Alternatives Collection (SEO Competitor Comparison Pages)
 
@@ -95,6 +211,17 @@ Which renders as "Can I import my data from ExampleApp?" for an ExampleApp compe
 | Sample alternative | `src/defaults/dist/_alternatives/example-competitor.md` |
 | CSS | `src/assets/css/pages/alternatives/alternative/index.scss` |
 | JS | `src/assets/js/pages/alternatives/alternative/index.js` |
+
+### Content Guidelines (alternatives)
+
+- **Comparison features:** include 8-12 features for a thorough comparison
+- **Values:** use `true`/`false` for binary features, strings for nuanced values ("Unlimited", "Limited", "Basic")
+- **Tone:** confident but not aggressive — focus on our strengths, not bashing competitors
+- **Shared sections:** do NOT repeat testimonials, stats, FAQs, CTA, or why_switch per page — they're inherited from the layout; override only when a specific competitor needs unique content
+- **Video:** optional — set `video.youtube_id` only if a comparison video exists for that competitor
+- **Up to 20 pages**
+- The `/alternatives` index page is auto-generated — do NOT create it manually
+- Do NOT add alternatives to the main nav or footer — discovered via search engines, like Solutions pages
 
 ## Schema / Structured Data (JSON-LD)
 

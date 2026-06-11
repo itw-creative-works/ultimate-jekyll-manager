@@ -82,4 +82,4 @@ Write the function in [src/utils/mode-helpers.js](../src/utils/mode-helpers.js) 
 
 ## See also
 
-- [test-framework.md](test-framework.md) — `UJ_TEST_MODE` is set automatically by the test runners; `--integration` gates real external APIs.
+- [test-framework.md](test-framework.md) — `UJ_TEST_MODE` is set automatically by the test runners; `--extended` / `TEST_EXTENDED_MODE=true` gates real external APIs.

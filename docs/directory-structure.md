@@ -1,4 +1,4 @@
-# Project Structure
+# Directory Structure
 
 UJM is a template framework that consuming projects install as an NPM module to build Jekyll sites quickly and efficiently. It provides best-practice configurations, default components, themes, and build tools.
 

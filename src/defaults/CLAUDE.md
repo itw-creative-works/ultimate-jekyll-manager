@@ -28,9 +28,12 @@ npm start           # dev: clean → setup → bundle exec gulp serve (Jekyll + 
 npm run build       # production build (UJ_BUILD_MODE=true): clean → setup → full gulp pipeline → _site/
 npm run deploy      # build → `npu sync --message='Deploy'` (publishes _site/)
 npx mgr test        # run framework + project test suites (build / page / boot layers)
-npx mgr test pages/home           # run a specific test by path (relative to test/)
-npx mgr test ujm:pages/home       # run only framework tests matching a path
-npx mgr test project:custom-test  # run only consumer project tests matching a path
+npx mgr test pages/home           # run a specific test by path (relative to test/, both sources)
+npx mgr test project:             # run ONLY your project tests (project:custom-test for one path)
+npx mgr test mgr:                 # run ONLY framework tests (ujm: / framework: are equivalent)
+npx mgr test --filter=foo         # match test NAMES within the selected files (composes with target)
+npx mgr test --extended           # also run tests that hit real external services (or TEST_EXTENDED_MODE=true; off by default)
+# (output is teed to logs/ — dev.log on `npm start`, build.log on `npm run build`, test.log on `npx mgr test`; cat instead of scrolling scrollback)
 npx mgr audit       # HTML validation + spellcheck + optional Lighthouse
 npx mgr install dev  # use LOCAL ultimate-jekyll-manager source (to test framework edits)
 npx mgr install live # restore the published ultimate-jekyll-manager from npm
@@ -51,7 +54,7 @@ See `node_modules/ultimate-jekyll-manager/docs/themes.md` for the full "Bootstra
 
 ## 🚨 Development workflow — MUST follow
 
-- **🚫 NEVER run `npm start`, `npm run build`, or `npm test`** unless the user explicitly asks. Assume the user is already running the dev server. Running these commands kills the user's process and wastes time.
+- **🚫 NEVER run `npm start`** — the user runs the dev server; running it again kills theirs. Assume it's already running; if it isn't, instruct the user to run it rather than running it yourself. Running `npx mgr test` is fine.
 - **✅ ALWAYS check `logs/dev.log`** after editing source files (SCSS, JS, HTML, config) to confirm the build succeeded. The dev server's gulp watcher recompiles on file change — check the log for errors.
   - Success: `Reloading Browsers...`
   - Failure: `'sass' errored`, `'webpack' errored`, `'build-error'`, `'jekyll' errored`
@@ -119,6 +122,10 @@ At build time, `require('ultimate-jekyll-manager/build')` exposes:
 - **Do NOT install framework dependencies directly** (`firebase`, `web-manager`, etc.). UJM's webpack config resolves them through the framework's own `node_modules/`. If something doesn't resolve, the issue is in UJM's webpack config — not your `package.json`.
 - **web-manager owns Firebase.** Never `import firebase from 'firebase/app'`. Use `import webManager from 'web-manager'` → `webManager.auth()`, `webManager.firestore()`.
 - **`Manager.require(name)`** resolves from UJM's module context at runtime for unbundled code (gulp tasks, test fixtures).
+
+## Testing
+
+Every feature ships with tests at every layer it has a surface in: **logic** (`test/build/`, or `test/page/` for frontend module logic), **UI** (`test/page/` — real events on the real DOM), and **end-to-end** (`test/boot/`). Skip a layer only when the feature genuinely has no surface there — "the logic test covers it" does not excuse the UI test. See `test/README.md` and `node_modules/ultimate-jekyll-manager/docs/test-framework.md`.
 
 <!-- Everything above this marker is owned by the framework and rewritten on every `npx mgr setup`. Add your project-specific notes below — they are preserved across setups. -->
 

@@ -276,11 +276,14 @@ module.exports = async function (options) {
     });
   }
 
-  // Generate 12 posts
+  // Generate posts (--count=<n>, default 12)
+  const count = parseInt(options.count, 10) || 12;
   const now = Math.floor(Date.now() / 1000);
   const dayInSeconds = 86400;
 
-  for (let i = 0; i < 12; i++) {
+  logger.log(`Generating ${count} test posts...`);
+
+  for (let i = 0; i < count; i++) {
     // Calculate timestamp for each post (spread over last 12 days)
     const postTimestamp = now - (i * dayInSeconds);
     const postId = `test-${postTimestamp}`; // Add test- prefix to ID
@@ -335,5 +338,5 @@ ${generateBlogContent(postImages)}`;
     logger.log(`Created post: ${filename}`);
   }
 
-  logger.log(`Successfully created 12 blog posts in ${postsDir}`);
+  logger.log(`Successfully created ${count} blog posts in ${postsDir}`);
 };

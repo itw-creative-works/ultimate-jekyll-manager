@@ -16,6 +16,14 @@ Shipped themes live in [src/assets/themes/](../src/assets/themes/):
   fallback source** (see below).
 - **`neobrutalism/`** — bold high-contrast theme (hard borders, offset shadows,
   zero radius). A worked example of a second theme.
+- **`newsflash/`** — editorial news-site theme (paper + ink + vermilion, serif
+  headlines, live ticker, reading progress). The worked example of a
+  **genre-specific** theme: news-native frontmatter defaults, news-purposed
+  homepage sections (`latest`, `rundown`, `desks`, `more_stories`), membership-tier pricing, desk/topic
+  archives (blog categories + tags), and a newsroom masthead (team + reporter
+  profile pages). Functional pages (download, feedback, updates, auth, account)
+  intentionally ride the classy fallback — their structure is the feature, and
+  the theme CSS restyles them.
 - **`_template/`** — a copy-paste starter for new themes (the `_` prefix excludes
   it from selection).
 
@@ -89,13 +97,147 @@ adopts your look. Override a layout only when the **structure itself** must diff
 The `neobrutalism` theme demonstrates both. It restyles classy's markup everywhere
 EXCEPT the homepage and pricing page, where it ships genuinely different structure
 (asymmetric split hero, offset showcase rows, oversized color-block stats) at
-`_layouts/themes/neobrutalism/frontend/pages/{index,pricing}.html`. **Critically,
-those overrides reuse the SAME `page.resolved.*` frontmatter data contract as
-classy's versions** — same `hero`, `pricing`, `stats`, `cta` keys, same
-price-resolution Liquid — so a consumer's existing page frontmatter keeps working;
-only the HTML that renders the data changes. When you override a page layout, copy
-classy's frontmatter block and preserve any data-resolution Liquid; restructure
-only the markup below the front matter.
+`_layouts/themes/neobrutalism/frontend/pages/{index,pricing}.html`. When you
+override a page layout, **preserve any data-resolution Liquid** (the pricing
+product-matching, paginator loops, `uj_post`/`uj_member` resolution) and keep the
+**universal section keys** (`hero`, `cta`, `stats`, `faqs`, `testimonials`,
+`newsletter`, `trusted_by`, `pricing.plans`) so a consumer's existing page
+frontmatter keeps working across theme swaps — but write your own defaults and
+structure for everything else (next section).
+
+#### Frontmatter defaults are part of the theme's identity
+
+Every theme page layout ships **default frontmatter** that renders when a
+consumer page doesn't override it. Those defaults are not filler — they are the
+theme's out-of-the-box voice, and **they MUST be written for the theme's genre,
+NOT copied from classy.** Themes serve different purposes: classy/neobrutalism
+are SaaS-product themes, `newsflash` is a news-site theme. A new theme's default
+copy, section names, and demo data should read like the kind of site the theme
+is for.
+
+Concretely, when authoring a theme's page layouts:
+
+1. **Write genre-native default values for every key.** A news theme's homepage
+   hero pitches the publication ("News with a pulse", "Read the latest" →
+   `/blog`), its pricing page sells reader memberships (`Reader` / `Supporter` /
+   `Insider` tiers funding the journalism), its contact page has a tips line and
+   a corrections subject — not "Technical support" and "API access". See
+   `_layouts/themes/newsflash/frontend/pages/*.html` for the reference example.
+2. **Keep universal keys universal.** Concepts that exist on any site keep the
+   shared names — `hero`, `cta`, `stats`, `faqs`, `testimonials`, `newsletter`,
+   `trusted_by`, and the `pricing` engine block — so consumer overrides survive
+   a theme swap.
+3. **Genre-specific sections get genre-specific keys.** When a section only
+   makes sense for the theme's genre, name the key for what it means there
+   instead of force-fitting classy's vocabulary: newsflash's homepage replaces
+   classy's `showcase`/`features` with `latest` (the front-page post feed),
+   `rundown` (the newsroom's numbered playbook), `desks` (coverage areas), and
+   `more_stories` (extra story tiles). Consumers customizing those sections
+   write frontmatter against the active theme's contract — document the keys
+   in the layout's frontmatter comments.
+4. **Never invent parallel resolution logic.** Whatever the keys are called,
+   the Liquid that resolves posts, members, and pagination is copied from
+   classy verbatim — and the plan-pricing math is not even copied: every
+   theme's pricing layout calls the shared
+   `{% include core/pricing/resolve-plan.html plan=plan %}` (product lookup,
+   monthly/annual precedence, per-unit math) and renders the variables it
+   assigns (`_plan_monthly`, `_plan_annually`, `monthly_price_per_unit`,
+   `annual_price_per_unit`, `_config_product`). Only the data defaults and
+   presentation change per theme.
+
+#### The pricing page has a JS contract too
+
+The pricing page is the one page whose content is **dynamically driven at
+runtime**: the framework page module `src/assets/js/pages/pricing/index.js`
+runs on every theme's `/pricing` and queries the DOM for the billing toggle,
+price swapping, checkout routing, the current-plan indicator, and the
+flash-sale promo banner. A theme that overrides the pricing layout MUST keep
+these hooks (restyle them freely — the ids, classes, and data attributes are
+the contract):
+
+| Hook | What the framework JS does with it |
+|---|---|
+| `input[name="billing"]` radios with `data-billing="monthly"` / `"annually"` (one `checked`) | source of truth for the billing toggle |
+| `.amount`, `.billing-info`, `.price-per-unit` — each carrying `data-monthly` + `data-annually` | text content swapped when the toggle changes |
+| `button[data-plan-id="<plan id>"]` inside a `.card` | click → `/payment/checkout?product=<id>` (`enterprise` → `/contact`); the current-plan indicator disables + relabels the signed-in user's active plan button |
+| plan name element matching `.card-title`, `.h2`, or `.h3` inside the card | plan name for add-to-cart analytics (falls back to the plan id) |
+| `#pricing-promo-banner` (shipped with the `hidden` attribute) containing `#pricing-promo-badge` / `#pricing-promo-text` / `#pricing-promo-countdown` / `#pricing-promo-code` | flash-sale banner: the JS reveals it, fills in the rotating sale name + countdown, and pushes `.navbar-wrapper` + `main > section:first-of-type` down to make room |
+
+Two behaviors worth knowing:
+
+- The JS swaps active/inactive **button classes** on the toggle only when the
+  radios live inside a `.btn-group` (classy's structure). A custom toggle
+  (newsflash's `.billing-toggle`) skips that gracefully — style the active
+  state in CSS via `.btn-check:checked + label` instead.
+- Omitting a hook fails **silently**, not loudly — a missing promo banner just
+  never appears, a missing `.card-title` quietly degrades analytics. Diff your
+  pricing layout against classy's hooks before calling the theme done.
+
+The hooks (and the rest of the theme conventions: entry files, `$avatar-sizes`,
+`[ site.theme.id ]` bracket parents, no theme-prefixed classes, no inline
+scripts, page-asset shapes) are enforced by the build-layer **theme-contract
+test** — `npx mgr test mgr:build/theme-contract` — which globs every theme, so
+a new theme is covered the moment it lands. It caught neobrutalism's missing
+promo banner + `.card-title` the day it was written.
+
+#### Theme chrome: inherit classy's nav + footer, restyle via CSS
+
+The site chrome (masthead/nav + footer) resolves automatically: the
+`jsonToHtml` task generates wrapper includes that dispatch to
+`themes/<active-id>/frontend/sections/*.html` with the consumer's
+`nav.json`/`footer.json` data, and `copyFallbackThemeFiles()` supplies classy's
+version (with `themes/classy/` paths rewritten to your namespace) when the
+theme doesn't ship one.
+
+**Inherit by default — do NOT fork chrome includes.** The chrome's *identity*
+comes from theme CSS, not from forked markup: newsflash's sticky blurred-paper
+masthead and editorial ink-slab footer are achieved entirely in
+`css/layout/_navigation.scss` + `_general.scss` against classy's inherited
+markup (serif wordmark sizing, `.avatar { display: none }`, panel-color
+repaints of the `.link-muted`/`.text-body` utilities, volt column heads). A
+forked include that only re-skins is a copy that silently drifts every time
+classy's chrome gets a fix — newsflash's nav fork was deleted for exactly this
+reason after diverging from classy by nothing but a comment.
+
+Fork a chrome include ONLY when the *structure* genuinely diverges (different
+element order, removed/added blocks that CSS cannot express). If you do:
+
+1. **Keep the data contract** — render the same `data.logo` / `data.links` /
+   `data.actions` / `data.socials` / `data.legal` / `data.copyright` shapes from
+   `nav.json`/`footer.json` so consumer config works across theme swaps.
+2. **Reference your own theme namespace** for nested includes (e.g.
+   `{% include themes/<id>/global/sections/account.html %}`) — the fallback
+   copies classy's file into your namespace when you don't ship one.
+3. **The footer MUST include the appearance picker** (see below) and the
+   language dropdown.
+
+#### The appearance picker is required in every footer
+
+Every theme footer includes the appearance dropdown — a pure drop-in block; all
+logic is handled framework-side via `data-appearance-*` attributes (see
+[docs/appearance.md](appearance.md)). The toggle button is **icon-only**: the
+mode icons swap via `data-appearance-icon`, and there is deliberately NO
+`data-appearance-current` text label in the button (the words live in the menu
+items):
+
+```html
+<div class="dropup uj-appearance-dropdown">
+  <button class="btn btn-sm btn-outline-adaptive dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-label="Appearance">
+    <span data-appearance-icon="light" hidden>{% uj_icon "sun", "fa-sm" %}</span>
+    <span data-appearance-icon="dark" hidden>{% uj_icon "moon-stars", "fa-sm" %}</span>
+    <span data-appearance-icon="system" hidden>{% uj_icon "circle-half-stroke", "fa-sm" %}</span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><button class="dropdown-item" type="button" data-appearance-set="light">Light</button></li>
+    <li><button class="dropdown-item" type="button" data-appearance-set="dark">Dark</button></li>
+    <li><button class="dropdown-item" type="button" data-appearance-set="system">System</button></li>
+  </ul>
+</div>
+```
+
+Classy's footer ships it next to the language dropdown, so themes inheriting
+the fallback footer get it for free; themes with custom footers must include
+it themselves.
 
 #### No theme-prefixed classes — use universal class names
 
@@ -263,7 +405,8 @@ Get this distinction right or you'll either duplicate plumbing or fight override
 |---|---|---|
 | Core behavior CSS | [src/assets/css/core/](../src/assets/css/core/) | animations, alerts, lazy-loading shimmer, cookie consent, bindings skeletons, social sharing. Injected for **every** theme by `ultimate-jekyll-manager.scss`. |
 | Bootstrap extensions | [src/assets/themes/bootstrap/overrides/](../src/assets/themes/bootstrap/overrides/) | avatars, color-shades, soft-colors, adaptive buttons, spacing, link/typography utilities. Each theme pulls these in via `@import '../bootstrap/overrides'` at the end of its `_theme.scss`. |
-| Page layouts/includes | classy theme + fallback copy | the ~40 frontend/backend/admin layouts and nav/footer/account includes. |
+| Page layouts/includes (fallback) | classy theme + fallback copy | the ~40 frontend/backend/admin layouts and ALL includes a theme doesn't define — including the nav + footer chrome, which themes inherit and restyle via CSS (see [Theme chrome](#theme-chrome-inherit-classys-nav--footer-restyle-via-css)). |
+| Pricing math | [_includes/core/pricing/resolve-plan.html](../src/defaults/dist/_includes/core/pricing/resolve-plan.html) | the plan price-resolution Liquid (product lookup, monthly/annual precedence, per-unit math). Every theme's pricing layout calls `{% include core/pricing/resolve-plan.html plan=plan %}` and renders the assigned variables — never re-implement the math. |
 | Bootstrap class contract | `bootstrap/scss` | the markup + class names (`.btn`, `.card`, `.navbar`, `.form-control`). Themes **restyle** these classes; they don't invent new markup. |
 
 ### Per-theme — this IS the theme's job (and SHOULD differ between themes)
@@ -272,8 +415,12 @@ Get this distinction right or you'll either duplicate plumbing or fight override
 - `_root.scss` — SCSS → CSS-variable bridge for light/dark.
 - Component SCSS — how `.btn`/`.card`/`.form-control`/`.navbar` actually look.
 - `_theme.js` — expose Bootstrap + run theme behaviors on DOM ready.
+- Chrome LOOK via CSS — masthead/footer restyling in `css/layout/` against the
+  inherited classy chrome markup (fork the include itself only on real
+  structural divergence — see [Theme chrome](#theme-chrome-inherit-classys-nav--footer-restyle-via-css)).
 - *(optional)* Page-layout overrides under `_layouts/themes/<id>/...` — for pages
-  whose structure must differ (reuse classy's frontmatter data contract).
+  whose structure must differ (keep the resolution Liquid + universal keys, write
+  genre-native defaults).
 - *(optional)* Theme page CSS at `pages/<path>/index.scss` — additive per-page
   styles for those overridden layouts.
 - *(optional)* Theme page JS at `pages/<path>/index.js` — additive per-page behavior
@@ -343,6 +490,80 @@ One more: a generic `a:hover { color: … }` also paints **button** labels (butt
 `<a>`). Guard it with `a.btn:hover { color: var(--bs-btn-color); }` so buttons keep
 their own (frozen) text color. Nav/dropdown/footer links already win on specificity.
 
+### Page bundles re-emit Bootstrap — double your selectors (gotcha)
+
+Every theme **page** bundle (`pages/<path>/index.<id>.bundle.css`) compiles
+standalone via `@use 'config'`, so it contains a full copy of Bootstrap — and it
+loads AFTER `main.bundle.css`. Any main-bundle rule that ties Bootstrap's
+specificity loses on pages that ship page CSS: Bootstrap's re-emitted
+`:root`/`[data-bs-theme=dark]` variable blocks clobber a theme's single-selector
+`_root.scss` bridge (dark mode reverts to Bootstrap gray), and re-emitted
+`.btn`/`.btn-outline-*` rules clobber single-class button overrides.
+
+**The fix is doubled selectors** in the theme's structural rules so they win on
+specificity regardless of load order:
+
+```scss
+:root:root, [data-bs-theme="light"][data-bs-theme="light"] { /* light vars */ }
+[data-bs-theme="dark"][data-bs-theme="dark"] { /* dark vars */ }
+.btn.btn { /* press/lift system */ }
+[class*="btn-outline-"][class*="btn-outline-"] { /* ghost buttons */ }
+.dropdown-menu.dropdown-menu { /* panel inset (Bootstrap re-emits padding-x: 0) */ }
+```
+
+See newsflash's `_root.scss` + `_buttons.scss` (and neobrutalism's `.btn.btn`)
+for reference treatments.
+
+The same trap applies to **type metrics**: Bootstrap's re-emitted `.display-*`
+(`font-weight: 300`), `.lead` (`font-weight: 300`), and `body` rules clobber
+main-bundle element-rule overrides on any page that ships page CSS — headings
+silently go thin on exactly those pages. For values Bootstrap owns a variable
+for, **set the variable in the config `@forward ... with (...)` block instead
+of writing an element rule** (`$display-font-weight`, `$display-line-height`,
+`$lead-font-weight`, `$headings-line-height`, `$line-height-base`, …) — then
+every Bootstrap copy compiles the right value natively and there is no
+specificity war at all. Element rules in `_typography.scss` are only for
+props Bootstrap has no variable for (optical sizing, letter-spacing,
+`text-wrap`, font smoothing).
+
+### Remap the `--bs-*-rgb` companions too (gotcha)
+
+Bootstrap's `.bg-body`, `.bg-body-secondary`, `.bg-body-tertiary`,
+`.text-body`, `.text-body-secondary` utilities paint from
+`rgba(var(--bs-*-rgb), opacity)` — NOT the hex variables. A theme that remaps
+`--bs-secondary-bg` but not `--bs-secondary-bg-rgb` gets Bootstrap's default
+gray triplets bleeding through every `.bg-body-*` surface (most visibly in dark
+mode). When the `_root.scss` bridge remaps a surface/color var, **always remap
+its `-rgb` companion** in the same block:
+
+```scss
+--bs-secondary-bg: #{$nf-paper-2};
+--bs-secondary-bg-rgb: #{red($nf-paper-2)}, #{green($nf-paper-2)}, #{blue($nf-paper-2)};
+```
+
+Also note: shared includes may put `!important` utilities (e.g.
+`.bg-body-secondary` on the footer) on elements a theme wants to restyle — the
+override needs `!important` AND equal-or-higher specificity
+(`footer.bg-body-secondary`, not bare `footer`).
+
+### Derive dark-mode brand remaps from `$primary` (gotcha)
+
+When a dark block remaps `--bs-primary` / `--bs-link-color` (e.g. to brighten
+the brand color for contrast on dark surfaces), **derive the value from the
+compile-time `$primary`** — never hardcode the theme's stock color. Consumers
+override `$primary` via `main.scss`'s `with (...)` block; a hardcoded dark
+remap would snap their brand back to the theme's color the moment dark mode
+engages (light honors the override, dark ignores it). newsflash's pattern:
+
+```scss
+// Stock vermilion keeps its hand-tuned brightening; any other brand color
+// gets a generic white-mix lift.
+$nf-primary-dark-mode: if($primary == $nf-vermilion, $nf-vermilion-dark-mode, mix(white, $primary, 15%));
+```
+
+The theme's own identity accents (newsflash's `--nf-vermilion` used in cover-art
+gradients) are exempt — those ARE the theme, not the consumer's brand.
+
 ---
 
 ## 🚨 BOOTSTRAP-FIRST — NEVER reinvent the wheel
@@ -408,7 +629,14 @@ The GOOD version uses zero custom CSS for layout/buttons — the theme's `_butto
 6. **Fonts** load via the base layout's `theme.head.content`, NOT a CSS `@import`
    (avoids render-blocking duplicate loads). To use custom fonts, override
    `frontend/core/base.html` (see below).
-7. **Validate live, then document.** UJM can't run a dev server — build in a
+7. **Develop in ONE appearance mode; ship with BOTH.** Pick a primary mode
+   while building (the consumer's `theme.appearance` default is the natural
+   choice) and get the design right there first — splitting attention across
+   both modes mid-build doubles every iteration. But a theme is only **done**
+   when light AND dark are both validated: the `_root.scss` bridge makes dark
+   mode a single remap block, so build the token bridge correctly, then do a
+   dedicated both-modes screenshot pass at the end.
+8. **Validate live, then document.** UJM can't run a dev server — build in a
    consumer and screenshot (see [Validating](#validating-a-theme)).
 
 ---
@@ -436,8 +664,15 @@ Use this for first-party themes like `neobrutalism`.
    classy fallback supplies the rest. The most common override is
    `frontend/core/base.html` to load your fonts (neobrutalism overrides just this
    one file).
-5. **Add a `README.md`** in the theme folder (customization quickstart).
-6. `npm run prepare` (copies `src/`→`dist/`) so consumers see it. Then test in a
+5. **Write genre-native frontmatter defaults** in every layout you override —
+   the default copy/sections must match the theme's purpose, not classy's SaaS
+   demo data. See [Frontmatter defaults are part of the theme's
+   identity](#frontmatter-defaults-are-part-of-the-themes-identity).
+6. **Restyle the inherited nav + footer chrome via CSS** (`css/layout/`) — do
+   NOT fork the chrome includes unless the structure genuinely diverges. See
+   [Theme chrome](#theme-chrome-inherit-classys-nav--footer-restyle-via-css).
+7. **Add a `README.md`** in the theme folder (customization quickstart).
+8. `npm run prepare` (copies `src/`→`dist/`) so consumers see it. Then test in a
    consumer (Path: [Validating](#validating-a-theme)).
 
 ## Path B — author a theme IN A CONSUMER PROJECT (that project only)
@@ -481,7 +716,10 @@ UJM cannot run a dev server itself (it runs inside a consumer). To verify a them
 3. Screenshot the key pages (home, pricing, signin, signup) in **both** light and
    dark (`document.documentElement.setAttribute('data-bs-theme','dark')`) — e.g.
    via the chrome-devtools MCP. Check the console for errors and that your theme's
-   "loaded" log appears.
+   "loaded" log appears. Developing in one mode is fine (and encouraged — see
+   [Authoring conventions](#authoring-conventions-both-paths)); **shipping
+   requires both modes validated**, plus a click-through of the footer
+   appearance picker to confirm live switching looks right.
 4. Iterate on SCSS — the consumer's gulp watcher recompiles when UJM's `dist/`
    changes (if UJM is running `npm start`), or re-run `npm run prepare`.
 
@@ -495,6 +733,9 @@ all four pages in light + dark.
 
 - Theme tokens example: [src/assets/themes/neobrutalism/_config.scss](../src/assets/themes/neobrutalism/_config.scss)
 - CSS-variable bridge example: [src/assets/themes/neobrutalism/css/base/_root.scss](../src/assets/themes/neobrutalism/css/base/_root.scss)
+- Genre-native frontmatter defaults example: [src/defaults/dist/_layouts/themes/newsflash/frontend/pages/index.html](../src/defaults/dist/_layouts/themes/newsflash/frontend/pages/index.html)
+- Posts-driven theme sections (ticker in base.html, cover-story hero, most-read rail — all guarded for empty `site.posts`): [src/defaults/dist/_layouts/themes/newsflash/](../src/defaults/dist/_layouts/themes/newsflash/)
+- Theme page JS example (blog post reading-progress, flat `asset_path` shape): [src/assets/themes/newsflash/pages/blog/post.js](../src/assets/themes/newsflash/pages/blog/post.js)
 - Starter: [src/assets/themes/_template/](../src/assets/themes/_template/)
 - Fallback mechanism: [src/gulp/tasks/distribute.js](../src/gulp/tasks/distribute.js) (`copyFallbackThemeFiles`)
 - Resolution: [src/gulp/tasks/sass.js](../src/gulp/tasks/sass.js), [src/gulp/tasks/webpack.js](../src/gulp/tasks/webpack.js)

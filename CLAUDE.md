@@ -8,7 +8,7 @@ Ultimate Jekyll Manager (UJM) is a comprehensive framework for building modern J
 
 - One-line bootstrap per context (build / frontend / service-worker)
 - Multi-stage gulp pipeline (15 tasks: defaults / distribute / webpack / sass / imagemin / jekyll / jsonToHtml / preprocess / audit / translation / minifyHtml / serve / setup / developmentRebuild)
-- Default Jekyll layouts + themes (`classy` + `neobrutalism` shipped; new themes inherit classy's layouts via the build-time fallback — see [docs/themes.md](docs/themes.md))
+- Default Jekyll layouts + themes (`classy` + `neobrutalism` + `newsflash` shipped; new themes inherit classy's layouts AND nav/footer chrome via the build-time fallback — restyle chrome via theme CSS, fork an include only on real structural divergence — ship **genre-native frontmatter defaults**, and must validate **both appearance modes**; conventions are enforced by the build-layer **theme-contract test** — see [docs/themes.md](docs/themes.md))
 - Frontend ES-module Manager with dynamic per-page module loading
 - Service worker with Firebase Messaging + cache management
 - A built-in **three-layer test framework** (build / page / boot)
@@ -22,7 +22,7 @@ The only things that ARE safe to run inside UJM itself:
 
 ## Recommended skills
 
-- **`UJM:patterns`** — SSOT for Ultimate Jekyll Manager architecture, gulp pipeline, frontend Manager, and theme conventions. Auto-loads on UJM-specific keywords (`_config.yml`, `theme.id`, `uj_icon`, `page.resolved`, `npx mgr setup`, etc.) and when touching files in `src/_layouts/`, `src/_includes/`, `src/pages/`, `src/assets/`, `config/ultimate-jekyll-manager.json`.
+- **`omega:ujm`** — router skill. Auto-loads on UJM-specific keywords (`_config.yml`, `theme.id`, `uj_icon`, `page.resolved`, `npx mgr setup`, etc.) and points back to this CLAUDE.md + `docs/` (the SSOT), carrying only Claude-workflow hard rules and process checklists.
 - **`js:patterns`** — JavaScript/Node.js conventions: file structure, JSDoc, defensive coding (`?.` usage), template literals, `package.json` conventions. Auto-loads when creating new `.js` files or touching JS module structure.
 
 ## 🚨 READ WEB-MANAGER TOO
@@ -43,16 +43,19 @@ The only things that ARE safe to run inside UJM itself:
 4. `npm run build` — production build (`UJ_BUILD_MODE=true`)
 5. `npm run deploy` — build + `npu sync --message='Deploy'`
 6. `npm test` (or `npx mgr test`) — runs framework + project test suites
-   - `npx mgr test pages/home` — run a specific test by path (relative to `test/`)
+   - `npx mgr test pages/home` — run a specific test by path (relative to `test/`, matches both sources)
+   - `npx mgr test project:` — run ONLY consumer project tests (`project:custom-test` to match a path)
+   - `npx mgr test mgr:` — run ONLY framework tests (`ujm:` / `framework:` are equivalent UJM aliases)
    - `npx mgr test ujm:pages/home` — run only framework tests matching a path
-   - `npx mgr test project:custom-test` — run only consumer project tests matching a path
-   - Prefix with `TEST_EXTENDED_MODE=true` for tests that hit real external APIs
+   - The `--filter=<substring>` flag matches test NAMES within the selected files (composes with the target); `--layer=build|page|boot` narrows to one layer
+   - Output is teed (ANSI-stripped) to `<projectRoot>/logs/test.log`, truncated fresh each run (skipped on CI) — `cat logs/test.log` instead of scrolling scrollback
+   - `--extended` (or `TEST_EXTENDED_MODE=true`) opts in tests that hit real external services — off by default, unprefixed name shared across BEM/BXM/UJM/EM, propagates to spawned envs (Jekyll/boot server); see [docs/test-framework.md](docs/test-framework.md#extended-mode-test_extended_mode)
 
 ### For Framework Development (This Repository)
 
 1. `npm install` — install UJM's own deps
 2. `npm start` (≡ `npm run prepare:watch`) — copies `src/` → `dist/` on file change
-3. Test in a consumer project: from inside the consumer, run `npx mgr install dev` to swap UJM to this local repo — required whenever you edit the framework source and want the consumer to pick up the changes (the consumer otherwise keeps its installed `node_modules/ultimate-jekyll-manager`). Reverse with `npx mgr install live`.
+3. Test in the **designated test consumer** — `../ultimate-jekyll-website` is UJM's consumer for validating framework changes end-to-end (exercise any consumer-level flow there freely: builds, tests, runtime). From inside it, run `npx mgr install dev` to swap UJM to this local repo — required whenever you edit the framework source and want the consumer to pick up the changes (the consumer otherwise keeps its installed `node_modules/ultimate-jekyll-manager`). Reverse with `npx mgr install live`.
 4. `npm test` — runs UJM's own 60 test suites
 
 ## Architecture
@@ -96,7 +99,7 @@ UJM uses node-powertools' `template()` with two bracket conventions:
 - `{ x }` (default) — used wherever `template()` is called without `brackets:` (e.g. defaults.js Gemfile templating)
 - `[ x ]` — used by distribute.js theme fallback and [template-transform.js](src/gulp/tasks/utils/template-transform.js) (for `.html/.md/.liquid/.json`)
 
-Jekyll's Liquid `{{ }}` is processed by Jekyll itself, NOT by node-powertools — those placeholders pass through node-powertools untouched. See [docs/templating.md](docs/templating.md) (planned).
+Jekyll's Liquid `{{ }}` is processed by Jekyll itself, NOT by node-powertools — those placeholders pass through node-powertools untouched. See [docs/templating.md](docs/templating.md).
 
 ### Frontend Manager (`src/index.js`)
 
@@ -135,6 +138,10 @@ Cache name is `${brand.id}-${cache_breaker}` from `UJ_BUILD_JSON.config`. See [d
 
 Same `{ layer, description, run(ctx) }` contract as EM/BXM. JSON-line reporter protocol uses `__UJM_TEST__` marker. See [docs/test-framework.md](docs/test-framework.md) + [docs/test-boot-layer.md](docs/test-boot-layer.md).
 
+### Test coverage
+
+Every feature ships with tests at EVERY layer it has a surface in — logic (`build`, or `page` for frontend module logic), UI (`page` — real events on the real DOM), and end-to-end (`boot`). Skip a layer ONLY when the feature genuinely has no surface there (a pure build utility has no UI; a CSS-only tweak has no logic). "The logic test already covers it" is NOT a reason to skip the UI test — logic tests prove the logic, UI tests prove the wiring, boot tests prove the built site. See [docs/test-framework.md](docs/test-framework.md).
+
 ## CLI
 
 `npx mgr <command>` (aliases `uj`, `ujm`, `ultimate-jekyll`):
@@ -152,7 +159,7 @@ Same `{ layer, description, run(ctx) }` contract as EM/BXM. JSON-line reporter p
 | `minify-html` | minify HTML (preserves JSON-LD + inline scripts + IE conditional comments) |
 | `optimize` | AI-optimize pages via OpenAI |
 | `migrate` | migrate consumer project layout (legacy → current) |
-| `blogify` | generate test blog posts from Unsplash |
+| `blogify` | generate test blog posts from Unsplash (`--count=<n>`, default 12) |
 | `cloudflare-purge` | purge Cloudflare cache |
 | `test` | run framework + project test suites (three layers) |
 
@@ -166,7 +173,7 @@ Note: `-t` short alias belongs to `translation`. The `test` command uses `--test
 
 ## Development Workflow
 
-- **🚫 NEVER run `npm start` / `npm run build` / `npm test` in a consumer project** unless the user explicitly asks. The user runs the dev server — running it again kills theirs. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error). If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change.
+- **🚫 NEVER run `npm start` in a consumer project** — the user runs the dev server; running it again kills theirs. Assume it's already running; if it isn't, **instruct the user to run it** rather than running it yourself. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error) — never tail/attach to the process. If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change. Running `npx mgr test` is fine.
 - **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. See `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
 
 ## File Conventions
@@ -202,26 +209,32 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 - [docs/test-boot-layer.md](docs/test-boot-layer.md) — boot layer deep-dive (_site/ discovery, HTTP server, fixture vs consumer)
 - [docs/environment-detection.md](docs/environment-detection.md) — `isTesting`/`isDevelopment`/`isProduction`/`getVersion`
 - [docs/jekyll-plugin.md](docs/jekyll-plugin.md) — UJ Powertools gem: filters, tags, page variables (`page.resolved`, `uj_icon`, `uj_hash`, `iftruthy`, etc.)
-- [docs/audit.md](docs/audit.md) — workflow for fixing issues raised by `gulp/tasks/audit.js`
+- [docs/audit.md](docs/audit.md) — two-stage audit workflow: AI content pass (conventions/XSS/inline scripts) + `npx mgr audit` fix loop
+- [docs/migration.md](docs/migration.md) — full migration (old UJ → latest UJM base), `_config.yml` quick-fix schema, revert-posts procedure
 
 ### Project & dev environment
 
-- [docs/project-structure.md](docs/project-structure.md) — UJM repo layout and consuming-project layout
-- [docs/local-development.md](docs/local-development.md) — browsersync URL, Firebase emulator connect, PurgeCSS safelist, log files (`logs/dev.log`, `logs/build.log`)
+- [docs/directory-structure.md](docs/directory-structure.md) — UJM repo layout and consuming-project layout
+- [docs/build-system.md](docs/build-system.md) — gulp pipeline (15 tasks), config flow, build modes, pure helpers
+- [docs/templating.md](docs/templating.md) — node-powertools bracket conventions, Liquid coexistence
+- [docs/local-development.md](docs/local-development.md) — browsersync URL, Firebase emulator connect, PurgeCSS safelist
+- [docs/logging.md](docs/logging.md) — `dev.log` / `build.log` / `test.log` tee, CI skip
+- [docs/common-mistakes.md](docs/common-mistakes.md) — the canonical "don't do this" list
 - [docs/assets.md](docs/assets.md) — UJM vs consumer file layout, section config (nav/footer/account), frontmatter-driven page customization, webpack aliases, page module pattern
 
 ### Pages, layouts, content
 
 - [docs/animation-studio.md](docs/animation-studio.md) — Animation Studio admin page: clip registration via `window.STUDIO_CLIPS`, helpers (`animate`, `el`, `flowClip`, `cardClip`, `chatClip`), resolution picker, recording, aspect ratio modes
 - [docs/themes.md](docs/themes.md) — theme system: selection + resolution (SCSS loadPaths, `__theme__`, classy layout fallback), shared vs per-theme layers, authoring a theme inside UJM OR in a consumer project, live validation
-- [docs/layouts-and-pages.md](docs/layouts-and-pages.md) — page types, layout chain, `asset_path` frontmatter
+- [docs/layouts-and-pages.md](docs/layouts-and-pages.md) — page types, layout chain, `asset_path` frontmatter, default-page customization rules + per-page levels, dashboard list/detail/edit pattern, custom page creation
 - [docs/images.md](docs/images.md) — `@post/` shortcut for blog post images, BEM admin/post image handling, imagemin pipeline + source-size constraints + `UJ_IMAGEMIN_REWRITE_SOURCES` cleanup flag
 - [docs/icons.md](docs/icons.md) — Font Awesome conventions, `{% uj_icon %}` vs prerendered icons in JS, size reference, country flag SVGs (`assets/icons/flags/modern-square/`)
-- [docs/seo.md](docs/seo.md) — Alternatives collection (competitor comparison pages) + Schema/JSON-LD (`SoftwareApplication`, `FAQPage`)
+- [docs/seo.md](docs/seo.md) — content writing rules (headlines, sentence case, accents), Services/Solutions page strategies, Alternatives collection (competitor comparison pages), Schema/JSON-LD (`SoftwareApplication`, `FAQPage`)
 
 ### Frontend behavior
 
 - [docs/css.md](docs/css.md) — section padding rule, theme-adaptive classes, cards in colored sections, `<html>` data attributes
+- [docs/purgecss.md](docs/purgecss.md) — PurgeCSS safelist playbook: two safelist locations, RegExp anchoring, gotchas (`variables: false`, per-file processing), current UJM safelist
 - [docs/appearance.md](docs/appearance.md) — dark/light/system mode switching: JS API, HTML attributes
 - [docs/page-loading.md](docs/page-loading.md) — page-loading protection, `.btn-action`, layered form-protection strategy
 - [docs/lazy-loading.md](docs/lazy-loading.md) — `data-lazy="@type value"` syntax and supported types
@@ -229,7 +242,8 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 
 ### JS libraries & security
 
-- [docs/javascript-libraries.md](docs/javascript-libraries.md) — WebManager singleton + UJM libs at `src/assets/js/libs/` (prerendered icons, authorizedFetch, usage bindings, payment-config, FormManager)
+- [docs/javascript-libraries.md](docs/javascript-libraries.md) — WebManager singleton + UJM libs at `src/assets/js/libs/` (prerendered icons, authorizedFetch, usage bindings, payment-config, FormManager), reads-vs-writes rule (Firestore SDK for reads, Cloud Functions for writes)
+- [docs/no-inline-scripts.md](docs/no-inline-scripts.md) — HARD RULE: no inline `<script>` bodies; full migration playbook incl. Liquid `data-*`/`<template>` bridges
 - [docs/xss-prevention.md](docs/xss-prevention.md) — zero-trust DOM injection rules, `escapeHTML`, postMessage origin checks, redirect validation
 
 ### Analytics

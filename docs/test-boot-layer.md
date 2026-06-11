@@ -1,4 +1,4 @@
-# Boot Layer
+# Test Framework — Boot Layer
 
 The boot layer runs Puppeteer against a real built `_site/` served by a tiny embedded HTTP server. It's the integration smoke that catches "did my actually-shipped site boot?" regressions — things plain-Node build tests can't see.
 

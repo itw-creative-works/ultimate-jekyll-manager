@@ -22,7 +22,19 @@ Mock **nothing** by default. There are exactly two cases where the real dependen
 
 If you can run it for real, you must. These exceptions are not a license to unit-test in isolation when a real-harness layer would work.
 
-**External APIs are skipped in-source, NOT mocked.** UJM build/gulp code that would hit the network (e.g. fetching Firebase auth files) short-circuits in its own source when `Manager.isTesting()` is true — it returns early, it does not return canned/mocked data. See [environment-detection.md](environment-detection.md). If a suite has slower live-integration tests, gate them behind the `--integration` flag (`UJ_TEST_INTEGRATION=1`) and run the real path; anything such a test creates externally MUST be cleaned up by the test (`cleanup`/`inspect` teardown) — the runner does not clean external systems.
+**External APIs are skipped in-source, NOT mocked.** UJM build/gulp code that would hit the network (e.g. fetching Firebase auth files) short-circuits in its own source when `Manager.isTesting()` is true — it returns early, it does not return canned/mocked data. See [environment-detection.md](environment-detection.md). If a suite has slower live-integration tests, gate them behind [extended mode](#extended-mode-test_extended_mode) (`--extended` / `TEST_EXTENDED_MODE=true`) and run the real path; anything such a test creates externally MUST be cleaned up by the test (`cleanup`/`inspect` teardown) — the runner does not clean external systems.
+
+## Test coverage — every surface gets a test (HARD RULE)
+
+A feature is not done when it works — it's done when every surface it exposes is covered in the layer that owns that surface:
+
+| Coverage | Layer | Proves |
+|---|---|---|
+| **Logic** | `build` / `page` | The feature's functions do the right thing when called directly (real build Manager, real frontend Manager surface) |
+| **UI** | `page` | The feature's interface is WIRED — a real event on the real DOM triggers the behavior and the visible result appears |
+| **End-to-end** | `boot` | The feature survives in the consumer's actual built `_site/` (extend the boot suite's `inspect` assertions) |
+
+**Skipping a layer is the exception, not the default.** A layer may be skipped ONLY when the feature genuinely has no surface there — a pure build-time utility has no UI; a CSS-only tweak has no logic to call. Convenience is never a reason: "the logic test already covers it" does NOT excuse the UI test — logic tests prove the logic, UI tests prove the wiring (a button can come unhooked while every logic test stays green), boot tests prove the built site. When in doubt, write the test.
 
 ## Quick start
 
@@ -37,25 +49,46 @@ npx mgr test --reporter json   # machine-readable __UJM_TEST__ events
 
 `npm test` works too — added to consumer `package.json#scripts.test` on `npx mgr setup`.
 
+All test output is also teed (ANSI-stripped) to `<projectRoot>/logs/test.log`, truncated fresh on each run — same pattern as `dev.log`/`build.log` and EM's/BEM's `test.log`. Skipped on CI (`isServer()`). Grep it after a run instead of scrolling terminal output.
+
 ### Filtering tests
 
-Pass a path (relative to `test/`) as a positional argument to run specific tests:
+Pass a path (relative to `test/`) as a positional **target** to select which test FILES run:
 
 ```bash
-# Run a single test file
+# Run a single test file (matches both framework + project)
 npx mgr test pages/home
 
-# Run only UJM framework tests
-npx mgr test ujm:pages/home
+# Run ONLY consumer project tests (no framework suites at all)
+npx mgr test project:
 
-# Run only consumer project tests
+# Run a single project test file
 npx mgr test project:custom-test
+
+# Run ONLY framework tests (universal cross-framework alias)
+npx mgr test mgr:
+
+# Run ONLY UJM framework tests (UJM-specific aliases, equivalent to mgr:)
+npx mgr test ujm:
+npx mgr test framework:
+
+# Run framework tests matching a path
+npx mgr test mgr:pages/home
+npx mgr test ujm:pages/home
 
 # Combine with extended mode
 TEST_EXTENDED_MODE=true npx mgr test pages/boot-test
 ```
 
-The filter matches against the test file path. `ujm:` and `project:` prefixes scope the filter to framework-only or project-only tests respectively. Without a prefix, both are searched.
+The target matches against the test file path. The source prefix scopes selection to framework-only or project-only tests — a prefixed target excludes the other source entirely:
+
+- `mgr:` — the **universal cross-framework alias** for "the manager's own tests" (framework-only). Works identically in UJM, EM, BXM, and BEM.
+- `ujm:` / `framework:` — UJM-specific aliases for framework-only tests, equivalent to `mgr:`.
+- `project:` — consumer project tests only.
+
+A bare prefix (`mgr:` / `ujm:` / `project:` with no path) runs every test in that source. A bare path (no prefix) searches both sources by path.
+
+> **Target vs `--filter`.** The positional target selects test FILES (by path + source). The `--filter=<substring>` flag is orthogonal: it matches test NAMES/descriptions within the selected files. They compose, e.g. `npx mgr test project: --filter=foo`. The `--layer=build|page|boot` flag further narrows to a single layer.
 
 ## Layers
 
@@ -227,12 +260,27 @@ module.exports = ({ projectRoot }) => ({
 });
 ```
 
+## Extended mode (`TEST_EXTENDED_MODE`)
+
+By default `npx mgr test` is fast and offline-safe: tests that would hit real external services are **skipped** (the code short-circuits in-source — it does NOT mock). Extended mode opts those tests in to run against the real path.
+
+- **Turn it on:** `npx mgr test --extended` or `TEST_EXTENDED_MODE=true npx mgr test`.
+- **Shared, unprefixed name.** `TEST_EXTENDED_MODE` is the SAME env var across BEM, BXM, UJM, and EM — cross-framework parity. Setting it in CI (or your shell) flips every framework's extended suites on.
+- **Propagates to spawned environments.** Once the test command sets `process.env.TEST_EXTENDED_MODE`, it reaches every child it spawns — the Jekyll build (via inherited `process.env`) and the boot HTTP server / Puppeteer browsers — automatically.
+- **A warning prints** when extended mode is on (also teed to `logs/test.log`), since it makes real network calls against live backends.
+- **Tests gate on `process.env.TEST_EXTENDED_MODE`.** Skip the live path unless it's set, e.g. `if (process.env.TEST_EXTENDED_MODE !== 'true') return ctx.skip('extended mode only');`. Anything an extended test creates in a real external system MUST be cleaned up by the test (`cleanup`/`inspect` teardown) — the runner never resets external systems.
+
+```bash
+TEST_EXTENDED_MODE=true npx mgr test            # all extended suites, all layers
+npx mgr test --extended mgr:build               # extended + a specific target
+```
+
 ## Env vars
 
 | Env | Set by | Purpose |
 |---|---|---|
 | `UJ_TEST_MODE=true`         | `npx mgr test` always | Canonical test signal. `Manager.isTesting()` reads this. Use it to short-circuit network calls / prompts / long timers in code that runs during tests. |
-| `UJ_TEST_INTEGRATION=1`     | `--integration` flag | Opt-in flag for slower live-integration tests if your suite has them. These run the **real** external path (NOT mocked); anything they create externally MUST be cleaned up by the test. |
+| `TEST_EXTENDED_MODE=true`   | `--extended` flag, or set in the env | Opt into tests that hit **real** external services (network fetches, Firebase via web-manager, live APIs). Off by default. Unprefixed + shared across BEM/BXM/UJM/EM. Propagates to every spawned child (Jekyll build, boot HTTP server / Puppeteer). Gate such tests on `process.env.TEST_EXTENDED_MODE`; anything they create externally MUST be cleaned up by the test. See [Extended mode](#extended-mode-test_extended_mode). |
 | `UJ_TEST_BOOT_PROJECT`      | Auto-set when UJM tests itself; else manual | Project root the boot runner uses (its `_site/` is the boot target) |
 | `UJ_TEST_BOOT_DIR`          | Manual | Absolute override for the `_site/` directory. Wins over `UJ_TEST_BOOT_PROJECT/_site` and `<cwd>/_site` |
 | `UJ_TEST_DEBUG=1`           | Manual | Verbose Puppeteer console output piped to the parent stdout |

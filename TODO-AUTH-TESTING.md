@@ -162,4 +162,4 @@ The test harness should stay vanilla Mocha + JSDOM + fixture HTML files.
 - All 6 test files above written and green
 - `npm test` in UJM runs them as part of the standard suite
 - The v1.3.1 bug (consent guard ordering) is caught by `auth-guard-ordering.test.js` — verify by reverting the v1.3.2 fix in a branch and watching the test fail
-- Documented in `docs/testing.md` so contributors know to add auth tests when touching auth code
+- Documented in `docs/test-framework.md` so contributors know to add auth tests when touching auth code

@@ -304,31 +304,8 @@ faqs:
 
         <div class="row g-4 mb-5 justify-content-center">
           {% for plan in page.resolved.pricing.plans %}
-            {% comment %} Look up matching product in _config.yml payment products {% endcomment %}
-            {% assign _config_product = nil %}
-            {% for p in site.web_manager.payment.products %}
-              {% if p.id == plan.id %}
-                {% assign _config_product = p %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-
-            {% comment %} Resolve prices: frontmatter pricing takes precedence, then config prices {% endcomment %}
-            {% if plan.pricing.monthly or plan.pricing.monthly == 0 %}
-              {% assign _plan_monthly = plan.pricing.monthly %}
-            {% elsif _config_product.prices.monthly or _config_product.prices.monthly == 0 %}
-              {% assign _plan_monthly = _config_product.prices.monthly %}
-            {% else %}
-              {% assign _plan_monthly = 0 %}
-            {% endif %}
-
-            {% if plan.pricing.annually or plan.pricing.annually == 0 %}
-              {% assign _plan_annually = plan.pricing.annually %}
-            {% elsif _config_product.prices.annually or _config_product.prices.annually == 0 %}
-              {% assign _plan_annually = _config_product.prices.annually %}
-            {% else %}
-              {% assign _plan_annually = 0 %}
-            {% endif %}
+            {% comment %} Shared pricing math (assigns _plan_monthly/_plan_annually/per-unit into this scope) {% endcomment %}
+            {% include core/pricing/resolve-plan.html plan=plan %}
 
             {% if plan.popular %}
               {% assign border_classes = "border-gradient-rainbow border-3" %}
@@ -365,21 +342,9 @@ faqs:
                     <!-- Price per unit (only shown when enabled) -->
                     {% if page.resolved.pricing.price_per_unit.enabled %}
                       <p class="text-muted small mb-4">
-                        {% if _plan_monthly > 0 %}
-                          {% for feature in plan.features %}
-                            {% if feature.id == page.resolved.pricing.price_per_unit.feature_id %}
-                              {% comment %} Resolve feature value from config limits if not set in frontmatter {% endcomment %}
-                              {% assign _ppu_value = feature.value %}
-                              {% if _config_product and _ppu_value == nil %}
-                                {% for _lim in _config_product.limits %}{% if _lim[0] == feature.id %}{% assign _ppu_value = _lim[1] %}{% break %}{% endif %}{% endfor %}
-                              {% endif %}
-                              {% assign monthly_price_per_unit = _plan_monthly | times: 1.0 | divided_by: _ppu_value | round: 2 %}
-                              {% assign annual_monthly_price = _plan_annually | divided_by: 12.0 %}
-                              {% assign annual_price_per_unit = annual_monthly_price | divided_by: _ppu_value | round: 2 %}
-                              <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.pricing.price_per_unit.label }}
-                            {% endif %}
-                          {% endfor %}
-                        {% else %}
+                        {% if monthly_price_per_unit %}
+                          <span class="price-per-unit" data-monthly="${{ monthly_price_per_unit }}" data-annually="${{ annual_price_per_unit }}">${{ annual_price_per_unit }}</span> per {{ page.resolved.pricing.price_per_unit.label }}
+                        {% elsif _plan_monthly == 0 %}
                           <!-- Placeholder text for free plan to maintain consistent height -->
                           Perfect for trying out
                         {% endif %}

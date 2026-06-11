@@ -12,6 +12,10 @@ Match the framework's three layers — Ultimate Jekyll Manager's test runner dis
 | `test/page/` | Browser page served from a local HTTP server | DOM, frontend Manager, page-specific scripts, `data-wm-bind` directives |
 | `test/boot/` | Consumer's actual built `_site/` | End-to-end smoke tests (does the site boot, does the service worker register, do dynamic pages load) |
 
+## Coverage
+
+Every feature ships with tests at every layer it has a surface in — logic (`build`/`page`), UI (`page`), end-to-end (`boot`). Skip a layer only when the feature genuinely has no surface there; "the logic test covers it" does not excuse the UI test.
+
 ## Quick example
 
 ```js

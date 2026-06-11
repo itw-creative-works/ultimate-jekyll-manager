@@ -28,7 +28,7 @@
 * **SEO Optimized**: Ultimate Jekyll is fully SEO optimized.
 * **Blazingly Fast**: Ultimate Jekyll is blazingly fast.
 * **NPM & Gulp**: Ultimate Jekyll is fueled by an intuitive incorporation of npm and gulp.
-* **Themes**: Pick a shipped theme with `theme.id` (`classy` or `neobrutalism`), or author your own. New themes inherit all default page layouts automatically and only restyle/override what differs. See [docs/themes.md](docs/themes.md).
+* **Themes**: Pick a shipped theme with `theme.id` (`classy`, `neobrutalism`, or `newsflash` — an editorial news-site theme), or author your own. New themes inherit all default page layouts automatically and only restyle/override what differs. See [docs/themes.md](docs/themes.md).
 * **Built-in test framework**: three layers (`build` / `page` / `boot`) — plain Node, headless Chromium tab, headless Chromium against real `_site/` with SW registration verification.
 
 ## 🚀 Getting started
@@ -48,6 +48,7 @@ npx mgr test                   # all layers
 npx mgr test --layer build     # plain Node, fast
 npx mgr test --layer page      # headless Chromium tab against harness HTML
 npx mgr test --layer boot      # headless Chromium against built _site/
+npx mgr test --extended        # also run tests that hit real external services (off by default)
 ```
 
 Test files use Jest-compatible matchers:
@@ -183,9 +184,10 @@ npm run prepare:watch
 ```
 
 ### Run the `blogify` task:
-Create 12 test blog posts in the `_posts` directory with the `blogify` task. This is useful for testing and development purposes.
+Create test blog posts in the `_posts` directory with the `blogify` task (default 12; pass `--count=<n>` for more — e.g. 18 fills every post slot on the newsflash homepage). This is useful for testing and development purposes.
 ```bash
 npx mgr blogify
+npx mgr blogify --count=18
 ```
 
 ## Page Frontmatter

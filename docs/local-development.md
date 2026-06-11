@@ -4,14 +4,7 @@ The local development server URL is stored in `.temp/_config_browsersync.yml` in
 
 ## Log Files
 
-UJM tees every line of stdout/stderr from the gulp pipeline into a log file in the consumer project root, so you can `tail -f` it or `grep` through it after a run:
-
-- `npm start` → `logs/dev.log`
-- `npm run build` (i.e. `UJ_BUILD_MODE=true`) → `logs/build.log`
-
-Both files **truncate fresh on each run** — the most recent session only. ANSI color codes are stripped from the file (so it's grep-friendly); the terminal continues to receive colored output unchanged. Captures everything that flows through stdout/stderr: `Manager.logger(...)` output, raw `console.log` calls, gulp task names, jekyll's child output, webpack output, the works.
-
-**Skipped on CI/cloud.** When `UJ_IS_SERVER=true` (set by GitHub Actions workflows and other server contexts), the tee is bypassed entirely — no `logs/` directory is written. Implementation: [src/utils/attach-log-file.js](../src/utils/attach-log-file.js), attached at the top of [src/gulp/main.js](../src/gulp/main.js).
+The gulp pipeline tees all output to `logs/dev.log` (`npm start`) / `logs/build.log` (`npm run build`), and `npx mgr test` tees to `logs/test.log`. Full reference — file table, capture behavior, CI skip via `UJ_IS_SERVER`: [logging.md](logging.md).
 
 ## Connecting to Local Firebase Emulators
 

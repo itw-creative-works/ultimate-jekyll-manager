@@ -46,6 +46,43 @@ Raw subscription data (product.id, status, trial, cancellation) is on `account.s
 
 The same function exists in BEM as `User.resolveSubscription(account)` with identical return shape.
 
+### Reads vs Writes: When to Use What
+
+| Operation | Method | Why |
+|-----------|--------|-----|
+| **Read** (list, fetch single) | `webManager.firestore()` | Faster, cheaper, no Cloud Function cold starts, no HTTP overhead |
+| **Write** (create, update, delete) | `authorizedFetch` (Cloud Function) | Server-side validation, usage tracking, analytics |
+| **Config/limits lookup** | `webManager.config.payment.products` | Already available client-side from `_config.yml`, no fetch needed |
+
+**Dashboard and frontend reads MUST use the Firestore SDK directly** — never call a Cloud Function GET endpoint from the dashboard. Firestore reads are faster, cheaper, and don't incur cold starts. The backend GET routes (`routes/{resource}/get.js`) exist for **external API consumers only**, not for our own frontend. (Requires Firestore security rules that allow the read, e.g. `allow read: if isAuthenticated() && resource.data.owner == authUid()`.)
+
+```javascript
+// Collection query (list user's items) — wait for auth first
+webManager.auth().listen({ once: true }, async ({ user }) => {
+  if (!user) return;
+
+  const result = await webManager.firestore()
+    .collection('codes')
+    .where('owner', '==', user.uid)
+    .orderBy('meta.created.timestampUNIX', 'desc')
+    .get();
+
+  if (result.empty) return; // show empty state
+
+  result.docs.forEach((doc) => {
+    const data = doc.data();
+    // Render item...
+  });
+});
+
+// Single document read
+const doc = await webManager.firestore().doc(`codes/${id}`).get();
+if (!doc.exists()) return; // not found
+const data = doc.data();
+```
+
+Full Firestore query API (chainable `.where()`/`.orderBy()`/`.limit()`/`.startAt()`, response shapes): see `web-manager`'s [docs/modules.md](../../web-manager/docs/modules.md) — in consumer projects, `node_modules/web-manager/docs/modules.md`.
+
 ## Ultimate Jekyll Libraries
 
 Ultimate Jekyll provides helper libraries in `src/assets/js/libs/` that can be imported as needed.

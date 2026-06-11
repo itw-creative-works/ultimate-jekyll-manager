@@ -63,3 +63,4 @@ webManager.uj().appearance.clear();      // Clear saved preference
 - **Module:** `src/assets/js/core/appearance.js` — API and UI handling
 - **Storage:** Saved under `_manager.appearance.preference` in localStorage
 - **Test page:** `/test/libraries/appearance`
+- **Footer picker:** every theme footer ships the appearance dropdown next to the language dropdown (classy's footer provides it to fallback themes automatically; themes with custom footers include it themselves — see [docs/themes.md](themes.md#the-appearance-picker-is-required-in-every-footer)). The footer toggle button is **icon-only** — `data-appearance-icon` spans, no `data-appearance-current` text label (the mode words live in the menu items)

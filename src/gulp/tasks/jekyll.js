@@ -115,8 +115,10 @@ async function jekyll(complete) {
       ].filter(Boolean).join(','),
       '--incremental',
       (Manager.isBuildMode() || argv.profile) ? ' --profile' : '',
-      // Limit posts in development for faster builds (use --all-posts to disable)
-      (!Manager.isBuildMode() && !argv['all-posts']) ? '--limit_posts 15' : '',
+      // Limit posts in development for faster builds (use --all-posts to disable).
+      // 18 keeps a fully-populated newsflash front page visible in dev (its
+      // deduplicated slots consume 17 distinct posts).
+      (!Manager.isBuildMode() && !argv['all-posts']) ? '--limit_posts 18' : '',
       // '--disable-disk-cache',
     ]
 
