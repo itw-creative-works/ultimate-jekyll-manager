@@ -209,7 +209,7 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 - [docs/test-boot-layer.md](docs/test-boot-layer.md) — boot layer deep-dive (_site/ discovery, HTTP server, fixture vs consumer)
 - [docs/environment-detection.md](docs/environment-detection.md) — `isTesting`/`isDevelopment`/`isProduction`/`getVersion`
 - [docs/jekyll-plugin.md](docs/jekyll-plugin.md) — UJ Powertools gem: filters, tags, page variables (`page.resolved`, `uj_icon`, `uj_hash`, `iftruthy`, etc.)
-- [docs/audit.md](docs/audit.md) — two-stage audit workflow: AI content pass (conventions/XSS/inline scripts) + `npx mgr audit` fix loop
+- [docs/audit.md](docs/audit.md) — full-audit check catalog (U-xx universal / UJM-xx / F-xx IDs with severity + scope), protocol + fix loop, `npx mgr audit` automated stage
 - [docs/migration.md](docs/migration.md) — full migration (old UJ → latest UJM base), `_config.yml` quick-fix schema, revert-posts procedure
 
 ### Project & dev environment

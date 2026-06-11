@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.8.1] - 2026-06-11
+
+### Changed
+
+- **`docs/audit.md` rewritten as the full-audit check catalog (`/omega:ujm audit`).** The two-stage site audit became an ID'd catalog: mirrored universal checks (U-01..U-14 — tests at every layer, XSS, secrets, config canon, doc parity, dead code, dep health, …), UJM-specific checks (UJM-01..UJM-10 — inline-script ban, theme-prefixed classes, content writing rules, SEO meta, purge safelist, reads-vs-writes, page-module pattern, images, a11y), and framework-repo checks (F-01..F-04 — sister parity, defaults sync, docs completeness, green framework suite), with scope auto-detect (consumer vs framework via package.json), a persisted findings report (`.temp/audit/claude-audit.md`), a severity-ordered TodoWrite fix loop, and the `npx mgr audit` automated stage absorbed from the old doc. Wired to the `omega:ujm` router's Audit process; `docs/audit.md` is mirrored across BEM/BXM/EM. CLAUDE.md's docs index updated to match.
+- **package.json `keywords` corrected** — replaced the stale template list (`Autoprefixer`, `imagemin` — not used; `Browsersync` — true but noise) with accurate, discovery-oriented ones (`jekyll`, `static-site`, `static-site-generator`, `website`, `seo`, `gulp`, `sass`, `webpack`, `postcss`). npm-listing metadata only; no behavior change. Mirrored across BEM/BXM/EM.
+
+---
 ## [1.8.0] - 2026-06-11
 
 ### Added

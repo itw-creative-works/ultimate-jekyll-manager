@@ -1,6 +1,6 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "exports": {
@@ -47,14 +47,15 @@
     "url": "https://github.com/itw-creative-works/ultimate-jekyll.git"
   },
   "keywords": [
-    "Autoprefixer",
-    "Browsersync",
+    "jekyll",
+    "static-site",
+    "static-site-generator",
+    "website",
+    "seo",
     "gulp",
-    "imagemin",
-    "Jekyll",
-    "PostCSS",
-    "Sass",
-    "Webpack"
+    "sass",
+    "webpack",
+    "postcss"
   ],
   "author": "ITW Creative Works",
   "license": "MIT",
