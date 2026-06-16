@@ -174,7 +174,7 @@ Note: `-t` short alias belongs to `translation`. The `test` command uses `--test
 ## Development Workflow
 
 - **🚫 NEVER run `npm start` in a consumer project** — the user runs the dev server; running it again kills theirs. Assume it's already running; if it isn't, **instruct the user to run it** rather than running it yourself. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error) — never tail/attach to the process. If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change. Running `npx mgr test` is fine.
-- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. See `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
+- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. Navigate to the EXACT URL written in the consumer's `.temp/_config_browsersync.yml` — the local network IP + port (e.g. `https://192.168.86.69:4000`), never `localhost:4000`. See [docs/cdp-debugging.md](docs/cdp-debugging.md) + `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
 
 ## File Conventions
 
@@ -218,6 +218,7 @@ Deep references live in `docs/`. Treat docs as a first-class deliverable. **When
 - [docs/build-system.md](docs/build-system.md) — gulp pipeline (15 tasks), config flow, build modes, pure helpers
 - [docs/templating.md](docs/templating.md) — node-powertools bracket conventions, Liquid coexistence
 - [docs/local-development.md](docs/local-development.md) — browsersync URL, Firebase emulator connect, PurgeCSS safelist
+- [docs/cdp-debugging.md](docs/cdp-debugging.md) — launching a controllable Chrome (CDP) at the dev server, persistent agent profile (one-time logins), driving via MCP/CDP (screenshots, clicks, network)
 - [docs/logging.md](docs/logging.md) — `dev.log` / `build.log` / `test.log` tee, CI skip
 - [docs/common-mistakes.md](docs/common-mistakes.md) — the canonical "don't do this" list
 - [docs/assets.md](docs/assets.md) — UJM vs consumer file layout, section config (nav/footer/account), frontmatter-driven page customization, webpack aliases, page module pattern

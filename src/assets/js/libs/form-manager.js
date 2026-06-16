@@ -782,7 +782,9 @@ export class FormManager {
   }
 
   /**
-   * Enable/disable form controls
+   * Enable/disable form controls. Fields marked data-fm-keep-disabled stay
+   * disabled permanently (e.g. "coming soon" options rendered inside a
+   * managed form) — the toggle never re-enables them.
    */
   _setDisabled(disabled) {
     /* @dev-only:start */
@@ -792,6 +794,10 @@ export class FormManager {
     /* @dev-only:end */
 
     this.$form.querySelectorAll('button, input, select, textarea').forEach(($el) => {
+      if ($el.dataset.fmKeepDisabled !== undefined) {
+        $el.disabled = true;
+        return;
+      }
       $el.disabled = disabled;
     });
   }

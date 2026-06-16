@@ -711,8 +711,9 @@ UJM cannot run a dev server itself (it runs inside a consumer). To verify a them
 
 1. In UJM: `npm run prepare` (or `npm start` for watch) to publish `src/`→`dist/`.
 2. In a consumer wired to local UJM (`"ultimate-jekyll-manager": "file:../ultimate-jekyll-manager"`),
-   set `theme.id` and run `npm start`. Capture the BrowserSync URL (e.g.
-   `https://localhost:4000`).
+   set `theme.id` and run `npm start`. Read the BrowserSync URL from the
+   consumer's `.temp/_config_browsersync.yml` — it's the local network IP
+   (e.g. `https://192.168.86.69:4000`), never `localhost`.
 3. Screenshot the key pages (home, pricing, signin, signup) in **both** light and
    dark (`document.documentElement.setAttribute('data-bs-theme','dark')`) — e.g.
    via the chrome-devtools MCP. Check the console for errors and that your theme's

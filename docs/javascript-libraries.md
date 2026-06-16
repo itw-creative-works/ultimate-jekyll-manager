@@ -387,6 +387,14 @@ Errors display with Bootstrap's `is-invalid` class and `.invalid-feedback` eleme
 
 When the form transitions to `ready` state, FormManager automatically focuses the field with the `autofocus` attribute (if present and not disabled).
 
+**Permanently-disabled fields (`data-fm-keep-disabled`):**
+
+FormManager blanket-toggles `disabled` on every control in the form while loading/submitting and re-enables them on `ready`/error. Fields that must STAY disabled (e.g. "coming soon" options rendered inside a managed form) opt out with the `data-fm-keep-disabled` attribute — the toggle always forces them to `disabled = true` and never re-enables them:
+
+```html
+<input type="radio" name="plan" value="enterprise" disabled data-fm-keep-disabled>
+```
+
 **Methods:**
 
 | Method | Description |

@@ -1,6 +1,6 @@
 # Local Development
 
-The local development server URL is stored in `.temp/_config_browsersync.yml` in the consuming project's root directory. Read this file to determine the correct URL for browsing and testing. By default, use `https://192.168.86.69:4000`.
+The exact local dev server URL is written to `.temp/_config_browsersync.yml` in the consuming project's root directory — read this file to determine the URL for browsing and testing. It is the machine's local network IP over HTTPS (e.g. `https://192.168.86.69:4000`), **never `localhost`** (refused), and the port varies (4001, …) when multiple sites run simultaneously.
 
 ## Log Files
 

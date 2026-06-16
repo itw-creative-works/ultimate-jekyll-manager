@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.8.2] - 2026-06-14
+
+### Added
+
+- **FormManager: `data-fm-keep-disabled` opt-out for permanently-disabled fields.** `_setDisabled` blanket-toggles `disabled` on every control in the form (loading/submitting ↔ ready), which silently re-enabled fields meant to STAY disabled — e.g. "coming soon" radio options rendered inside a managed form. Controls carrying `data-fm-keep-disabled` are now always forced to `disabled = true` and never re-enabled. Documented in `docs/javascript-libraries.md` (FormManager section).
+- **`docs/cdp-debugging.md` — launching a controllable browser (mirrored across UJM/BEM/BXM/EM).** The canonical Chrome launch for agents and humans: CDP port + REQUIRED dedicated `--user-data-dir` (Chrome 136+ silently ignores the debug port on the default profile — verified on 149), the persistent agent profile (`~/Library/Application Support/chrome-profiles/agent` — log in once, state survives relaunches, verified), the shared-instance model (CDP is multi-client — agents share the one logged-in Chrome on one port, one tab each; a second profile/port only for a second identity), safe quit by profile match, and driving via the `chrome-devtools` MCP (`CHROME_CDP_PORT` set before the session) or any CDP client. UJM flavor: point it at the dev server for the edit → live-reload → screenshot/console/network loop. Indexed in CLAUDE.md.
+
+---
 ## [1.8.1] - 2026-06-11
 
 ### Changed
