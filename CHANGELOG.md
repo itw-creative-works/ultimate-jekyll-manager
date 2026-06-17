@@ -15,6 +15,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.0] - 2026-06-17
+
+### Added
+
+- **Token page: MCP OAuth flow.** When the `/token` page receives `?mcp=true&redirect_uri=...&state=...`, it completes an OAuth-style handshake — the user signs in via Firebase Auth, the page obtains a fresh ID token, and redirects back to the `redirect_uri` with `code=<idToken>&state=<state>`. This lets Claude (or any MCP client) authenticate users through the existing sign-in UI without a custom OAuth server.
+
+### Changed
+
+- **Dev-URL guidance updated** — docs (local-development.md, themes.md, cdp-debugging.md, CLAUDE.md) now say "prefer `https://localhost:4000`; fall back to the network IP if localhost doesn't connect" instead of hardcoding a specific IP.
+
+---
 ## [1.8.2] - 2026-06-14
 
 ### Added

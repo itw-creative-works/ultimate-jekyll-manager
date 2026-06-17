@@ -14,7 +14,7 @@ open -gna "Google Chrome" --args \
   --disable-background-timer-throttling \
   --disable-backgrounding-occluded-windows \
   --disable-renderer-backgrounding \
-  https://192.168.86.69:4000     # ← the UJM dev server — EXACT URL from .temp/_config_browsersync.yml (or any URL)
+  https://localhost:4000          # ← the UJM dev server (or the IP from .temp/_config_browsersync.yml if localhost doesn't connect)
 ```
 
 Verify it's up: `curl -s http://127.0.0.1:9223/json/version`
@@ -39,6 +39,10 @@ Port conventions: **9222** = Electron apps (EM), **9223+** = Chrome instances.
 
 ## UJM specifics
 
+<<<<<<< HEAD
 - **The dev server URL is NEVER `localhost`.** BrowserSync serves on the machine's local network IP over HTTPS (e.g. `https://192.168.86.69:4000`) — `localhost:4000` is refused. The port also varies (4001, …) when multiple sites run simultaneously. The exact served URL is written to `.temp/_config_browsersync.yml` at the root of the WEBSITE project being served (the UJM consumer — e.g. `<brand>-website/.temp/_config_browsersync.yml`) — read that file FIRST, every time, before navigating.
+=======
+- **The dev server is HTTPS.** BrowserSync serves over HTTPS (self-signed cert). Prefer `https://localhost:4000`; fall back to the machine's local network IP (e.g. `https://192.168.x.x:4000`) if localhost doesn't connect. Port 4000 by default, increments to 4001+ when multiple sites run. The exact URL is in `.temp/_config_browsersync.yml` at the root of the WEBSITE project (the UJM consumer — e.g. `<brand>-website/.temp/_config_browsersync.yml`) — read that file FIRST, every time, before navigating.
+>>>>>>> df950b1 (v1.9.0: MCP OAuth flow on /token page, CDP debugging docs, dev-URL updates)
 - Launch it pointed at the dev server — UJM's live reload keeps the tab current as you edit, so the agent sees every change without relaunching anything.
 - Typical loop: edit → reload happens → MCP `take_screenshot` / `list_console_messages` / `list_network_requests` to verify the page, requests to the backend, and console cleanliness.

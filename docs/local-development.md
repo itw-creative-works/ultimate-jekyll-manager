@@ -1,6 +1,6 @@
 # Local Development
 
-The exact local dev server URL is written to `.temp/_config_browsersync.yml` in the consuming project's root directory — read this file to determine the URL for browsing and testing. It is the machine's local network IP over HTTPS (e.g. `https://192.168.86.69:4000`), **never `localhost`** (refused), and the port varies (4001, …) when multiple sites run simultaneously.
+The exact local dev server URL is written to `.temp/_config_browsersync.yml` in the consuming project's root directory — always read it, never guess. BrowserSync serves over HTTPS (self-signed cert). Prefer `https://localhost:4000`; fall back to the machine's local network IP (e.g. `https://192.168.x.x:4000`) if localhost doesn't connect. Port 4000 by default, increments to 4001+ when multiple sites run simultaneously.
 
 ## Log Files
 

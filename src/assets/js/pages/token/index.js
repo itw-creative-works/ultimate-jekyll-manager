@@ -1,4 +1,5 @@
 // This file is required by /token page to generate custom auth tokens for extensions/apps
+// Also handles MCP OAuth flow: user signs in → Firebase ID token sent back to Claude as auth code
 import authorizedFetch from '__main_assets__/js/libs/authorized-fetch.js';
 import webManager from 'web-manager';
 
@@ -11,16 +12,24 @@ export default function () {
   // Get URL params
   const url = new URL(window.location.href);
   const authReturnUrl = url.searchParams.get('authReturnUrl');
+  const mcpRedirectUri = url.searchParams.get('redirect_uri');
+  const mcpState = url.searchParams.get('state');
+  const isMcp = url.searchParams.get('mcp') === 'true';
 
   // Handle DOM ready
   webManager.dom().ready()
   .then(async () => {
     // Log
-    console.log('[Token] Initialized. authReturnUrl:', authReturnUrl);
+    console.log('[Token] Initialized.', isMcp ? 'MCP OAuth flow' : 'Standard flow', 'authReturnUrl:', authReturnUrl);
 
-    // Validate authReturnUrl if present
+    // Validate redirect URLs
     if (authReturnUrl && !webManager.isValidRedirectUrl(authReturnUrl)) {
       showError('Invalid redirect URL');
+      return;
+    }
+
+    if (isMcp && !mcpRedirectUri) {
+      showError('Missing redirect_uri for MCP OAuth flow');
       return;
     }
 
@@ -35,7 +44,32 @@ export default function () {
       }
 
       try {
-        // Generate custom token
+        // MCP OAuth flow: return Firebase ID token as the authorization code
+        if (isMcp && mcpRedirectUri) {
+          updateStatus('Completing MCP authorization...');
+
+          const idToken = await webManager.auth().getIdToken(true);
+          const returnUrl = new URL(mcpRedirectUri);
+          returnUrl.searchParams.set('code', idToken);
+
+          if (mcpState) {
+            returnUrl.searchParams.set('state', mcpState);
+          }
+
+          const redirectUrl = returnUrl.toString();
+          console.log('[Token] MCP redirect to:', redirectUrl);
+
+          updateStatus('Redirecting to Claude...');
+
+          setTimeout(() => {
+            updateStatus('If you were not redirected, <a href="' + webManager.utilities().escapeHTML(redirectUrl) + '">click here to try again</a>.', true);
+          }, 3000);
+
+          window.location.href = redirectUrl;
+          return;
+        }
+
+        // Standard flow: generate custom token via BEM API
         updateStatus('Generating secure token...');
         const token = await generateCustomToken();
 
