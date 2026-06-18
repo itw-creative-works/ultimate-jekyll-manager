@@ -55,7 +55,7 @@ sections:
     name: "Notifications"
     icon: "bell"
   - id: "api-keys"
-    name: "API keys"
+    name: "API & MCP"
     icon: "key"
   - id: "data-request"
     name: "Data request"
@@ -1311,9 +1311,10 @@ badges:
 
       <!-- API Keys Section -->
       <section id="api-keys-section" class="account-section d-none">
-        <h2 class="h3 mb-4" >API keys</h2>
+        <h2 class="h3 mb-4">API & MCP</h2>
 
-        <div class="card">
+        <!-- API Key Card -->
+        <div class="card mb-4">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h5 class="card-title mb-0">Your API key</h5>
@@ -1349,6 +1350,212 @@ badges:
                 <strong>Warning:</strong> Resetting your API key will invalidate the current key. Any applications using the old key will stop working.
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- MCP Integration Card -->
+        <div class="card" data-brand-id="{{ site.brand.id }}" id="mcp-card">
+          <div class="card-body">
+            <h5 class="card-title mb-2">MCP integration</h5>
+            <p class="card-text text-muted mb-3">Connect AI assistants to your account using the Model Context Protocol. Paste the URL below into your preferred AI tool.</p>
+
+            <!-- MCP URL display -->
+            <div class="mb-4">
+              <label for="mcp-url-input" class="form-label small text-muted">MCP server URL</label>
+              <div class="input-group">
+                <input type="text" class="form-control font-monospace" id="mcp-url-input" readonly data-mcp-url value="Loading...">
+                <button type="button" class="btn btn-outline-adaptive" id="copy-mcp-url-btn">
+                  {% uj_icon "copy", "me-2" %}
+                  <span class="button-text d-none d-sm-inline">Copy</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Provider Tabs -->
+            <div class="border rounded">
+              <ul class="nav nav-tabs px-3 pt-2 flex-nowrap overflow-auto" id="mcp-provider-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active small text-nowrap" id="mcp-claude-tab" data-bs-toggle="tab" data-bs-target="#mcp-claude" type="button" role="tab">Claude</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-cursor-tab" data-bs-toggle="tab" data-bs-target="#mcp-cursor" type="button" role="tab">Cursor</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-vscode-tab" data-bs-toggle="tab" data-bs-target="#mcp-vscode" type="button" role="tab">VS Code</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-codex-tab" data-bs-toggle="tab" data-bs-target="#mcp-codex" type="button" role="tab">Codex</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-gemini-tab" data-bs-toggle="tab" data-bs-target="#mcp-gemini" type="button" role="tab">Gemini CLI</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-opencode-tab" data-bs-toggle="tab" data-bs-target="#mcp-opencode" type="button" role="tab">OpenCode</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-windsurf-tab" data-bs-toggle="tab" data-bs-target="#mcp-windsurf" type="button" role="tab">Windsurf</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-zed-tab" data-bs-toggle="tab" data-bs-target="#mcp-zed" type="button" role="tab">Zed</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small text-nowrap" id="mcp-other-tab" data-bs-toggle="tab" data-bs-target="#mcp-other" type="button" role="tab">Other</button>
+                </li>
+              </ul>
+              <div class="tab-content p-3">
+                <!-- Claude -->
+                <div class="tab-pane fade show active" id="mcp-claude" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Open your terminal and run:
+                      <div class="input-group mt-1 mb-1">
+                        <input type="text" class="form-control form-control-sm font-monospace bg-dark text-light" id="mcp-cmd-claude" readonly data-mcp-cmd="claude" value="Loading...">
+                        <button type="button" class="btn btn-outline-adaptive btn-sm" data-copy-target="mcp-cmd-claude">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li class="mb-2">This will trigger an OAuth flow to connect Claude to your account.</li>
+                  </ol>
+                  <div class="position-relative my-3">
+                    <hr class="text-muted">
+                    <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small bg-body-secondary">OR</span>
+                  </div>
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Go to <strong>Claude Desktop &rarr; Settings &rarr; Integrations &rarr; Add</strong>.</li>
+                    <li>Paste the MCP URL above and connect.</li>
+                  </ol>
+                </div>
+                <!-- Cursor -->
+                <div class="tab-pane fade" id="mcp-cursor" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Open Cursor Settings: <kbd>&#8984;</kbd> + <kbd>Shift</kbd> + <kbd>J</kbd></li>
+                    <li class="mb-2">Select <strong>Skills and Integrations</strong>.</li>
+                    <li class="mb-2">Select <strong>New MCP Server</strong> and paste:
+                      <div class="position-relative mt-1">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" id="mcp-cmd-cursor" data-mcp-cmd="cursor"><code>Loading...</code></pre>
+                        <button type="button" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-2" data-copy-target="mcp-cmd-cursor">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+                <!-- VS Code -->
+                <div class="tab-pane fade" id="mcp-vscode" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2"><kbd>&#8984;</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> and search for <strong>MCP: Add Server</strong>.</li>
+                    <li class="mb-2">Select <strong>HTTP (HTTP or Server-Sent Events)</strong>.</li>
+                    <li class="mb-2">Enter the MCP URL and hit enter.</li>
+                  </ol>
+                  <div class="position-relative my-3">
+                    <hr class="text-muted">
+                    <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small bg-body-secondary">OR</span>
+                  </div>
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Add to your <code>settings.json</code>:
+                      <div class="position-relative mt-1">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" id="mcp-cmd-vscode" data-mcp-cmd="vscode"><code>Loading...</code></pre>
+                        <button type="button" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-2" data-copy-target="mcp-cmd-vscode">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li>Save the file and restart VS Code.</li>
+                  </ol>
+                </div>
+                <!-- Codex -->
+                <div class="tab-pane fade" id="mcp-codex" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Open your terminal and run:
+                      <div class="input-group mt-1 mb-1">
+                        <input type="text" class="form-control form-control-sm font-monospace bg-dark text-light" id="mcp-cmd-codex" readonly data-mcp-cmd="codex" value="Loading...">
+                        <button type="button" class="btn btn-outline-adaptive btn-sm" data-copy-target="mcp-cmd-codex">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li>The MCP server will be available next time you run <code>codex</code>.</li>
+                  </ol>
+                </div>
+                <!-- Gemini CLI -->
+                <div class="tab-pane fade" id="mcp-gemini" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Edit <code>~/.gemini/settings.json</code> and add the HTTP MCP server configuration:
+                      <div class="position-relative mt-1">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" id="mcp-cmd-gemini" data-mcp-cmd="gemini"><code>Loading...</code></pre>
+                        <button type="button" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-2" data-copy-target="mcp-cmd-gemini">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li class="mb-2">Save the file and restart Gemini CLI.</li>
+                    <li class="mb-2">Authenticate by running:
+                      <div class="input-group mt-1 mb-1">
+                        <input type="text" class="form-control form-control-sm font-monospace bg-dark text-light" id="mcp-cmd-gemini-auth" readonly data-mcp-cmd="gemini-auth" value="Loading...">
+                        <button type="button" class="btn btn-outline-adaptive btn-sm" data-copy-target="mcp-cmd-gemini-auth">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li>This will open a browser window to complete the OAuth flow.</li>
+                  </ol>
+                </div>
+                <!-- OpenCode -->
+                <div class="tab-pane fade" id="mcp-opencode" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Edit <code>~/.config/opencode/opencode.json</code> and add the remote MCP server configuration:
+                      <div class="position-relative mt-1">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" id="mcp-cmd-opencode" data-mcp-cmd="opencode"><code>Loading...</code></pre>
+                        <button type="button" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-2" data-copy-target="mcp-cmd-opencode">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li class="mb-2">Save the file and restart OpenCode.</li>
+                    <li class="mb-2">Authenticate by running:
+                      <div class="input-group mt-1 mb-1">
+                        <input type="text" class="form-control form-control-sm font-monospace bg-dark text-light" id="mcp-cmd-opencode-auth" readonly data-mcp-cmd="opencode-auth" value="Loading...">
+                        <button type="button" class="btn btn-outline-adaptive btn-sm" data-copy-target="mcp-cmd-opencode-auth">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li>This will open a browser window to complete the OAuth flow.</li>
+                  </ol>
+                </div>
+                <!-- Windsurf -->
+                <div class="tab-pane fade" id="mcp-windsurf" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2">Open Windsurf Settings.</li>
+                    <li class="mb-2">Under <strong>Cascade</strong>, find <strong>Model Context Protocol Servers</strong>.</li>
+                    <li class="mb-2">Select <strong>Add Server</strong> and paste:
+                      <div class="position-relative mt-1">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" id="mcp-cmd-windsurf" data-mcp-cmd="windsurf"><code>Loading...</code></pre>
+                        <button type="button" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-2" data-copy-target="mcp-cmd-windsurf">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+                <!-- Zed -->
+                <div class="tab-pane fade" id="mcp-zed" role="tabpanel">
+                  <ol class="small text-muted mb-0">
+                    <li class="mb-2"><kbd>&#8984;</kbd> + <kbd>,</kbd> to open Zed settings.</li>
+                    <li class="mb-2">Add the MCP server configuration:
+                      <div class="position-relative mt-1">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" id="mcp-cmd-zed" data-mcp-cmd="zed"><code>Loading...</code></pre>
+                        <button type="button" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-2" data-copy-target="mcp-cmd-zed">{% uj_icon "copy" %}</button>
+                      </div>
+                    </li>
+                    <li>Restart Zed to activate the server.</li>
+                  </ol>
+                </div>
+                <!-- Other -->
+                <div class="tab-pane fade" id="mcp-other" role="tabpanel">
+                  <p class="small text-muted mb-2">Use these details to configure any MCP-compatible client:</p>
+                  <table class="table table-sm small mb-0">
+                    <tbody>
+                      <tr>
+                        <td class="text-muted fw-medium w-25">Server URL</td>
+                        <td class="font-monospace" id="mcp-detail-url" data-mcp-detail="url">Loading...</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted fw-medium">Transport</td>
+                        <td class="font-monospace">Streamable HTTP</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted fw-medium">Authentication</td>
+                        <td>OAuth 2.1 (automatic)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

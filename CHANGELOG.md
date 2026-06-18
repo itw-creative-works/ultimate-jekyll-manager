@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.2] - 2026-06-17
+
+### Added
+- **Account page: API & MCP section.** Renamed "API keys" to "API & MCP". New MCP integration card with server URL (copy-to-clipboard) and tabbed setup instructions for 9 providers: Claude, Cursor, VS Code, Codex, Gemini CLI, OpenCode, Windsurf, Zed, and Other. MCP URL built dynamically from `webManager.getApiUrl()`.
+
+---
 ## [1.9.1] - 2026-06-17
 
 ### Changed
