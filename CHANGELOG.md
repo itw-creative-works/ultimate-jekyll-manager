@@ -15,6 +15,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.1] - 2026-06-17
+
+### Changed
+
+- **FormManager: snapshot-and-restore disabled-state model (replaces `data-fm-keep-disabled`).** `_init()` now snapshots every element that has `disabled` in HTML markup (excluding submit buttons — those are loading guards FM takes over). Snapshotted elements stay disabled through every state transition automatically — no data attributes needed. Recommended form pattern: `<form data-form-state="initializing" onsubmit="return false">` with CSS `form[data-form-state]:not([data-form-state="ready"]) { pointer-events: none; }`. Documented in `docs/javascript-libraries.md`.
+
+### Added
+
+- **Comprehensive FormManager test suite (30 page-layer tests).** Disabled-state snapshot (5 tests), getData/setData/input groups (12 tests), validation/honeypot/file-accept (13 tests). Previously FormManager had zero automated tests.
+- **Visual Test 7 on the FM test page** (`/test/libraries/form-manager`) — permanently disabled elements, submit cycle demo, rapid-cycle button for manual verification.
+
+---
 ## [1.9.0] - 2026-06-17
 
 ### Added

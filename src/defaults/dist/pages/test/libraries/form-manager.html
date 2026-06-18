@@ -301,6 +301,78 @@ meta:
       </div>
     </div>
 
+    <!-- Test 7: Disabled-State Snapshot -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Test 7: Disabled-State Snapshot</h5>
+          <small class="text-muted">Elements disabled in HTML stay disabled through every FM state transition. Submit buttons are loading guards — FM takes them over.</small>
+        </div>
+        <div class="card-body">
+          <form id="test-form-snapshot" data-form-state="initializing" onsubmit="return false">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="text-muted mb-3">FM-managed <span class="badge bg-success">enabled on ready</span></h6>
+                <div class="mb-3">
+                  <label for="snapshot-name" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="snapshot-name" name="name" value="Ian">
+                </div>
+                <div class="mb-3">
+                  <label for="snapshot-email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="snapshot-email" name="email" value="ian@example.com">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label d-block">Plan</label>
+                  <div class="form-check">
+                    <input type="radio" class="form-check-input" id="snapshot-plan-free" name="plan" value="free" checked>
+                    <label class="form-check-label" for="snapshot-plan-free">Free</label>
+                  </div>
+                  <div class="form-check">
+                    <input type="radio" class="form-check-input" id="snapshot-plan-pro" name="plan" value="pro">
+                    <label class="form-check-label" for="snapshot-plan-pro">Pro</label>
+                  </div>
+                  <div class="form-check">
+                    <input type="radio" class="form-check-input" id="snapshot-plan-enterprise" name="plan" value="enterprise" disabled>
+                    <label class="form-check-label" for="snapshot-plan-enterprise">Enterprise <span class="badge bg-secondary">Coming soon</span></label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-muted mb-3">Permanently disabled <span class="badge bg-danger">stays disabled</span></h6>
+                <div class="mb-3">
+                  <label for="snapshot-region" class="form-label">Region <span class="badge bg-secondary">Coming soon</span></label>
+                  <select class="form-select" id="snapshot-region" name="region" disabled>
+                    <option>US (coming soon)</option>
+                    <option>EU (coming soon)</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="snapshot-notes" class="form-label">Internal notes <span class="badge bg-secondary">Admin only</span></label>
+                  <textarea class="form-control" id="snapshot-notes" name="notes" rows="2" disabled>Restricted field</textarea>
+                </div>
+                <div class="alert alert-info small mb-0">
+                  Enterprise radio, Region select, and Notes textarea have <code>disabled</code> in the HTML. FM snapshots them at init and never re-enables them. The other fields start without <code>disabled</code> — the form-level <code>data-form-state</code> + CSS blocks interaction until FM is ready.
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary" disabled>
+                <span class="button-text">Submit (watch disabled states)</span>
+              </button>
+              <button type="button" id="snapshot-cycle" class="btn btn-outline-warning">Rapid cycle (5x)</button>
+            </div>
+          </form>
+          <div class="mt-3 d-flex gap-3">
+            <small class="text-muted" id="snapshot-status">Status: initializing</small>
+            <small class="text-muted" id="snapshot-cycle-count">Cycles: 0</small>
+          </div>
+          <div class="mt-2">
+            <pre id="snapshot-output" class="bg-body-secondary p-2 rounded small" style="max-height: 160px; overflow: auto;">Submit to see disabled states toggle. Enterprise radio + Region select should NEVER re-enable.</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </section>

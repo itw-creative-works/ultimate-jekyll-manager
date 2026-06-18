@@ -59,6 +59,7 @@ export class FormManager {
     // State
     this.state = 'initializing';
     this._isDirty = false;
+    this._permanentlyDisabled = new Set();
 
     // Event listeners
     this._listeners = {
@@ -92,6 +93,17 @@ export class FormManager {
    * Initialize the form manager
    */
   _init() {
+    // Snapshot elements that are disabled in HTML markup BEFORE the first
+    // blanket disable. These are business-logic disabled (e.g. "coming soon"
+    // options) and must stay disabled through every state transition.
+    // Submit buttons are excluded — disabled submit buttons in HTML are
+    // loading guards that FM takes over.
+    this.$form.querySelectorAll('button, input, select, textarea').forEach(($el) => {
+      if ($el.disabled && $el.type !== 'submit') {
+        this._permanentlyDisabled.add($el);
+      }
+    });
+
     // Disable form during initialization
     this._setDisabled(true);
 
@@ -782,9 +794,8 @@ export class FormManager {
   }
 
   /**
-   * Enable/disable form controls. Fields marked data-fm-keep-disabled stay
-   * disabled permanently (e.g. "coming soon" options rendered inside a
-   * managed form) — the toggle never re-enables them.
+   * Enable/disable form controls. Elements snapshotted as permanently
+   * disabled during _init() are never re-enabled.
    */
   _setDisabled(disabled) {
     /* @dev-only:start */
@@ -794,7 +805,7 @@ export class FormManager {
     /* @dev-only:end */
 
     this.$form.querySelectorAll('button, input, select, textarea').forEach(($el) => {
-      if ($el.dataset.fmKeepDisabled !== undefined) {
+      if (this._permanentlyDisabled.has($el)) {
         $el.disabled = true;
         return;
       }

@@ -387,12 +387,22 @@ Errors display with Bootstrap's `is-invalid` class and `.invalid-feedback` eleme
 
 When the form transitions to `ready` state, FormManager automatically focuses the field with the `autofocus` attribute (if present and not disabled).
 
-**Permanently-disabled fields (`data-fm-keep-disabled`):**
+**Permanently-disabled fields (snapshot model):**
 
-FormManager blanket-toggles `disabled` on every control in the form while loading/submitting and re-enables them on `ready`/error. Fields that must STAY disabled (e.g. "coming soon" options rendered inside a managed form) opt out with the `data-fm-keep-disabled` attribute — the toggle always forces them to `disabled = true` and never re-enables them:
+FormManager snapshots every element that has `disabled` in HTML markup at init time (excluding `type="submit"` buttons, which are treated as loading guards). Snapshotted elements stay disabled through every state transition — no data attributes needed. Just put `disabled` on the element in HTML:
 
 ```html
-<input type="radio" name="plan" value="enterprise" disabled data-fm-keep-disabled>
+<input type="radio" name="plan" value="enterprise" disabled>
+<select name="region" disabled>...</select>
+```
+
+Submit buttons can still use `disabled` in HTML as a loading guard — FM always manages them regardless of initial state. For full pre-JS protection, add `data-form-state="initializing"` and `onsubmit="return false"` to the `<form>` tag, with CSS to block interaction:
+
+```css
+form[data-form-state]:not([data-form-state="ready"]) {
+  pointer-events: none;
+  opacity: 0.6;
+}
 ```
 
 **Methods:**

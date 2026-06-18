@@ -19,6 +19,7 @@ export default () => {
     initTestFormManual();
     initTestFormGroups();
     initTestFormFileDrop();
+    initTestFormSnapshot();
 
     // Resolve after initialization
     return resolve();
@@ -242,6 +243,58 @@ function initTestFormGroups() {
 
     // Don't actually submit - just show the data
     formManager.showSuccess('getData() returned ' + Object.keys(data).length + ' top-level keys');
+  });
+}
+
+// Test 7: Disabled-State Snapshot
+function initTestFormSnapshot() {
+  const formManager = new FormManager('#test-form-snapshot');
+  const $status = document.getElementById('snapshot-status');
+  const $cycleCount = document.getElementById('snapshot-cycle-count');
+  const $output = document.getElementById('snapshot-output');
+  const $cycleBtn = document.getElementById('snapshot-cycle');
+
+  let cycles = 0;
+
+  function logStates() {
+    const form = document.getElementById('test-form-snapshot');
+    const lines = [];
+    form.querySelectorAll('input, select, textarea, button').forEach(($el) => {
+      const label = $el.name || $el.type || $el.tagName.toLowerCase();
+      lines.push(`${label}: disabled=${$el.disabled}`);
+    });
+    $output.textContent = lines.join('\n');
+  }
+
+  formManager.on('statechange', ({ state }) => {
+    $status.textContent = `Status: ${state}`;
+    logStates();
+  });
+
+  formManager.on('submit', async ({ data }) => {
+    console.log('[Test 7] Submitting:', data);
+    logStates();
+    await simulateApi(2000);
+    cycles++;
+    $cycleCount.textContent = `Cycles: ${cycles}`;
+    formManager.showSuccess('Done! Permanently disabled fields should still be disabled.');
+  });
+
+  // Rapid cycle button — triggers 5 fast disable/enable cycles
+  $cycleBtn.addEventListener('click', async () => {
+    $cycleBtn.disabled = true;
+    for (let i = 0; i < 5; i++) {
+      formManager._setDisabled(true);
+      logStates();
+      await simulateApi(300);
+      formManager._setDisabled(false);
+      logStates();
+      await simulateApi(300);
+      cycles++;
+    }
+    $cycleCount.textContent = `Cycles: ${cycles}`;
+    $cycleBtn.disabled = false;
+    formManager.showSuccess('5 rapid cycles complete. Check that Enterprise/Region/Notes stayed disabled.');
   });
 }
 
