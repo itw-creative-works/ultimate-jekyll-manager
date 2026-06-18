@@ -68,7 +68,7 @@ Manager.reportBuildError = function (error, callback) {
   const errorMessage = error.message || error.toString() || 'Unknown error';
   const errorPlugin = error.plugin || 'Build';
 
-  execute(`notifly --title 'Build Error: ${errorPlugin}' --message '${errorMessage.replace(/'/g, "\\'")}' --appIcon '/Users/ian/claude-ai-icon.png' --timeout 3 --sound 'Sosumi'`)
+  execute(`/Applications/Notifly.app/Contents/MacOS/Notifly --title 'Build Error: ${errorPlugin}' --message '${errorMessage.replace(/'/g, "\\'")}' --appIcon '/Users/ian/claude-ai-icon.png' --timeout 3 --sound 'Sosumi'`)
     .catch((e) => {
       logger.error('Failed to send notification', e);
     });

@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.3] - 2026-06-18
+
+### Changed
+- **Notifly build-error notifications use absolute path.** Switched from bare `notifly` keyword to full application path (`/Applications/Notifly.app/Contents/MacOS/Notifly`) so the notification binary resolves reliably regardless of PATH.
+
+---
 ## [1.9.2] - 2026-06-17
 
 ### Added
