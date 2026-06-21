@@ -5,8 +5,8 @@
 * **Goal:** FormManager disabled-state refactor (snapshot-and-restore)
 * **Current Phase:** Phase 1 — implementation + tests complete, docs pending
 * **Priority:** Medium
-* **Last Updated:** 2026-06-17 6:05 PM PDT
-* **Notes:** FM disabled-state refactor done + comprehensive FM test suite added (110 tests total, up from 80). Covers getData/setData/input groups/validation/honeypot/file-accept/disabled snapshot. Docs (javascript-libraries.md, CHANGELOG) still need updating before shipping.
+* **Last Updated:** 2026-06-20 11:03 PM PDT
+* **Notes:** FM disabled-state refactor done + comprehensive FM test suite added (110 tests total, up from 80). Blog post ad insertion fix applied (Phase 2). Docs (javascript-libraries.md, CHANGELOG) still need updating before shipping.
 
 ## Active Task List
 * [ ] Phase 1: FormManager disabled-state snapshot-and-restore
@@ -19,6 +19,9 @@
   * [ ] Task 1.7: Update `docs/javascript-libraries.md` — replace `data-fm-keep-disabled` docs with new snapshot pattern + `onsubmit="return false"` + `data-form-state="initializing"` CSS guard
   * [ ] Task 1.8: Update CHANGELOG with the change
   * [ ] Task 1.9: Ship (commit, push, publish)
+
+* [x] Phase 2: Fix blog post ad insertion inside blockquotes
+  * [x] Task 2.1: Filter out `<p>` elements inside `<blockquote>`, `<details>`, `<figure>` from ad insertion candidates in `post.js`
 
 ## Completed Task List
 * [x] Phase 0: v1.9.0 release — MCP OAuth flow + CDP debugging docs + dev-URL updates

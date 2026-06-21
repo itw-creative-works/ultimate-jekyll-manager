@@ -29,8 +29,9 @@ function insertBlogPostAds() {
   const adLayout = 'in-article';
   const adFormat = 'fluid';
 
-  // Get all paragraphs in the article
-  const $paragraphs = Array.from($article.querySelectorAll('p'));
+  // Get all top-level paragraphs (exclude those inside blockquotes, details, etc.)
+  const $paragraphs = Array.from($article.querySelectorAll('p'))
+    .filter(p => !p.closest('blockquote, details, figure'));
   if ($paragraphs.length < 3) {
     console.log('[Blog Post] Not enough paragraphs for ad insertion');
     return;

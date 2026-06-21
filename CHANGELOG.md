@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.4] - 2026-06-20
+
+### Fixed
+- **Blog post ads no longer render inside blockquotes.** Ad insertion now filters out `<p>` elements inside `<blockquote>`, `<details>`, and `<figure>` so ads only appear between top-level content blocks.
+
+---
 ## [1.9.3] - 2026-06-18
 
 ### Changed
