@@ -93,6 +93,10 @@ export class FormManager {
    * Initialize the form manager
    */
   _init() {
+    // Set the form state attribute immediately so the CSS loading guard
+    // kicks in even if the HTML didn't include data-form-state.
+    this.$form.setAttribute('data-form-state', this.state);
+
     // Snapshot elements that are disabled in HTML markup BEFORE the first
     // blanket disable. These are business-logic disabled (e.g. "coming soon"
     // options) and must stay disabled through every state transition.

@@ -21,6 +21,17 @@ body {
 }
 
 // ============================================
+// FormManager Loading Guard
+// ============================================
+
+// Forms with data-form-state block interaction until FormManager sets state
+// to "ready". Replaces per-element disabled attributes as the loading guard.
+form[data-form-state]:not([data-form-state="ready"]) {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+// ============================================
 // Font Display Configuration
 // ============================================
 

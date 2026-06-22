@@ -15,6 +15,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.5] - 2026-06-22
+
+### Changed
+- **FormManager: CSS-based loading guard replaces per-element `disabled`.** All FM-managed forms now use `data-form-state="initializing"` + a CSS rule (`pointer-events: none; opacity: 0.65`) instead of `disabled` attributes on individual inputs. FM sets the attribute in `_init()` and the CSS unblocks when state transitions to `ready`. Removed loading-guard `disabled` from inputs across all 41 forms (auth, contact, checkout, hero demo, account, admin, etc.) and 7 test forms. Submit buttons retain `disabled` in HTML — FM excludes `type="submit"` from the snapshot by design.
+
+### Added
+- **Supply-chain security via Socket Firewall.** New `safeInstall()` helper (`src/lib/safe-install.js`) wraps npm install with `sfw` (Socket Firewall) when available, scanning the full transitive dependency tree for malware before download. `npx mgr install` and `npx mgr setup` now route through it. CI `build.yml` installs sfw globally and runs `sfw npm install`.
+
+### Fixed
+- **Footer language switcher no longer links to excluded pages.** The language dropdown now checks `translation.exclude` before rendering language links. Pages matching an exclude entry (e.g. blog posts when `"blog"` is excluded) only show the default language, preventing dead `/es/blog/...` links that 404.
+
+---
 ## [1.9.4] - 2026-06-20
 
 ### Fixed

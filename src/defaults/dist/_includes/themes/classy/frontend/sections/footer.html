@@ -86,7 +86,15 @@
               </button>
               <ul class="dropdown-menu">
                 {% assign default_language = site.translation.default | default: "en" %}
-                {% if site.translation.enabled and site.translation.languages.size > 0 %}
+                {% assign page_excluded_from_translation = false %}
+                {% for exclude in site.translation.exclude %}
+                  {% assign exclude_folder = "/" | append: exclude | append: "/" %}
+                  {% assign exclude_page = "/" | append: exclude %}
+                  {% if page.url == exclude_page or page.url contains exclude_folder %}
+                    {% assign page_excluded_from_translation = true %}
+                  {% endif %}
+                {% endfor %}
+                {% if site.translation.enabled and site.translation.languages.size > 0 and page_excluded_from_translation != true %}
                   {% assign all_languages = site.translation.languages | push: default_language %}
                 {% else %}
                   {% assign all_languages = "" | split: "" | push: default_language %}

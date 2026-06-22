@@ -101,7 +101,7 @@ prerender_icons:
 </div>
 
 <!-- Search Form -->
-<form id="user-search-form" onsubmit="return false">
+<form id="user-search-form" data-form-state="initializing" onsubmit="return false">
   <div class="row mb-3">
     <div class="col">
       <div class="input-group">
@@ -252,7 +252,7 @@ prerender_icons:
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="user-edit-form" onsubmit="return false">
+        <form id="user-edit-form" data-form-state="initializing" onsubmit="return false">
           <!-- UID (read-only) -->
           <div class="mb-3">
             <label class="form-label small text-muted">UID</label>

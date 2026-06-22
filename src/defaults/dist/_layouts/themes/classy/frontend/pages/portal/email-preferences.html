@@ -45,7 +45,7 @@ prerender_icons:
         </div>
 
         <!-- Email preferences Form -->
-        <form id="email-preferences-form" autocomplete="off" onsubmit="return false">
+        <form id="email-preferences-form" autocomplete="off" data-form-state="initializing" onsubmit="return false">
           <!-- Action selector -->
           <div class="mb-4">
             <div class="d-flex gap-2">
@@ -78,8 +78,7 @@ prerender_icons:
               placeholder="Type your email to confirm"
               autocomplete="email"
               autofocus
-              required
-              disabled>
+              required>
             <div class="invalid-feedback"></div>
           </div>
 

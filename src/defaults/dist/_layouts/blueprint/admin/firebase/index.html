@@ -87,7 +87,7 @@ prerender_icons:
         <hr class="my-2">
 
         <!-- Custom Collection Input -->
-        <form id="collection-form" onsubmit="return false">
+        <form id="collection-form" data-form-state="initializing" onsubmit="return false">
           <div class="input-group input-group-sm">
             <input type="text" class="form-control" name="collection.path" placeholder="Collection path..." aria-label="Collection path" required>
             <button type="submit" class="btn btn-outline-adaptive">
@@ -104,7 +104,7 @@ prerender_icons:
         <h6 class="mb-0">{% uj_icon "magnifying-glass", "fa-sm me-2" %} Query</h6>
       </div>
       <div class="card-body">
-        <form id="query-form" onsubmit="return false">
+        <form id="query-form" data-form-state="initializing" onsubmit="return false">
           <div class="mb-2">
             <label for="query-field" class="form-label small mb-1">Field</label>
             <input type="text" class="form-control form-control-sm" name="query.field" id="query-field" placeholder="e.g. auth.email" required>

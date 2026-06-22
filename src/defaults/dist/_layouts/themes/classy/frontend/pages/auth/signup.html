@@ -40,7 +40,7 @@ social_signup:
       {% capture initializing_spinner %}<span class="spinner-border spinner-border-sm me-2 form-initializing-spinner"></span>{% endcapture %}
 
       <!-- Sign up Form -->
-      <form id="auth-form" autocomplete="on" novalidate onsubmit="return false">
+      <form id="auth-form" autocomplete="on" novalidate data-form-state="initializing" onsubmit="return false">
         <!-- Hidden default submit button for Enter key -->
         <button type="submit" class="d-none" data-provider="email" aria-hidden="true" tabindex="-1"></button>
 
@@ -77,7 +77,7 @@ social_signup:
           <label for="email" class="form-label fw-semibold">
             Email <span class="text-danger">*</span>
           </label>
-          <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email" autocomplete="email" autofocus disabled>
+          <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email" autocomplete="email" autofocus>
         </div>
 
         <div class="mb-3 text-start">
@@ -85,7 +85,7 @@ social_signup:
             Password <span class="text-danger">*</span>
           </label>
           <div class="input-group">
-            <input type="password" class="form-control form-control-md" id="password" name="password" placeholder="Create a strong password" autocomplete="new-password" disabled>
+            <input type="password" class="form-control form-control-md" id="password" name="password" placeholder="Create a strong password" autocomplete="new-password">
             <button class="btn border uj-password-toggle px-3" type="button" aria-label="Toggle password visibility">
               <span class="uj-password-show">{% uj_icon "eye", "fa-fw" %}</span>
               <span class="uj-password-hide d-none">{% uj_icon "eye-slash", "fa-fw" %}</span>

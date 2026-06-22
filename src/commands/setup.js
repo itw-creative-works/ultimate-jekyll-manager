@@ -6,6 +6,7 @@ const jetpack = require('fs-jetpack');
 const version = require('wonderful-version');
 const fetch = require('wonderful-fetch');
 const { execute } = require('node-powertools');
+const { safeInstall } = require('../lib/safe-install');
 const NPM = require('npm-api');
 const glob = require('glob').globSync;
 const detectGitHubRepository = require('../gulp/tasks/utils/detect-github-repo');
@@ -652,7 +653,7 @@ function npmInstall(pkg, ver, location) {
 
   logger.log('Installing:', command);
 
-  return execute(command, { log: true })
+  return safeInstall(command)
     .then(() => {
       const projectUpdated = jetpack.read(path.join(process.cwd(), 'package.json'), 'json');
 

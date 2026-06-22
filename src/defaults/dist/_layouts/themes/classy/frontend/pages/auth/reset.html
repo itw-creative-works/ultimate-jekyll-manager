@@ -25,12 +25,12 @@ layout: themes/[ site.theme.id ]/frontend/core/cover
       {% capture initializing_spinner %}<span class="spinner-border spinner-border-sm me-2 form-initializing-spinner"></span>{% endcapture %}
 
       <!-- Reset Form -->
-      <form id="auth-form" autocomplete="on" novalidate onsubmit="return false">
+      <form id="auth-form" autocomplete="on" novalidate data-form-state="initializing" onsubmit="return false">
         <div class="mb-4 text-start">
           <label for="email" class="form-label fw-semibold">
             Email <span class="text-danger">*</span>
           </label>
-          <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email" autocomplete="email" autofocus required disabled>
+          <input type="email" class="form-control form-control-md" id="email" name="email" placeholder="Enter your email" autocomplete="email" autofocus required>
         </div>
 
         <button type="submit" class="btn btn-success _btn-lg w-100 mb-4" data-provider="email" disabled>

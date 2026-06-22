@@ -2,6 +2,8 @@
 
 > **Note for contributors and Claude:** This file is the architectural overview — identity, top-level conventions, and a map to deep references. The **meat** (per-subsystem APIs, page customization recipes, theming, behavior tables, defaults lists) lives in `docs/<topic>.md`. When extending or adding content, write it in the matching `docs/*.md` file and cross-link from here — do NOT inline it. If a topic doesn't have a doc yet, create one. Goal: keep this file under 250 lines.
 
+> **Mirrored structure:** BEM, UJM, BXM, and EM CLAUDE.md files mirror each other — shared sections (Supply-Chain Security, Development Workflow, File Conventions, etc.) appear in the **same order at the same position** across all four. When adding a section that applies to multiple frameworks, insert it in the same spot in all of them.
+
 ## Identity
 
 Ultimate Jekyll Manager (UJM) is a comprehensive framework for building modern Jekyll-powered static sites. Sister project to Electron Manager (EM) and Browser Extension Manager (BXM). Provides:
@@ -175,6 +177,10 @@ Note: `-t` short alias belongs to `translation`. The `test` command uses `--test
 
 - **🚫 NEVER run `npm start` in a consumer project** — the user runs the dev server; running it again kills theirs. Assume it's already running; if it isn't, **instruct the user to run it** rather than running it yourself. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error) — never tail/attach to the process. If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change. Running `npx mgr test` is fine.
 - **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. Read the URL from the consumer's `.temp/_config_browsersync.yml`. Prefer `https://localhost:4000`; fall back to the local network IP (e.g. `https://192.168.x.x:4000`) if localhost doesn't connect. See [docs/cdp-debugging.md](docs/cdp-debugging.md) + `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
+
+## Supply-Chain Security
+
+All `npm install` calls in CLI commands (`npx mgr i`, `npx mgr setup`) route through the `safeInstall()` helper (`src/lib/safe-install.js`). It prefixes `sfw` (Socket Firewall) when installed — blocking confirmed malware at the network level before packages reach disk. Falls back to plain npm if sfw isn't available. CI workflows install sfw globally and run `sfw npm install`. Installs will **fail if sfw detects confirmed malware** in any package in the dependency tree; non-critical CVEs and quality warnings pass through.
 
 ## File Conventions
 

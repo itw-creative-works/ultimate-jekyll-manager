@@ -39,7 +39,7 @@ meta:
         <h5 class="mb-0">Create new user</h5>
       </div>
       <div class="card-body">
-        <form id="create-user-form" novalidate onsubmit="return false">
+        <form id="create-user-form" novalidate data-form-state="initializing" onsubmit="return false">
           <div class="mb-3">
             <label for="email" class="form-label">Email address <span class="text-danger">*</span></label>
             <input type="email" class="form-control" id="email" name="user.email" required autofocus>

@@ -84,7 +84,7 @@ prerender_icons:
               {% endiftruthy %}
             </div>
 
-            <form id="feedback-form" autocomplete="off" onsubmit="return false">
+            <form id="feedback-form" autocomplete="off" data-form-state="initializing" onsubmit="return false">
               <!-- Rating Selection -->
               <div class="feedback-rating-group mb-4">
                 <input type="hidden" name="rating" id="feedback-rating-input" required>
