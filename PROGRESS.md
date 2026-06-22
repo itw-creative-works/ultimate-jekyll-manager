@@ -3,10 +3,10 @@
 
 ## Current Focus
 * **Goal:** FormManager disabled-state refactor (snapshot-and-restore)
-* **Current Phase:** Phase 1 — implementation + tests complete, docs pending
+* **Current Phase:** Phase 1 — refined loading guard model, docs pending
 * **Priority:** Medium
-* **Last Updated:** 2026-06-20 11:03 PM PDT
-* **Notes:** FM disabled-state refactor done + comprehensive FM test suite added (110 tests total, up from 80). Blog post ad insertion fix applied (Phase 2). Auth form HTML fixed to remove `disabled` from inputs (loading guards that conflicted with FM snapshot). Docs (javascript-libraries.md, CHANGELOG) still need updating before shipping.
+* **Last Updated:** 2026-06-22 3:30 PM PDT
+* **Notes:** Refined FM loading guard: removed whole-form CSS lockdown + blanket `_setDisabled(true)` during init. Forms are now immediately editable — only submit buttons disabled until FM ready. Three existing submission guards (disabled buttons + `onsubmit="return false"` + FM state check) already prevent premature submits. `_setDisabled(true)` still runs during `submitting`. Docs still need updating.
 
 ## Active Task List
 * [ ] Phase 1: FormManager disabled-state snapshot-and-restore
@@ -17,8 +17,10 @@
   * [x] Task 1.5: Add visual Test 7 to FM test page (form-manager.html + JS) with permanently disabled fields + rapid-cycle demo
   * [x] Task 1.6: Write comprehensive FM page-layer tests — getData/setData (12 tests), validation/honeypot/file-accept (13 tests). 110 total.
   * [x] Task 1.7a: Full audit + fix: remove `disabled` from all loading-guard inputs across UJM forms (auth signin/signup/reset, email-preferences, hero-demo-form input/select/textarea)
-  * [x] Task 1.7b: Add `data-form-state="initializing"` to all 34 FM-managed forms + 7 test forms, CSS guard in `_initialize.scss`, FM sets attribute in `_init()`. Remove loading-guard `disabled` from test form inputs (tests 1-6).
-  * [ ] Task 1.7: Update `docs/javascript-libraries.md` — replace `data-fm-keep-disabled` docs with new snapshot pattern + `onsubmit="return false"` + `data-form-state="initializing"` CSS guard
+  * [x] Task 1.7b: Add `data-form-state="initializing"` to all FM-managed forms, CSS guard in `_initialize.scss`, FM sets attribute in `_init()`. Remove loading-guard `disabled` from test form inputs.
+  * [x] Task 1.7c: Refined loading guard — removed whole-form CSS lockdown + blanket `_setDisabled(true)` from init. Forms editable immediately; only submit buttons disabled until ready. Existing guards (disabled buttons + `onsubmit` + FM state check + body.html click interceptor) prevent premature submission.
+  * [x] Task 1.7d: Hardened disabled-state CSS + click interceptor — added `[aria-disabled="true"]` to selectors, FM form-state submit button safety net in `_utilities.scss`, removed production `console.log` from body.html interceptor.
+  * [ ] Task 1.7: Update `docs/javascript-libraries.md` — replace `data-fm-keep-disabled` docs with new snapshot pattern + loading guard model
   * [ ] Task 1.8: Update CHANGELOG with the change
   * [ ] Task 1.9: Ship (commit, push, publish)
 

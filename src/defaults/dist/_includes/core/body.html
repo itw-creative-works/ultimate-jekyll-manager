@@ -96,22 +96,16 @@
 <script type="text/javascript">
   (function() {
     'use strict';
-    // Attach click listener immediately to prevent clicks on disabled elements
     document.addEventListener('click', function(e) {
       var target = e.target;
-
-      // Check if click is on a disabled element OR a button/form element during page load
       if (
-        target.closest('*[disabled], *.disabled, :disabled')
+        target.closest('*[disabled], *.disabled, :disabled, [aria-disabled="true"]')
         || (
           document.documentElement.hasAttribute('data-page-loading')
           && target.closest('button, input[type="submit"], input[type="button"], input[type="reset"], .btn-action')
         )
       ) {
-        // Log the click for debugging
         console.log('Click prevented (disabled):', target);
-
-        // Prevent all actions
         e.preventDefault();
         e.stopImmediatePropagation();
         e.stopPropagation();

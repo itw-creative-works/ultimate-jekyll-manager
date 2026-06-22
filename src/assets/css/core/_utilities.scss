@@ -13,8 +13,10 @@
 .disabled,
 [disabled],
 :disabled,
+[aria-disabled="true"],
 [data-page-loading] button.btn,
-[data-page-loading] .btn-action {
+[data-page-loading] .btn-action,
+form[data-form-state]:not([data-form-state="ready"]) [type="submit"] {
   cursor: not-allowed !important;
   pointer-events: all !important;
 
@@ -26,7 +28,8 @@
 }
 
 [data-page-loading] button.btn,
-[data-page-loading] .btn-action {
+[data-page-loading] .btn-action,
+form[data-form-state]:not([data-form-state="ready"]) [type="submit"] {
   opacity: var(--bs-btn-disabled-opacity);
   color: var(--bs-btn-disabled-color);
 }

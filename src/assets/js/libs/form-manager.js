@@ -93,23 +93,18 @@ export class FormManager {
    * Initialize the form manager
    */
   _init() {
-    // Set the form state attribute immediately so the CSS loading guard
-    // kicks in even if the HTML didn't include data-form-state.
+    // Set the form state attribute for debugging and consumer CSS hooks.
     this.$form.setAttribute('data-form-state', this.state);
 
-    // Snapshot elements that are disabled in HTML markup BEFORE the first
-    // blanket disable. These are business-logic disabled (e.g. "coming soon"
-    // options) and must stay disabled through every state transition.
-    // Submit buttons are excluded — disabled submit buttons in HTML are
-    // loading guards that FM takes over.
+    // Snapshot elements that are disabled in HTML markup. These are
+    // business-logic disabled (e.g. "coming soon" options) and must stay
+    // disabled through every state transition. Submit buttons are excluded
+    // — disabled submit buttons in HTML are loading guards that FM takes over.
     this.$form.querySelectorAll('button, input, select, textarea').forEach(($el) => {
       if ($el.disabled && $el.type !== 'submit') {
         this._permanentlyDisabled.add($el);
       }
     });
-
-    // Disable form during initialization
-    this._setDisabled(true);
 
     // Attach submit handler
     this.$form.addEventListener('submit', (e) => this._handleSubmit(e));

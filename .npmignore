@@ -1,8 +1,0 @@
-.codeclimate.yml
-/src/
-/test/
-/examples/
-/old/
-/_backup/
-/_logos/
-firebase-debug.log

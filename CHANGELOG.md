@@ -15,6 +15,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.6] - 2026-06-22
+
+### Changed
+- **FormManager: forms editable during initialization.** Removed the whole-form CSS lockdown (`pointer-events: none; opacity: 0.65`) and blanket `_setDisabled(true)` from `_init()`. Inputs are now immediately interactive — only submit buttons stay disabled until FM is ready. Premature submission is prevented by three existing layers: `disabled` on submit buttons, `onsubmit="return false"`, and FM's state check.
+- **Disabled-state CSS covers `[aria-disabled="true"]`.** Added `[aria-disabled="true"]` to the disabled selectors in `_utilities.scss` and the body.html click interceptor for Bootstrap/accessibility pattern compatibility.
+- **FM form-state submit button safety net.** Added `form[data-form-state]:not([data-form-state="ready"]) [type="submit"]` to the disabled CSS — ensures submit buttons in non-ready FM forms always show disabled styling even if the `disabled` attribute is omitted.
+- **Replaced `.npmignore` with `files` field** in `package.json` for cleaner tarball control.
+
+---
 ## [1.9.5] - 2026-06-22
 
 ### Changed
