@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.7] - 2026-06-23
+
+### Added
+- **Gitignore rules for blogify test posts.** The default `.gitignore` template now excludes `src/_posts/test/` and `src/assets/images/blog/post-test-*/` so generated test blog content stays out of version control. Consumer projects pick this up on the next `npx mgr setup`.
+
+---
 ## [1.9.6] - 2026-06-22
 
 ### Changed
