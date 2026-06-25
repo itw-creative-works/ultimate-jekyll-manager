@@ -236,7 +236,7 @@ cta:
             autofocus
           >
           {% assign demo_btn_class = demo.options.button.class | default: "btn-adaptive-inverse" %}
-          <button type="submit" class="btn {{ demo_btn_class }} btn-lg text-nowrap flex-shrink-0" disabled>
+          <button type="submit" class="btn {{ demo_btn_class }} btn-lg text-nowrap flex-shrink-0">
             {% iftruthy demo.options.button.icon %}
               {% uj_icon demo.options.button.icon, "me-2" %}
             {% endiftruthy %}
@@ -305,7 +305,7 @@ cta:
           {% endfor %}
           {% assign form_btn_class = demo.options.button.class | default: "btn-adaptive-inverse" %}
           <div class="col-12 {% if demo.options.button.full_width != true %}col-sm-auto{% endif %}">
-            <button type="submit" class="btn {{ form_btn_class }} btn-lg w-100 h-100" disabled>
+            <button type="submit" class="btn {{ form_btn_class }} btn-lg w-100 h-100">
               {% iftruthy demo.options.button.icon %}
                 {% uj_icon demo.options.button.icon, "me-2" %}
               {% endiftruthy %}

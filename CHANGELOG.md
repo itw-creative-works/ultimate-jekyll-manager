@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.8] - 2026-06-25
+
+### Changed
+- **Removed redundant `disabled` from submit buttons in default templates.** The CSS `form[data-form-state]:not([data-form-state="ready"]) [type="submit"]` already protects submit buttons visually during initialization. The `disabled` HTML attribute was unnecessary cruft — FormManager excludes submit buttons from the permanently-disabled snapshot and re-enables them on `ready()`. Affected: auth (signin, signup, reset), hero demo, email-preferences, and all test forms.
+
+---
 ## [1.9.7] - 2026-06-23
 
 ### Added

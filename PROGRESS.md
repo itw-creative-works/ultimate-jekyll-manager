@@ -2,11 +2,11 @@
 > Agents and maintainers should update this file regularly to reflect the current state of the project.
 
 ## Current Focus
-* **Goal:** FormManager disabled-state refactor (snapshot-and-restore)
-* **Current Phase:** Phase 1 — refined loading guard model, docs pending
+* **Goal:** FormManager disabled-state refactor — global fleet rollout
+* **Current Phase:** Phase 1 — global form fixes applied, docs pending
 * **Priority:** Medium
-* **Last Updated:** 2026-06-22 3:30 PM PDT
-* **Notes:** Refined FM loading guard: removed whole-form CSS lockdown + blanket `_setDisabled(true)` during init. Forms are now immediately editable — only submit buttons disabled until FM ready. Three existing submission guards (disabled buttons + `onsubmit="return false"` + FM state check) already prevent premature submits. `_setDisabled(true)` still runs during `submitting`. Docs still need updating.
+* **Last Updated:** 2026-06-25 9:07 AM PDT
+* **Notes:** Global audit + fix complete. 41 files edited across UJM framework + 19 consumer repos. All JS-managed forms now have `data-form-state="initializing"` + `onsubmit="return false"`. Unnecessary `disabled` removed from submit buttons. `data-fm-keep-disabled` eliminated. Docs still need updating.
 
 ## Active Task List
 * [ ] Phase 1: FormManager disabled-state snapshot-and-restore
@@ -20,6 +20,9 @@
   * [x] Task 1.7b: Add `data-form-state="initializing"` to all FM-managed forms, CSS guard in `_initialize.scss`, FM sets attribute in `_init()`. Remove loading-guard `disabled` from test form inputs.
   * [x] Task 1.7c: Refined loading guard — removed whole-form CSS lockdown + blanket `_setDisabled(true)` from init. Forms editable immediately; only submit buttons disabled until ready. Existing guards (disabled buttons + `onsubmit` + FM state check + body.html click interceptor) prevent premature submission.
   * [x] Task 1.7d: Hardened disabled-state CSS + click interceptor — added `[aria-disabled="true"]` to selectors, FM form-state submit button safety net in `_utilities.scss`, removed production `console.log` from body.html interceptor.
+  * [x] Task 1.7e: Global fleet audit — audited all 46 UJM consumer repos + framework for form compliance
+  * [x] Task 1.7f: UJM framework fix — removed `disabled` from 15 submit buttons across auth, hero-demo, email-preferences, test page
+  * [x] Task 1.7g: Consumer repo fixes — added `data-form-state` + `onsubmit` to ~30 forms across 19 repos, removed `data-fm-keep-disabled` (LoudMouth), removed loading-guard `disabled` from 6 elements (Trusteroo)
   * [ ] Task 1.7: Update `docs/javascript-libraries.md` — replace `data-fm-keep-disabled` docs with new snapshot pattern + loading guard model
   * [ ] Task 1.8: Update CHANGELOG with the change
   * [ ] Task 1.9: Ship (commit, push, publish)

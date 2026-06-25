@@ -1,13 +1,13 @@
 {
   "name": "ultimate-jekyll-manager",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "description": "Ultimate Jekyll dependency manager",
   "main": "dist/index.js",
   "files": [
-    "dist/",
-    "bin/",
-    "docs/",
     "assets/",
+    "bin/",
+    "dist/",
+    "docs/",
     "CLAUDE.md"
   ],
   "exports": {
