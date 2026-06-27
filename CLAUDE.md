@@ -193,6 +193,7 @@ All `npm install` calls in CLI commands (`npx mgr i`, `npx mgr setup`) route thr
 - **No backwards compatibility** unless explicitly requested.
 - **Don't add `?.` paranoia.** Framework internals (`manager.config`, `manager.webManager`) deref directly. `?.` belongs only on user-supplied config sub-fields, optional return values from regex matches, caught exceptions, and pre-init state.
 - **Use `process.cwd()` (not hardcoded paths) for consumer-project resolution** in gulp tasks + commands. UJM runs inside the consumer's working directory.
+- **All `<img src>` tags MUST have a cachebreaker** — append `?cb={{ site.uj.cache_breaker }}` to image `src` attributes in includes and layouts. This applies to logos, brandmarks, rating images, and any other image rendered via Liquid variables. External third-party URLs (YouTube embeds, analytics pixels, placeholder services) are exempt. `data-lazy="@src"` is handled at the JS layer, not here. See [docs/common-mistakes.md](docs/common-mistakes.md).
 
 ## Doc-update parity
 

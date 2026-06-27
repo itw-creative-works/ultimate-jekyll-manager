@@ -15,6 +15,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.9] - 2026-06-26
+
+### Fixed
+- **Added missing `?cb=` cachebreaker to logo/brandmark `<img>` tags.** Nav (2 variants: wordmark + avatar), dashboard sidebar (desktop + mobile), and feedback page rating images were all rendering without `?cb={{ site.uj.cache_breaker }}`, causing stale cached images when logos changed on the CDN. All other assets (favicons, CSS/JS bundles, ad units) already had cachebreakers — these 5 img tags were the only gaps.
+
+### Added
+- **Documented cachebreaker rule** in `CLAUDE.md` (File Conventions) and `docs/common-mistakes.md` (#14): all `<img src>` tags in includes/layouts must append the cachebreaker. `data-lazy="@src"` is handled at the JS layer.
+- **Listed `uj_append_param` and `uj_cachebreak` filters** in `docs/jekyll-plugin.md` (shipped in jekyll-uj-powertools v1.8.0).
+
+---
 ## [1.9.8] - 2026-06-25
 
 ### Changed

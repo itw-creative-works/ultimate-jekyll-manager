@@ -92,7 +92,7 @@ prerender_icons:
                   {% for rating in page.resolved.feedback_form.ratings %}
                     <div class="col-6 col-sm-3">
                       <button type="button" class="feedback-rating-btn w-100 border rounded-3 bg-body text-center" data-rating="{{ rating.id }}">
-                        <img src="{{ rating.image }}" alt="{{ rating.label }}" class="feedback-rating-img mb-2" width="64" height="64" loading="eager">
+                        <img src="{{ rating.image }}?cb={{ site.uj.cache_breaker }}" alt="{{ rating.label }}" class="feedback-rating-img mb-2" width="64" height="64" loading="eager">
                         <span class="d-block small fw-semibold text-muted">{{ rating.label }}</span>
                       </button>
                     </div>
