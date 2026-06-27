@@ -20,16 +20,16 @@ feedback_form:
   ratings:
     - id: "dislike"
       label: "Poor"
-      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/dislike.png?cb={{ site.uj.cache_breaker }}"
+      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/dislike.png"
     - id: "neutral"
       label: "Okay"
-      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/neutral.png?cb={{ site.uj.cache_breaker }}"
+      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/neutral.png"
     - id: "like"
       label: "Good"
-      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/like.png?cb={{ site.uj.cache_breaker }}"
+      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/like.png"
     - id: "love"
       label: "Excellent"
-      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/love.png?cb={{ site.uj.cache_breaker }}"
+      image: "https://cdn.itwcreativeworks.com/assets/general/images/feedback/love.png"
 
 # Prerender icons for JS
 prerender_icons:
@@ -92,7 +92,7 @@ prerender_icons:
                   {% for rating in page.resolved.feedback_form.ratings %}
                     <div class="col-6 col-sm-3">
                       <button type="button" class="feedback-rating-btn w-100 border rounded-3 bg-body text-center" data-rating="{{ rating.id }}">
-                        <img src="{{ rating.image }}?cb={{ site.uj.cache_breaker }}" alt="{{ rating.label }}" class="feedback-rating-img mb-2" width="64" height="64" loading="eager">
+                        <img src="{{ rating.image | uj_cachebreak }}" alt="{{ rating.label }}" class="feedback-rating-img mb-2" width="64" height="64" loading="eager">
                         <span class="d-block small fw-semibold text-muted">{{ rating.label }}</span>
                       </button>
                     </div>
@@ -164,7 +164,7 @@ prerender_icons:
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-body text-center p-5">
         <div class="mb-4">
-          <img src="https://cdn.itwcreativeworks.com/assets/general/images/feedback/love.png?cb={{ site.uj.cache_breaker }}" alt="Thank you" width="80" height="80">
+          <img src="{{ 'https://cdn.itwcreativeworks.com/assets/general/images/feedback/love.png' | uj_cachebreak }}" alt="Thank you" width="80" height="80">
         </div>
         <h3 class="mb-3" id="review-modal-label">You're awesome!</h3>
         <p class="text-muted mb-3">

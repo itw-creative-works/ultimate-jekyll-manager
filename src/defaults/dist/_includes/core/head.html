@@ -172,13 +172,13 @@
 <link rel="alternate" href="{{ page.canonical.url }}" hreflang="{{ page-translation-default }}"/>
 
 <!-- Favicon -->
-<link rel="apple-touch-icon" sizes="180x180" href="{{ favicon-path }}/apple-touch-icon.png?cb={{ site.uj.cache_breaker }}"/>
-<link rel="icon" type="image/png" sizes="32x32" href="{{ favicon-path }}/favicon-32x32.png?cb={{ site.uj.cache_breaker }}"/>
-<link rel="icon" type="image/png" sizes="16x16" href="{{ favicon-path }}/favicon-16x16.png?cb={{ site.uj.cache_breaker }}"/>
-<link rel="mask-icon" href="{{ favicon-path }}/safari-pinned-tab.svg?cb={{ site.uj.cache_breaker }}" color="{{ page.resolved.favicon.safari-pinned-tab }}"/>
-<link rel="shortcut icon" type="image/x-icon" href="{{ favicon-path }}/favicon.ico?cb={{ site.uj.cache_breaker }}"/>
+<link rel="apple-touch-icon" sizes="180x180" href="{{ favicon-path | append: '/apple-touch-icon.png' | uj_cachebreak }}"/>
+<link rel="icon" type="image/png" sizes="32x32" href="{{ favicon-path | append: '/favicon-32x32.png' | uj_cachebreak }}"/>
+<link rel="icon" type="image/png" sizes="16x16" href="{{ favicon-path | append: '/favicon-16x16.png' | uj_cachebreak }}"/>
+<link rel="mask-icon" href="{{ favicon-path | append: '/safari-pinned-tab.svg' | uj_cachebreak }}" color="{{ page.resolved.favicon.safari-pinned-tab }}"/>
+<link rel="shortcut icon" type="image/x-icon" href="{{ favicon-path | append: '/favicon.ico' | uj_cachebreak }}"/>
 <meta name="msapplication-TileColor" content="{{ page.resolved.favicon.msapp-tile-color }}"/>
-<meta name="msapplication-config" content="{{ favicon-path }}/browserconfig.xml?cb={{ site.uj.cache_breaker }}"/>
+<meta name="msapplication-config" content="{{ favicon-path | append: '/browserconfig.xml' | uj_cachebreak }}"/>
 <meta name="theme-color" content="{{ page.resolved.favicon.theme-color }}"/>
 
 <!-- Browser Support -->
@@ -193,17 +193,17 @@
 <!-- Note: media="print" onload="this.media='all'" does NOT improve performance -->
 <!-- Fetch specific bundle if it's requested -->
 {% iftruthy page.resolved.theme.css.bundle %}
-  <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/{{ page.resolved.theme.css.bundle }}.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ site.url | append: '/assets/css/' | append: page.resolved.theme.css.bundle | append: '.bundle.css' | uj_cachebreak }}"/>
 {% endiftruthy %}
 
 <!-- Otherwise, fetch main bundle -->
 {% iffalsy page.resolved.theme.css.bundle %}
-  <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/main.bundle.css?cb={{ site.uj.cache_breaker }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ site.url | append: '/assets/css/main.bundle.css' | uj_cachebreak }}"/>
 {% endiffalsy %}
 
 <!-- Then, fetch any page specific bundles -->
 {% iffile page-css-path %}
-  <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-path }}?cb={{ site.uj.cache_breaker }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ site.url | append: page-css-path | uj_cachebreak }}"/>
 
   <!-- Dev log -->
   {% if jekyll.environment == "development" %}
@@ -217,7 +217,7 @@
      Only present when the theme ships page CSS for this path — otherwise nothing loads
      and the theme's component/general styles handle the page. No fallback needed. -->
 {% iffile page-css-theme-path %}
-  <link rel="stylesheet" type="text/css" href="{{ site.url }}{{ page-css-theme-path }}?cb={{ site.uj.cache_breaker }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ site.url | append: page-css-theme-path | uj_cachebreak }}"/>
 
   <!-- Dev log -->
   {% if jekyll.environment == "development" %}

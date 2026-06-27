@@ -28,6 +28,30 @@ Returns a deterministic number between 0 and max (exclusive) based on the input 
 {{ site.url | uj_hash: 2 }}          => 0 or 1
 ```
 
+### `uj_append_param`
+
+Intelligently appends a query parameter to a URL, using `?` or `&` depending on whether the URL already has a query string.
+
+```liquid
+{{ "https://example.com/img.png" | uj_append_param: "cb", "123" }}
+<!-- Output: https://example.com/img.png?cb=123 -->
+
+{{ "https://example.com/img.png?w=200" | uj_append_param: "cb", "123" }}
+<!-- Output: https://example.com/img.png?w=200&cb=123 -->
+```
+
+### `uj_cachebreak`
+
+Appends a cache-busting `cb=<timestamp>` query parameter to any URL. Uses the same consistent timestamp as `site.uj.cache_breaker`. Handles URLs with or without existing query strings.
+
+```liquid
+{{ site.brand.images.brandmark | uj_cachebreak }}
+<!-- Output: https://cdn.example.com/logo.svg?cb=1234567890 -->
+
+{{ "/assets/css/main.bundle.css" | uj_cachebreak }}
+<!-- Output: /assets/css/main.bundle.css?cb=1234567890 -->
+```
+
 ### `iftruthy` / `iffalsy`
 
 Custom tags that check JavaScript truthiness (not null, undefined, or empty string).

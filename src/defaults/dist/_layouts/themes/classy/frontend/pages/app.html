@@ -15,7 +15,7 @@ app:
       <!-- Logo -->
       <div class="text-center mb-3">
         <div class="avatar avatar-xl">
-          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }} Logo"/>
+          <img src="{{ site.brand.images.brandmark | uj_cachebreak }}" alt="{{ site.brand.name }} Logo"/>
         </div>
       </div>
 

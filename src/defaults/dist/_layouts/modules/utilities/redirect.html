@@ -20,7 +20,7 @@ meta:
       <div class="text-center mb-3">
         <a href="{{ site.url }}">
           <div class="avatar avatar-xl">
-            <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}"/>
+            <img src="{{ site.brand.images.brandmark | uj_cachebreak }}" alt="{{ site.brand.name }}"/>
           </div>
         </a>
       </div>
@@ -69,4 +69,4 @@ meta:
 </div>
 
 <!-- Load redirect module script -->
-<script type="text/javascript" src="{{ site.url }}/assets/js/modules/redirect.bundle.js?cb={{ site.uj.cache_breaker }}" async></script>
+<script type="text/javascript" src="{{ site.url | append: '/assets/js/modules/redirect.bundle.js' | uj_cachebreak }}" async></script>

@@ -151,7 +151,7 @@ badges:
       <!-- Left: Brand -->
       <a href="/" class="d-flex align-items-center text-decoration-none text-body">
         <span class="avatar avatar-md me-3 filter-adaptive">
-          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }}"/>
+          <img src="{{ site.brand.images.brandmark | uj_cachebreak }}" alt="{{ site.brand.name }}"/>
         </span>
         <h1 class="h5 mb-0 fw-semibold">{{ site.brand.name }} Account</h1>
       </a>
@@ -790,7 +790,7 @@ badges:
                         {% uj_icon method.icon, "fa-3xl" %}
                       {% endiftruthy %}
                       {% iftruthy method.logo %}
-                        <img src="{{ method.logo }}?cb={{ site.uj.cache_breaker }}" class="object-fit-contain" alt="{{ method.name }} Logo"/>
+                        <img src="{{ method.logo | uj_cachebreak }}" class="object-fit-contain" alt="{{ method.name }} Logo"/>
                       {% endiftruthy %}
                     </div>
                     <div>
@@ -958,7 +958,7 @@ badges:
                   <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3">
                     <div class="d-flex align-items-center">
                       <div class="d-flex align-items-center justify-content-center me-3 flex-shrink-0 fa fa-3xl">
-                        <img src="{{ connection.logo }}?cb={{ site.uj.cache_breaker }}" class="object-fit-contain" alt="{{ connection.name }} Logo"/>
+                        <img src="{{ connection.logo | uj_cachebreak }}" class="object-fit-contain" alt="{{ connection.name }} Logo"/>
                       </div>
                       <div>
                         <h6 class="mb-0">{{ connection.name }}</h6>

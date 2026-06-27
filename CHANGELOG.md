@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.10] - 2026-06-26
+
+### Changed
+- **Migrated all `?cb={{ site.uj.cache_breaker }}` patterns to `| uj_cachebreak` filter.** Every asset reference (favicons, CSS/JS bundles, logos, brandmarks, provider logos, ad unit scripts) now uses the `uj_cachebreak` Liquid filter from jekyll-uj-powertools v1.8.0. The filter intelligently handles URLs with or without existing query strings (`?` vs `&`). The only remaining `site.uj.cache_breaker` reference is the `buildTime` JS variable in foot.html (not a URL).
+
+---
 ## [1.9.9] - 2026-06-26
 
 ### Fixed
