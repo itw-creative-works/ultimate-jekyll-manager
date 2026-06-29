@@ -57,6 +57,7 @@ export default class CalendarRenderer {
       </div>
       <div class="calendar-toolbar-period">
         ${core.formatPeriodLabel()}
+        <span class="calendar-toolbar-utc-clock">${this._formatUTCClock()}</span>
       </div>
       <div class="calendar-toolbar-views btn-group" role="group" aria-label="Calendar view">
         ${VIEW_MODES.map((mode) => `
@@ -528,11 +529,16 @@ export default class CalendarRenderer {
   // ============================================
   _startNowLine() {
     clearInterval(this._nowLineInterval);
+    this._updateUTCClock();
     if (this.core.viewMode !== 'day' && this.core.viewMode !== 'week' && this.core.viewMode !== 'month') {
+      this._nowLineInterval = setInterval(() => this._updateUTCClock(), 60000);
       return;
     }
     this._updateNowLine();
-    this._nowLineInterval = setInterval(() => this._updateNowLine(), 60000);
+    this._nowLineInterval = setInterval(() => {
+      this._updateNowLine();
+      this._updateUTCClock();
+    }, 60000);
   }
 
   _updateNowLine() {
@@ -765,6 +771,22 @@ export default class CalendarRenderer {
       hours.push({ value: h, label: `${display} ${period}` });
     }
     return hours;
+  }
+
+  _formatUTCClock() {
+    const now = new Date();
+    const h = now.getUTCHours();
+    const m = now.getUTCMinutes();
+    const period = h >= 12 ? 'p' : 'a';
+    const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${display}:${String(m).padStart(2, '0')}${period} UTC`;
+  }
+
+  _updateUTCClock() {
+    const $clock = this.$toolbar.querySelector('.calendar-toolbar-utc-clock');
+    if ($clock) {
+      $clock.textContent = this._formatUTCClock();
+    }
   }
 
   _formatTime(timeStr) {

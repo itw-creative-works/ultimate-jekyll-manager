@@ -228,6 +228,7 @@ cta:
               <h3 class="h5 my-2">{{ post.post.title }}</h3>
               <p class="small text-body-secondary mb-0">
                 <b class="text-body">{%- uj_member post.post.author, "name" -%}</b>
+                · {{ post.date | date: "%b %d, %Y" }}
                 · {% uj_readtime post.content %} min read
               </p>
             </a>
@@ -470,6 +471,7 @@ cta:
               <h3 class="h5 my-2">{{ post.post.title }}</h3>
               <p class="small text-body-secondary mb-0">
                 <b class="text-body">{%- uj_member post.post.author, "name" -%}</b>
+                · {{ post.date | date: "%b %d, %Y" }}
                 · {% uj_readtime post.content %} min read
               </p>
             </a>

@@ -27,6 +27,11 @@
   * [ ] Task 1.8: Update CHANGELOG with the change
   * [ ] Task 1.9: Ship (commit, push, publish)
 
+* [x] Phase 4: Add missing dates to newsflash story cards
+  * [x] Task 4.1: Add date to "Top Stories" cards on homepage (index.html)
+  * [x] Task 4.2: Add date to "More to Chew On" cards on homepage (index.html)
+  * [x] Task 4.3: Add date to "Read Next" cards on blog post page (post.html)
+
 * [ ] Phase 3: Fix translation exclude list not respected by footer language switcher
   * [x] Task 3.1: Diagnose root cause — footer renders dead `/es/blog/...` links for excluded pages
   * [x] Task 3.2: Fix footer template (`classy/frontend/sections/footer.html`) to check exclude list
