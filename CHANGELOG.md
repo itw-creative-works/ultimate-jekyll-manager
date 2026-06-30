@@ -15,6 +15,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.20] - 2026-06-30
+
+### Fixed
+- **Imagemin Gulp 5 binary corruption** — `gulp.src()` in the imagemin task was missing `encoding: false`, causing Gulp 5's default UTF-8 encoding to corrupt binary image files (replacing JPEG bytes with U+FFFD replacement characters). This was the root cause of `IMG_3119.JPG` CI failures.
+
+---
+## [1.9.19] - 2026-06-30
+
+### Changed
+- **Added buffer diagnostics** to `lowercaseExtTransform` — logs buffer length, first bytes, and null/buffer state for debugging image processing failures on CI.
+
+---
 ## [1.9.18] - 2026-06-30
 
 ### Fixed
