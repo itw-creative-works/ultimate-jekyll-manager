@@ -373,6 +373,7 @@ function lowercaseExtTransform() {
         if (file.isNull()) {
           file.contents = jetpack.read(file.path, 'buffer');
         }
+        logger.log(`🔍 Uppercase ext: ${file.relative}, isNull=${file.isNull()}, isBuffer=${file.isBuffer()}, contentsLen=${file.contents ? file.contents.length : 'N/A'}, firstBytes=${file.contents ? file.contents.slice(0, 4).toString('hex') : 'N/A'}`);
         file.path = file.path.slice(0, -ext.length) + ext.toLowerCase();
       }
       cb(null, file);
