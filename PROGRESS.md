@@ -5,16 +5,17 @@
 * **Goal:** CI workflow hardening — retry logic + action version bumps
 * **Current Phase:** Phase 6 — workflow updated, needs kolpav decision + publish
 * **Priority:** Medium
-* **Last Updated:** 2026-06-30 1:39 AM PDT
-* **Notes:** Updated UJM's default build.yml template (source of truth for all consumers). Added 3x retry on `sfw npm install`, bumped checkout v4→v7 and setup-node v4→v6 to fix Node 20 deprecation warnings. `kolpav/purge-artifacts-action@v1` is abandoned (last commit Jan 2023) — needs decision: remove, replace, or keep.
+* **Last Updated:** 2026-06-30 4:07 AM PDT
+* **Notes:** Fixed build.yml not syncing to consumers — `defaults.js` was missing `overwrite: true` on the workflow entry, so it only wrote the file on first scaffold and silently skipped all updates. Kolpav kept (still useful for purging 218MB `github-pages` artifacts). Needs republish.
 
 ## Active Task List
 * [ ] Phase 6: CI workflow hardening — retry logic + action version bumps
   * [x] Task 6.1: Diagnose CI failure — transient ECONNRESET + sfw crash on undefined alert results
   * [x] Task 6.2: Add 3x retry with 15s delay to `sfw npm install` step (with comments)
   * [x] Task 6.3: Bump `actions/checkout` v4→v7, `actions/setup-node` v4→v6 (Node 20 deprecation)
-  * [ ] Task 6.4: Decide on `kolpav/purge-artifacts-action@v1` (abandoned) — remove, replace, or keep
-  * [ ] Task 6.5: Publish new UJM version so consumers pick up the workflow changes
+  * [x] Task 6.4: Decide on `kolpav/purge-artifacts-action@v1` — keeping (still useful, warning is cosmetic)
+  * [x] Task 6.5: Fix `defaults.js` — add `overwrite: true` to `.github/workflows/build.yml` entry so workflow syncs on every `npx mgr setup`
+  * [x] Task 6.6: Publish v1.9.16
 
 * [ ] Phase 5: Fix "Getter must be a function: default" crash + dependency upgrades
   * [x] Task 5.1: Diagnose root cause — stale CDN cache of `main.bundle.js` (5.107 runtime) served alongside fresh 5.108 chunks with array-form `.d()` calls

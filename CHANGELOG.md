@@ -15,6 +15,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.16] - 2026-06-30
+
+### Fixed
+- **Workflow template not syncing to consumers** — `defaults.js` was missing `overwrite: true` on the `.github/workflows/build.yml` entry, so the file was only written on first scaffold and silently skipped on every subsequent `npx mgr setup`.
+
+### Changed
+- **CI workflow hardening** — `sfw npm install` now retries up to 3 times with 15s delay to handle transient `ECONNRESET` / socket hang-ups on GitHub Actions runners.
+- **Updated GitHub Actions versions** — `actions/checkout` v4 → v7, `actions/setup-node` v4 → v6 (fixes Node.js 20 deprecation warnings).
+
+---
 ## [1.9.15] - 2026-06-30
 
 ### Fixed
