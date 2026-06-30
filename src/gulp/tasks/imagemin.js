@@ -188,7 +188,7 @@ async function imagemin(complete) {
   // This await only ever runs in build mode — dev mode short-circuits via `!Manager.isBuildMode()`
   // above (so `npm start` never blocks on this), letting BrowserSync reload as images land later.
   await new Promise((resolve, reject) => {
-    src(filesToProcess, { base: 'src/assets/images' })
+    src(filesToProcess, { base: 'src/assets/images', encoding: false })
       .pipe(lowercaseExtTransform())
       .pipe(responsive({
         [`**/${RESPONSIVE_GLOB}`]: responsiveConfigs
