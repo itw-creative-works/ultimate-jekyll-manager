@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.14] - 2026-06-29
+
+### Changed
+- **Updated Font Awesome icons to Pro Plus 7.3.0.** Brands: 549 → 609 (+60). Solid: 4,677 → 4,799 (+122). Documented download/update process in `docs/icons.md`.
+- **Added CSS comments** to form-state disabled-button guards in `_utilities.scss`.
+- **Calendar UTC clock** now refreshes on a separate 1s interval (decoupled from the 60s now-line update).
+
+---
 ## [1.9.13] - 2026-06-29
 
 ### Changed

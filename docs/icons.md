@@ -4,9 +4,19 @@ Ultimate Jekyll uses Font Awesome icons but does NOT include the Font Awesome Ja
 
 ## Available Icons
 
-UJM ships with the **full Font Awesome Pro solid icon set** (4,600+ icons) at `assets/icons/font-awesome/solid/`, plus brand icons at `assets/icons/font-awesome/brands/`. Any Pro or Free solid/brand icon name can be used with `{% uj_icon %}` and prerendered icons. The icon style defaults to `solid` and can be configured via `site.config.icons.style`.
+UJM ships with the **full Font Awesome Pro solid icon set** (4,799 icons) at `assets/icons/font-awesome/solid/`, plus brand icons (609) at `assets/icons/font-awesome/brands/`. Currently at **Font Awesome Pro Plus 7.3.0**. Any Pro or Free solid/brand icon name can be used with `{% uj_icon %}` and prerendered icons. The icon style defaults to `solid` and can be configured via `site.config.icons.style`.
 
 Browse available icons at: https://fontawesome.com/icons
+
+### Updating icons
+
+Download the latest **Pro Plus Web** package and replace the `brands/` and `solid/` SVG directories:
+
+1. Download from https://fontawesome.com/download (direct: `https://fontawesome.com/releases/<version>/pro-plus/web/download`)
+2. Copy `svgs/brands/` → `assets/icons/font-awesome/brands/`
+3. Copy `svgs/solid/` → `assets/icons/font-awesome/solid/`
+
+Pro and Pro+ have identical `brands/` and `solid/` SVGs — Pro+ just adds extra style variants (chisel, jelly, slab, etc.) that UJM doesn't use.
 
 ## When to Use `{% uj_icon %}` vs Prerendered Icons
 
