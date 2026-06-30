@@ -188,6 +188,7 @@ async function imagemin(complete) {
   // This await only ever runs in build mode — dev mode short-circuits via `!Manager.isBuildMode()`
   // above (so `npm start` never blocks on this), letting BrowserSync reload as images land later.
   await new Promise((resolve, reject) => {
+    // encoding: false — Gulp 5 defaults to UTF-8 which corrupts binary files
     src(filesToProcess, { base: 'src/assets/images', encoding: false })
       .pipe(lowercaseExtTransform())
       .pipe(responsive({
@@ -373,7 +374,6 @@ function lowercaseExtTransform() {
         if (file.isNull()) {
           file.contents = jetpack.read(file.path, 'buffer');
         }
-        logger.log(`🔍 Uppercase ext: ${file.relative}, isNull=${file.isNull()}, isBuffer=${file.isBuffer()}, contentsLen=${file.contents ? file.contents.length : 'N/A'}, firstBytes=${file.contents ? file.contents.slice(0, 4).toString('hex') : 'N/A'}`);
         file.path = file.path.slice(0, -ext.length) + ext.toLowerCase();
       }
       cb(null, file);
