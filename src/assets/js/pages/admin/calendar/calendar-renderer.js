@@ -529,16 +529,14 @@ export default class CalendarRenderer {
   // ============================================
   _startNowLine() {
     clearInterval(this._nowLineInterval);
+    clearInterval(this._clockInterval);
     this._updateUTCClock();
+    this._clockInterval = setInterval(() => this._updateUTCClock(), 1000);
     if (this.core.viewMode !== 'day' && this.core.viewMode !== 'week' && this.core.viewMode !== 'month') {
-      this._nowLineInterval = setInterval(() => this._updateUTCClock(), 60000);
       return;
     }
     this._updateNowLine();
-    this._nowLineInterval = setInterval(() => {
-      this._updateNowLine();
-      this._updateUTCClock();
-    }, 60000);
+    this._nowLineInterval = setInterval(() => this._updateNowLine(), 60000);
   }
 
   _updateNowLine() {
@@ -777,9 +775,10 @@ export default class CalendarRenderer {
     const now = new Date();
     const h = now.getUTCHours();
     const m = now.getUTCMinutes();
+    const s = now.getUTCSeconds();
     const period = h >= 12 ? 'p' : 'a';
     const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
-    return `${display}:${String(m).padStart(2, '0')}${period} UTC`;
+    return `${display}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}${period} UTC`;
   }
 
   _updateUTCClock() {

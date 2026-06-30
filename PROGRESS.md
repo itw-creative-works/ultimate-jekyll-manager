@@ -2,13 +2,23 @@
 > Agents and maintainers should update this file regularly to reflect the current state of the project.
 
 ## Current Focus
-* **Goal:** FormManager disabled-state refactor — global fleet rollout
-* **Current Phase:** Phase 1 — global form fixes applied, docs pending
-* **Priority:** Medium
-* **Last Updated:** 2026-06-25 9:07 AM PDT
-* **Notes:** Global audit + fix complete. 41 files edited across UJM framework + 19 consumer repos. All JS-managed forms now have `data-form-state="initializing"` + `onsubmit="return false"`. Unnecessary `disabled` removed from submit buttons. `data-fm-keep-disabled` eliminated. Docs still need updating.
+* **Goal:** Fix webpack 5.108 runtime crash on signin/signup pages
+* **Current Phase:** Phase 5 — webpack pinned, needs rebuild + deploy
+* **Priority:** High
+* **Last Updated:** 2026-06-29 6:31 PM PDT
+* **Notes:** Root cause is stale CDN cache, NOT a webpack bug. webpack 5.108 works correctly when both runtime + chunks are from the same build. StudyMonkey's Cloudflare served a cached `main.bundle.js` (stable filename, no content hash) from a 5.107 build while serving fresh 5.108 chunks — the old runtime lacks the `Array.isArray` handler for the new array-form `.d()` calls. Fix: redeploy + Cloudflare cache purge. Webpack pin may not be needed.
 
 ## Active Task List
+* [ ] Phase 5: Fix "Getter must be a function: default" crash + dependency upgrades
+  * [x] Task 5.1: Diagnose root cause — stale CDN cache of `main.bundle.js` (5.107 runtime) served alongside fresh 5.108 chunks with array-form `.d()` calls
+  * [x] Task 5.2: Confirm webpack 5.108 works correctly in a clean build (both runtime + chunks match)
+  * [x] Task 5.3: Update all patch/minor deps (10 packages including webpack 5.108.3)
+  * [x] Task 5.4: Upgrade js-yaml 4→5 — guarded 3 `yaml.load()` call sites against empty input, production build passes
+  * [x] Task 5.5: Upgrade @babel/core + @babel/preset-env 7→8 — no config changes needed, production build passes
+  * [ ] Task 5.6: Rebuild + redeploy StudyMonkey (+ Cloudflare cache purge for main.bundle.js)
+  * [ ] Task 5.7: Verify /signin loads without error on StudyMonkey
+
+
 * [ ] Phase 1: FormManager disabled-state snapshot-and-restore
   * [x] Task 1.1: Refactor `_setDisabled` to use snapshot instead of `data-fm-keep-disabled`
   * [x] Task 1.2: Add `_permanentlyDisabled` Set, populated in `_init()` before first disable

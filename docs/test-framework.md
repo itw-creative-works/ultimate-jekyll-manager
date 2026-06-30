@@ -234,7 +234,7 @@ Same protocol as EM (`__EM_TEST__`) and BXM (`__BXM_TEST__`). One marker per fra
 
 - **Framework suites**: glob `<ujm>/dist/test/suites/**/*.js` (resolved from `__dirname/suites` in `runner.js`).
 - **Consumer suites**: glob `<cwd>/test/**/*.js`.
-- **Excluded**: any directory starting with `_` (handy for shared helpers).
+- **Excluded** (`_` underscore convention): any file or directory starting with `_` is excluded from suite discovery. Put shared helpers, fixture data, and non-test support files in `_`-prefixed paths — e.g. `test/_fixtures/`, `test/_helpers/`. The runner still specifically loads `test/_init.js` as the lifecycle hook. Matches the same convention in BEM/EM/BXM.
 - **Framework boot suites** are excluded when the cwd's `package.json#name` is not `ultimate-jekyll-manager` — they target UJM's fixture site, not the consumer's. Consumers write their own boot tests in `<cwd>/test/boot/`.
 
 ## `test/_init.js` — pre-test lifecycle hook

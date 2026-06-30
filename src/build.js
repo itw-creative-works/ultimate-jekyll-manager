@@ -120,7 +120,8 @@ Manager.getConfig = function (type) {
     : 'dist';
   const resolvedPath = path.join(basePath, '_config.yml');
 
-  return yaml.load(jetpack.read(resolvedPath));
+  const content = jetpack.read(resolvedPath);
+  return content ? yaml.load(content) : undefined;
 }
 Manager.prototype.getConfig = Manager.getConfig;
 

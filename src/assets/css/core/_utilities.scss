@@ -32,6 +32,8 @@ form[data-form-state]:not([data-form-state="ready"]) [type="submit"] {
 form[data-form-state]:not([data-form-state="ready"]) [type="submit"] {
   opacity: var(--bs-btn-disabled-opacity);
   color: var(--bs-btn-disabled-color);
+  background-color: var(--bs-btn-disabled-bg);
+  border-color: var(--bs-btn-disabled-border-color);
 }
 
 // Prevent pointer events on all children inside buttons and links

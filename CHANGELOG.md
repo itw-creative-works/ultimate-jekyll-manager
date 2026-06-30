@@ -15,6 +15,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.13] - 2026-06-29
+
+### Changed
+- **Upgraded major dependencies**: @babel/core 7→8, @babel/preset-env 7→8, js-yaml 4→5. Guarded `yaml.load()` call sites against js-yaml 5's empty-document throw behavior. No webpack config changes needed for Babel 8.
+- **Upgraded patch/minor dependencies**: adm-zip, dompurify, fast-xml-parser, html-validate, postcss, prettier, puppeteer, sass, web-manager, webpack (5.108.3).
+- **Auth form fully disabled during OAuth redirect check.** Fields and buttons are now disabled via `_setDisabled(true)` while `handleRedirectResult()` runs, preventing interaction during the redirect validation window.
+- **Improved CSS-disabled button styling.** Added `background-color` and `border-color` to the `data-form-state` CSS guard so the visual matches Bootstrap's native `:disabled` appearance (no flash on transition).
+
+### Added
+- **`_dev_simulateRedirect` query parameter** for auth pages (`/signin`, `/signup`, `/reset`). Values: `true`/`success` (login flow), `signup` (new-user flow), `error` (error + re-enable). Exercises the real `handleRedirectResult()` code paths with fake data.
+- **UTC clock seconds** on the marketing calendar page (refreshes every second).
+- **Documented all `_dev_*` query parameters** in `docs/local-development.md`.
+
+---
 ## [1.9.10] - 2026-06-26
 
 ### Changed
