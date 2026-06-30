@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.15] - 2026-06-30
+
+### Fixed
+- **Imagemin uppercase extension handling** — files like `IMG_3119.JPG` now process correctly on Linux CI. The `lowercaseExtTransform` reads file contents into a buffer before renaming the Vinyl path, and cache-path logic normalizes extensions to lowercase.
+- **Updated `gulp-responsive-modern` to 1.0.1** — case-insensitive format detection and buffer-first sharp initialization.
+
+---
 ## [1.9.14] - 2026-06-29
 
 ### Changed

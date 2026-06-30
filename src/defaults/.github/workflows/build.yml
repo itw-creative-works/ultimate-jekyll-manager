@@ -36,7 +36,7 @@ jobs:
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
           git config --global user.name "$GITHUB_ACTOR"
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
@@ -57,13 +57,26 @@ jobs:
         run: |
           bundle install
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install Socket Firewall
         run: npm install -g sfw
-      - name: Run node install
-        run: sfw npm install
+      # Retry up to 3 times — transient ECONNRESET / socket hang-ups on GH Actions
+      # runners are common, and sfw crashes (instead of gracefully degrading) when
+      # a fetch fails mid-flight, killing the whole job.
+      - name: Run node install (with retry)
+        run: |
+          for attempt in 1 2 3; do
+            echo "Install attempt $attempt of 3..."
+            sfw npm install && break
+            echo "Attempt $attempt failed"
+            if [ "$attempt" -eq 3 ]; then
+              echo "All 3 install attempts failed"
+              exit 1
+            fi
+            sleep 15
+          done
       - name: Log dependency versions
         run: |
           echo "🖥️ Unix Versions: "

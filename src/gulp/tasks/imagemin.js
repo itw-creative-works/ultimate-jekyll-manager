@@ -361,16 +361,18 @@ async function rewriteOversizedSources(files) {
 }
 
 // Lowercase the extension on each Vinyl file's path before piping into gulp-responsive-modern.
-// gulp-responsive-modern's lib/format.js uses a case-sensitive switch on path.extname() and returns
-// the string 'unsupported' for anything else, which then crashes sharp.toFormat(). Files saved
-// straight off a camera (IMG_3119.JPG) hit this. Rewriting the Vinyl path in-stream keeps the
-// on-disk file untouched while letting the plugin recognize the format.
+// On case-sensitive filesystems (Linux CI), the on-disk file may be IMG_3119.JPG while the
+// lowercased path points to a nonexistent IMG_3119.jpg. We read file.contents into a buffer
+// first so sharp uses the buffer (not the renamed path), then safely lowercase the extension.
 function lowercaseExtTransform() {
   return new Transform({
     objectMode: true,
     transform(file, _enc, cb) {
       const ext = path.extname(file.path);
       if (ext && ext !== ext.toLowerCase()) {
+        if (file.isNull()) {
+          file.contents = jetpack.read(file.path, 'buffer');
+        }
         file.path = file.path.slice(0, -ext.length) + ext.toLowerCase();
       }
       cb(null, file);
@@ -439,7 +441,7 @@ async function determineFilesToProcess(files, meta, githubCache, stats) {
     // Track expected outputs for this file
     const baseName = path.basename(file, path.extname(file));
     const dirName = path.dirname(relativePath).replace(/^src\/assets\/images\/?/, '');
-    const originalExt = path.extname(file).slice(1); // Remove the dot
+    const originalExt = path.extname(file).slice(1).toLowerCase();
 
     // Only generate responsive outputs for supported formats
     // Other formats (svg, gif, webp) pass through as-is

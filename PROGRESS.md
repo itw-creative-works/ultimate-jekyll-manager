@@ -2,13 +2,20 @@
 > Agents and maintainers should update this file regularly to reflect the current state of the project.
 
 ## Current Focus
-* **Goal:** Fix webpack 5.108 runtime crash on signin/signup pages
-* **Current Phase:** Phase 5 — webpack pinned, needs rebuild + deploy
-* **Priority:** High
-* **Last Updated:** 2026-06-29 6:31 PM PDT
-* **Notes:** Root cause is stale CDN cache, NOT a webpack bug. webpack 5.108 works correctly when both runtime + chunks are from the same build. StudyMonkey's Cloudflare served a cached `main.bundle.js` (stable filename, no content hash) from a 5.107 build while serving fresh 5.108 chunks — the old runtime lacks the `Array.isArray` handler for the new array-form `.d()` calls. Fix: redeploy + Cloudflare cache purge. Webpack pin may not be needed.
+* **Goal:** CI workflow hardening — retry logic + action version bumps
+* **Current Phase:** Phase 6 — workflow updated, needs kolpav decision + publish
+* **Priority:** Medium
+* **Last Updated:** 2026-06-30 1:39 AM PDT
+* **Notes:** Updated UJM's default build.yml template (source of truth for all consumers). Added 3x retry on `sfw npm install`, bumped checkout v4→v7 and setup-node v4→v6 to fix Node 20 deprecation warnings. `kolpav/purge-artifacts-action@v1` is abandoned (last commit Jan 2023) — needs decision: remove, replace, or keep.
 
 ## Active Task List
+* [ ] Phase 6: CI workflow hardening — retry logic + action version bumps
+  * [x] Task 6.1: Diagnose CI failure — transient ECONNRESET + sfw crash on undefined alert results
+  * [x] Task 6.2: Add 3x retry with 15s delay to `sfw npm install` step (with comments)
+  * [x] Task 6.3: Bump `actions/checkout` v4→v7, `actions/setup-node` v4→v6 (Node 20 deprecation)
+  * [ ] Task 6.4: Decide on `kolpav/purge-artifacts-action@v1` (abandoned) — remove, replace, or keep
+  * [ ] Task 6.5: Publish new UJM version so consumers pick up the workflow changes
+
 * [ ] Phase 5: Fix "Getter must be a function: default" crash + dependency upgrades
   * [x] Task 5.1: Diagnose root cause — stale CDN cache of `main.bundle.js` (5.107 runtime) served alongside fresh 5.108 chunks with array-form `.d()` calls
   * [x] Task 5.2: Confirm webpack 5.108 works correctly in a clean build (both runtime + chunks match)
