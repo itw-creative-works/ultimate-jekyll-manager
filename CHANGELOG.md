@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.17] - 2026-06-30
+
+### Changed
+- **Updated `gulp-responsive-modern` to 1.0.2** — improved error reporting so CI failures surface the actual error message instead of an empty `Error`.
+
+---
 ## [1.9.16] - 2026-06-30
 
 ### Fixed
