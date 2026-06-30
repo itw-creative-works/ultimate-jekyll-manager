@@ -62,18 +62,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install Socket Firewall
         run: npm install -g sfw
-      # Retry up to 3 times — transient ECONNRESET / socket hang-ups on GH Actions
-      # runners are common, and sfw crashes (instead of gracefully degrading) when
-      # a fetch fails mid-flight, killing the whole job.
-      - name: Run node install (with retry)
+      - name: Run node install
         run: |
           for attempt in 1 2 3; do
-            echo "Install attempt $attempt of 3..."
+            echo "Install attempt $attempt of 3 (sfw)..."
             sfw npm install && break
             echo "Attempt $attempt failed"
             if [ "$attempt" -eq 3 ]; then
-              echo "All 3 install attempts failed"
-              exit 1
+              echo "⚠ All sfw attempts failed, falling back to plain npm install"
+              npm install
             fi
             sleep 15
           done

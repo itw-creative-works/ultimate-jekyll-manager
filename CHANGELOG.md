@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.18] - 2026-06-30
+
+### Fixed
+- **CI workflow template** — `sfw npm install` now falls back to plain `npm install` when all 3 attempts fail, instead of aborting the build. Works around a `sfw` bug that crashes on certain package fetches.
+
+---
 ## [1.9.17] - 2026-06-30
 
 ### Changed
