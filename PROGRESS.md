@@ -9,6 +9,10 @@
 * **Notes:** Fixed build.yml not syncing to consumers — `defaults.js` was missing `overwrite: true` on the workflow entry, so it only wrote the file on first scaffold and silently skipped all updates. Kolpav kept (still useful for purging 218MB `github-pages` artifacts). Needs republish.
 
 ## Active Task List
+* [x] One-off: CDP doc rewrite for the per-session isolated browser (2026-07-01)
+  * [x] `docs/cdp-debugging.md` rewritten (mirrored UJM/BEM/BXM/EM/WM): sessions auto-launch their own private Chrome via the `chrome-devtools` MCP — no launch command/ports/shared profile; resolved the committed merge conflict — dev URL is `https://localhost:4000`, NEVER the LAN IP
+  * [x] CLAUDE.md live-test line updated to the localhost-only rule; CHANGELOG [Unreleased] added (uncommitted — ship with next release)
+  * [x] OMEGA mirror mandate: Doc-update parity now documents the mirrored structure (canonical skeletons: omega:main mirror-spec); maintainer mirror note added to src/defaults/CLAUDE.md
 * [x] One-off: Billing redirects category (2026-07-01)
   * [x] Move `/cancel` + `/refund` default redirects from `redirects/authentication/helpers/` to new `redirects/billing/` category
   * [x] Fix `/refund` target: `/privacy` → `/terms` (refund policy lives in terms)

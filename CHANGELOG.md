@@ -15,6 +15,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.23] - 2026-07-02
+
+### Changed
+- **`docs/cdp-debugging.md` rewritten for the per-session isolated browser model** (mirrored across UJM/BEM/BXM/EM/WM). Claude sessions now auto-launch their OWN private Chrome via the `chrome-devtools` MCP — no manual launch command, no ports, no shared `chrome-profiles/agent`, no `CHROME_CDP_PORT`. Profiles are ephemeral (log in during the task); self-signed HTTPS is pre-accepted.
+
+### Added
+- **OMEGA mirror mandate** — `CLAUDE.md` (Doc-update parity) now states the docs are structurally MIRRORED across the sister frameworks (section skeleton, consumer template, shared-concept doc filenames, omega skills — same order everywhere); `src/defaults/CLAUDE.md` carries a maintainer mirror note. Canonical skeletons live in the `omega:main` skill's mirror-spec resource.
+
+### Fixed
+- Resolved the committed merge conflict in `docs/cdp-debugging.md` and settled the rule (also in CLAUDE.md): **the dev server URL is `https://localhost:4000` — NEVER the LAN IP** (`https://192.168.x.x:...`).
+
 ## [1.9.22] - 2026-07-01
 
 ### Changed

@@ -179,7 +179,7 @@ Note: `-t` short alias belongs to `translation`. The `test` command uses `--test
 
 - **🚫 NEVER use `npx mgr ...` from the framework repo** — `npx mgr` is for CONSUMER projects only (where the bin lives in `node_modules/.bin/`). From the framework repo, use `npm test`, `npm start`, etc. — the `scripts` in `package.json` call `node bin/ultimate-jekyll-manager` directly. This applies to ALL four OMEGA frameworks (BEM/UJM/BXM/EM).
 - **🚫 NEVER run `npm start` in a consumer project** — the user runs the dev server; running it again kills theirs. Assume it's already running; if it isn't, **instruct the user to run it** rather than running it yourself. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error) — never tail/attach to the process. If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change. Running `npx mgr test` is fine.
-- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. Read the URL from the consumer's `.temp/_config_browsersync.yml`. Prefer `https://localhost:4000`; fall back to the local network IP (e.g. `https://192.168.x.x:4000`) if localhost doesn't connect. See [docs/cdp-debugging.md](docs/cdp-debugging.md) + `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
+- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser — your session auto-launches its own private Chrome on the first tool call (no setup, no ports). This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. The dev server URL is **`https://localhost:4000`** (port from the consumer's `.temp/_config_browsersync.yml` when multiple sites run) — **NEVER the LAN IP** (`https://192.168.x.x:...`). See [docs/cdp-debugging.md](docs/cdp-debugging.md) + `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
 
 ## Supply-Chain Security
 
@@ -208,6 +208,8 @@ Whenever you make a behavioral change (new command, new flag, new pattern, remov
 4. **`CHANGELOG.md`** — if the project keeps one
 
 Don't ship behavioral changes with stale docs. Validate first, then document — write docs that describe shipped reality, not intentions.
+
+**The OMEGA docs are structurally MIRRORED.** This file's section skeleton, the consumer template (`src/defaults/CLAUDE.md`), shared-concept `docs/*.md` filenames, and the `omega:*` skills are identical in structure and order across the sister frameworks (UJM / BEM / BXM / EM / MAM — WM mirrors the library subset). Never add, rename, or reorder a section here without making the SAME change in every sister repo in the same pass. The canonical skeletons + omission rules live in the `omega:main` skill's `mirror-spec.md` resource.
 
 ## Documentation
 

@@ -1,6 +1,8 @@
 # ========== Default Values ==========
 # Ultimate Jekyll Manager (UJM) — consumer project
 
+<!-- MAINTAINERS (framework repo): this consumer template is MIRRORED across UJM/BEM/BXM/EM/MAM — same sections, same order (framework-specific extras may be inserted; canonical sections are never reordered/renamed). Edit all five together. Canonical skeleton: omega:main skill → resources/mirror-spec.md -->
+
 ## Framework
 
 This project consumes **Ultimate Jekyll Manager** (UJM) — a comprehensive framework for building modern Jekyll-powered static sites. UJM provides one-line bootstrap per context (build / frontend / service-worker), a multi-stage gulp pipeline (defaults / distribute / webpack / sass / imagemin / jekyll / audit / translation / minifyHtml / serve), default Jekyll layouts + themes, a frontend ES-module Manager with dynamic per-page module loading, a service worker with Firebase Messaging + cache management, and a built-in three-layer test framework.
