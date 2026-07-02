@@ -15,6 +15,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.22] - 2026-07-01
+
+### Changed
+- Moved `/cancel` and `/refund` default redirects from `redirects/authentication/helpers/` into a new `redirects/billing/` category
+
+### Fixed
+- `/refund` default redirect now points to `/terms` (where the refund policy lives) instead of `/privacy`
+
+---
 ## [1.9.20] - 2026-06-30
 
 ### Fixed

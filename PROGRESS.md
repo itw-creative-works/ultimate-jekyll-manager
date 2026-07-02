@@ -9,6 +9,11 @@
 * **Notes:** Fixed build.yml not syncing to consumers — `defaults.js` was missing `overwrite: true` on the workflow entry, so it only wrote the file on first scaffold and silently skipped all updates. Kolpav kept (still useful for purging 218MB `github-pages` artifacts). Needs republish.
 
 ## Active Task List
+* [x] One-off: Billing redirects category (2026-07-01)
+  * [x] Move `/cancel` + `/refund` default redirects from `redirects/authentication/helpers/` to new `redirects/billing/` category
+  * [x] Fix `/refund` target: `/privacy` → `/terms` (refund policy lives in terms)
+  * [x] All 110 tests passing; CHANGELOG [Unreleased] entry added
+
 * [ ] Phase 6: CI workflow hardening — retry logic + action version bumps
   * [x] Task 6.1: Diagnose CI failure — transient ECONNRESET + sfw crash on undefined alert results
   * [x] Task 6.2: Add 3x retry with 15s delay to `sfw npm install` step (with comments)
