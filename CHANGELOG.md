@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.24] - 2026-07-02
+
+### Fixed
+- **Test discovery now excludes `_`-prefixed directories at ANY depth.** The discovery globs ignored only top-level `_` entries (`['_**']`), so files nested under an underscore directory — e.g. a consumer's `test/_helpers/harness.js` — were picked up as suites and failed with "not a valid suite". Both discovery globs (framework + consumer) now share the exported `DISCOVERY_IGNORE = ['**/_*.js', '**/_*/**']` (runner.js), matching the documented convention: `_`-prefixed files AND everything under `_`-prefixed directories are skipped. New build-layer self-test (`test-discovery.test.js`) proves the pattern against a real temp tree; `docs/test-framework.md` → Discovery documents the convention. Mirrors EM's fix — same constant, test, and docs shape across BXM/EM/UJM (BEM's recursive walker already skipped `_` at every depth).
+
 ## [1.9.23] - 2026-07-02
 
 ### Changed

@@ -9,6 +9,10 @@
 * **Notes:** Fixed build.yml not syncing to consumers — `defaults.js` was missing `overwrite: true` on the workflow entry, so it only wrote the file on first scaffold and silently skipped all updates. Kolpav kept (still useful for purging 218MB `github-pages` artifacts). Needs republish.
 
 ## Active Task List
+* [x] One-off: Test discovery `_`-dir exclusion fix (2026-07-02)
+  * [x] `runner.js` discovery globs ignored only top-level `_` entries (`['_**']`) — files under `_`-prefixed dirs (e.g. `test/_helpers/x.js`) were discovered as suites; both globs now share exported `DISCOVERY_IGNORE = ['**/_*.js', '**/_*/**']` (mirrors EM's fix)
+  * [x] TDD: new build-layer `test-discovery.test.js` (red → green against a real temp tree); full suite 112 passing
+  * [x] Docs: `docs/test-framework.md` Discovery bullet + CHANGELOG [Unreleased]; same fix applied to BXM (85 passing); BEM already correct (recursive walker), EM already shipped it
 * [x] One-off: CDP doc rewrite for the per-session isolated browser (2026-07-01)
   * [x] `docs/cdp-debugging.md` rewritten (mirrored UJM/BEM/BXM/EM/WM): sessions auto-launch their own private Chrome via the `chrome-devtools` MCP — no launch command/ports/shared profile; resolved the committed merge conflict — dev URL is `https://localhost:4000`, NEVER the LAN IP
   * [x] CLAUDE.md live-test line updated to the localhost-only rule; CHANGELOG [Unreleased] added (uncommitted — ship with next release)
