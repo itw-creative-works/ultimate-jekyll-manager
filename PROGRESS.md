@@ -9,6 +9,9 @@
 * **Notes:** Fixed build.yml not syncing to consumers — `defaults.js` was missing `overwrite: true` on the workflow entry, so it only wrote the file on first scaffold and silently skipped all updates. Kolpav kept (still useful for purging 218MB `github-pages` artifacts). Needs republish.
 
 ## Active Task List
+* [x] One-off: `--extended` boolean-declaration fix in bin (2026-07-02)
+  * [x] Bare `yargs(...).parseSync()` let `mgr test --extended some/target` swallow the target as the flag's VALUE (target lost + extended silently off); bin now declares `.boolean(['extended'])` — mirrors BEM's cli fix; same fix applied to BXM + EM in the same pass
+  * [x] Verified: parse proof (before/after) + real bin run shows `target="..." +extended` + `build/cli` suite 3 passing; CHANGELOG [Unreleased]
 * [x] One-off: Test discovery `_`-dir exclusion fix (2026-07-02)
   * [x] `runner.js` discovery globs ignored only top-level `_` entries (`['_**']`) — files under `_`-prefixed dirs (e.g. `test/_helpers/x.js`) were discovered as suites; both globs now share exported `DISCOVERY_IGNORE = ['**/_*.js', '**/_*/**']` (mirrors EM's fix)
   * [x] TDD: new build-layer `test-discovery.test.js` (red → green against a real temp tree); full suite 112 passing

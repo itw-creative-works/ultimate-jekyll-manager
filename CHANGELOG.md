@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.25] - 2026-07-02
+
+### Fixed
+- **`--extended` no longer swallows the test target.** The bin parsed argv with bare yargs, so value-less flags were untyped and `mgr test --extended some/target` became `extended='some/target'` with NO positional target — the target was lost AND extended mode silently stayed off (the string fails the `=== true || === 'true'` check), running the full suite in normal mode. The bin now declares `.boolean(['extended'])`, mirroring the same fix in BEM's CLI. Flag-last invocations (`mgr test some/target --extended`) were unaffected.
+
 ## [1.9.24] - 2026-07-02
 
 ### Fixed
