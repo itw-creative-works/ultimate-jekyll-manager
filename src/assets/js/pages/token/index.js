@@ -83,7 +83,7 @@ export default function () {
           const returnUrl = new URL(authReturnUrl);
           returnUrl.searchParams.set('authToken', token);
 
-          // LEGACY: Reformat token for desktop app deep links
+          // LEGACY: Add the legacy payload shape for old desktop app deep links
           // TODO: Remove this block when legacy desktop app support is no longer needed
           _legacyTranslateTokenRedirect(returnUrl, token);
 
@@ -161,12 +161,13 @@ export default function () {
     }
   }
 
-  // LEGACY: Reformat token for desktop app deep links
-  // Legacy desktop apps expect ?payload={"token":"X"} instead of ?authToken=X for custom protocol URLs
+  // LEGACY: Add the legacy token shape for desktop app deep links
+  // Legacy desktop apps read ?payload={"token":"X"} on custom protocol URLs — ADDED
+  // alongside ?authToken=X (never replacing it): old apps read payload and ignore
+  // authToken, modern apps (Electron Manager) read authToken and ignore payload.
   // TODO: Remove this function AND its call above when legacy desktop app support is no longer needed
   function _legacyTranslateTokenRedirect(returnUrl, token) {
     if (returnUrl.protocol !== 'http:' && returnUrl.protocol !== 'https:') {
-      returnUrl.searchParams.delete('authToken');
       returnUrl.searchParams.set('payload', JSON.stringify({ token: token }));
     }
   }
