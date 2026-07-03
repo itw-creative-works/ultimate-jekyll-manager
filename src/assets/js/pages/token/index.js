@@ -8,6 +8,14 @@ export default function () {
   const $status = document.getElementById('token-status');
   const $error = document.getElementById('token-error');
   const $errorMessage = document.getElementById('token-error-message');
+  const $spinner = document.getElementById('token-spinner');
+  const $actions = document.getElementById('token-actions');
+  const $retry = document.getElementById('token-retry');
+
+  // Retry re-runs the whole flow — reloading re-attempts auth + token generation
+  if ($retry) {
+    $retry.addEventListener('click', () => window.location.reload());
+  }
 
   // Get URL params
   const url = new URL(window.location.href);
@@ -101,6 +109,7 @@ export default function () {
           // Extension background will detect this and close the tab
           url.searchParams.set('authToken', token);
           window.history.replaceState({}, '', url.toString());
+          stopSpinner();
           updateStatus('You can close this tab now.');
         }
       } catch (error) {
@@ -150,14 +159,26 @@ export default function () {
     $status.appendChild($p);
   }
 
-  // Show error message
+  // Show error message + swap the spinner for the retry / go-home actions
   function showError(message) {
+    stopSpinner();
+
     if ($error && $errorMessage) {
       $errorMessage.textContent = message;
       $error.classList.remove('d-none');
     }
     if ($status) {
       $status.classList.add('d-none');
+    }
+    if ($actions) {
+      $actions.classList.remove('d-none');
+    }
+  }
+
+  // Stop the loading spinner once the flow reaches a terminal state
+  function stopSpinner() {
+    if ($spinner) {
+      $spinner.classList.add('d-none');
     }
   }
 

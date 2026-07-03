@@ -2,15 +2,16 @@
 > Agents and maintainers should update this file regularly to reflect the current state of the project.
 
 ## Current Focus
-* **Goal:** v1.9.26 shipped — defaults copy-once fix (test/_init.js clobbering)
-* **Current Phase:** Released; next: audit BEM/EM/BXM for the same FILE_MAP gap
+* **Goal:** v1.9.27 shipping — token page: additive `?payload=` wrap + error-state retry/home UI
+* **Current Phase:** Shipping v1.9.27 (patch + npm publish)
 * **Priority:** Medium
-* **Last Updated:** 2026-07-02 11:58 PM PDT
+* **Last Updated:** 2026-07-03 4:50 PM PDT
 * **Notes:** `test/**/*` is now copy-once in `defaults.js` FILE_MAP — setup reruns no longer reset the consumer's `test/_init.js` (bit the Video-Editor/Clipdeck project twice). Sister frameworks (BEM/EM/BXM) have mirrored defaults tasks and likely the same gap — audit them in a follow-up pass. Prior focus (Phase 6 CI hardening) shipped in v1.9.16; kolpav kept.
 
 ## Active Task List
 * [x] One-off: token page's `?payload=` wrap made ADDITIVE (2026-07-03 — Ian's call: "pass more than we need, consumers ignore the extra")
-  * [x] `pages/token/index.js` `_legacyTranslateTokenRedirect` no longer deletes `authToken` before setting `payload` — custom-scheme redirects carry BOTH shapes; old apps read payload, modern apps (EM `getAuthUrl()` flow, `authToken`-only) read authToken, each ignores the other. One-line change; old app byte-identical. Paired: EM's `auth/token` deep-link route reads ONLY `?authToken=`. CHANGELOG Unreleased. The wrap still deletes cleanly when legacy support ends (existing TODOs)
+  * [x] `pages/token/index.js` `_legacyTranslateTokenRedirect` no longer deletes `authToken` before setting `payload` — custom-scheme redirects carry BOTH shapes; old apps read payload, modern apps (EM `getAuthUrl()` flow, `authToken`-only) read authToken, each ignores the other. One-line change; old app byte-identical. Paired: EM's `auth/token` deep-link route reads ONLY `?authToken=`. The wrap still deletes cleanly when legacy support ends (existing TODOs)
+  * [x] Error-state UX (2026-07-03): the loading spinner spun forever after a failure — `showError()` never hid the static spinner. Added `#token-spinner` + `#token-actions` to classy's `auth/token.html`; new `stopSpinner()` runs on every terminal state; on error the spinner swaps for a **Try again** (reload) button + smaller **Go home** link. New page-layer `token-error-state.test.js` (4 tests); full suite 119 passing
 * [x] One-off: defaults task clobbered consumer `test/_init.js` on setup reruns (2026-07-02)
   * [x] Root cause: no FILE_MAP rule matched `test/**` — fall-through default is `overwrite: true`, so every `npx mgr setup` reset the consumer's fixture hook to the stub (only `test/README.md` was protected, via `**/*.md`)
   * [x] Fix: `'test/**/*': { overwrite: false }` in the copy-once section (seed when missing, consumer-owned after — matches the `src/`/`hooks/` convention); `getFileOptions` exported for testability

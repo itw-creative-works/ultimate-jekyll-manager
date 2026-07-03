@@ -15,10 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
-## Unreleased
+## [1.9.27] - 2026-07-03
 
 ### Changed
 - **The token page's legacy `?payload=` wrap is now ADDITIVE, never a replacement.** Custom-scheme redirects carry BOTH `?authToken=<token>` (the modern shape) AND `?payload={"token":…}` (the legacy-app shape) — previously the wrap DELETED `authToken` before setting `payload`, so modern desktop apps (Electron Manager's `getAuthUrl()` flow, which reads only `authToken`) received a token they couldn't see. Each consumer reads its own param and ignores the other; old-app behavior unchanged. One line (`searchParams.delete('authToken')` removed); the whole wrap still deletes cleanly when legacy desktop app support ends.
+
+### Fixed
+- **The `/token` page no longer spins forever after a failure.** The loading spinner was static layout markup that `showError()` never hid, so any resolution error (token fetch failure, invalid redirect URL, unauthenticated) left it spinning behind the error alert. The spinner now stops on every terminal state and, on error, is replaced by a **Try again** button (reloads the page to re-attempt auth + token generation) plus a smaller **Go home** link. New page-layer suite `token-error-state.test.js` locks the spinner-off / actions-on transition and the retry-button wiring.
 
 ## [1.9.26] - 2026-07-02
 
