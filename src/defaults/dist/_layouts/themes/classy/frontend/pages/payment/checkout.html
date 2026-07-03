@@ -379,7 +379,7 @@ web_manager:
                         <div class="d-flex align-items-center wm-binding-skeleton" data-wm-bind="@show checkout">
                           <div class="position-relative me-3">
                             <div class="product-thumbnail bg-light rounded-3 d-flex align-items-center justify-content-center">
-                              <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" class="img-fluid p-2" alt="{{ site.brand.name }} Plan Icon"/>
+                              <img src="{{ site.brand.images.brandmark | uj_cachebreak }}" class="img-fluid p-2" alt="{{ site.brand.name }} Plan Icon"/>
                             </div>
                             <span class="quantity-badge position-absolute top-0 start-100 translate-middle badge rounded-circle bg-primary">
                               1

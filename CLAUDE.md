@@ -55,6 +55,8 @@ The only things that ARE safe to run inside UJM itself:
 
 ### For Framework Development (This Repository)
 
+> **🚫 NEVER use `npx mgr ...` from the framework repo.** `npx mgr` is for CONSUMER projects only (where the bin is linked in `node_modules/.bin/`). From the framework repo, use `npm test`, `npm start`, etc. — the `scripts` in `package.json` call the local `bin/` directly. This applies to ALL four OMEGA frameworks (BEM/UJM/BXM/EM).
+
 1. `npm install` — install UJM's own deps
 2. `npm start` (≡ `npm run prepare:watch`) — copies `src/` → `dist/` on file change
 3. Test in the **designated test consumer** — `../ultimate-jekyll-website` is UJM's consumer for validating framework changes end-to-end (exercise any consumer-level flow there freely: builds, tests, runtime). From inside it, run `npx mgr install dev` to swap UJM to this local repo — required whenever you edit the framework source and want the consumer to pick up the changes (the consumer otherwise keeps its installed `node_modules/ultimate-jekyll-manager`). Reverse with `npx mgr install live`.
@@ -175,8 +177,9 @@ Note: `-t` short alias belongs to `translation`. The `test` command uses `--test
 
 ## Development Workflow
 
+- **🚫 NEVER use `npx mgr ...` from the framework repo** — `npx mgr` is for CONSUMER projects only (where the bin lives in `node_modules/.bin/`). From the framework repo, use `npm test`, `npm start`, etc. — the `scripts` in `package.json` call `node bin/ultimate-jekyll-manager` directly. This applies to ALL four OMEGA frameworks (BEM/UJM/BXM/EM).
 - **🚫 NEVER run `npm start` in a consumer project** — the user runs the dev server; running it again kills theirs. Assume it's already running; if it isn't, **instruct the user to run it** rather than running it yourself. Instead, **check `logs/dev.log`** after editing files to confirm the watcher recompiled successfully (`Reloading Browsers...` = success; `errored` = fix the error) — never tail/attach to the process. If editing multiple files, check the log once after the last edit. A change that breaks the build is not a completed change. Running `npx mgr test` is fine.
-- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser. This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. Read the URL from the consumer's `.temp/_config_browsersync.yml`. Prefer `https://localhost:4000`; fall back to the local network IP (e.g. `https://192.168.x.x:4000`) if localhost doesn't connect. See [docs/cdp-debugging.md](docs/cdp-debugging.md) + `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
+- **Live-test UI changes via CDP.** After code changes compile, use the `chrome-devtools` MCP tools (screenshots, click, evaluate JS, console logs) to verify the change works in the running browser — your session auto-launches its own private Chrome on the first tool call (no setup, no ports). This is the primary way to confirm UI changes — type-checking and test suites verify code correctness, not feature correctness. The dev server URL is **`https://localhost:4000`** (port from the consumer's `.temp/_config_browsersync.yml` when multiple sites run) — **NEVER the LAN IP** (`https://192.168.x.x:...`). See [docs/cdp-debugging.md](docs/cdp-debugging.md) + `~/.claude/mcp-server/servers/chrome-devtools/CLAUDE.md`.
 
 ## Supply-Chain Security
 
@@ -193,6 +196,7 @@ All `npm install` calls in CLI commands (`npx mgr i`, `npx mgr setup`) route thr
 - **No backwards compatibility** unless explicitly requested.
 - **Don't add `?.` paranoia.** Framework internals (`manager.config`, `manager.webManager`) deref directly. `?.` belongs only on user-supplied config sub-fields, optional return values from regex matches, caught exceptions, and pre-init state.
 - **Use `process.cwd()` (not hardcoded paths) for consumer-project resolution** in gulp tasks + commands. UJM runs inside the consumer's working directory.
+- **All `<img src>` tags MUST have a cachebreaker** — append `?cb={{ site.uj.cache_breaker }}` to image `src` attributes in includes and layouts. This applies to logos, brandmarks, rating images, and any other image rendered via Liquid variables. External third-party URLs (YouTube embeds, analytics pixels, placeholder services) are exempt. `data-lazy="@src"` is handled at the JS layer, not here. See [docs/common-mistakes.md](docs/common-mistakes.md).
 
 ## Doc-update parity
 
@@ -204,6 +208,8 @@ Whenever you make a behavioral change (new command, new flag, new pattern, remov
 4. **`CHANGELOG.md`** — if the project keeps one
 
 Don't ship behavioral changes with stale docs. Validate first, then document — write docs that describe shipped reality, not intentions.
+
+**The OMEGA docs are structurally MIRRORED.** This file's section skeleton, the consumer template (`src/defaults/CLAUDE.md`), shared-concept `docs/*.md` filenames, and the `omega:*` skills are identical in structure and order across the sister frameworks (UJM / BEM / BXM / EM / MAM — WM mirrors the library subset). Never add, rename, or reorder a section here without making the SAME change in every sister repo in the same pass. The canonical skeletons + omission rules live in the `omega:main` skill's `mirror-spec.md` resource.
 
 ## Documentation
 

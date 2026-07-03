@@ -129,6 +129,7 @@ const FILE_MAP = {
 
   // Files to run templating on
   '.github/workflows/build.yml': {
+    overwrite: true,
     template: { ...cleanVersions, ...ujConfig, ...githubSecrets },
   },
   '.nvmrc': {

@@ -398,6 +398,11 @@ function filterBySource(source, files, sourceFilter, pathPart) {
   });
 }
 
+// Glob ignore patterns implementing the "underscore = not a suite" convention:
+// `_`-prefixed FILES (e.g. test/_init.js) and everything under a `_`-prefixed
+// DIRECTORY at any depth (helpers, fixtures — e.g. test/_helpers/harness.js).
+const DISCOVERY_IGNORE = ['**/_*.js', '**/_*/**'];
+
 function discoverTestFiles(target) {
   const { source: sourceFilter, pathPart } = parseTarget(target);
 
@@ -421,7 +426,7 @@ function discoverTestFiles(target) {
   // Consumers write their own boot tests under <cwd>/test/boot/.
   const frameworkSuitesDir = path.join(__dirname, 'suites');
   if (jetpack.exists(frameworkSuitesDir)) {
-    const ignore = ['_**'];
+    const ignore = [...DISCOVERY_IGNORE];
     if (!isFrameworkSelfTest) ignore.push('boot/**');
     glob('**/*.js', { cwd: frameworkSuitesDir, ignore }).sort().forEach((rel) => {
       framework.push(path.join(frameworkSuitesDir, rel));
@@ -430,9 +435,10 @@ function discoverTestFiles(target) {
 
   // Consumer project suites — CWD/test/**/*.js. Skip when running from inside the
   // framework's own dist tree (where consumer-tests-dir === framework-tests-parent).
+  // Excludes `_`-prefixed files and directories (see DISCOVERY_IGNORE).
   const projectTestsDir = path.join(process.cwd(), 'test');
   if (jetpack.exists(projectTestsDir) && projectTestsDir !== path.dirname(frameworkSuitesDir)) {
-    glob('**/*.js', { cwd: projectTestsDir, ignore: ['_**'] }).sort().forEach((rel) => {
+    glob('**/*.js', { cwd: projectTestsDir, ignore: [...DISCOVERY_IGNORE] }).sort().forEach((rel) => {
       project.push(path.join(projectTestsDir, rel));
     });
   }
@@ -508,4 +514,4 @@ async function runInitSetups() {
   }
 }
 
-module.exports = { run, SkipError };
+module.exports = { run, SkipError, DISCOVERY_IGNORE };

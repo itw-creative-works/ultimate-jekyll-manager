@@ -107,7 +107,7 @@
 </script>
 
 <!-- JS Bundle -->
-<script type="text/javascript" src="{{ site.url }}/assets/js/main.bundle.js?cb={{ site.uj.cache_breaker }}" async></script>
+<script type="text/javascript" src="{{ site.url | append: '/assets/js/main.bundle.js' | uj_cachebreak }}" async></script>
 
 <!-- Script to quickly handle nav user state -->
 <script type="text/javascript">

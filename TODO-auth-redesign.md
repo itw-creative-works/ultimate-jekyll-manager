@@ -1,0 +1,1 @@
+ok now that we have this working... i think its time to rebuild our auth logic. you wrote a plan i believe (i hav eit selected here but its missign some stuf...) we tralekd about rebuilding the auth JS files on front end and reorganizing them since they are kind of big and messy. cna you do a full audit

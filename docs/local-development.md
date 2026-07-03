@@ -16,6 +16,31 @@ FIREBASE_EMULATOR_CONNECT=true npm start
 
 This value is written to `.temp/_config_browsersync.yml` under `web_manager.env.FIREBASE_EMULATOR_CONNECT` and made available to the frontend at build time.
 
+## Dev Query Parameters (`_dev_*`)
+
+Pages accept `_dev_` prefixed query parameters to simulate hard-to-reach states without real backend/OAuth interactions. These only affect frontend behavior — no data is written.
+
+### Auth pages (`/signin`, `/signup`, `/reset`)
+
+| Parameter | Values | Behavior |
+|---|---|---|
+| `_dev_simulateRedirect` | `true`, `success` | Simulates a successful OAuth redirect: 2s loading state → login tracking + success message. Auth state listener handles navigation. |
+| | `signup` | Simulates a new-user OAuth redirect: 2s loading → signup tracking + success. On `/signin`, triggers `reverseAccidentalSignup` (the Google auto-creation reversal flow). |
+| | `error` | Simulates an OAuth error (`auth/account-exists-with-different-credential`): 2s loading → error message → form re-enables. |
+
+All three modes exercise the real `handleRedirectResult()` code paths — the simulation injects fake data into the same tracking, error handling, and form state transitions that a real OAuth redirect uses.
+
+### Other pages
+
+| Parameter | Page | Behavior |
+|---|---|---|
+| `_dev_prefill` | `/account/security`, `/account/referrals` | Pre-fills form with fake data |
+| `_dev_trialEligible` | `/payment/checkout` | Overrides trial eligibility check |
+| `_dev_preDelay` | `/payment/checkout` | Adds a delay before checkout init |
+| `_dev_cardProcessor` | `/payment/checkout` | Forces a specific card processor |
+| `_dev_recaptcha` | `/payment/checkout` | Overrides reCAPTCHA behavior |
+| `_dev_subscription` | `/account` | Overrides subscription state |
+
 ## PurgeCSS
 
 PurgeCSS runs automatically in production builds and can be enabled locally with `UJ_PURGECSS=true`. Consuming projects can add custom safelist patterns via `config/ultimate-jekyll-manager.json` under `sass.purgecss.safelist`:

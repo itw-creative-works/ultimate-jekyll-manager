@@ -14,7 +14,7 @@ prerender_icons:
       <!-- Logo -->
       <div class="text-center mb-3">
         <div class="avatar avatar-xl">
-          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" alt="{{ site.brand.name }} Logo"/>
+          <img src="{{ site.brand.images.brandmark | uj_cachebreak }}" alt="{{ site.brand.name }} Logo"/>
         </div>
       </div>
 
@@ -87,7 +87,7 @@ prerender_icons:
             <input type="text" class="form-control" name="honey" tabindex="-1" autocomplete="off">
           </div>
 
-          <button type="submit" class="btn btn-danger w-100 mb-4" id="email-preferences-submit" disabled>
+          <button type="submit" class="btn btn-danger w-100 mb-4" id="email-preferences-submit">
             <span class="button-text">Unsubscribe</span>
           </button>
         </form>

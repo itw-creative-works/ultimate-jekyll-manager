@@ -15,6 +15,127 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.25] - 2026-07-02
+
+### Fixed
+- **`--extended` no longer swallows the test target.** The bin parsed argv with bare yargs, so value-less flags were untyped and `mgr test --extended some/target` became `extended='some/target'` with NO positional target — the target was lost AND extended mode silently stayed off (the string fails the `=== true || === 'true'` check), running the full suite in normal mode. The bin now declares `.boolean(['extended'])`, mirroring the same fix in BEM's CLI. Flag-last invocations (`mgr test some/target --extended`) were unaffected.
+
+## [1.9.24] - 2026-07-02
+
+### Fixed
+- **Test discovery now excludes `_`-prefixed directories at ANY depth.** The discovery globs ignored only top-level `_` entries (`['_**']`), so files nested under an underscore directory — e.g. a consumer's `test/_helpers/harness.js` — were picked up as suites and failed with "not a valid suite". Both discovery globs (framework + consumer) now share the exported `DISCOVERY_IGNORE = ['**/_*.js', '**/_*/**']` (runner.js), matching the documented convention: `_`-prefixed files AND everything under `_`-prefixed directories are skipped. New build-layer self-test (`test-discovery.test.js`) proves the pattern against a real temp tree; `docs/test-framework.md` → Discovery documents the convention. Mirrors EM's fix — same constant, test, and docs shape across BXM/EM/UJM (BEM's recursive walker already skipped `_` at every depth).
+
+## [1.9.23] - 2026-07-02
+
+### Changed
+- **`docs/cdp-debugging.md` rewritten for the per-session isolated browser model** (mirrored across UJM/BEM/BXM/EM/WM). Claude sessions now auto-launch their OWN private Chrome via the `chrome-devtools` MCP — no manual launch command, no ports, no shared `chrome-profiles/agent`, no `CHROME_CDP_PORT`. Profiles are ephemeral (log in during the task); self-signed HTTPS is pre-accepted.
+
+### Added
+- **OMEGA mirror mandate** — `CLAUDE.md` (Doc-update parity) now states the docs are structurally MIRRORED across the sister frameworks (section skeleton, consumer template, shared-concept doc filenames, omega skills — same order everywhere); `src/defaults/CLAUDE.md` carries a maintainer mirror note. Canonical skeletons live in the `omega:main` skill's mirror-spec resource.
+
+### Fixed
+- Resolved the committed merge conflict in `docs/cdp-debugging.md` and settled the rule (also in CLAUDE.md): **the dev server URL is `https://localhost:4000` — NEVER the LAN IP** (`https://192.168.x.x:...`).
+
+## [1.9.22] - 2026-07-01
+
+### Changed
+- Moved `/cancel` and `/refund` default redirects from `redirects/authentication/helpers/` into a new `redirects/billing/` category
+
+### Fixed
+- `/refund` default redirect now points to `/terms` (where the refund policy lives) instead of `/privacy`
+
+---
+## [1.9.20] - 2026-06-30
+
+### Fixed
+- **Imagemin Gulp 5 binary corruption** — `gulp.src()` in the imagemin task was missing `encoding: false`, causing Gulp 5's default UTF-8 encoding to corrupt binary image files (replacing JPEG bytes with U+FFFD replacement characters). This was the root cause of `IMG_3119.JPG` CI failures.
+
+---
+## [1.9.19] - 2026-06-30
+
+### Changed
+- **Added buffer diagnostics** to `lowercaseExtTransform` — logs buffer length, first bytes, and null/buffer state for debugging image processing failures on CI.
+
+---
+## [1.9.18] - 2026-06-30
+
+### Fixed
+- **CI workflow template** — `sfw npm install` now falls back to plain `npm install` when all 3 attempts fail, instead of aborting the build. Works around a `sfw` bug that crashes on certain package fetches.
+
+---
+## [1.9.17] - 2026-06-30
+
+### Changed
+- **Updated `gulp-responsive-modern` to 1.0.2** — improved error reporting so CI failures surface the actual error message instead of an empty `Error`.
+
+---
+## [1.9.16] - 2026-06-30
+
+### Fixed
+- **Workflow template not syncing to consumers** — `defaults.js` was missing `overwrite: true` on the `.github/workflows/build.yml` entry, so the file was only written on first scaffold and silently skipped on every subsequent `npx mgr setup`.
+
+### Changed
+- **CI workflow hardening** — `sfw npm install` now retries up to 3 times with 15s delay to handle transient `ECONNRESET` / socket hang-ups on GitHub Actions runners.
+- **Updated GitHub Actions versions** — `actions/checkout` v4 → v7, `actions/setup-node` v4 → v6 (fixes Node.js 20 deprecation warnings).
+
+---
+## [1.9.15] - 2026-06-30
+
+### Fixed
+- **Imagemin uppercase extension handling** — files like `IMG_3119.JPG` now process correctly on Linux CI. The `lowercaseExtTransform` reads file contents into a buffer before renaming the Vinyl path, and cache-path logic normalizes extensions to lowercase.
+- **Updated `gulp-responsive-modern` to 1.0.1** — case-insensitive format detection and buffer-first sharp initialization.
+
+---
+## [1.9.14] - 2026-06-29
+
+### Changed
+- **Updated Font Awesome icons to Pro Plus 7.3.0.** Brands: 549 → 609 (+60). Solid: 4,677 → 4,799 (+122). Documented download/update process in `docs/icons.md`.
+- **Added CSS comments** to form-state disabled-button guards in `_utilities.scss`.
+- **Calendar UTC clock** now refreshes on a separate 1s interval (decoupled from the 60s now-line update).
+
+---
+## [1.9.13] - 2026-06-29
+
+### Changed
+- **Upgraded major dependencies**: @babel/core 7→8, @babel/preset-env 7→8, js-yaml 4→5. Guarded `yaml.load()` call sites against js-yaml 5's empty-document throw behavior. No webpack config changes needed for Babel 8.
+- **Upgraded patch/minor dependencies**: adm-zip, dompurify, fast-xml-parser, html-validate, postcss, prettier, puppeteer, sass, web-manager, webpack (5.108.3).
+- **Auth form fully disabled during OAuth redirect check.** Fields and buttons are now disabled via `_setDisabled(true)` while `handleRedirectResult()` runs, preventing interaction during the redirect validation window.
+- **Improved CSS-disabled button styling.** Added `background-color` and `border-color` to the `data-form-state` CSS guard so the visual matches Bootstrap's native `:disabled` appearance (no flash on transition).
+
+### Added
+- **`_dev_simulateRedirect` query parameter** for auth pages (`/signin`, `/signup`, `/reset`). Values: `true`/`success` (login flow), `signup` (new-user flow), `error` (error + re-enable). Exercises the real `handleRedirectResult()` code paths with fake data.
+- **UTC clock seconds** on the marketing calendar page (refreshes every second).
+- **Documented all `_dev_*` query parameters** in `docs/local-development.md`.
+
+---
+## [1.9.10] - 2026-06-26
+
+### Changed
+- **Migrated all `?cb={{ site.uj.cache_breaker }}` patterns to `| uj_cachebreak` filter.** Every asset reference (favicons, CSS/JS bundles, logos, brandmarks, provider logos, ad unit scripts) now uses the `uj_cachebreak` Liquid filter from jekyll-uj-powertools v1.8.0. The filter intelligently handles URLs with or without existing query strings (`?` vs `&`). The only remaining `site.uj.cache_breaker` reference is the `buildTime` JS variable in foot.html (not a URL).
+
+---
+## [1.9.9] - 2026-06-26
+
+### Fixed
+- **Added missing `?cb=` cachebreaker to logo/brandmark `<img>` tags.** Nav (2 variants: wordmark + avatar), dashboard sidebar (desktop + mobile), and feedback page rating images were all rendering without `?cb={{ site.uj.cache_breaker }}`, causing stale cached images when logos changed on the CDN. All other assets (favicons, CSS/JS bundles, ad units) already had cachebreakers — these 5 img tags were the only gaps.
+
+### Added
+- **Documented cachebreaker rule** in `CLAUDE.md` (File Conventions) and `docs/common-mistakes.md` (#14): all `<img src>` tags in includes/layouts must append the cachebreaker. `data-lazy="@src"` is handled at the JS layer.
+- **Listed `uj_append_param` and `uj_cachebreak` filters** in `docs/jekyll-plugin.md` (shipped in jekyll-uj-powertools v1.8.0).
+
+---
+## [1.9.8] - 2026-06-25
+
+### Changed
+- **Removed redundant `disabled` from submit buttons in default templates.** The CSS `form[data-form-state]:not([data-form-state="ready"]) [type="submit"]` already protects submit buttons visually during initialization. The `disabled` HTML attribute was unnecessary cruft — FormManager excludes submit buttons from the permanently-disabled snapshot and re-enables them on `ready()`. Affected: auth (signin, signup, reset), hero demo, email-preferences, and all test forms.
+
+---
+## [1.9.7] - 2026-06-23
+
+### Added
+- **Gitignore rules for blogify test posts.** The default `.gitignore` template now excludes `src/_posts/test/` and `src/assets/images/blog/post-test-*/` so generated test blog content stays out of version control. Consumer projects pick this up on the next `npx mgr setup`.
+
+---
 ## [1.9.6] - 2026-06-22
 
 ### Changed

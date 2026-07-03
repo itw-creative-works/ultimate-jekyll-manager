@@ -24,14 +24,9 @@
   }
 }
 
-// Cards that are links (editorial story cards) lift on hover
 a.card {
   color: inherit;
   text-decoration: none;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
 }
 
 // Framed images inside hovered cards/links zoom slowly (cinematic pan feel)

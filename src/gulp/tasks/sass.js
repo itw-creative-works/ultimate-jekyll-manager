@@ -467,7 +467,7 @@ function parseFrontmatter(filePath) {
     const frontmatterContent = content.substring(3, frontmatterEnd).trim();
 
     // Parse YAML frontmatter
-    const frontmatter = yaml.load(frontmatterContent);
+    const frontmatter = frontmatterContent ? yaml.load(frontmatterContent) : undefined;
     return frontmatter || {};
   } catch (error) {
     logger.log(`Error parsing frontmatter for ${filePath}:`, error.message);

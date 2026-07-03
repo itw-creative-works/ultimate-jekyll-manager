@@ -45,6 +45,13 @@ $campaign-push-color: #4CAF50;
   min-width: 200px;
 }
 
+.calendar-toolbar-utc-clock {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--bs-secondary-color);
+}
+
 .calendar-toolbar-views .btn {
   padding: 0.25rem 0.75rem;
   font-size: 0.8rem;

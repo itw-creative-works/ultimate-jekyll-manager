@@ -47,7 +47,7 @@
 <!-- Inject Ad -->
 {%- iftruthy page-adsense-client -%}
   <div data-lazy='@script {
-    "src": "{{ site.url }}/assets/js/modules/vert.bundle.js?cb={{ site.uj.cache_breaker }}",
+    "src": "{{ site.url | append: '/assets/js/modules/vert.bundle.js' | uj_cachebreak }}",
     "attributes": {
       "data-ad-client": "{{ page-adsense-client }}",
       "data-ad-type": "{{ type }}",

@@ -2,6 +2,16 @@
 const jetpack = require('fs-jetpack');
 const yaml = require('js-yaml');
 
+function safeLoadYaml(content) {
+  if (!content) return undefined;
+  try {
+    return yaml.load(content);
+  } catch (e) {
+    if (e.name === 'YAMLException' && /expected a document/.test(e.message)) return undefined;
+    throw e;
+  }
+}
+
 /**
  * Merges Jekyll collections and defaults from UJM's config with the
  * consuming project's config. Jekyll's --config does a shallow merge
@@ -15,9 +25,9 @@ function mergeJekyllConfigs(ujmConfigPath, projectConfigPath, outputPath, logger
     return null;
   }
 
-  const ujmConfig = yaml.load(ujmContent) || {};
+  const ujmConfig = safeLoadYaml(ujmContent) || {};
   const projectContent = jetpack.read(projectConfigPath);
-  const projectConfig = projectContent ? (yaml.load(projectContent) || {}) : {};
+  const projectConfig = projectContent ? (safeLoadYaml(projectContent) || {}) : {};
 
   // Extract collections and defaults from both
   const ujmCollections = ujmConfig.collections || {};

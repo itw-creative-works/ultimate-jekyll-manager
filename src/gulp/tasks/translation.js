@@ -810,7 +810,7 @@ function getIgnoredPages() {
       const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
       if (frontmatterMatch) {
-        const frontmatter = yaml.load(frontmatterMatch[1]);
+        const frontmatter = frontmatterMatch[1] ? yaml.load(frontmatterMatch[1]) : undefined;
         if (frontmatter?.permalink) {
           redirectPermalinks.push(frontmatter.permalink.replace(/^\//, '')); // Remove leading slash
         }

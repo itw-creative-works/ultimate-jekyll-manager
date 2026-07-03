@@ -26,7 +26,7 @@ social_signup:
       <!-- Logo -->
       <div class="text-center mb-3">
         <div class="avatar avatar-xl">
-          <img src="{{ site.brand.images.brandmark }}?cb={{ site.uj.cache_breaker }}" class="filter-adaptive" alt="{{ site.brand.name }} Logo"/>
+          <img src="{{ site.brand.images.brandmark | uj_cachebreak }}" class="filter-adaptive" alt="{{ site.brand.name }} Logo"/>
         </div>
       </div>
 
@@ -47,10 +47,10 @@ social_signup:
         <!-- Social Signup (Optional) -->
         <div class="mb-4">
           {% for provider in page.resolved.social_signup %}
-            <button type="submit" class="btn btn-adaptive _btn-lg w-100 mb-3 d-flex align-items-center justify-content-center" data-provider="{{ provider.id }}" disabled>
+            <button type="submit" class="btn btn-adaptive _btn-lg w-100 mb-3 d-flex align-items-center justify-content-center" data-provider="{{ provider.id }}">
               {{ initializing_spinner }}
               <span class="avatar avatar-xs me-2">
-                <img src="{{ provider.logo }}?cb={{ site.uj.cache_breaker }}" class="object-fit-contain" alt="{{ provider.name }} Logo"/>
+                <img src="{{ provider.logo | uj_cachebreak }}" class="object-fit-contain" alt="{{ provider.name }} Logo"/>
               </span>
               <span class="button-text">Sign up with {{ provider.name }}</span>
             </button>
@@ -114,7 +114,7 @@ social_signup:
           <div id="consent-error" class="small mt-2 d-none" style="color: var(--bs-form-invalid-color, var(--bs-danger, #dc3545));"></div>
         </div>
 
-        <button type="submit" class="btn btn-success _btn-lg w-100 mb-3" data-provider="email" disabled>
+        <button type="submit" class="btn btn-success _btn-lg w-100 mb-3" data-provider="email">
           {{ initializing_spinner }}
           {% uj_icon "user-plus", "me-2" %}
           <span class="button-text">Create account</span>

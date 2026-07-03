@@ -31,6 +31,11 @@ export default function () {
     // Initialize the appropriate form based on the page (with autoReady: false)
     initializePageForm();
 
+    // Disable form fields while checking for OAuth redirect result.
+    // State stays 'initializing' so spinners remain visible during the check.
+    // formManager.ready() transitions to 'ready' and re-enables if no redirect is found.
+    formManager._setDisabled(true);
+
     // Check for redirect result from OAuth providers BEFORE enabling form
     // This prevents the form from appearing interactive while redirect is processing
     const hasRedirectResult = await handleRedirectResult();
@@ -279,13 +284,36 @@ export default function () {
   }
 
   async function handleRedirectResult() {
-    try {
-      // Import Firebase auth functions
+    // Resolve the redirect result — either from Firebase or a dev simulation
+    let result, additionalUserInfo;
+    const simulateRedirect = url.searchParams.get('_dev_simulateRedirect');
+
+    if (simulateRedirect) {
+      console.log('[Auth] Simulating OAuth redirect result:', simulateRedirect);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      if (simulateRedirect !== 'error') {
+        result = {
+          user: { uid: 'dev-sim-uid', email: 'dev@test.local', providerData: [{ providerId: 'google.com' }] },
+          providerId: 'google.com',
+        };
+        additionalUserInfo = { isNewUser: simulateRedirect === 'signup' };
+      }
+    } else {
       const { getAuth, getRedirectResult, getAdditionalUserInfo } = await import('@firebase/auth');
       const auth = getAuth();
+      result = await getRedirectResult(auth);
+      if (result?.user) {
+        additionalUserInfo = getAdditionalUserInfo(result);
+      }
+    }
 
-      // Check for redirect result
-      const result = await getRedirectResult(auth);
+    try {
+      if (simulateRedirect === 'error') {
+        const fakeError = new Error('Simulated: An account already exists with different credentials');
+        fakeError.code = 'auth/account-exists-with-different-credential';
+        throw fakeError;
+      }
 
       // Log results for debugging
       console.log('[Auth] Redirect result:', result);
@@ -300,13 +328,6 @@ export default function () {
       // Determine the provider from the result
       const providerId = result.providerId || result.user.providerData?.[0]?.providerId || 'unknown';
 
-      // Track based on whether this is a new user. Firebase Auth v9+ modular SDK
-      // does NOT expose additionalUserInfo as a direct property on UserCredential —
-      // you must call getAdditionalUserInfo(result) to get it. The legacy compat SDK
-      // exposed it as a direct property, hence the v9 migration footgun. Verified
-      // against @firebase/auth's auth-public.d.ts: UserCredential only declares
-      // { user, providerId, operationType }.
-      const additionalUserInfo = getAdditionalUserInfo(result);
       const isNewUser = additionalUserInfo?.isNewUser;
       const pagePath = document.documentElement.getAttribute('data-page-path');
       const isSignupPage = pagePath === '/signup';
@@ -326,6 +347,18 @@ export default function () {
       } else {
         trackLogin(providerId, result.user);
         formManager.showSuccess('Successfully signed in!');
+      }
+
+      // In simulation mode, handle the redirect ourselves since the auth
+      // state listener won't fire (no real Firebase login happened).
+      if (simulateRedirect) {
+        const authReturnUrl = url.searchParams.get('authReturnUrl');
+        const redirectTo = authReturnUrl && webManager.isValidRedirectUrl(authReturnUrl)
+          ? authReturnUrl
+          : '/dashboard';
+        console.log('[Auth] Simulated redirect to:', redirectTo);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        window.location.href = redirectTo;
       }
 
       // Return true to indicate redirect was successfully processed
