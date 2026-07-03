@@ -55,6 +55,11 @@ const FILE_MAP = {
   'src/**/*': {
     overwrite: false,
   },
+  // Consumer-owned after seeding (e.g. test/_init.js fixture hooks) — copy when
+  // missing, never clobber the consumer's version on setup reruns
+  'test/**/*': {
+    overwrite: false,
+  },
   'src/**/*.{html,md,json}': {
     skip: (file) => {
       // Get the name
@@ -603,6 +608,9 @@ function defaultsWatcher(complete) {
 
 // Default Task
 module.exports = series(defaults, defaultsWatcher);
+
+// Exposed for the build-layer FILE_MAP test (defaults-file-options.test.js)
+module.exports.getFileOptions = getFileOptions;
 
 function getFileOptions(filePath) {
   const defaults = {

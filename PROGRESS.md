@@ -2,13 +2,19 @@
 > Agents and maintainers should update this file regularly to reflect the current state of the project.
 
 ## Current Focus
-* **Goal:** CI workflow hardening — retry logic + action version bumps
-* **Current Phase:** Phase 6 — workflow updated, needs kolpav decision + publish
+* **Goal:** v1.9.26 shipped — defaults copy-once fix (test/_init.js clobbering)
+* **Current Phase:** Released; next: audit BEM/EM/BXM for the same FILE_MAP gap
 * **Priority:** Medium
-* **Last Updated:** 2026-06-30 4:07 AM PDT
-* **Notes:** Fixed build.yml not syncing to consumers — `defaults.js` was missing `overwrite: true` on the workflow entry, so it only wrote the file on first scaffold and silently skipped all updates. Kolpav kept (still useful for purging 218MB `github-pages` artifacts). Needs republish.
+* **Last Updated:** 2026-07-02 11:58 PM PDT
+* **Notes:** `test/**/*` is now copy-once in `defaults.js` FILE_MAP — setup reruns no longer reset the consumer's `test/_init.js` (bit the Video-Editor/Clipdeck project twice). Sister frameworks (BEM/EM/BXM) have mirrored defaults tasks and likely the same gap — audit them in a follow-up pass. Prior focus (Phase 6 CI hardening) shipped in v1.9.16; kolpav kept.
 
 ## Active Task List
+* [x] One-off: defaults task clobbered consumer `test/_init.js` on setup reruns (2026-07-02)
+  * [x] Root cause: no FILE_MAP rule matched `test/**` — fall-through default is `overwrite: true`, so every `npx mgr setup` reset the consumer's fixture hook to the stub (only `test/README.md` was protected, via `**/*.md`)
+  * [x] Fix: `'test/**/*': { overwrite: false }` in the copy-once section (seed when missing, consumer-owned after — matches the `src/`/`hooks/` convention); `getFileOptions` exported for testability
+  * [x] New build-layer `defaults-file-options.test.js` locks all four rule classes (copy-once / always-overwrite / merge / skip) incl. last-match-wins ordering; full suite 115 passing ×2; `npm run prepare` synced dist
+  * [x] Docs: new "Defaults distribution" rule table in `docs/build-system.md` (⚠️ unmatched files fall through to overwrite — new consumer-owned defaults MUST get an explicit rule), consumer-ownership note in `docs/test-framework.md` § test/_init.js, CHANGELOG [Unreleased]
+  * [ ] Follow-up: audit BEM/EM/BXM mirrored defaults tasks for the same missing-rule gap
 * [x] One-off: `--extended` boolean-declaration fix in bin (2026-07-02)
   * [x] Bare `yargs(...).parseSync()` let `mgr test --extended some/target` swallow the target as the flag's VALUE (target lost + extended silently off); bin now declares `.boolean(['extended'])` — mirrors BEM's cli fix; same fix applied to BXM + EM in the same pass
   * [x] Verified: parse proof (before/after) + real bin run shows `target="..." +extended` + `build/cli` suite 3 passing; CHANGELOG [Unreleased]

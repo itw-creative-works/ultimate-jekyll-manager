@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.26] - 2026-07-02
+
+### Fixed
+- **Setup reruns no longer clobber the consumer's `test/_init.js`.** No `FILE_MAP` rule matched `test/**` in the defaults task, so shipped test files fell through to the `overwrite: true` default and every `npx mgr setup` reset the consumer's fixture hook to the stub (silently breaking any project whose suites depend on `_init.js`-synthesized fixtures). `test/**/*` is now copy-once (`overwrite: false`) — seeded when missing, consumer-owned after — matching the existing `src/`/`hooks/` convention. `getFileOptions` is exported from `defaults.js` and the rule classes are locked by a new build-layer test (`defaults-file-options.test.js`); the defaults-distribution rule table is documented in `docs/build-system.md`.
+
 ## [1.9.25] - 2026-07-02
 
 ### Fixed

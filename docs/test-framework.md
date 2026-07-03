@@ -241,6 +241,8 @@ Same protocol as EM (`__EM_TEST__`) and BXM (`__BXM_TEST__`). One marker per fra
 
 The runner loads an optional `test/_init.js` from **both** test roots — the framework (`<UJM>/test/_init.js`) and the consumer project (`<cwd>/test/_init.js`) — and runs it **once, before any suite** (it is NOT itself run as a test; the `_`-prefix keeps it out of discovery). Mirrors the same hook in BEM/EM/BXM so all four frameworks share one shape.
 
+The stub shipped in `src/defaults/test/_init.js` is **seeded once and never overwritten** — the file is consumer-owned, so setup reruns preserve whatever fixture logic the project puts in it (`test/**/*` is copy-once in the defaults task's `FILE_MAP`; see [build-system.md](build-system.md#defaults-distribution-defaults-task)).
+
 The module **must export a function** — `module.exports = (ctx) => ({ ... })` — called with `{ projectRoot }` and returning the hook object. It may declare:
 
 - `async setup({ projectRoot })` — runs once before the suites, e.g. to scaffold a fixture file the boot layer needs.

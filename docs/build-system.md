@@ -22,6 +22,19 @@ serve → build → developmentRebuild
 
 Pure helpers are exposed under [src/gulp/tasks/utils/](../src/gulp/tasks/utils/) (`merge-jekyll-configs`, `_validate-yaml`, `template-transform`, `collectTextNodes`, `dictionary`, `github-cache`, `formatDocument`) — these are the highest-value test targets (zero I/O, callable directly in `build`-layer tests).
 
+## Defaults distribution (`defaults` task)
+
+The `defaults` task copies `dist/defaults/**` from the framework into the consumer project on every build/setup. Per-file behavior is decided by `FILE_MAP` in [defaults.js](../src/gulp/tasks/defaults.js) (`getFileOptions` — **last matching glob wins**), in four classes:
+
+| Class | Behavior | Rules |
+|---|---|---|
+| Copy-once (consumer-owned) | Seeded when missing, NEVER overwritten | `**/*.md`, `hooks/**/*`, `src/**/*`, `test/**/*` (e.g. `test/_init.js`) |
+| Always-overwrite (framework-owned) | Replaced every run | `.github/workflows/build.yml`, `src/assets/images/team/**/*`, and **any file with no matching rule** (fall-through default) |
+| Merge | Combined with the consumer's version | `config/ultimate-jekyll-manager.json` (deep config merge), `CLAUDE.md` / `_.env` / `_.gitignore` (marker-based line merge) |
+| Skip | Never copied | `**/.DS_Store`, `**/__temp/**/*` |
+
+⚠️ The fall-through default is `overwrite: true` — when adding a new consumer-owned file to `src/defaults/`, it MUST get an explicit copy-once rule or setup reruns will clobber the consumer's edits. The rule classes are locked by the build-layer test `defaults-file-options.test.js`.
+
 ## Config flow
 
 Three config files in the consumer project feed the build:
