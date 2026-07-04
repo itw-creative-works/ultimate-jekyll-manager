@@ -129,30 +129,32 @@ async function getHttpsConfig() {
   // Check if mkcert certificates exist
   const certPath = path.join(rootPathProject, '.temp');
 
-  // Look for any mkcert generated files (handles localhost+2.pem format)
-  const certFiles = jetpack.find(certPath, { matching: 'localhost*.pem' }) || [];
+  // Look for any mkcert generated files. NOTE: mkcert names files after the FIRST
+  // SAN host (development.<brand>+N.pem, not localhost*.pem) — match *.pem, the
+  // same pattern generateMkcertCertificates() finds after generating.
+  const certFiles = jetpack.find(certPath, { matching: '*.pem' }) || [];
   const keyFile = certFiles.find(f => f.includes('-key.pem'));
   const certFile = certFiles.find(f => !f.includes('-key.pem'));
 
   if (keyFile && certFile) {
-    logger.log('Using mkcert certificates from .temp/');
-    logger.log(`Certificate: ${certFile}`);
-    logger.log(`Key: ${keyFile}`);
+    const problem = checkCertProblem(certFile);
 
-    // Read certificate to check validity
-    try {
-      const certContent = jetpack.read(certFile);
-      if (certContent && certContent.includes('BEGIN CERTIFICATE')) {
-        logger.log('✅ Certificate appears valid');
-      }
-    } catch (e) {
-      logger.log('⚠️ Could not read certificate');
+    if (!problem) {
+      logger.log('Using mkcert certificates from .temp/');
+      logger.log(`Certificate: ${certFile}`);
+      logger.log(`Key: ${keyFile}`);
+
+      return {
+        key: keyFile,
+        cert: certFile
+      };
     }
 
-    return {
-      key: keyFile,
-      cert: certFile
-    };
+    // Stale certs (expired, or issued by a DIFFERENT machine's mkcert CA — e.g.
+    // .temp copied over from another Mac) make browsers reject https://localhost:4000
+    // outright. Wipe and regenerate against THIS machine's trusted CA.
+    logger.log(`Existing certificates are not usable (${problem}) — regenerating...`);
+    certFiles.forEach((file) => jetpack.remove(file));
   }
 
   // Try to generate mkcert certificates
@@ -168,6 +170,41 @@ async function getHttpsConfig() {
   logger.log('Using self-signed certificates (browser warnings expected)');
   logger.log('For trusted HTTPS: brew install mkcert && mkcert -install');
   return true;
+}
+
+// Returns a reason string when the existing cert must be regenerated, or null
+// when it's usable: unexpired AND signed by this machine's trusted mkcert root CA.
+function checkCertProblem(certFile) {
+  const { X509Certificate } = require('crypto');
+  const { execSync } = require('child_process');
+
+  let cert;
+  try {
+    cert = new X509Certificate(jetpack.read(certFile));
+  } catch (e) {
+    return 'unreadable certificate';
+  }
+
+  if (new Date(cert.validTo) <= new Date()) {
+    return `expired ${cert.validTo}`;
+  }
+
+  // Verify the signature chains to the CURRENT mkcert root CA. If mkcert (or its
+  // root) isn't available we can't verify — keep the existing certs rather than
+  // breaking the self-signed fallback path.
+  try {
+    const caRoot = execSync('mkcert -CAROOT', { encoding: 'utf8' }).trim();
+    const ca = new X509Certificate(jetpack.read(path.join(caRoot, 'rootCA.pem')));
+
+    if (!cert.verify(ca.publicKey)) {
+      const issuerCN = cert.issuer.split('\n').find((line) => line.startsWith('CN=')) || cert.issuer;
+      return `issued by a different CA (${issuerCN})`;
+    }
+  } catch (e) {
+    return null;
+  }
+
+  return null;
 }
 
 // Generate mkcert certificates

@@ -15,6 +15,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.28] - 2026-07-03
+
+### Changed
+- **web-manager `^4.3.2` → `^4.3.4`** — picks up the dev API URL switch to `https://localhost:5002` (the frontend half of BEM's HTTPS serve proxy; plain http:// could not connect to it) and dev-only loopback redirect support for native-app sign-in.
+
+### Fixed
+- **`serve` no longer reuses HTTPS certificates this machine doesn't trust, and actually reuses the ones it does** — two bugs in `getHttpsConfig()` (harmonized with backend-manager's identical fix): (1) the reuse lookup matched `localhost*.pem`, but mkcert names files after the FIRST SAN host (`development.<brand>+N.pem`), so cached certs were never found and certs were silently regenerated on EVERY serve; (2) the "validity" check only looked for a `BEGIN CERTIFICATE` header — a cert issued by a DIFFERENT machine's mkcert CA (e.g. `.temp` copied from another Mac) or an expired one was reused blindly, making browsers reject `https://localhost:4000`. Existing certs are now verified (unexpired + signature chains to the current `mkcert -CAROOT` root) and wiped + regenerated when they don't; the no-mkcert self-signed fallback is preserved.
+
+---
 ## [1.9.27] - 2026-07-03
 
 ### Changed
