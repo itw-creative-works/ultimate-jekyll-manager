@@ -15,9 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
-## [Unreleased]
+## [1.9.29] - 2026-07-06
+
+### Changed
+- **web-manager `^4.3.4` → `^4.3.5`** — Firebase no longer initializes on the all-empty-string config blob UJM's Jekyll config merge injects into Firebase-less consumer sites (the base template's empty Firebase keys can't be deleted by the merge). Those sites used to crash every page with `auth/invalid-api-key` unless they stripped the blob themselves pre-init; with 4.3.5 the workaround is unnecessary.
 
 ### Fixed
+- **The theme-contract suite no longer crashes `npx mgr test` in consumer projects.** It asserts on the framework's `src/assets/themes` sources, but the published package ships no `src/` (`files:` = assets/bin/dist/docs) — `jetpack.list()` returned `undefined` and the suite threw at require time in EVERY consumer. It now degrades to a single explicit skip ("theme sources present (framework repo only)") outside the UJM repo; inside the repo (or a consumer linked via `npx mgr install dev`) the full 13-test contract still runs. See `docs/themes.md`.
 - **The sass watcher no longer dies with `ENOENT: scandir .../src/assets/css/bundles` in consumers that have no project bundles dir.** `bundleFiles` fed an unguarded `src/assets/css/bundles/*.scss` glob into `src()`/`watch()`, and gulp's `src()` throws when it scandirs a missing directory — the boot-time compile survived, but every watcher-triggered rebuild errored within milliseconds and the consumer's dist CSS silently went stale. The project-bundles glob is now included only when the dir exists — the same `jetpack.exists` guard `themePageGlobs()` in the same file already uses for theme page dirs (and documents with the identical rationale). Most consumers don't define project bundles, so most consumers hit this on every SCSS edit.
 
 ---

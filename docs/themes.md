@@ -178,7 +178,11 @@ The hooks (and the rest of the theme conventions: entry files, `$avatar-sizes`,
 scripts, page-asset shapes) are enforced by the build-layer **theme-contract
 test** — `npx mgr test mgr:build/theme-contract` — which globs every theme, so
 a new theme is covered the moment it lands. It caught neobrutalism's missing
-promo banner + `.card-title` the day it was written.
+promo banner + `.card-title` the day it was written. The suite asserts on the
+framework's `src/assets/themes` sources, which the published package doesn't
+ship — in consumer projects it reports a single skip instead of running (or
+crashing); it only executes inside the UJM repo (or a consumer linked to the
+local repo via `npx mgr install dev`).
 
 #### Theme chrome: inherit classy's nav + footer, restyle via CSS
 

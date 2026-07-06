@@ -19,7 +19,10 @@ const INCLUDES = path.join(ROOT, 'src/defaults/dist/_includes/themes');
 
 // _template is held to the asset contract too — it's what theme authors copy.
 // bootstrap is the shared Bootstrap source, not a theme.
-const themes = jetpack.list(ASSETS).filter((t) => t !== 'bootstrap');
+// The published package ships no src/ (package.json files: assets/bin/dist/docs),
+// so in consumer projects this framework-source suite has nothing to assert
+// against — it degrades to a single skip (see module.exports) instead of crashing.
+const themes = (jetpack.list(ASSETS) || []).filter((t) => t !== 'bootstrap');
 
 // Class tokens that would couple markup to one theme (markup must stay
 // swappable; theme prefixes live only in SCSS internals)
@@ -77,7 +80,12 @@ module.exports = {
   layer: 'build',
   description: 'theme contract (structure, swappability, cross-theme JS contracts)',
   type: 'group',
-  tests: [
+  tests: themes.length === 0 ? [
+    {
+      name: 'theme sources present (framework repo only)',
+      run: (ctx) => ctx.skip('src/assets/themes is not shipped in the published package — this suite runs in the UJM repo'),
+    },
+  ] : [
     ...themes.map((theme) => ({
       name: `${theme}: entry files + config contract`,
       run: (ctx) => {
