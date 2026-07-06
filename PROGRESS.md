@@ -2,13 +2,19 @@
 > Agents and maintainers should update this file regularly to reflect the current state of the project.
 
 ## Current Focus
-* **Goal:** v1.9.27 shipping — token page: additive `?payload=` wrap + error-state retry/home UI
-* **Current Phase:** Shipping v1.9.27 (patch + npm publish)
+* **Goal:** Unreleased fix pending — sass watcher bundles-dir guard (ship as next patch)
+* **Current Phase:** v1.9.28 shipped; sass watcher fix uncommitted in working tree
 * **Priority:** Medium
-* **Last Updated:** 2026-07-03 4:50 PM PDT
+* **Last Updated:** 2026-07-06 3:45 AM PDT
 * **Notes:** `test/**/*` is now copy-once in `defaults.js` FILE_MAP — setup reruns no longer reset the consumer's `test/_init.js` (bit the Video-Editor/Clipdeck project twice). Sister frameworks (BEM/EM/BXM) have mirrored defaults tasks and likely the same gap — audit them in a follow-up pass. Prior focus (Phase 6 CI hardening) shipped in v1.9.16; kolpav kept.
 
 ## Active Task List
+* [ ] One-off: sass watcher ENOENT on missing project bundles dir (2026-07-06 — found by Video-Editor/Clipdeck 4.3)
+  * [x] Root cause: `bundleFiles` fed an unguarded `src/assets/css/bundles/*.scss` glob into `src()`/`watch()`; gulp's src() throws `ENOENT scandir` on a missing dir. Boot-time compile survived, but EVERY watcher-triggered rebuild errored in ms and consumer dist CSS silently went stale. Identical failure mode `themePageGlobs()` in the same file already guards (with the same rationale in its comment)
+  * [x] Fix: project-bundles glob spread in only when the dir exists (`jetpack.exists` — mirrors themePageGlobs). One expression in `src/gulp/tasks/sass.js`
+  * [x] Verified: repro probe against the repo's own gulp — unguarded list = `ENOENT scandir .../src/assets/css/bundles`, guarded = OK, guarded+dir-present = both files compiled (probe lives in the Video-Editor session scratchpad); `node --check` clean; `npm run prepare` synced dist; CHANGELOG [Unreleased]
+  * [ ] Ship as next patch release. Video-Editor consumer carries an empty `src/assets/css/bundles/` workaround dir (its gotcha #22) — delete it there once this ships
+  * [ ] No locking test: the guard is require-time cwd-dependent and the suite has no fake-consumer sass harness to require sass.js against — would need that harness first
 * [ ] One-off: serve HTTPS cert validation — harmonized with BEM (2026-07-03)
   * [x] Bug 1: reuse lookup matched `localhost*.pem` but mkcert names certs after the FIRST SAN host (`development.<brand>+N.pem`) → cache never hit, certs silently regenerated EVERY serve. Lookup now matches `*.pem` (same as the post-generate find)
   * [x] Bug 2: "validity" check was just a `BEGIN CERTIFICATE` header sniff → foreign-CA (`.temp` roamed from another Mac) or expired certs reused blindly, browser rejects https://localhost:4000. New `checkCertProblem()`: unexpired + signature verifies against current `mkcert -CAROOT`; on problem, wipe `.temp/*.pem` + regenerate. Identical logic to backend-manager serve.js `_checkCertProblem()` (found via somiibo-backend's foreign-CA cert incident)
@@ -22,7 +28,7 @@
   * [x] Fix: `'test/**/*': { overwrite: false }` in the copy-once section (seed when missing, consumer-owned after — matches the `src/`/`hooks/` convention); `getFileOptions` exported for testability
   * [x] New build-layer `defaults-file-options.test.js` locks all four rule classes (copy-once / always-overwrite / merge / skip) incl. last-match-wins ordering; full suite 115 passing ×2; `npm run prepare` synced dist
   * [x] Docs: new "Defaults distribution" rule table in `docs/build-system.md` (⚠️ unmatched files fall through to overwrite — new consumer-owned defaults MUST get an explicit rule), consumer-ownership note in `docs/test-framework.md` § test/_init.js, CHANGELOG [Unreleased]
-  * [ ] Follow-up: audit BEM/EM/BXM mirrored defaults tasks for the same missing-rule gap
+  * [x] Follow-up (2026-07-06): audited BEM/EM/BXM — BEM + EM SAFE (their `copyDefaults()` in setup.js is copy-once by design: "already exists → preserve consumer's version"; EM's gulp defaults task is still a stub). BXM HAD the gap (ships `test/_init.js`, no `test/**` FILE_MAP rule → fall-through overwrite) — fixed in its working tree: `test/**/*` copy-once + `getFileOptions` export + locking build test + `getConfig()` missing-file guard (`JSON5.parse(undefined)` crashed in framework-repo context); 86/86 passing, CHANGELOG + docs/defaults.md updated. Uncommitted — BXM clone is 5 commits behind origin w/ unrelated WIP; Ian reconciles
 * [x] One-off: `--extended` boolean-declaration fix in bin (2026-07-02)
   * [x] Bare `yargs(...).parseSync()` let `mgr test --extended some/target` swallow the target as the flag's VALUE (target lost + extended silently off); bin now declares `.boolean(['extended'])` — mirrors BEM's cli fix; same fix applied to BXM + EM in the same pass
   * [x] Verified: parse proof (before/after) + real bin run shows `target="..." +extended` + `build/cli` suite 3 passing; CHANGELOG [Unreleased]

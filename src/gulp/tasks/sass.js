@@ -40,8 +40,10 @@ const bundleFiles = [
   // Main bundles
   `${rootPathPackage}/dist/assets/css/bundles/*.scss`,
 
-  // Project bundles
-  'src/assets/css/bundles/*.scss',
+  // Project bundles — only if the dir exists (gulp's src() throws ENOENT when it
+  // scandirs a missing directory, same as themePageGlobs below); most consumers
+  // don't define project bundles
+  ...(jetpack.exists('src/assets/css/bundles') ? ['src/assets/css/bundles/*.scss'] : []),
 ];
 
 // Build the active theme's page-CSS globs, but ONLY for `pages` dirs that exist —

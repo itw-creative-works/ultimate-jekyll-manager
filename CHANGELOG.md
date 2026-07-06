@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [Unreleased]
+
+### Fixed
+- **The sass watcher no longer dies with `ENOENT: scandir .../src/assets/css/bundles` in consumers that have no project bundles dir.** `bundleFiles` fed an unguarded `src/assets/css/bundles/*.scss` glob into `src()`/`watch()`, and gulp's `src()` throws when it scandirs a missing directory — the boot-time compile survived, but every watcher-triggered rebuild errored within milliseconds and the consumer's dist CSS silently went stale. The project-bundles glob is now included only when the dir exists — the same `jetpack.exists` guard `themePageGlobs()` in the same file already uses for theme page dirs (and documents with the identical rationale). Most consumers don't define project bundles, so most consumers hit this on every SCSS edit.
+
+---
 ## [1.9.28] - 2026-07-03
 
 ### Changed
