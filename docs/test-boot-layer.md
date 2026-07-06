@@ -8,6 +8,8 @@ Service workers refuse to register from `file://` URLs. Since SW registration / 
 
 The server also serves files with correct MIME types (text/html / text/javascript / text/css / application/json / image/png / etc.) and sets `Service-Worker-Allowed: /` so consumers can register a SW from any subdirectory.
 
+The browser launches with `acceptInsecureCerts: true`: the boot layer serves whatever `_site/` exists, and a **dev-mode** build (consumer dev server running) points its asset URLs at the BrowserSync origin's self-signed cert — without the flag those requests are silently blocked, page JS never runs, and JS-dependent boot assertions time out. Harmless in a loopback test harness.
+
 ## `_site/` discovery order
 
 The runner picks the first of these that has an `index.html`:

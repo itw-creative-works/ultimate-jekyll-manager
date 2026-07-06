@@ -65,6 +65,9 @@ async function runBootTests({ tests, projectRoot, ujmDistRoot }) {
 
   const browser = await puppeteer.launch({
     headless: 'new',
+    // Dev-mode _site builds point assets at the BrowserSync origin (self-signed
+    // cert) - without this, page JS silently never loads in those runs
+    acceptInsecureCerts: true,
     args: [
       '--no-sandbox',
       '--disable-dev-shm-usage',

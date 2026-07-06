@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.31] - 2026-07-06
+
+### Fixed
+- **Boot tests no longer fail against a dev-mode `_site/`.** The boot layer serves the existing `_site/` as-is; a dev build points assets at the BrowserSync origin (self-signed cert), and the boot browser silently refused to load them — page JS never ran, so any JS-dependent boot assertion (e.g. readiness-signal selectors) timed out whenever the consumer's dev server was running. The boot runner's Puppeteer launch now sets `acceptInsecureCerts: true` (harmless in a loopback test harness). Verified A/B on the same dev-mode `_site`: without the flag the readiness selector times out; with it the page goes READY.
+
+---
 ## [1.9.30] - 2026-07-06
 
 ### Changed
