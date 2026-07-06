@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
+## [1.9.30] - 2026-07-06
+
+### Changed
+- **web-manager `^4.3.5` → `^4.3.6`** — Firebase-less sites now get a `[Firebase] Skipped: config has no apiKey ...` console line instead of a silent skip (same idiom as `[Analytics] Skipped:`), so intentional Firebase-less setups and botched configs are both diagnosable at a glance.
+
+---
 ## [1.9.29] - 2026-07-06
 
 ### Changed
