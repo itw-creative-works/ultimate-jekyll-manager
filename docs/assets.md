@@ -114,6 +114,10 @@ Consuming projects should create their own JSON files in `src/_includes/frontend
   ],
   socials: {
     enabled: true,
+    // Optional: restrict/order platforms; defaults to twitter,facebook,instagram,linkedin,github.
+    // Only platforms with a handle set in _config.yml `socials:` actually render —
+    // undefined ones are skipped, and the block hides entirely when none are defined.
+    // list: ['twitter', 'github'],
   },
   copyright: {
     enabled: true,

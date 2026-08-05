@@ -128,17 +128,25 @@
           </div>
         </div>
 
-        <!-- Social Links -->
+        <!-- Social Links (only platforms with a handle in socials config render) -->
         {% if data.socials.enabled %}
-          <div class="d-flex align-items-center">
-            {% if data.socials.list and data.socials.list.size > 0 %}
-              {% assign social_list = data.socials.list %}
-            {% else %}
-              {% assign social_list = 'twitter,facebook,instagram,linkedin,github' | split: ',' %}
-            {% endif %}
+          {% if data.socials.list and data.socials.list.size > 0 %}
+            {% assign social_list = data.socials.list %}
+          {% else %}
+            {% assign social_list = 'twitter,facebook,instagram,linkedin,github' | split: ',' %}
+          {% endif %}
 
-            {% for social in social_list %}
-              {% iftruthy social %}
+          {% assign defined_socials = '' | split: '' %}
+          {% for social in social_list %}
+            {% assign social_handle = page.resolved.socials[social] %}
+            {% iftruthy social_handle %}
+              {% assign defined_socials = defined_socials | push: social %}
+            {% endiftruthy %}
+          {% endfor %}
+
+          {% if defined_socials.size > 0 %}
+            <div class="d-flex align-items-center">
+              {% for social in defined_socials %}
                 {% if forloop.last %}
                   {% assign spacing_class = '' %}
                 {% else %}
@@ -147,9 +155,9 @@
                 <a href="{% uj_social social %}" class="link-muted text-decoration-none {{ spacing_class }}" aria-label="{{ social | capitalize }}">
                   {% uj_icon social, "fa-xl" %}
                 </a>
-              {% endiftruthy %}
-            {% endfor %}
-          </div>
+              {% endfor %}
+            </div>
+          {% endif %}
         {% endif %}
       </div>
 
