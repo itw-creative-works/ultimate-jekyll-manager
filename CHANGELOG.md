@@ -971,6 +971,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix profile premium badge using removed `trialing` status and `access` field
 - Add dev-only artificial pre-delay support to checkout page for testing form protection timing
 - Fix `btn-check:checked` outline button styling in classy theme — transparent `!important` rule was overriding Bootstrap's checked background due to higher CSS specificity
+
+## [1.9.32] - 2026-08-05
+### Fixed
 - (no issue) — Footer social icons only render platforms with a handle defined in the `socials:` config; undefined platforms no longer produce empty-href links, and the block hides entirely when none are defined
 
 ---
