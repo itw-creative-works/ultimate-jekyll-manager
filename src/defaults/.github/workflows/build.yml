@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           token: ${{ secrets.GH_TOKEN }}
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Setup ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -104,10 +104,15 @@ jobs:
       - name: Log all files in repo
         run: |
           echo "All files in the repo: "
-          ls -R *
+          git ls-files
+      - name: Log disk usage (before build)
+        run: df -h /
       - name: Run node build
         run: |
           UJ_BUILD_MODE=true UJ_IS_SERVER=true npx uj setup && npm run build
+      - name: Log disk usage (after build)
+        if: always()
+        run: df -h /
       # - name: Delete gh-pages branch
       #   continue-on-error: true
       #   run: |
@@ -120,6 +125,7 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           publish_dir: ./_site
+          force_orphan: true
           # enable_jekyll: true
       - name: Purge CloudFlare cache
         run: npx uj cloudflare-purge
