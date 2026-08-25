@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Security` in case of vulnerabilities.
 
 ---
-## [Unreleased]
+## [1.9.33] - 2026-08-24
 
 ### Fixed
 - (no issue) — Consumer `build.yml` template no longer exhausts runner disk on deploy: shallow checkout (`fetch-depth: 1`), `force_orphan` gh-pages deploy, `df -h` logged before and after the build, and `git ls-files` replaces `ls -R *`. Re-run `npx uj setup` to pick it up.
